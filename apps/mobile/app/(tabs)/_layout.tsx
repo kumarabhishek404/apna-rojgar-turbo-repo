@@ -49,7 +49,7 @@ export default function Layout() {
   /** Bottom inset only; tiny fallback when inset is 0 (no double “extra” padding). */
   const tabBarBottomPad =
     insets.bottom > 0 ? insets.bottom : Platform.OS === "android" ? 4 : 2;
-  /** Inner content height — compact like classic tab bars; still fits 2-line labels. */
+  /** Inner row height — prototype: tighter than 64 to reduce top/bottom gap in the tab bar. */
   const TAB_BAR_CONTENT = 64;
   const tabBarTopPad = 6;
   const tabBarHeight = tabBarTopPad + TAB_BAR_CONTENT + tabBarBottomPad;
@@ -226,12 +226,7 @@ export default function Layout() {
         ]}
       >
         <View style={[styles.tabColumn, { paddingBottom: tabBarBottomPad }]}>
-          <View
-            style={[
-              styles.tabPill,
-              isSelected && styles.tabPillActive,
-            ]}
-          >
+          <View style={[styles.tabPill, isSelected && styles.tabPillActive]}>
             <Icon
               name={iconNameLiteral}
               size={isSelected ? iconSize + 1 : iconSize}
@@ -286,7 +281,6 @@ export default function Layout() {
               ],
             }}
           >
-
             <Tabs.Screen
               name="index"
               options={{

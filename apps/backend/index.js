@@ -24,7 +24,7 @@ connectDB();
 
 // ✅ Basic route
 app.get("/", (req, res) => {
-  res.send("Labour App API is running...");
+  res.send("Apna Rojgar App API is running...");
 });
 
 // ✅ Import routes
