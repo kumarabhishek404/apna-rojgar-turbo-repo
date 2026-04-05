@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "strict": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "module": "Node16",
+    "moduleResolution": "node16",
+    "typeRoots": ["./types", "./node_modules/@types"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "images.d.ts",
+    "utils/i18n.js",
+    "app/i18n.js",
+    "eslint.config.js",
+    "app/hooks/toast.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
+}

@@ -1,0 +1,126 @@
+{
+  "expo": {
+    "name": "Apna Rojgar",
+    "slug": "labour-app",
+    "version": "1.2.5",
+    "platforms": ["android", "ios"],
+    "orientation": "default",
+    "scheme": "apnarojgar",
+    "jsEngine": "hermes",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/app/adaptive-icon.png",
+    "splash": {
+      "image": "./assets/app/adaptive-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "androidStatusBar": {
+      "translucent": false,
+      "backgroundColor": "#22409a",
+      "barStyle": "light-content"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      "expo-av",
+      "expo-router",
+      "expo-font",
+      "expo-localization",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/app/notification-icon.png"
+        }
+      ],
+      "expo-asset",
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "allowBackup": true,
+            "supportsTablet": true,
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "expo-web-browser"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.kumarabhishek404.labourapp",
+      "associatedDomains": ["applinks:apnarojgar.com"]
+    },
+    "android": {
+      "androidNavigationBar": {
+        "backgroundColor": "#22409a",
+        "barStyle": "light"
+      },
+      "versionCode": 40,
+      "package": "com.kumarabhishek404.labourapp",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "splash": {
+        "image": "./assets/app/adaptive-icon.png",
+        "resizeMode": "cover",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "apnarojgar"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "apnarojgar.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": "https://apnarojgar.com"
+      },
+      "eas": {
+        "projectId": "38023a03-3848-401a-bc2c-04efd071ef83"
+      }
+    },
+    "owner": "kaarya.app",
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/38023a03-3848-401a-bc2c-04efd071ef83",
+      "enabled": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
+  }
+}

@@ -1,0 +1,1326 @@
+import {
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import * as Speech from "expo-speech";
+import React, { useEffect, useState } from "react";
+import {
+  Stack,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
+import { Animated } from "react-native";
+import SERVICE from "../../api/services";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useFocusEffect } from "expo-router";
+import { useAtomValue, useSetAtom } from "jotai";
+import Atoms from "@/app/AtomStore";
+import Requirements from "@/components/commons/Requirements";
+import EmployerCard from "@/components/commons/EmployerCard";
+import Highlights from "@/components/commons/Highlights";
+import ServiceFacilitiesSection from "@/components/commons/ServiceFacilitiesSection";
+import ImageSlider from "@/components/commons/ImageSlider";
+import CustomHeading from "@/components/commons/CustomHeading";
+import CustomText from "@/components/commons/CustomText";
+import CustomHeader from "@/components/commons/Header";
+import { t } from "@/utils/translationHelper";
+import REFRESH_USER from "@/app/hooks/useRefreshUser";
+import ServiceActionButtons from "./actionButtons";
+import MEDIATOR from "@/app/api/mediator";
+import {
+  generateServiceSummary,
+  handleCall,
+  speakText,
+} from "@/constants/functions";
+import ProfilePicture from "@/components/commons/ProfilePicture";
+import ButtonComp from "@/components/inputs/Button";
+import DateDisplay from "@/components/commons/ShowDate";
+import ShowAddress from "@/components/commons/ShowAddress";
+import ApplicantsTabScreen from "./showApplicationsAndSelections";
+import ApplicantSummary from "./applicantsSummary";
+import BookingActionButtons from "../bookings/actionButtons";
+import ServicePlaceholder from "@/components/commons/LoadingPlaceholders/ServiceDetailsPlaceholder";
+import { getDynamicWorkerType } from "@/utils/i18n";
+import { shareServiceDetails } from "@/utils/shareService";
+import { getServiceJobId } from "@/utils/serviceJobId";
+import { trackEvent } from "@/utils/analytics";
+import { AnalyticsEvents } from "@/utils/analyticsEvents";
+import TOAST from "@/app/hooks/toast";
+
+const { width } = Dimensions.get("window");
+const IMG_HEIGHT = 300;
+
+const ServiceDetails = () => {
+  const userDetails = useAtomValue(Atoms?.UserAtom);
+  const navigation = useNavigation();
+  const locale = useAtomValue(Atoms?.LocaleAtom);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const setAddService = useSetAtom(Atoms?.AddServiceAtom);
+  const firstTimeRef = React.useRef(true);
+  const { id, showApplicationDetails } = useLocalSearchParams();
+  const [service, setService]: any = useState({});
+  const router = useRouter();
+  const scrollRef = React.useRef<typeof Animated.ScrollView | null>(null);
+  const [isServiceLiked, setIsServiceLiked] = useState(
+    service?.likedBy?.find((id: any) => id === userDetails?._id),
+  );
+  const [isServiceApplied, setIsServiceApplied] = useState(
+    service?.appliedUsers?.find(
+      (user: any) =>
+        user?.status === "PENDING" && user?.user === userDetails?._id,
+    ) || false,
+  );
+  const [isServiceAppliedByMediator, setIsServiceAppliedByMediator] = useState(
+    service?.appliedUsers?.find((user: any) =>
+      user?.workers?.some(
+        (worker: any) =>
+          worker?.worker?.toString() === userDetails?._id &&
+          worker?.status === "PENDING",
+      ),
+    ) || false,
+  );
+  const [isSelected, setIsSelected] = useState(
+    service?.selectedUsers?.find(
+      (user: any) =>
+        (user?.status === "SELECTED" && user?.user === userDetails?._id) ||
+        user?.workers?.some(
+          (worker: any) =>
+            worker?.worker?.toString() === userDetails?._id &&
+            worker?.status === "SELECTED",
+        ),
+    ) || false,
+  );
+
+  console.log("id----", id);
+  console.log("service----", service);
+
+  
+  const [isMediatorOrSingleWorker, setIsMediatorOrSingleWorker] = useState(
+    service?.selectedUsers?.find(
+      (user: any) =>
+        user?.status === "SELECTED" && user?.user === userDetails?._id,
+    ) || false,
+  );
+
+  const [isWorkerBooked, setIsWorkerBooked] = useState(
+    service?.bookedWorker === userDetails?._id,
+  );
+
+  const [mediatorMobile, setMediatorMobile] = useState(() => {
+    const matchedMediator = selectedApplicants?.find((selectedUser: any) =>
+      selectedUser?.workers?.some(
+        (workerObj: any) => workerObj?._id === userDetails?._id,
+      ),
+    );
+
+    return matchedMediator?.user?.mobile;
+  });
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [isCompleteModalVisible, setIsCompleteModalVisible] = useState(false);
+  const [isWorkerSelectModal, setIsWorkerSelectModal] = useState(false);
+  const [workers, setWorkers]: any = useState([]);
+  const [selectedWorkersIds, setSelectedWorkersIds]: any = useState([]);
+  const [selectedApplicants, setSelectedApplicants] = useState<any[]>([]);
+  const [applicants, setApplicants] = useState<any[]>([]);
+  const { refreshUser, isLoading: isRefreshLoading } =
+    REFRESH_USER.useRefreshUser();
+
+  const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
+
+  const [isAdmin] = useState(userDetails?.isAdmin);
+  const {
+    isLoading,
+    data: response,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ["serviceDetails", id],
+    queryFn: async () => await SERVICE?.getServiceById(id),
+    retry: false,
+    enabled: !!id,
+  });
+
+  useEffect(() => {
+    const unsubscribeBlur = navigation.addListener("blur", () => {
+      Speech.stop();
+    });
+
+    const unsubscribeBack = navigation.addListener("beforeRemove", () => {
+      Speech.stop();
+    });
+
+    return () => {
+      unsubscribeBlur();
+      unsubscribeBack();
+    };
+  }, [navigation]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (firstTimeRef.current) {
+        firstTimeRef.current = false;
+        return;
+      }
+      refetch();
+    }, [refetch]),
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const sid = Array.isArray(id) ? id[0] : id;
+      if (sid) {
+        trackEvent(AnalyticsEvents.SERVICE_VIEW, { serviceId: String(sid) });
+      }
+    }, [id]),
+  );
+
+  const {
+    data: appliedUsers,
+    isLoading: isAppliedWorkersLoading,
+    isRefetching: isAppliedWorkersRefetching,
+    isFetchingNextPage: isAppliedWorkersFetchingNextPage,
+    fetchNextPage: appliedWorkersFetchPage,
+    hasNextPage: hasAppliedWorkersNextPage,
+    refetch: refetchAppliedWorkers,
+  } = useInfiniteQuery({
+    queryKey: ["appliedUsers", service],
+    queryFn: ({ pageParam }) => {
+      return SERVICE?.fetchMyAppliedWorkers({ pageParam, serviceId: id });
+    },
+    retry: false,
+    initialPageParam: 1,
+    enabled: userDetails?._id === service?.employer,
+    getNextPageParam: (lastPage: any, pages) => {
+      if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
+        return lastPage?.pagination?.page + 1;
+      }
+      return undefined;
+    },
+  });
+
+  const {
+    data: members,
+    isLoading: isMemberLoading,
+    isFetchingNextPage: isMemberFetchingNextPage,
+    fetchNextPage: memberFetchPage,
+    hasNextPage: hasMemberNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["members"],
+    queryFn: ({ pageParam }) =>
+      MEDIATOR?.fetchAllMembers({
+        mediatorId: userDetails?._id,
+        pageParam,
+        category: "",
+      }),
+    retry: false,
+    initialPageParam: 1,
+    enabled: userDetails?._id !== service?.employer,
+    getNextPageParam: (lastPage: any, pages) => {
+      if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
+        return lastPage?.pagination?.page + 1;
+      }
+      return undefined;
+    },
+  });
+
+  const {
+    data: selectedUsers,
+    isLoading: isSelectedWorkerLoading,
+    isRefetching: isSelectedWorkerRefetching,
+    isFetchingNextPage: isSelectedWorkerFetchingNextPage,
+    fetchNextPage: selectedWorkersFetchPage,
+    hasNextPage: hasSelectedWorkersNextPage,
+    refetch: refetchSelectedWorkers,
+  } = useInfiniteQuery({
+    queryKey: ["selectedUsers", service],
+    queryFn: ({ pageParam }) => {
+      return SERVICE?.fetchSelectedWorkers({ pageParam, serviceId: id });
+    },
+    retry: false,
+    initialPageParam: 1,
+    // enabled: userDetails?._id === service?.employer,
+    getNextPageParam: (lastPage: any, pages) => {
+      if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
+        return lastPage?.pagination?.page + 1;
+      }
+      return undefined;
+    },
+  });
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const unsubscribe = setWorkers(
+        members?.pages.flatMap((page: any) => page.data || [])[0]?.workers,
+      );
+      return () => unsubscribe;
+    }, [members]),
+  );
+
+  useEffect(() => {
+    setIsServiceApplied(
+      service?.appliedUsers?.find(
+        (user: any) =>
+          user?.status === "PENDING" && user?.user === userDetails?._id,
+      ) || false,
+    );
+    setIsServiceAppliedByMediator(
+      service?.appliedUsers?.find((user: any) =>
+        user?.workers?.some(
+          (worker: any) =>
+            worker?.worker?.toString() === userDetails?._id &&
+            worker?.status === "PENDING",
+        ),
+      ) || false,
+    );
+    setIsServiceLiked(
+      service?.likedBy?.find((id: any) => id === userDetails?._id),
+    );
+    setIsSelected(
+      service?.selectedUsers?.find(
+        (user: any) =>
+          (user?.status === "SELECTED" && user?.user === userDetails?._id) ||
+          user?.workers?.some(
+            (worker: any) =>
+              worker?.worker?.toString() === userDetails?._id &&
+              worker?.status === "SELECTED",
+          ),
+      ) || false,
+    );
+
+    setIsMediatorOrSingleWorker(
+      service?.selectedUsers?.find(
+        (user: any) =>
+          user?.status === "SELECTED" && user?.user === userDetails?._id,
+      ) || false,
+    );
+    setIsWorkerBooked(service?.bookedWorker === userDetails?._id);
+
+    const matchedMediator = selectedApplicants?.find((selectedUser: any) =>
+      selectedUser?.workers?.some(
+        (workerObj: any) => workerObj?._id === userDetails?._id,
+      ),
+    );
+
+    setMediatorMobile(matchedMediator?.user?.mobile);
+  }, [service, selectedApplicants]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      let appliedUsers = response?.data?.appliedUsers?.find(
+        (mediator: any) => mediator?.user === userDetails?._id,
+      );
+
+      // Extract worker IDs if the logged-in user is found
+      const workerIds = appliedUsers?.workers?.map((id: any) => id) || [];
+
+      setSelectedWorkersIds(workerIds);
+
+      const unsubscribe = setService(response?.data);
+      return () => unsubscribe;
+    }, [response]),
+  );
+
+  useEffect(() => {
+    // Ensure drawer updates dynamically
+    setDrawerState((prevState: any) => ({
+      ...prevState,
+      content: () => (
+        <ApplicantsTabScreen
+          applicants={applicants}
+          selectedApplicants={selectedApplicants}
+          serviceId={service?._id}
+          isSelectedWorkerLoading={
+            isSelectedWorkerLoading || isSelectedWorkerRefetching
+          }
+          isSelectedWorkerFetchingNextPage={isSelectedWorkerFetchingNextPage}
+          isAppliedWorkersLoading={
+            isAppliedWorkersLoading || isAppliedWorkersRefetching
+          }
+          isAppliedWorkersFetchingNextPage={isAppliedWorkersFetchingNextPage}
+          refetchAppliedWorkers={refetchAppliedWorkers}
+          refetchSelectedWorkers={refetchSelectedWorkers}
+          refetch={refetch}
+        />
+      ),
+    }));
+  }, [
+    applicants,
+    selectedApplicants,
+    isSelectedWorkerLoading,
+    isSelectedWorkerRefetching,
+    isAppliedWorkersLoading,
+    isAppliedWorkersRefetching,
+  ]);
+
+  useEffect(() => {
+    const workers = selectedUsers?.pages[0]?.data || [];
+    setSelectedApplicants([...workers]);
+  }, [selectedUsers?.pages]);
+
+  useEffect(() => {
+    const workers = appliedUsers?.pages[0]?.data || [];
+    setApplicants([...workers]);
+  }, [appliedUsers?.pages]);
+
+  const handleSpeakAboutSerivceDetails = () => {
+    const textToSpeak = generateServiceSummary(
+      service,
+      locale?.language,
+      userDetails?.location,
+    );
+
+    speakText(textToSpeak, locale?.language, setIsSpeaking);
+  };
+
+  const handleCloseSpeakers = () => {
+    Speech.stop();
+    setIsSpeaking(false);
+  };
+
+  const handleShareService = async () => {
+    const { ok } = await shareServiceDetails(service, { t });
+    if (!ok) {
+      TOAST?.error(t("shareFailed"));
+    }
+  };
+
+  const handleShowApplications = () => {
+    setDrawerState((prevState: any) => ({
+      ...prevState,
+      visible: true,
+      title: "showApplicationsDetails",
+      content: () => (
+        <ApplicantsTabScreen
+          applicants={applicants}
+          selectedApplicants={selectedApplicants}
+          serviceId={service?._id}
+          isSelectedWorkerLoading={
+            isSelectedWorkerLoading || isSelectedWorkerRefetching
+          }
+          isSelectedWorkerFetchingNextPage={isSelectedWorkerFetchingNextPage}
+          isAppliedWorkersLoading={
+            isAppliedWorkersLoading || isAppliedWorkersRefetching
+          }
+          isAppliedWorkersFetchingNextPage={isAppliedWorkersFetchingNextPage}
+          refetchAppliedWorkers={refetchAppliedWorkers}
+          refetchSelectedWorkers={refetchSelectedWorkers}
+          refetch={refetch}
+        />
+      ),
+    }));
+  };
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          header: () => (
+            <CustomHeader
+              title={
+                service?.bookingType === "byService"
+                  ? "serviceDetails"
+                  : "bookingDetails"
+              }
+              left="back"
+              right="notification"
+            />
+          ),
+        }}
+      />
+
+      {isLoading ? (
+        <ServicePlaceholder />
+      ) : (
+        <>
+          <ScrollView style={styles.container}>
+            <Animated.ScrollView
+              ref={scrollRef}
+              contentContainerStyle={{ paddingBottom: 150 }}
+            >
+              <ImageSlider images={service?.images} />
+              {getServiceJobId(service) ? (
+                <View style={styles.jobIdBanner}>
+                  <CustomText
+                    baseFont={12}
+                    fontWeight="600"
+                    color={Colors.subHeading}
+                    style={{ marginBottom: 4 }}
+                  >
+                    {t("jobIdReference")}
+                  </CustomText>
+                  <CustomText
+                    selectable
+                    baseFont={14}
+                    fontWeight="600"
+                    color={Colors.black}
+                  >
+                    {getServiceJobId(service)}
+                  </CustomText>
+                </View>
+              ) : null}
+              {(service?.employer === userDetails?._id || isAdmin) &&
+                service?.bookingType === "byService" && (
+                  <ApplicantSummary
+                    appliedCount={applicants?.length}
+                    selectedCount={selectedApplicants?.length}
+                    onShowDetails={handleShowApplications}
+                    isLoading={
+                      isAppliedWorkersLoading ||
+                      isAppliedWorkersRefetching ||
+                      isSelectedWorkerLoading ||
+                      isSelectedWorkerRefetching
+                    }
+                  />
+                )}
+              <View style={styles.contentWrapper}>
+                {service?.bookedWorker &&
+                  userDetails?._id === service?.employer && (
+                    <>
+                      <CustomHeading
+                        textAlign="left"
+                        baseFont={20}
+                        color={Colors?.black}
+                        style={{ marginBottom: 10 }}
+                      >
+                        {t("bookedWorker")}
+                      </CustomHeading>
+                      <View style={styles.workerCard}>
+                        <View style={styles.productCard}>
+                          <ProfilePicture
+                            uri={service?.bookedWorker?.profilePicture}
+                            style={{ marginRight: 10 }}
+                          />
+                          <View style={styles.productInfo}>
+                            <View style={styles?.titleContainer}>
+                              <CustomHeading baseFont={22}>
+                                {service?.bookedWorker?.name}
+                              </CustomHeading>
+                            </View>
+                            <ShowAddress
+                              address={service?.bookedWorker?.address}
+                            />
+                          </View>
+                          <View
+                            style={{
+                              alignContent: "flex-end",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <TouchableOpacity
+                              onPress={() =>
+                                router?.push({
+                                  pathname: "/screens/users/[id]",
+                                  params: {
+                                    id: service?.bookedWorker?._id,
+                                    role: "workers",
+                                    title: "workerDetails",
+                                    type: "applicant",
+                                  },
+                                })
+                              }
+                            >
+                              <CustomText
+                                fontWeight="bold"
+                                color={Colors?.link}
+                              >
+                                {t("workerDetails")}
+                              </CustomText>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      </View>
+                    </>
+                  )}
+
+                {service?.status === "CANCELLED" && (
+                  <View style={styles?.cancelledService}>
+                    <View style={{ width: "100%" }}>
+                      <CustomHeading color={Colors?.white} textAlign="left">
+                        {t("thisServiceIsCancelled")}
+                      </CustomHeading>
+                      <CustomText textAlign="left" color={Colors?.white}>
+                        {t("apologyForInconvenience")}
+                      </CustomText>
+                    </View>
+                  </View>
+                )}
+
+                {service?.status === "COMPLETED" && (
+                  <View style={styles?.selectedWrapper}>
+                    <View style={{ width: "100%" }}>
+                      <CustomHeading color={Colors?.white} textAlign="left">
+                        {t("thisServiceIsCompleted")}
+                      </CustomHeading>
+                      <CustomText textAlign="left" color={Colors?.white}>
+                        {t("thankYouForUsingOurService")}
+                      </CustomText>
+                    </View>
+                  </View>
+                )}
+
+                {(isServiceApplied || isServiceAppliedByMediator) &&
+                  service?.status !== "CANCELLED" && (
+                    <View style={styles?.appliedWrapper}>
+                      <CustomHeading color={Colors?.white} textAlign="left">
+                        {t("youHaveAppliedSuccessfully")}
+                      </CustomHeading>
+
+                      <CustomText
+                        textAlign="left"
+                        color={Colors?.white}
+                        style={{ marginBottom: 10 }}
+                      >
+                        {workers && workers.length > 0
+                          ? t("youAppliedWithTheseMembers")
+                          : isServiceAppliedByMediator
+                            ? t("youAppliedByMediator")
+                            : t("youAppliedIndividually")}
+                      </CustomText>
+
+                      {/* If mediator, show only applied workers */}
+                      {workers && workers.length > 0 && (
+                        <View style={{ gap: 10 }}>
+                          {service?.appliedUsers
+                            ?.filter(
+                              (appliedUser: any) =>
+                                appliedUser?.user === userDetails?._id &&
+                                appliedUser?.status === "PENDING",
+                            )
+                            ?.flatMap(
+                              (appliedUser: any) => appliedUser?.workers || [],
+                            )
+                            ?.map((appliedWorker: any, index: number) => {
+                              const matchedWorker = workers.find(
+                                (worker: any) =>
+                                  worker?._id === appliedWorker?.worker &&
+                                  appliedWorker?.status === "PENDING",
+                              );
+
+                              if (!matchedWorker) return null;
+
+                              const { name, mobile, profilePicture, address } =
+                                matchedWorker;
+
+                              return (
+                                <View
+                                  key={matchedWorker?._id || index}
+                                  style={styles?.mediatorAppliedWorkers}
+                                >
+                                  <ProfilePicture
+                                    uri={profilePicture}
+                                    style={{
+                                      width: 50,
+                                      height: 50,
+                                      borderRadius: 25,
+                                      backgroundColor: Colors.white,
+                                    }}
+                                  />
+
+                                  <View style={{ flex: 1 }}>
+                                    <CustomText
+                                      textAlign="left"
+                                      color={Colors.white}
+                                    >
+                                      {t("name")}: {name || "-"}
+                                    </CustomText>
+                                    <CustomText
+                                      textAlign="left"
+                                      color={Colors.white}
+                                    >
+                                      {t("mobile")}: {mobile || "-"}
+                                    </CustomText>
+                                    <CustomText
+                                      textAlign="left"
+                                      color={Colors.white}
+                                    >
+                                      {t("appliedSkill")}:{" "}
+                                      {getDynamicWorkerType(
+                                        appliedWorker?.skill,
+                                        1,
+                                      ) || "-"}
+                                    </CustomText>
+                                    <CustomText
+                                      textAlign="left"
+                                      color={Colors.white}
+                                    >
+                                      {t("address")}: {address || "-"}
+                                    </CustomText>
+                                  </View>
+                                </View>
+                              );
+                            })}
+                        </View>
+                      )}
+
+                      {/* If individual worker, show their applied skill */}
+                      {(!workers || workers.length === 0) && (
+                        <View
+                          style={{
+                            backgroundColor: Colors?.fourth,
+                            padding: 10,
+                            borderRadius: 8,
+                          }}
+                        >
+                          {service?.appliedUsers
+                            ?.filter(
+                              (appliedUser: any) =>
+                                appliedUser?.user === userDetails?._id &&
+                                appliedUser?.status === "PENDING",
+                            )
+                            ?.map((appliedUser: any, index: number) => (
+                              <CustomText key={index} color={Colors?.primary}>
+                                {t("yourAppliedSkill")}:{" "}
+                                <CustomText
+                                  fontWeight="600"
+                                  color={Colors?.primary}
+                                >
+                                  {appliedUser?.skill
+                                    ? getDynamicWorkerType(
+                                        appliedUser?.skill,
+                                        1,
+                                      )
+                                    : t("noSkill")}
+                                </CustomText>
+                              </CustomText>
+                            ))}
+
+                          {isServiceAppliedByMediator &&
+                            service?.appliedUsers
+                              ?.find((user: any) =>
+                                user?.workers?.some(
+                                  (worker: any) =>
+                                    worker?.worker?.toString() ===
+                                      userDetails?._id &&
+                                    worker?.status === "PENDING",
+                                ),
+                              )
+                              ?.workers?.filter(
+                                (worker: any) =>
+                                  worker?.worker?.toString() ===
+                                    userDetails?._id &&
+                                  worker?.status === "PENDING",
+                              )
+                              ?.map((worker: any, index: number) => (
+                                <CustomText key={index} color={Colors?.primary}>
+                                  {t("yourAppliedSkill")}:{" "}
+                                  <CustomText
+                                    fontWeight="600"
+                                    color={Colors?.primary}
+                                  >
+                                    {getDynamicWorkerType(worker?.skill, 1) ||
+                                      "-"}
+                                  </CustomText>
+                                </CustomText>
+                              ))}
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                {isSelected && service?.status !== "CANCELLED" && (
+                  <View style={styles?.selectedWrapper}>
+                    <CustomHeading color={Colors?.white} textAlign="left">
+                      {t("youAreSelected")}
+                    </CustomHeading>
+                    <CustomText
+                      textAlign="left"
+                      color={Colors?.white}
+                      style={{ marginBottom: 10 }}
+                    >
+                      {t("doYourBest")}
+                    </CustomText>
+                    <View style={{ gap: 20 }}>
+                      {isMediatorOrSingleWorker && (
+                        <ButtonComp
+                          isPrimary={true}
+                          title={t("callEmployer")}
+                          onPress={() =>
+                            handleCall(service?.employer?.mobile, {
+                              source: "service_detail_header",
+                              serviceId: String(
+                                Array.isArray(id) ? id[0] : id ?? "",
+                              ),
+                            })
+                          }
+                          icon={
+                            <FontAwesome5
+                              name="phone-alt"
+                              size={16}
+                              color={Colors.white}
+                              style={{ marginRight: 10 }}
+                            />
+                          }
+                        />
+                      )}
+                      <ButtonComp
+                        isPrimary={true}
+                        title={t("showYourAttendance")}
+                        onPress={() =>
+                          router?.push({
+                            pathname: "/screens/bookings/showAttendance",
+                            params: {
+                              bookingDetails: JSON.stringify(service),
+                            },
+                          })
+                        }
+                        bgColor={Colors?.tertieryButton}
+                        borderColor={Colors?.tertieryButton}
+                        style={{ flex: 1, paddingVertical: 6 }}
+                      />
+                    </View>
+                  </View>
+                )}
+
+                {service?.bookingType === "direct" &&
+                  service?.bookedWorker === userDetails?._id && (
+                    <ButtonComp
+                      isPrimary={true}
+                      title={t("showYourAttendance")}
+                      onPress={() =>
+                        router?.push({
+                          pathname: "/screens/bookings/showAttendance",
+                          params: {
+                            bookingDetails: JSON.stringify(service),
+                          },
+                        })
+                      }
+                      bgColor={Colors?.tertieryButton}
+                      borderColor={Colors?.tertieryButton}
+                      style={{ flex: 1, paddingVertical: 6, marginBottom: 20 }}
+                    />
+                  )}
+
+                <View style={styles.headingWrapper}>
+                  <View style={styles.headingTitleRow}>
+                    <CustomHeading
+                      textAlign="left"
+                      baseFont={20}
+                      color={Colors?.black}
+                      style={styles.headingTitle}
+                    >
+                      {t("serviceDetails")}
+                    </CustomHeading>
+                    <TouchableOpacity
+                      onPress={handleShareService}
+                      style={styles.shareButton}
+                      accessibilityRole="button"
+                      accessibilityLabel={t("shareService")}
+                      activeOpacity={0.85}
+                    >
+                      <Ionicons
+                        name="share-social"
+                        size={20}
+                        color={Colors.primary}
+                      />
+                      <CustomText
+                        fontWeight="800"
+                        baseFont={13}
+                        color={Colors.primary}
+                      >
+                        {t("shareService")}
+                      </CustomText>
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity
+                    onPress={
+                      isSpeaking
+                        ? handleCloseSpeakers
+                        : handleSpeakAboutSerivceDetails
+                    }
+                    style={[
+                      styles?.leftTag,
+                      {
+                        backgroundColor: isSpeaking
+                          ? Colors?.danger
+                          : Colors?.success,
+                      },
+                    ]}
+                  >
+                    <CustomText color={Colors?.white} fontWeight="bold">
+                      📢{" "}
+                      {isSpeaking
+                        ? t("speakingAndClose")
+                        : t("listenAboutService")}
+                    </CustomText>
+                  </TouchableOpacity>
+                </View>
+
+                {service?.type && service?.subType && (
+                  <CustomHeading baseFont={18} textAlign="left">
+                    {t(service?.type)} - {t(service?.subType)}
+                  </CustomHeading>
+                )}
+
+                {service?.appliedSkill && service?.appliedSkill?.skill && (
+                  <View style={styles.directSkillCard}>
+                    <CustomHeading
+                      baseFont={13}
+                      textAlign="left"
+                      color={Colors.subHeading}
+                      style={{ marginBottom: 6 }}
+                    >
+                      {t("skillAndPay")}
+                    </CustomHeading>
+                    <View style={styles.directSkillRow}>
+                      <CustomHeading
+                        baseFont={18}
+                        textAlign="left"
+                        style={styles.directSkillName}
+                      >
+                        {getDynamicWorkerType(service?.appliedSkill?.skill, 1)}
+                      </CustomHeading>
+                      <View style={styles.directPayPill}>
+                        <CustomHeading
+                          baseFont={18}
+                          color={Colors?.tertieryButton}
+                        >
+                          ₹{service?.appliedSkill?.pricePerDay}
+                        </CustomHeading>
+                        <CustomText baseFont={12} color={Colors.subHeading}>
+                          {t("perDay")}
+                        </CustomText>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.atAGlanceCard}>
+                  <View style={styles.sectionTitleRow}>
+                    <Ionicons
+                      name="location-outline"
+                      size={20}
+                      color={Colors.primary}
+                    />
+                    <CustomHeading textAlign="left" baseFont={16} color={Colors.black}>
+                      {t("locationAndSchedule")}
+                    </CustomHeading>
+                  </View>
+                  <View style={styles.listingLocationWrapper}>
+                    <ShowAddress address={service?.address} />
+                  </View>
+                  <View style={styles.listingLocationWrapper}>
+                    <DateDisplay date={service?.startDate} type="startDate" />
+                  </View>
+                  <Highlights compact service={service} />
+                </View>
+
+                <ServiceFacilitiesSection facilities={service?.facilities} />
+
+                {service?.description && (
+                  <View style={styles.descriptionCard}>
+                    <View style={styles.sectionTitleRow}>
+                      <Ionicons
+                        name="document-text-outline"
+                        size={20}
+                        color={Colors.primary}
+                      />
+                      <CustomHeading
+                        textAlign="left"
+                        baseFont={16}
+                        color={Colors.black}
+                      >
+                        {t("description")}
+                      </CustomHeading>
+                    </View>
+                    <CustomText textAlign="left" baseFont={16} style={styles.descriptionBody}>
+                      {service?.description}
+                    </CustomText>
+                  </View>
+                )}
+
+                {service && service?.requirements?.length > 0 && (
+                  <Requirements
+                    type="full"
+                    requirements={service?.requirements}
+                  />
+                )}
+
+                {/* {service?.employer?._id &&
+                  service?.employer?._id !== userDetails?._id && (
+                    <View style={{ marginTop: 20 }}>
+                      <CustomHeading
+                        textAlign="left"
+                        baseFont={20}
+                        color={Colors?.black}
+                      >
+                        {t("employer")}
+                      </CustomHeading>
+                      <EmployerCard employer={service?.employer} />
+                    </View>
+                  )} */}
+              </View>
+            </Animated.ScrollView>
+          </ScrollView>
+
+          {service?.bookingType === "byService" && !isLoading && (
+            <ServiceActionButtons
+              service={service}
+              members={workers}
+              mediatorMobile={mediatorMobile}
+              isSelectedWorkerLoading={isSelectedWorkerLoading}
+              isMemberLoading={isMemberLoading}
+              isMemberFetchingNextPage={isMemberFetchingNextPage}
+              userDetails={userDetails}
+              isAdmin={isAdmin}
+              isSelected={isSelected}
+              isMediatorOrSingleWorker={isMediatorOrSingleWorker}
+              isWorkerBooked={isWorkerBooked}
+              isServiceApplied={isServiceApplied}
+              isServiceAppliedByMediator={isServiceAppliedByMediator}
+              isServiceLiked={isServiceLiked}
+              id={id as string}
+              refetch={refetch}
+              refreshUser={refreshUser}
+              selectedWorkersIds={selectedWorkersIds}
+              setSelectedWorkersIds={setSelectedWorkersIds}
+              setIsWorkerSelectModal={setIsWorkerSelectModal}
+              setModalVisible={setModalVisible}
+              setIsCompleteModalVisible={setIsCompleteModalVisible}
+              hasMemberNextPage={hasMemberNextPage}
+              memberFetchPage={memberFetchPage}
+              setAddService={setAddService}
+              isCompleteModalVisible={isCompleteModalVisible}
+              modalVisible={modalVisible}
+              isWorkerSelectModal={isWorkerSelectModal}
+            />
+          )}
+
+          {service?.bookingType === "direct" && (
+            <BookingActionButtons
+              category={"booking"}
+              booking={service}
+              userDetails={userDetails}
+              isAdmin={isAdmin}
+              id={id as string}
+              refetch={refetch}
+              refreshUser={refreshUser}
+              setModalVisible={setModalVisible}
+              setIsCompleteModalVisible={setIsCompleteModalVisible}
+              isCompleteModalVisible={isCompleteModalVisible}
+              modalVisible={modalVisible}
+            />
+          )}
+        </>
+      )}
+    </>
+  );
+};
+
+export default ServiceDetails;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  image: {
+    width: width,
+    height: IMG_HEIGHT,
+  },
+  contentWrapper: {
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+  atAGlanceCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    padding: 14,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+    marginBottom: 4,
+  },
+  directSkillCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.12)",
+  },
+  directSkillRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+  },
+  directSkillName: {
+    flex: 1,
+    minWidth: 0,
+  },
+  directPayPill: {
+    alignItems: "flex-end",
+    backgroundColor: Colors.fourth,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+  },
+  descriptionCard: {
+    marginTop: 16,
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+  },
+  descriptionBody: {
+    lineHeight: 24,
+    marginTop: 4,
+  },
+  selectedWrapper: {
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: Colors?.success,
+  },
+  cancelledService: {
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: Colors?.danger,
+  },
+  appliedWrapper: {
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: Colors?.tertieryButton,
+  },
+  editContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  headingWrapper: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 10,
+    marginBottom: 10,
+  },
+  headingTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  headingTitle: {
+    flex: 1,
+    minWidth: 0,
+  },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(34, 64, 154, 0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.2)",
+  },
+  listingLocationWrapper: {
+    flexDirection: "row",
+    marginTop: 5,
+    alignItems: "flex-start",
+    gap: 5,
+  },
+  listingLocationTxt: {
+    fontSize: 14,
+    marginLeft: 5,
+    color: Colors.black,
+  },
+
+  listingDetails: {
+    fontSize: 16,
+    color: Colors.black,
+    lineHeight: 25,
+    letterSpacing: 0.5,
+  },
+
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
+    position: "absolute",
+    bottom: 0,
+    padding: 20,
+    paddingBottom: 30,
+    width: width,
+  },
+  footerBtn: {
+    flex: 1,
+    backgroundColor: Colors.black,
+    borderColor: Colors.black,
+    alignItems: "center",
+  },
+  footerBookBtn: {
+    flex: 2,
+    backgroundColor: Colors.primary,
+    marginRight: 20,
+  },
+  footerBtnTxt: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  deleteBtn: {
+    width: "48%",
+    backgroundColor: Colors?.danger,
+    borderColor: Colors?.danger,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  completeBtn: {
+    width: "48%",
+    backgroundColor: Colors?.primary,
+    borderColor: Colors?.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  modalView: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 20,
+    alignItems: "center",
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  iconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: "#FFD700", // Yellow circle
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    // padding: 20,
+    // width: "90%",
+    // maxHeight: "80%",
+  },
+  userItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    gap: 4,
+    // marginVertical: 10,
+  },
+  profilePic: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginHorizontal: 10,
+  },
+  userInfo: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    gap: 2,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  userSkills: {
+    fontSize: 14,
+    color: "#555",
+  },
+  userAddress: {
+    fontSize: 12,
+    color: "#888",
+  },
+  loaderStyle: {
+    alignItems: "flex-start",
+    paddingLeft: 20,
+    paddingBottom: 10,
+  },
+  workerCard: {
+    borderRadius: 8,
+    marginBottom: 10,
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "flex-start",
+  },
+  productCard: {
+    flexDirection: "row",
+    backgroundColor: Colors?.white,
+    paddingVertical: 15,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 2,
+  },
+  recommendationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  leftTag: {
+    backgroundColor: Colors?.tertiery,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  mediatorAppliedWorkers: {
+    backgroundColor: Colors?.highlight,
+    borderRadius: 8,
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  jobIdBanner: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: Colors.secondaryBackground,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.gray,
+  },
+  highlightBox: {
+    flexDirection: "row",
+    width: "48%",
+  },
+  highlightIcon: {
+    backgroundColor: Colors?.white,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    marginRight: 8,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

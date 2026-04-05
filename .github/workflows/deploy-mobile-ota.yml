@@ -1,0 +1,50 @@
+# Publishes an Expo EAS Update (OTA) for Android — no native rebuild.
+# Required repo secret: EXPO_TOKEN (https://expo.dev/accounts/[account]/settings/access-tokens)
+
+name: Deploy Mobile (EAS OTA)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-mobile-ota
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ota:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable pnpm
+        run: corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+      - name: Install monorepo dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Expo & EAS
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          eas-version: latest
+
+      - name: Publish OTA update (Android)
+        working-directory: apps/mobile
+        run: |
+          eas update \
+            --branch production \
+            --platform android \
+            --message "main: ${{ github.sha }}" \
+            --non-interactive
