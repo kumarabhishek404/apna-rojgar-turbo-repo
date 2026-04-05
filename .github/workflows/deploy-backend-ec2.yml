@@ -18,6 +18,11 @@
 # Troubleshooting "ssh: no key found":
 #   - Must be the PRIVATE key (.pem from AWS), not the .pub public key.
 #   - Paste includes BEGIN/END lines and real newlines (or use EC2_SSH_KEY_B64).
+#
+# Troubleshooting "cd: ... No such file or directory":
+#   - EC2_DEPLOY_PATH must exist ON THE SERVER (clone the repo there once over SSH).
+#   - Must be the monorepo root (folder containing apps/backend and pnpm-workspace.yaml).
+#   - No trailing spaces in the GitHub secret; use the same path as `pwd` on EC2.
 
 name: Deploy Backend (EC2)
 
@@ -68,9 +73,22 @@ jobs:
           script: |
             set -euo pipefail
             DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH }}"
+            DEPLOY_PATH="$(printf '%s' "$DEPLOY_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
             PM2_NAME="${{ secrets.EC2_PM2_APP_NAME }}"
             if [ -z "$DEPLOY_PATH" ]; then echo "EC2_DEPLOY_PATH secret is not set"; exit 1; fi
             if [ -z "$PM2_NAME" ]; then PM2_NAME="worker-app-api"; fi
+            if [ ! -d "$DEPLOY_PATH" ]; then
+              echo "ERROR: EC2_DEPLOY_PATH is not a directory on this server."
+              echo "SSH in once and run: git clone <your-repo-url> && cd <repo> && pwd"
+              echo "Put that pwd value in the EC2_DEPLOY_PATH secret (monorepo root, not apps/backend)."
+              echo "--- listing home ($HOME) ---"
+              ls -la "$HOME" || true
+              exit 1
+            fi
+            if [ ! -f "$DEPLOY_PATH/pnpm-workspace.yaml" ]; then
+              echo "ERROR: $DEPLOY_PATH looks wrong — pnpm-workspace.yaml not found (need monorepo root)."
+              exit 1
+            fi
             cd "$DEPLOY_PATH"
             git fetch origin main
             git checkout main
