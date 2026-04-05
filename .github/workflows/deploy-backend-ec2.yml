@@ -2,12 +2,22 @@
 #
 # Required GitHub secrets:
 #   EC2_HOST          — e.g. 1.2.3.4 or ec2-xx.compute.amazonaws.com
-#   EC2_USER          — e.g. ubuntu, ec2-user
-#   EC2_SSH_KEY       — full private key (PEM) for SSH auth
-#   EC2_DEPLOY_PATH   — absolute path on the server where this repo is cloned (monorepo root)
+#   EC2_USER          — e.g. ec2-user (Amazon Linux), ubuntu (Ubuntu)
+#   EC2_DEPLOY_PATH   — absolute path on the server where this monorepo is cloned
+#
+# SSH auth — use ONE of:
+#   EC2_SSH_KEY       — full PRIVATE key (.pem), from -----BEGIN ... to -----END-----
+#   EC2_SSH_KEY_B64   — base64-encoded file (recommended if plain PEM fails in GitHub UI)
+#                       macOS: base64 -i your.pem | tr -d '\n'
+#                       Linux: base64 -w0 your.pem
 #
 # Optional:
-#   EC2_PM2_APP_NAME  — PM2 process name (default: worker-app-api)
+#   EC2_SSH_KEY_PASSPHRASE — if your private key is encrypted with a passphrase
+#   EC2_PM2_APP_NAME       — PM2 name (default: worker-app-api)
+#
+# Troubleshooting "ssh: no key found":
+#   - Must be the PRIVATE key (.pem from AWS), not the .pub public key.
+#   - Paste includes BEGIN/END lines and real newlines (or use EC2_SSH_KEY_B64).
 
 name: Deploy Backend (EC2)
 
@@ -28,12 +38,32 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Prepare SSH private key on runner
+        run: |
+          mkdir -p ~/.ssh
+          KEY_FILE=~/.ssh/deploy_key.pem
+          if [ -n "${{ secrets.EC2_SSH_KEY_B64 }}" ]; then
+            echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > "$KEY_FILE"
+          elif [ -n "${{ secrets.EC2_SSH_KEY }}" ]; then
+            echo "${{ secrets.EC2_SSH_KEY }}" > "$KEY_FILE"
+          else
+            echo "::error::Set either EC2_SSH_KEY (PEM text) or EC2_SSH_KEY_B64 (base64 of the .pem file)."
+            exit 1
+          fi
+          chmod 600 "$KEY_FILE"
+          if ! head -1 "$KEY_FILE" | grep -q "BEGIN"; then
+            echo "::error::Key file must start with -----BEGIN ... PRIVATE KEY-----. Use the private .pem from AWS, not the .pub file. Try EC2_SSH_KEY_B64 if pasting PEM fails."
+            exit 1
+          fi
+
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key_path: /home/runner/.ssh/deploy_key.pem
+          passphrase: ${{ secrets.EC2_SSH_KEY_PASSPHRASE }}
+          port: 22
           script_stop: true
           script: |
             set -euo pipefail
