@@ -1,39 +1,11 @@
-# Deploys the **turbo monorepo** on EC2: git sync to origin/main, pnpm install at repo root, then PM2 runs apps/backend.
-# EC2_DEPLOY_PATH must be the monorepo root (contains pnpm-workspace.yaml), not a legacy standalone backend folder.
-#
-# Required GitHub secrets:
-#   EC2_HOST          — e.g. 1.2.3.4 or ec2-xx.compute.amazonaws.com
-#   EC2_USER          — e.g. ec2-user (Amazon Linux), ubuntu (Ubuntu)
-#   EC2_DEPLOY_PATH   — absolute path on the server where this monorepo is cloned
-#
-# SSH auth — use ONE of:
-#   EC2_SSH_KEY       — full PRIVATE key (.pem), from -----BEGIN ... to -----END-----
-#   EC2_SSH_KEY_B64   — base64-encoded file (recommended if plain PEM fails in GitHub UI)
-#                       macOS: base64 -i your.pem | tr -d '\n'
-#                       Linux: base64 -w0 your.pem
-#
-# Optional:
-#   EC2_SSH_KEY_PASSPHRASE — if your private key is encrypted with a passphrase
-#   EC2_PM2_APP_NAME       — PM2 name (default: worker-app-api)
-#
-# Troubleshooting "ssh: no key found":
-#   - Must be the PRIVATE key (.pem from AWS), not the .pub public key.
-#   - Paste includes BEGIN/END lines and real newlines (or use EC2_SSH_KEY_B64).
-#
-# Troubleshooting "cd: ... No such file or directory":
-#   - EC2_DEPLOY_PATH must exist ON THE SERVER (clone the repo there once over SSH).
-#   - Must be the monorepo root (folder containing apps/backend and pnpm-workspace.yaml).
-#   - No trailing spaces in the GitHub secret; use the same path as `pwd` on EC2.
-#
-# Troubleshooting "EACCES ... symlink ... /usr/bin/pnpm" (corepack):
-#   - Deploy uses `npx pnpm` instead of `corepack enable` so no root/sudo is required.
+# EC2: git pull + pm2 restart. If you add/change npm deps, run pnpm install on the server once or add those commands back here.
+# Secrets: EC2_HOST, EC2_USER, EC2_DEPLOY_PATH, EC2_SSH_KEY or EC2_SSH_KEY_B64, optional EC2_PM2_APP_NAME, EC2_SSH_KEY_PASSPHRASE
 
 name: Deploy Backend (EC2)
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -47,88 +19,35 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare SSH private key on runner
+      - name: SSH key
         run: |
-          mkdir -p ~/.ssh
-          KEY_FILE=~/.ssh/deploy_key.pem
+          mkdir -p ~/.ssh && KEY=~/.ssh/deploy_key.pem
           if [ -n "${{ secrets.EC2_SSH_KEY_B64 }}" ]; then
-            echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > "$KEY_FILE"
+            echo "${{ secrets.EC2_SSH_KEY_B64 }}" | base64 -d > "$KEY"
           elif [ -n "${{ secrets.EC2_SSH_KEY }}" ]; then
-            echo "${{ secrets.EC2_SSH_KEY }}" > "$KEY_FILE"
+            echo "${{ secrets.EC2_SSH_KEY }}" > "$KEY"
           else
-            echo "::error::Set either EC2_SSH_KEY (PEM text) or EC2_SSH_KEY_B64 (base64 of the .pem file)."
-            exit 1
+            echo "Set EC2_SSH_KEY or EC2_SSH_KEY_B64"; exit 1
           fi
-          chmod 600 "$KEY_FILE"
-          if ! head -1 "$KEY_FILE" | grep -q "BEGIN"; then
-            echo "::error::Key file must start with -----BEGIN ... PRIVATE KEY-----. Use the private .pem from AWS, not the .pub file. Try EC2_SSH_KEY_B64 if pasting PEM fails."
-            exit 1
-          fi
+          chmod 600 "$KEY"
 
-      - name: Deploy over SSH
+      - name: Pull & restart
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key_path: /home/runner/.ssh/deploy_key.pem
           passphrase: ${{ secrets.EC2_SSH_KEY_PASSPHRASE }}
-          port: 22
           script_stop: true
           script: |
-            set -euo pipefail
-            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH }}"
-            DEPLOY_PATH="$(printf '%s' "$DEPLOY_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
-            PM2_NAME="${{ secrets.EC2_PM2_APP_NAME }}"
-            if [ -z "$DEPLOY_PATH" ]; then echo "EC2_DEPLOY_PATH secret is not set"; exit 1; fi
-            if [ -z "$PM2_NAME" ]; then PM2_NAME="worker-app-api"; fi
-            if [ ! -d "$DEPLOY_PATH" ]; then
-              echo "ERROR: EC2_DEPLOY_PATH is not a directory on this server."
-              echo "SSH in once and run: git clone <your-repo-url> && cd <repo> && pwd"
-              echo "Put that pwd value in the EC2_DEPLOY_PATH secret (monorepo root, not apps/backend)."
-              echo "--- listing home ($HOME) ---"
-              ls -la "$HOME" || true
-              exit 1
-            fi
-            if [ ! -f "$DEPLOY_PATH/pnpm-workspace.yaml" ]; then
-              echo "ERROR: $DEPLOY_PATH looks wrong — pnpm-workspace.yaml not found (need monorepo root)."
-              exit 1
-            fi
-            cd "$DEPLOY_PATH"
-            echo "=== Monorepo deploy root ==="
-            pwd
-            git remote -v | head -4 || true
-            ORIGIN_URL="$(git remote get-url origin 2>/dev/null || true)"
-            if echo "$ORIGIN_URL" | grep -q "apna-rojgar-turbo-repo"; then
-              echo "OK: origin points at the turbo monorepo (apna-rojgar-turbo-repo)."
-            else
-              echo "WARNING: origin URL may still be an old backend-only repo. On EC2 run: git remote -v"
-              echo "Then: git remote set-url origin <your-apna-rojgar-turbo-repo-git-url>"
-            fi
-            git fetch origin main
-            git checkout main
-            git reset --hard origin/main
-            echo "=== HEAD after sync ==="
-            git log -1 --oneline
-            BACKEND_DIR="$DEPLOY_PATH/apps/backend"
-            if [ ! -f "$BACKEND_DIR/index.js" ]; then
-              echo "ERROR: $BACKEND_DIR/index.js missing — clone must be the full monorepo (apps/backend)."
-              exit 1
-            fi
-            export NODE_ENV=production
-            # Avoid `corepack enable` here — it tries to symlink into /usr/bin and needs root on EC2.
-            # Use npx to run pnpm in user space (Node/npm must be installed on the server).
-            PNPM_VER=9.15.0
-            npx --yes pnpm@${PNPM_VER} install --frozen-lockfile
-            npx --yes pnpm@${PNPM_VER} --filter @repo/common run build
-            if ! command -v pm2 >/dev/null 2>&1; then
-              echo "pm2 not found on server; npm i -g pm2 or use systemd."
-              exit 1
-            fi
-            # PM2 keeps the old script path/cwd on "restart". If you migrated from a standalone backend
-            # repo to the monorepo, restart still ran the old folder. Delete + start from apps/backend fixes that.
-            cd "$BACKEND_DIR"
-            echo "=== PM2 start from $BACKEND_DIR ==="
-            pm2 delete "$PM2_NAME" 2>/dev/null || true
-            export NODE_ENV=production
-            pm2 start index.js --name "$PM2_NAME" --cwd "$BACKEND_DIR"
+            set -e
+            REPO="${{ secrets.EC2_DEPLOY_PATH }}"
+            REPO="$(printf '%s' "$REPO" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            NAME="${{ secrets.EC2_PM2_APP_NAME }}"
+            test -n "$REPO" || { echo "Set EC2_DEPLOY_PATH"; exit 1; }
+            test -n "$NAME" || NAME="worker-app-api"
+            git config --global --add safe.directory "$REPO" 2>/dev/null || true
+            cd "$REPO"
+            git pull origin main
+            pm2 restart "$NAME" --update-env
             pm2 save
