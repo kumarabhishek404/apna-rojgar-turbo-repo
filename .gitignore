@@ -21,9 +21,9 @@ web-build/
 .metro-health-check*
 
 # Environment
-.env
-.env.*
-!.env.example
+# .env
+# .env.*
+# !.env.example
 
 # OS & editors
 .DS_Store
