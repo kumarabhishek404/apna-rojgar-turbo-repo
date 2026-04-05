@@ -24,7 +24,7 @@ connectDB();
 
 // ✅ Basic route
 app.get("/", (req, res) => {
-  res.send("Apna Rojgar App API is running...");
+  res.send("Apna Rojgar Backend API is working for you...");
 });
 
 // ✅ Import routes
