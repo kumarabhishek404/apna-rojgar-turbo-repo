@@ -13,6 +13,7 @@ const fetchAllUsers = async ({ pageParam, status }: any) => {
       `[adminService] An error occurred while fetching users : `,
       error?.response?.data?.message
     );
+    
     TOAST?.error(
       error?.response?.data?.message || "An error occurred while fetching users"
     );
