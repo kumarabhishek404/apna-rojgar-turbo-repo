@@ -23,6 +23,9 @@
 #   - EC2_DEPLOY_PATH must exist ON THE SERVER (clone the repo there once over SSH).
 #   - Must be the monorepo root (folder containing apps/backend and pnpm-workspace.yaml).
 #   - No trailing spaces in the GitHub secret; use the same path as `pwd` on EC2.
+#
+# Troubleshooting "EACCES ... symlink ... /usr/bin/pnpm" (corepack):
+#   - Deploy uses `npx pnpm` instead of `corepack enable` so no root/sudo is required.
 
 name: Deploy Backend (EC2)
 
@@ -94,10 +97,11 @@ jobs:
             git checkout main
             git reset --hard origin/main
             export NODE_ENV=production
-            corepack enable
-            corepack prepare pnpm@9.15.0 --activate
-            pnpm install --frozen-lockfile
-            pnpm --filter @repo/common run build
+            # Avoid `corepack enable` here — it tries to symlink into /usr/bin and needs root on EC2.
+            # Use npx to run pnpm in user space (Node/npm must be installed on the server).
+            PNPM_VER=9.15.0
+            npx --yes pnpm@${PNPM_VER} install --frozen-lockfile
+            npx --yes pnpm@${PNPM_VER} --filter @repo/common run build
             if ! command -v pm2 >/dev/null 2>&1; then
               echo "pm2 not found on server; npm i -g pm2 or use systemd."
               exit 1
