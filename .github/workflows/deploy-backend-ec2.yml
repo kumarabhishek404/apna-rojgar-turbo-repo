@@ -1,4 +1,5 @@
-# Deploys the API by SSH into your EC2 box: git pull + pnpm install + PM2 restart.
+# Deploys the **turbo monorepo** on EC2: git sync to origin/main, pnpm install at repo root, then PM2 runs apps/backend.
+# EC2_DEPLOY_PATH must be the monorepo root (contains pnpm-workspace.yaml), not a legacy standalone backend folder.
 #
 # Required GitHub secrets:
 #   EC2_HOST          — e.g. 1.2.3.4 or ec2-xx.compute.amazonaws.com
@@ -93,9 +94,26 @@ jobs:
               exit 1
             fi
             cd "$DEPLOY_PATH"
+            echo "=== Monorepo deploy root ==="
+            pwd
+            git remote -v | head -4 || true
+            ORIGIN_URL="$(git remote get-url origin 2>/dev/null || true)"
+            if echo "$ORIGIN_URL" | grep -q "apna-rojgar-turbo-repo"; then
+              echo "OK: origin points at the turbo monorepo (apna-rojgar-turbo-repo)."
+            else
+              echo "WARNING: origin URL may still be an old backend-only repo. On EC2 run: git remote -v"
+              echo "Then: git remote set-url origin <your-apna-rojgar-turbo-repo-git-url>"
+            fi
             git fetch origin main
             git checkout main
             git reset --hard origin/main
+            echo "=== HEAD after sync ==="
+            git log -1 --oneline
+            BACKEND_DIR="$DEPLOY_PATH/apps/backend"
+            if [ ! -f "$BACKEND_DIR/index.js" ]; then
+              echo "ERROR: $BACKEND_DIR/index.js missing — clone must be the full monorepo (apps/backend)."
+              exit 1
+            fi
             export NODE_ENV=production
             # Avoid `corepack enable` here — it tries to symlink into /usr/bin and needs root on EC2.
             # Use npx to run pnpm in user space (Node/npm must be installed on the server).
@@ -106,10 +124,11 @@ jobs:
               echo "pm2 not found on server; npm i -g pm2 or use systemd."
               exit 1
             fi
-            cd "$DEPLOY_PATH/apps/backend"
-            if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
-              pm2 restart "$PM2_NAME" --update-env
-            else
-              pm2 start index.js --name "$PM2_NAME" --update-env
-            fi
+            # PM2 keeps the old script path/cwd on "restart". If you migrated from a standalone backend
+            # repo to the monorepo, restart still ran the old folder. Delete + start from apps/backend fixes that.
+            cd "$BACKEND_DIR"
+            echo "=== PM2 start from $BACKEND_DIR ==="
+            pm2 delete "$PM2_NAME" 2>/dev/null || true
+            export NODE_ENV=production
+            pm2 start index.js --name "$PM2_NAME" --cwd "$BACKEND_DIR"
             pm2 save
