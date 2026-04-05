@@ -1,4 +1,4 @@
-# EC2: git pull + pm2 restart. If you add/change npm deps, run pnpm install on the server once or add those commands back here.
+# EC2: git pull + pm2 restart (or pm2 start if the process name does not exist yet).
 # Secrets: EC2_HOST, EC2_USER, EC2_DEPLOY_PATH, EC2_SSH_KEY or EC2_SSH_KEY_B64, optional EC2_PM2_APP_NAME, EC2_SSH_KEY_PASSPHRASE
 
 name: Deploy Backend (EC2)
@@ -45,9 +45,15 @@ jobs:
             REPO="$(printf '%s' "$REPO" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
             NAME="${{ secrets.EC2_PM2_APP_NAME }}"
             test -n "$REPO" || { echo "Set EC2_DEPLOY_PATH"; exit 1; }
-            test -n "$NAME" || NAME="worker-app-api"
+            test -n "$NAME" || NAME="apna-rojgar-backend"
             git config --global --add safe.directory "$REPO" 2>/dev/null || true
             cd "$REPO"
             git pull origin main
-            pm2 restart "$NAME" --update-env
+            export NODE_ENV=production
+            if pm2 describe "$NAME" >/dev/null 2>&1; then
+              pm2 restart "$NAME" --update-env
+            else
+              cd "$REPO/apps/backend"
+              pm2 start index.js --name "$NAME" --cwd "$REPO/apps/backend"
+            fi
             pm2 save

@@ -39,7 +39,7 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 │   │   ├── metro.config.js     # monorepo: watchFolders + resolver for pnpm
 │   │   ├── package.json
 │   │   └── tsconfig.json
-│   └── backend/                # Node API (npm name: worker-app-api)
+│   └── backend/                # Node API (npm name: apna-rojgar-backend)
 │       ├── index.js            # Express entry (ESM: "type": "module")
 │       ├── app/
 │       │   ├── routes/
@@ -62,7 +62,7 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 | Directory | `package.json` name | Role |
 |-----------|----------------------|------|
 | `apps/mobile` | `labour-app` | Expo / React Native client |
-| `apps/backend` | `worker-app-api` | Express API |
+| `apps/backend` | `apna-rojgar-backend` | Express API |
 | `packages/common` | `@repo/common` | Shared types, constants, small pure helpers |
 
 **Rules:**
@@ -83,7 +83,7 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 | Run all `dev` scripts (Turbo) | `pnpm dev` |
 | Build everything (Turbo) | `pnpm run build` |
 | Lint all (Turbo) | `pnpm run lint` |
-| Dev API only | `pnpm --filter worker-app-api dev` |
+| Dev API only | `pnpm --filter apna-rojgar-backend dev` |
 | Dev Expo only | `pnpm --filter labour-app dev` |
 | Build shared package | `pnpm --filter @repo/common build` |
 | Mobile typecheck (strict TS) | `pnpm --filter labour-app typecheck` |
@@ -128,7 +128,7 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 ---
 
-## 4. BACKEND (`apps/backend` — worker-app-api)
+## 4. BACKEND (`apps/backend` — apna-rojgar-backend)
 
 - **Entry**: `index.js` loads env, mounts Express, registers routes under `/api/v1/...`.
 - **Structure**: `app/routes` → `app/controllers` → `app/models` / `app/middlewares` / `app/validations` / `app/utils`.
@@ -178,7 +178,7 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 1. **This is a monorepo** — use paths under `apps/mobile`, `apps/backend`, and `packages/common`; do not assume a single flat app at repo root.
 2. **Use `pnpm --filter <workspace-name>`** when running a single package’s scripts from the root.
-3. **Do not rename** `labour-app` / `worker-app-api` / store identifiers in `app.json` unless the product owner requests it (Play Store / EAS / bundle IDs).
+3. **Do not rename** `labour-app` / `apna-rojgar-backend` / store identifiers in `app.json` unless the product owner requests it (Play Store / EAS / bundle IDs).
 4. **Don’t hardcode secrets or base URLs** — use env and existing config patterns.
 5. **Centralize side effects** (notifications, deep links) at app boundaries.
 6. **Prefer small, focused changes** consistent with existing style.
