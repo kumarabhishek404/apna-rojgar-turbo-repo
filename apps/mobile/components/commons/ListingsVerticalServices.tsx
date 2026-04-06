@@ -40,6 +40,7 @@ const ListingsVerticalServices = ({
         data={listings}
         renderItem={({ item }) => <RenderItem item={item} />}
         keyExtractor={(item) => item._id}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={ListHeaderComponent ?? undefined}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         onEndReached={debouncedLoadMore}

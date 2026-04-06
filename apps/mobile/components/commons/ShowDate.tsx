@@ -7,9 +7,15 @@ interface DateDisplayProps {
   date: string | Date | [string | Date, string | Date]; // Can be ISO string, Date object, or array of both
   type: "startDate" | "endDate" | "date" | "dateRange";
   styles?: any; // Optional styles for the text
+  showLeadingEmoji?: boolean;
 }
 
-const DateDisplay: React.FC<DateDisplayProps> = ({ date, type, styles }) => {
+const DateDisplay: React.FC<DateDisplayProps> = ({
+  date,
+  type,
+  styles,
+  showLeadingEmoji = true,
+}) => {
   // Helper function to parse date
   const parseDate = (input: string | Date) => {
     if (typeof input === "string") {
@@ -44,7 +50,7 @@ const DateDisplay: React.FC<DateDisplayProps> = ({ date, type, styles }) => {
 
     return (
       <CustomText textAlign="left">
-        📅{" "}
+        {showLeadingEmoji ? "📅 " : ""}
         {t("dateRange", { startDate: formattedStart, endDate: formattedEnd })}
       </CustomText>
     );
@@ -76,7 +82,12 @@ const DateDisplay: React.FC<DateDisplayProps> = ({ date, type, styles }) => {
       day: translatedWeekday,
     });
 
-    return <CustomText textAlign="left" style={styles}>📅 {displayText}</CustomText>;
+    return (
+      <CustomText textAlign="left" style={styles}>
+        {showLeadingEmoji ? "📅 " : ""}
+        {displayText}
+      </CustomText>
+    );
   }
 };
 

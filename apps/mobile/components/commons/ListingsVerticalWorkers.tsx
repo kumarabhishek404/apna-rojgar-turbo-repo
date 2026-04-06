@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import React, { useRef, type ReactElement } from "react";
 import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import coverImage from "../../assets/images/placeholder-cover.jpg";
 import RatingAndReviews from "./RatingAndReviews";
@@ -57,7 +58,8 @@ const ListingsVerticalWorkers = ({
       return (
         <View style={styles.rowWrap}>
           <TouchableOpacity
-            activeOpacity={0.9}
+            activeOpacity={0.92}
+            accessibilityRole="button"
             onPress={() =>
               router.push({
                 pathname: "/screens/users/[id]",
@@ -71,49 +73,74 @@ const ListingsVerticalWorkers = ({
             style={styles.cardTouchable}
           >
             <View style={styles.item}>
-              <Image
-                source={
-                  item?.profilePicture
-                    ? { uri: item.profilePicture }
-                    : coverImage
-                }
-                style={styles.avatar}
-              />
+              <View style={styles.itemInner}>
+                <View style={styles.mainRow}>
+                  <Image
+                    source={
+                      item?.profilePicture
+                        ? { uri: item.profilePicture }
+                        : coverImage
+                    }
+                    style={styles.avatar}
+                  />
+                  <View style={styles.cardContent}>
+                    <CustomHeading textAlign="left" style={styles.workerName}>
+                      {item?.name}
+                    </CustomHeading>
+                    <View style={styles.roleTagLine}>
+                      <UserRoleTag user={item} variant="compact" />
+                    </View>
 
-              <View style={styles.cardContent}>
-                <View style={styles.nameRow}>
-                <CustomHeading textAlign="left">{item?.name}</CustomHeading>
-                  <View style={styles.roleTagLine}>
-                    <UserRoleTag user={item} variant="compact" />
+                    <View style={styles.addressMetaRow}>
+                      <View style={styles.metaIconBadge}>
+                        <Ionicons
+                          name="location-outline"
+                          size={18}
+                          color={Colors.primary}
+                        />
+                      </View>
+                      <View style={styles.addressTextWrap}>
+                        <ShowAddress
+                          address={item?.address}
+                          numberOfLines={2}
+                          showLeadingPin={false}
+                          baseFont={14}
+                        />
+                      </View>
+                    </View>
+
+                    <SkillSelector
+                      canAddSkills={false}
+                      isShowLabel={false}
+                      style={styles.skillsContainer}
+                      tagStyle={styles.skillTag}
+                      tagTextStyle={styles.skillTagText}
+                      userSkills={item?.skills}
+                      availableSkills={availableInterest}
+                      count={3}
+                    />
                   </View>
                 </View>
 
-                <ShowAddress address={item?.address} numberOfLines={1} />
-
-                <SkillSelector
-                  canAddSkills={false}
-                  isShowLabel={false}
-                  style={styles.skillsContainer}
-                  tagStyle={styles.skillTag}
-                  tagTextStyle={styles.skillTagText}
-                  userSkills={item?.skills}
-                  availableSkills={availableInterest}
-                  count={3}
-                />
-
-                <View style={styles.bottomRow}>
-                  <RatingAndReviews
-                    rating={item?.rating?.average}
-                    reviews={item?.rating?.count}
-                  />
-
-                  <ShowDistance
-                    address={item?.address}
-                    loggedInUserLocation={
-                      userDetails?.geoLocation ?? userDetails?.location
-                    }
-                    targetLocation={item?.geoLocation}
-                  />
+                <View style={styles.footerCard}>
+                  <View style={styles.footerInner}>
+                    <View style={styles.ratingPill}>
+                      <RatingAndReviews
+                        rating={item?.rating?.average}
+                        reviews={item?.rating?.count}
+                      />
+                    </View>
+                    <View style={styles.distancePill}>
+                      <ShowDistance
+                        address={item?.address}
+                        loggedInUserLocation={
+                          userDetails?.geoLocation ?? userDetails?.location
+                        }
+                        targetLocation={item?.geoLocation}
+                        align="right"
+                      />
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
@@ -191,71 +218,134 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardTouchable: {
-    borderRadius: 14,
+    borderRadius: 16,
   },
   item: {
-    flexDirection: "row",
     backgroundColor: Colors.white,
-    borderRadius: 14,
-    padding: 11,
-    alignItems: "flex-start",
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.16)",
-    shadowColor: Colors.primary,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+    shadowColor: "#1e3a8a",
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+    overflow: "hidden",
+    position: "relative",
+  },
+  accentBar: {
+    height: 3,
+    width: "100%",
+    backgroundColor: Colors.primary,
+  },
+  itemInner: {
+    padding: 14,
+    paddingTop: 12,
+  },
+  mainRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   avatar: {
-    width: 68,
-    height: 86,
-    borderRadius: 12,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.18)",
+    width: 80,
+    height: 100,
+    borderRadius: 14,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: Colors.white,
     backgroundColor: Colors.secondaryBackground,
+    shadowColor: "#1e3a8a",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   cardContent: {
     flex: 1,
     minWidth: 0,
   },
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
+  workerName: {
+    marginBottom: 2,
   },
   roleTagLine: {
     alignSelf: "flex-start",
-    marginTop: 4,
-    marginBottom: 4,
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  addressMetaRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    marginBottom: 2,
+  },
+  metaIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: Colors.secondaryBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+    marginTop: 2,
+  },
+  addressTextWrap: {
+    flex: 1,
+    minWidth: 0,
   },
   skillsContainer: {
-    marginTop: 4,
+    marginTop: 10,
     flexDirection: "row",
+    flexWrap: "wrap",
   },
   skillTag: {
-    backgroundColor: Colors.secondaryBackground,
+    backgroundColor: "#F8FAFC",
     borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     marginRight: 6,
+    marginBottom: 4,
     borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.16)",
+    borderColor: "rgba(34, 64, 154, 0.12)",
   },
   skillTagText: {
     fontSize: 11,
     color: Colors.primary,
     fontWeight: "700",
   },
-  bottomRow: {
+  footerCard: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(34, 64, 154, 0.12)",
+  },
+  footerInner: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 6,
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  ratingPill: {
+    flexShrink: 0,
+    backgroundColor: "#FFFBF0",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 164, 28, 0.35)",
+  },
+  distancePill: {
+    flexShrink: 0,
+    backgroundColor: "rgba(34, 64, 154, 0.08)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.14)",
   },
   separator: {
-    height: 10,
+    height: 12,
   },
   listContent: {
     flexGrow: 1,

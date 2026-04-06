@@ -3,7 +3,7 @@ import * as Speech from "expo-speech";
 import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { AntDesign, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
-import { Link, router, useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { getServiceListHeroIcon } from "@/utils/serviceListHeroIcon";
 import {
   generateServiceSummary,
@@ -99,7 +99,6 @@ const ListingsServices = ({ item }: any) => {
     <>
       <View style={styles.container}>
         <View style={styles.item}>
-          <View style={styles.accentBar} />
           <TouchableOpacity
             activeOpacity={0.92}
             accessibilityRole="button"
@@ -251,44 +250,94 @@ const ListingsServices = ({ item }: any) => {
                 )}
             </View>
 
-            <View style={styles.titleBlock}>
-              {item?.subType ? (
-                <CustomHeading textAlign="left" style={styles.title}>
-                  {t(item?.subType || "unknown")}
-                </CustomHeading>
-              ) : (
-                <CustomHeading textAlign="left" style={styles.title}>
-                  {t("service")}
-                </CustomHeading>
-              )}
-            </View>
-
-            <Requirements type="highlights" requirements={item?.requirements} />
-            <View style={styles.infoBlock}>
-              <View style={styles.addressTimeRow}>
-                <View style={styles.addressCol}>
-                  <ShowAddress address={item?.address} numberOfLines={2} />
-                </View>
+            <View style={styles.titleHeaderRow}>
+              <View style={styles.titleHeaderText}>
+                {item?.subType ? (
+                  <CustomHeading textAlign="left" style={styles.title}>
+                    {t(item?.subType || "unknown")}
+                  </CustomHeading>
+                ) : (
+                  <CustomHeading textAlign="left" style={styles.title}>
+                    {t("service")}
+                  </CustomHeading>
+                )}
+              </View>
+              <View style={styles.postedPill}>
                 <CustomText
-                  textAlign="right"
-                  baseFont={13}
+                  textAlign="center"
+                  baseFont={12}
                   fontWeight="700"
-                  color={Colors.primary}
-                  style={styles.timeAgo}
+                  color={Colors.subHeading}
+                  numberOfLines={1}
                 >
                   {getTimeAgo(item?.createdAt)}
                 </CustomText>
               </View>
-              <DateDisplay date={item?.startDate} type="startDate" />
-              <View style={styles.actionContainer}>
-                <ShowDuration duration={item?.duration} alignment="left" />
-                <ShowDistance
-                  address={item?.address}
-                  loggedInUserLocation={
-                    userDetails?.geoLocation ?? userDetails?.location
-                  }
-                  targetLocation={item?.geoLocation}
-                />
+            </View>
+
+            <Requirements type="highlights" requirements={item?.requirements} />
+
+            <View style={styles.infoBlock}>
+              <View style={styles.metaRow}>
+                <View style={styles.metaIconBadge}>
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    color={Colors.primary}
+                  />
+                </View>
+                <View style={styles.metaRowBody}>
+                  <ShowAddress
+                    address={item?.address}
+                    numberOfLines={3}
+                    showLeadingPin={false}
+                    baseFont={15}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.metaRow}>
+                <View style={styles.metaIconBadge}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={19}
+                    color={Colors.primary}
+                  />
+                </View>
+                <View style={styles.metaRowBody}>
+                  <DateDisplay
+                    date={item?.startDate}
+                    type="startDate"
+                    showLeadingEmoji={false}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.durationDistanceCard}>
+                <View style={styles.durationDistanceInner}>
+                  <View style={styles.metaRowCompact}>
+                    <Ionicons
+                      name="time-outline"
+                      size={18}
+                      color={Colors.subHeading}
+                    />
+                    <ShowDuration
+                      duration={item?.duration}
+                      alignment="left"
+                      showLeadingEmoji={false}
+                    />
+                  </View>
+                  <View style={styles.distancePill}>
+                    <ShowDistance
+                      address={item?.address}
+                      loggedInUserLocation={
+                        userDetails?.geoLocation ?? userDetails?.location
+                      }
+                      targetLocation={item?.geoLocation}
+                      align="right"
+                    />
+                  </View>
+                </View>
               </View>
             </View>
             <ShowFacilities facilities={item?.facilities} />
@@ -356,33 +405,54 @@ const styles = StyleSheet.create({
   },
   item: {
     backgroundColor: Colors.white,
-    padding: 12,
-    paddingBottom: 10,
-    borderRadius: 12,
+    padding: 16,
+    paddingBottom: 14,
+    borderRadius: 16,
     width: "100%",
     position: "relative",
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+    shadowColor: "#1e3a8a",
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
   },
   accentBar: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 4,
-    // backgroundColor: Colors.white,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    height: 3,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  titleHeaderRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginTop: 12,
+  },
+  titleHeaderText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  postedPill: {
+    flexShrink: 0,
+    maxWidth: "42%",
+    backgroundColor: "#EEF2FF",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.12)",
   },
   heroWrap: {
     width: "100%",
     height: 180,
-    borderRadius: 8,
+    borderRadius: 14,
     overflow: "hidden",
     backgroundColor: Colors.secondaryBackground,
     position: "relative",
@@ -410,7 +480,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(34, 64, 154, 0.92)",
     paddingVertical: 5,
     paddingHorizontal: 8,
-    borderRadius: 6,
+    borderRadius: 10,
   },
   directTagOnHero: {
     position: "absolute",
@@ -422,13 +492,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 999,
   },
-  titleBlock: {
-    marginTop: 12,
-    gap: 8,
-  },
   title: {
     textTransform: "capitalize",
-    marginRight: 10,
+    marginRight: 0,
   },
   pillsRow: {
     flexDirection: "row",
@@ -523,31 +589,64 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingBottom: 10,
   },
-  actionContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 5,
-  },
   infoBlock: {
-    marginTop: 10,
-    gap: 8,
+    marginTop: 4,
+    gap: 0,
   },
-  addressTimeRow: {
-    width: "100%",
+  metaRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: 8,
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(34, 64, 154, 0.1)",
   },
-  addressCol: {
+  metaIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: Colors.secondaryBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+  },
+  metaRowBody: {
     flex: 1,
     minWidth: 0,
+    justifyContent: "center",
+    paddingTop: 2,
   },
-  timeAgo: {
+  durationDistanceCard: {
+    marginTop: 12,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
+  },
+  durationDistanceInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  metaRowCompact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flex: 1,
+    minWidth: 140,
+  },
+  distancePill: {
     flexShrink: 0,
-    maxWidth: "38%",
+    backgroundColor: "rgba(34, 64, 154, 0.08)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.14)",
   },
   ctaRow: {
     marginTop: 12,

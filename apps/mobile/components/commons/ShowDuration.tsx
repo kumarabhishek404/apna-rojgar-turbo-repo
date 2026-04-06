@@ -5,12 +5,18 @@ import CustomText from "./CustomText";
 interface ShowDurationProps {
   duration: number;
   alignment?: string;
+  showLeadingEmoji?: boolean;
 }
 
-const ShowDuration: React.FC<ShowDurationProps> = ({ duration, alignment }) => {
+const ShowDuration: React.FC<ShowDurationProps> = ({
+  duration,
+  alignment,
+  showLeadingEmoji = true,
+}) => {
   return (
     <CustomText textAlign={alignment ? alignment : "left"}>
-      ⏳  {t("duration")} {duration} {duration > 1 ? t("days") : t("day")}
+      {showLeadingEmoji ? "⏳  " : ""}
+      {t("duration")} {duration} {duration > 1 ? t("days") : t("day")}
     </CustomText>
   );
 };
