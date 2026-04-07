@@ -22,7 +22,7 @@ For any **new feature, enhancement, or UI improvement** on the mobile app, follo
 
 ```
 apna-rojgar/                    # repo root (package name: apna-rojgar)
-├── package.json                # root scripts: dev, build, lint, clean; prepare → builds @repo/common
+├── package.json                # root scripts: dev, dev:mobile/backend/website, build, lint, clean; prepare → @repo/common
 ├── pnpm-workspace.yaml         # apps/*, packages/*
 ├── turbo.json                  # Turborepo task graph (build, dev, lint, clean)
 ├── tsconfig.base.json          # shared TS baseline (where referenced)
@@ -51,6 +51,14 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 │       │   ├── cron/
 │       │   └── ...
 │       └── package.json
+│   └── website/                # Next.js + Sanity (npm name: apna-rojgar-website)
+│       ├── app/                # App Router pages & layouts
+│       ├── components/
+│       ├── public/
+│       ├── sanity/             # Sanity schemas & lib (CMS)
+│       ├── sanity.config.ts
+│       ├── next.config.ts
+│       └── package.json
 └── packages/
     └── common/                 # @repo/common — shared TypeScript (build → dist/)
         ├── src/
@@ -63,12 +71,13 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 |-----------|----------------------|------|
 | `apps/mobile` | `labour-app` | Expo / React Native client |
 | `apps/backend` | `apna-rojgar-backend` | Express API |
+| `apps/website` | `apna-rojgar-website` | Next.js marketing / web + Sanity studio |
 | `packages/common` | `@repo/common` | Shared types, constants, small pure helpers |
 
 **Rules:**
 
 - Work on **one workspace at a time** unless the task is explicitly cross-cutting (e.g. shared types in `@repo/common`).
-- Mobile UI and routes live under **`apps/mobile/`** only; API code under **`apps/backend/`** only.
+- Mobile UI and routes live under **`apps/mobile/`** only; API under **`apps/backend/`** only; web/marketing UI under **`apps/website/`** only.
 - Put **cross-app** shared code (types, enums, constants) in **`packages/common`** and import with `@repo/common`. After changing `packages/common`, run `pnpm --filter @repo/common build` (or rely on root `prepare` after `pnpm install`).
 
 ---
@@ -83,14 +92,17 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 | Run all `dev` scripts (Turbo) | `pnpm dev` |
 | Build everything (Turbo) | `pnpm run build` |
 | Lint all (Turbo) | `pnpm run lint` |
-| Dev API only | `pnpm --filter apna-rojgar-backend dev` |
-| Dev Expo only | `pnpm --filter labour-app dev` |
+| Dev website only | `pnpm dev:website` or `pnpm --filter apna-rojgar-website dev` |
+| Dev API only | `pnpm dev:backend` or `pnpm --filter apna-rojgar-backend dev` |
+| Dev Expo only | `pnpm dev:mobile` or `pnpm --filter labour-app dev` |
+| Build website only (Turbo) | `pnpm exec turbo run build --filter=apna-rojgar-website` |
 | Build shared package | `pnpm --filter @repo/common build` |
 | Mobile typecheck (strict TS) | `pnpm --filter labour-app typecheck` |
 
 **Notes:**
 
 - Root **`build`** runs Turbo; **`labour-app`**’s `build` is a lightweight no-op so the graph stays green; production mobile builds use **EAS** / native pipelines, not `tsc` at root.
+- **`apna-rojgar-website`** uses **Next.js**; Turbo `build` outputs include **`dist/`** (shared package) and **`.next/`** (website) for caching — see `turbo.json`.
 - **`typecheck`** on mobile runs `tsc --noEmit` and may surface existing TS issues; it is optional for day-to-day dev.
 
 ---
@@ -136,14 +148,24 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 ---
 
-## 5. SHARED PACKAGE (`packages/common`)
+## 5. WEBSITE (`apps/website` — apna-rojgar-website)
+
+- **Stack**: **Next.js** (App Router under `app/`), **React**, **Tailwind CSS**, **Sanity** (`sanity/`, `sanity.config.ts`, embedded studio route such as `/studio` when configured).
+- **Entry & config**: `next.config.ts`, `app/layout.tsx`, `app/globals.css`; static assets in **`public/`**.
+- **Scripts** (from repo root via filter): `dev` → `next dev`, `build` → `next build`, `start` → `next start`, `lint`, `clean` (`.next` + `.turbo`).
+- **Env**: use **`.env.local`** (and other Next env files) for keys and public `NEXT_PUBLIC_*` vars — do not commit secrets.
+- Prefer keeping **web-only** UI and CMS config here; share stable constants/types via **`@repo/common`** only when it genuinely benefits both web and mobile/backend.
+
+---
+
+## 6. SHARED PACKAGE (`packages/common`)
 
 - TypeScript compiles to **`dist/`**; consumers import **`@repo/common`**.
 - Add only **stable, portable** code (types, constants, validation) — no React or Node-only server internals unless you intentionally split entrypoints later.
 
 ---
 
-## 6. NAMING CONVENTIONS (CODE STYLE)
+## 7. NAMING CONVENTIONS (CODE STYLE)
 
 - **Components**: PascalCase (`ServiceCard`, `Highlights`).
 - **Hooks/helpers**: camelCase (`useDeepLinkHandler`, `formatPhoneNumber`).
@@ -151,7 +173,7 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 ---
 
-## 7. UI, NOTIFICATIONS, ERRORS
+## 8. UI, NOTIFICATIONS, ERRORS
 
 - Prefer small reusable components; screens orchestrate, components present.
 - Notifications: keep listeners/state centralized (e.g. `NotificationContext`) — avoid duplicate listeners per screen.
@@ -159,24 +181,25 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 ---
 
-## 8. TESTING
+## 9. TESTING
 
 - Follow any configured test runner per workspace.
 - Keep pure helpers in `utils/` or `@repo/common` easy to test (deterministic, minimal side effects).
 
 ---
 
-## 9. CONFIGURATION & SECRETS
+## 10. CONFIGURATION & SECRETS
 
 - **Never commit secrets** (`.env`, keys, tokens).
 - Mobile: Expo config in **`apps/mobile/app.json`**; env for client-side config as the project already does (e.g. `.env` in `apps/mobile` if used).
+- Website: **`.env.local`** / Next env conventions under **`apps/website`** — not in git.
 - Backend: env files as documented in backend code — not in git.
 
 ---
 
-## 10. KEY RULES (KEEP THESE TRUE)
+## 11. KEY RULES (KEEP THESE TRUE)
 
-1. **This is a monorepo** — use paths under `apps/mobile`, `apps/backend`, and `packages/common`; do not assume a single flat app at repo root.
+1. **This is a monorepo** — use paths under `apps/mobile`, `apps/backend`, `apps/website`, and `packages/common`; do not assume a single flat app at repo root.
 2. **Use `pnpm --filter <workspace-name>`** when running a single package’s scripts from the root.
 3. **Do not rename** `labour-app` / `apna-rojgar-backend` / store identifiers in `app.json` unless the product owner requests it (Play Store / EAS / bundle IDs).
 4. **Don’t hardcode secrets or base URLs** — use env and existing config patterns.

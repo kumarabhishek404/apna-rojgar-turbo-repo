@@ -4,6 +4,9 @@
   "scripts": {
     "prepare": "pnpm --filter @repo/common run build",
     "dev": "turbo run dev",
+    "dev:website": "pnpm --filter apna-rojgar-website dev",
+    "dev:backend": "pnpm --filter apna-rojgar-backend dev",
+    "dev:mobile": "pnpm --filter labour-app dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules"
