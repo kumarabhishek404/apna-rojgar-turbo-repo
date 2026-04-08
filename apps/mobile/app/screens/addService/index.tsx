@@ -55,10 +55,6 @@ const AddServiceScreen = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const pollingRef = useRef<any>(null);
 
-  console.log("address----", address);
-
-  console.log("location----", location);
-
   const [startDate, setStartDate] = useState(
     addService?.startDate
       ? moment(addService.startDate).toDate()

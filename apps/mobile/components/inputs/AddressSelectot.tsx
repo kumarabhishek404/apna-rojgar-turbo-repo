@@ -8,6 +8,7 @@ import CustomHeading from "../commons/CustomHeading";
 import CustomText from "../commons/CustomText";
 import AddAddressDrawer from "@/app/screens/location/addAddress";
 import { t } from "@/utils/translationHelper";
+import PaperDropdown from "./Dropdown";
 
 interface Props {
   label: string;
@@ -29,18 +30,30 @@ const AddressSelector = ({
   const [addresses, setAddresses] = useState<string[]>([]);
 
   useEffect(() => {
-    if (user?.savedAddresses?.length) {
-      const unique: any = Array.from(new Set(user.savedAddresses));
-      setAddresses(unique);
+    const mainAddress = user?.address?.trim();
+    const savedAddresses = Array.isArray(user?.savedAddresses)
+      ? user.savedAddresses
+      : [];
+    const merged = Array.from(
+      new Set([...(mainAddress ? [mainAddress] : []), ...savedAddresses]),
+    ).filter(Boolean) as string[];
 
-      // auto select last address if none selected
-      if (!address) setAddress(unique[unique.length - 1]);
+    setAddresses(merged);
+
+    // Default to profile main address on create-service step.
+    if (!address && merged.length > 0) {
+      setAddress(mainAddress || merged[0]);
     }
-  }, [user?.savedAddresses]);
+  }, [user?.address, user?.savedAddresses, address, setAddress]);
 
   const selectAddress = (addr: string) => {
     setAddress(addr);
   };
+
+  const addressOptions = addresses.map((addr) => ({
+    label: addr,
+    value: addr,
+  }));
 
   return (
     <View style={{ gap: 10 }}>
@@ -48,26 +61,38 @@ const AddressSelector = ({
         {label}
       </CustomHeading>
 
-      {/* Saved Address List */}
-      {addresses.map((addr, index) => {
-        const selected = address === addr;
-        return (
-          <TouchableOpacity
-            key={index}
-            style={[styles.card, selected && styles.activeCard]}
-            onPress={() => selectAddress(addr)}
-          >
-            <View style={[styles.radio, selected && styles.radioActive]} />
-            <CustomText
-              style={{ flex: 1 }}
-              textAlign="left"
-              color={selected ? Colors.primary : Colors.text}
+      {/* Saved Address Input */}
+      {addresses.length > 1 ? (
+        <PaperDropdown
+          name="address"
+          label=""
+          options={addressOptions}
+          selectedValue={address}
+          onSelect={selectAddress}
+          placeholder={t("selectWorkLocation")}
+          searchEnabled
+        />
+      ) : (
+        addresses.map((addr, index) => {
+          const selected = address === addr;
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[styles.card, selected && styles.activeCard]}
+              onPress={() => selectAddress(addr)}
             >
-              {addr}
-            </CustomText>
-          </TouchableOpacity>
-        );
-      })}
+              <View style={[styles.radio, selected && styles.radioActive]} />
+              <CustomText
+                style={{ flex: 1 }}
+                textAlign="left"
+                color={selected ? Colors.primary : Colors.text}
+              >
+                {addr}
+              </CustomText>
+            </TouchableOpacity>
+          );
+        })
+      )}
 
       {/* Add new address button */}
       <TouchableOpacity
@@ -82,9 +107,21 @@ const AddressSelector = ({
         visible={drawerVisible}
         onClose={() => setDrawerVisible(false)}
         userId={user?._id}
+        type="secondary"
         isMainAddress={false}
         setAddress={(data: any) => {
-          setAddress(data.address);
+          const selected =
+            typeof data === "string" ? data : data?.address || "";
+          if (selected) {
+            setAddress(selected);
+          }
+        }}
+        setSavedAddress={(saved: string[]) => {
+          const unique = Array.from(new Set(saved || []));
+          setAddresses(unique);
+          if (unique.length > 0 && !address) {
+            setAddress(unique[unique.length - 1]);
+          }
         }}
         setLocation={setLocation}
       />

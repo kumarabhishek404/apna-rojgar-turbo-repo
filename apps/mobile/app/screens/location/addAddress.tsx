@@ -220,6 +220,10 @@ const AddAddressDrawer = ({
       return;
     }
 
+    const updatedSavedAddresses = Array.from(
+      new Set([...(userDetails?.savedAddresses || []), finalAddress]),
+    );
+
     // 🔥 STEP 2: Update local state
     setUserDetails({
       ...userDetails,
@@ -230,7 +234,7 @@ const AddAddressDrawer = ({
             geoLocation: geoLocation, // ✅ always correct
           }
         : {
-            savedAddresses: userDetails?.savedAddresses || [],
+            savedAddresses: updatedSavedAddresses,
             geoLocation: geoLocation,
           }),
     });
@@ -241,12 +245,12 @@ const AddAddressDrawer = ({
     if (type === "secondary") {
       setAddress({ address: finalAddress });
       setLocation(geoLocation); // ✅ FIXED
-      setSavedAddress(userDetails?.savedAddresses || []);
-
-      onClose();
-      reset();
-      setIsEditing(false);
-      setLocationAddress("");
+      setSavedAddress(updatedSavedAddresses);
+      // Persist in profile as well, so it appears in saved addresses consistently.
+      mutationUpdateProfileInfo.mutate({
+        savedAddresses: finalAddress,
+        geoLocation,
+      });
       return;
     }
 
@@ -273,6 +277,23 @@ const AddAddressDrawer = ({
   const handleEdit = () => {
     setIsEditing(true);
   };
+
+  const manualAddressPreview = [
+    additionalDetails,
+    watch("village"),
+    watch("subDistrict"),
+    watch("district"),
+    watch("state"),
+    pinCode,
+  ]
+    .filter(Boolean)
+    .join(", ")
+    .trim();
+
+  const addedAddressPreview =
+    selectedTab === "savedAddresses"
+      ? selectedAddress
+      : locationAddress || manualAddressPreview;
 
   const fetchStateDetailsMutation = useMutation({
     mutationKey: ["fetchStateDetails"],
@@ -333,30 +354,42 @@ const AddAddressDrawer = ({
     <View style={{ marginTop: 20 }}>
       {!isEditing && (
         <>
-          <ButtonComp
-            isPrimary
-            title={t("pleaseFetchCurrentLocation")}
-            onPress={fetchLocation}
-            loading={isFetchingLocation}
-            disabled={isFetchingLocation}
-          />
+          <View style={styles.buttonBlock}>
+            <CustomText style={styles.guideLabel}>{t("pleaseFetchCurrentLocation")}</CustomText>
+            <ButtonComp
+              isPrimary
+              title={t("getCurrentLocation")}
+              onPress={fetchLocation}
+              loading={isFetchingLocation}
+              disabled={isFetchingLocation}
+              icon={
+                <Feather
+                  name="navigation"
+                  size={18}
+                  color={Colors?.white}
+                  style={{ marginRight: 10 }}
+                />
+              }
+              bgColor={Colors?.primary}
+              borderColor={Colors?.primary}
+              style={styles.fetchLocationButton}
+              textStyle={styles.fetchLocationButtonText}
+            />
+          </View>
 
-          <TouchableOpacity
-            style={styles?.addManuallyText}
-            onPress={handleEdit}
-          >
-            <Text style={styles.editButton}>{t("addAddressManually")}</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonBlock}>
+            <CustomText style={styles.guideLabel}>{t("manualAddressGuide")}</CustomText>
+            <TouchableOpacity
+              style={styles.manualEntryButton}
+              onPress={handleEdit}
+            >
+              <Feather name="edit-3" size={18} color={Colors.white} />
+              <Text style={styles.manualEntryButtonText}>{t("addAddressManually")}</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
-      {locationAddress && !isEditing ? (
-        <View style={styles.addressContainer}>
-          <Text style={styles.addressText}>{locationAddress}</Text>
-          {/* <TouchableOpacity onPress={handleEdit}>
-            <Text style={styles.editButton}>{t("edit")}</Text>
-          </TouchableOpacity> */}
-        </View>
-      ) : isEditing ? (
+      {isEditing ? (
         <View style={styles.formContainer}>
           <TouchableOpacity onPress={() => setIsEditing(false)}>
             <CustomText
@@ -493,6 +526,19 @@ const AddAddressDrawer = ({
 
   const modalContent = () => (
     <View>
+      {Boolean(addedAddressPreview) && (
+        <View style={styles.addedAddressCard}>
+          <CustomText style={styles.addedAddressLabel}>
+            {t("addedAddressLabel")}
+          </CustomText>
+          <CustomText textAlign="left" style={styles.addedAddressValue}>
+            {addedAddressPreview}
+          </CustomText>
+          <CustomText textAlign="left" style={styles.addedAddressHint}>
+            {t("addedAddressSaveHint")}
+          </CustomText>
+        </View>
+      )}
       {type === "primary" && (
         <ProfileTabs
           tabs={["savedAddresses", "addNewAddress"]}
@@ -584,6 +630,29 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: "flex-end",
   },
+  manualEntryButton: {
+    marginTop: 4,
+    minHeight: 52,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "#d97706",
+    backgroundColor: "#f59e0b",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    shadowColor: "#d97706",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  manualEntryButtonText: {
+    color: Colors.white,
+    fontWeight: "700",
+    fontSize: 17,
+  },
   editButton: {
     color: Colors.primary,
     fontWeight: "bold",
@@ -612,9 +681,62 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
   },
+  fetchLocationButton: {
+    minHeight: 56,
+    borderRadius: 14,
+    paddingVertical: 12,
+    shadowColor: "#1d4ed8",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+    marginTop: 4,
+  },
+  fetchLocationButtonText: {
+    fontSize: 19,
+    letterSpacing: 0.2,
+  },
+  buttonBlock: {
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  guideLabel: {
+    textAlign: "left",
+    color: Colors?.text,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 6,
+    paddingHorizontal: 2,
+  },
   icon: {
     marginRight: 10,
     color: Colors.secondary,
+  },
+  addedAddressCard: {
+    backgroundColor: "#f0f6ff",
+    borderWidth: 1,
+    borderColor: "#c8dcff",
+    borderRadius: 12,
+    padding: 10,
+    marginTop: 12,
+    marginBottom: 8,
+    gap: 4,
+  },
+  addedAddressLabel: {
+    textAlign: "left",
+    fontSize: 13,
+    fontWeight: "700",
+    color: Colors.primary,
+  },
+  addedAddressValue: {
+    color: Colors.text,
+    fontWeight: "600",
+  },
+  addedAddressHint: {
+    textAlign: "left",
+    fontSize: 13,
+    color: Colors.secondary,
+    marginTop: 4,
   },
 });
 

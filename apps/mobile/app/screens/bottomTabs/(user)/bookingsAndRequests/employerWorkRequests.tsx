@@ -51,7 +51,7 @@ const EmployerWorkRequests = () => {
         return await EMPLOYER.fetchAllBookingSentRequests({ pageParam });
       }
 
-      // TAB 2 → Services created by employer
+      // TAB 2 → Services created by employer (HIRING only)
       return await EMPLOYER.fetchMyServices({ pageParam, status: "HIRING" });
     },
     initialPageParam: 1,
@@ -71,6 +71,13 @@ const EmployerWorkRequests = () => {
         response?.pages?.flatMap((page: any) => page.data || []) || [];
       setFilteredData(merged);
     }, [response]),
+  );
+
+  // Ensure tab data refreshes after creating a service and returning here.
+  useFocusEffect(
+    React.useCallback(() => {
+      refetch();
+    }, [refetch, activeTab]),
   );
 
   const memoizedData = useMemo(
@@ -185,7 +192,6 @@ const EmployerWorkRequests = () => {
 
       {/* 🌟 Tabs */}
       <View style={styles.tabsContainer}>
-
         <TabButton
           id="created"
           title={t("tabCreatedServicesTitle")}
@@ -203,7 +209,7 @@ const EmployerWorkRequests = () => {
         {isLoading ? (
           <ListingsBookingsPlaceholder />
         ) : memoizedData?.length > 0 ? (
-          <View style={{ paddingHorizontal: 10, paddingTop: 10 }}>
+          <View style={{ flex: 1, paddingHorizontal: 10, paddingTop: 10 }}>
             {activeTab === "sent" ? (
               <ListingsVerticalBookings
                 category="sentRequests"

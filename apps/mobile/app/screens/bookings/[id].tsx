@@ -56,6 +56,11 @@ const BookingDetails = () => {
     REFRESH_USER.useRefreshUser();
 
   const [isAdmin] = useState(userDetails?.isAdmin);
+  const resolvedHeaderTitle =
+    (typeof title === "string" && title) ||
+    (category === "recievedRequests" || category === "sentRequests"
+      ? "directBookingDetails"
+      : "bookingDetails");
 
   let workersList =
     booking?.bookingType === "byService"
@@ -115,9 +120,10 @@ const BookingDetails = () => {
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => (
             <CustomHeader
-              title={title || "directBookingDetails"}
+              title={resolvedHeaderTitle}
               left="back"
               right="notification"
             />
@@ -129,13 +135,13 @@ const BookingDetails = () => {
       {isLoading ? (
         <BookingDetailsPlaceholder />
       ) : (
-        <ScrollView style={styles.container}>
-          <Animated.ScrollView
-            ref={scrollRef}
-            contentContainerStyle={{ paddingBottom: 150 }}
-            showsVerticalScrollIndicator={false}
-            scrollEventThrottle={16}
-          >
+        <Animated.ScrollView
+          style={styles.container}
+          ref={scrollRef}
+          contentContainerStyle={{ paddingBottom: 150 }}
+          showsVerticalScrollIndicator={false}
+          scrollEventThrottle={16}
+        >
             <View style={styles.contentWrapper}>
               {booking?.employer && booking?.employer === userDetails?._id && (
                 <View>
@@ -258,7 +264,7 @@ const BookingDetails = () => {
                 </View>
               )}
 
-              <View style={{ marginTop: 20, marginBottom: 10 }}>
+              <View style={styles.detailsCard}>
                 {booking?.type &&
                   booking?.subType &&
                   booking?.bookingType === "byService" && (
@@ -349,7 +355,6 @@ const BookingDetails = () => {
                 )}
             </View>
           </Animated.ScrollView>
-        </ScrollView>
       )}
 
       {!isLoading && (
@@ -380,8 +385,17 @@ const styles = StyleSheet.create({
   },
   contentWrapper: {
     paddingHorizontal: 15,
-    // paddingVertical: 20,
+    paddingTop: 10,
     backgroundColor: Colors.background,
+  },
+  detailsCard: {
+    marginTop: 16,
+    marginBottom: 10,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.10)",
   },
   selectedWrapper: {
     padding: 15,

@@ -1,4 +1,7 @@
 import "./globals.css";
+import { LanguageProvider } from "@/components/LanguageProvider";
+import AuthBootstrap from "@/components/AuthBootstrap";
+import SocialWall from "@/components/SocialWall";
 
 export const metadata = {
   title: "Apna Rojgar | Find Work Opportunities",
@@ -46,7 +49,13 @@ export default function RootLayout({
         />
       </head>
 
-      <body className="bg-gradient-to-b from-white to-gray-50">{children}</body>
+      <body className="bg-gradient-to-b from-white to-gray-50">
+        <LanguageProvider>
+          <AuthBootstrap />
+          <SocialWall />
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

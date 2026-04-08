@@ -69,8 +69,6 @@ const UserProfile = () => {
 
   const { refreshUser, isLoading } = REFRESH_USER.useRefreshUser();
 
-  console.log("userDetails?.role---", userDetails?.role);
-
   useEffect(() => {
     setRole(userDetails?.role || "");
   }, [userDetails]);

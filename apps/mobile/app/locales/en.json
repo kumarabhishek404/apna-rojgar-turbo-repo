@@ -954,6 +954,9 @@
   "saveAddress": "Save Address",
   "changeAddress": "Change Address",
   "unableToFetchLocation": "Unable to fetch location",
+  "manualAddressGuide": "If your location is not correct, use manual address.",
+  "addedAddressLabel": "Added Address",
+  "addedAddressSaveHint": "This is your new added address. To save it, press the Save Address button.",
   "addAddressManually": "Add Address Manually",
 
   "createPassword": "Create a 4-Digit Password",

@@ -47,9 +47,6 @@ const AutoLocationButton = ({
 
   const errorMessage = errors?.[name]?.message;
 
-  console.log("location-----", location);
-  console.log("address----", address);
-
   const fetchAndSaveLocation = async () => {
     try {
       setLoading(true);

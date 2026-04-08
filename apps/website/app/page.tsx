@@ -1,27 +1,33 @@
-import Navbar from "../components/Navbar";
-import Hero from "../components/Hero";
-import Features from "../components/Features";
-import HowItWorks from "../components/HowItWorks";
-import DownloadApp from "../components/DownloadApp";
-import Contact from "../components/Contact";
-import Footer from "../components/Footer";
-import ScreenshotsSlider from "@/components/ScreenshotsSlider";
-import AboutMissionVision from "../components/AboutMissionVision";
-import Investors from "@/components/InvestorSection";
+"use client";
+
+import { useEffect, useState } from "react";
+import PublicHome from "@/components/PublicHome";
+import ServicesDashboard from "@/components/webapp/ServicesDashboard";
+import { getAuth, validateStoredToken } from "@/lib/auth";
 
 export default function Home() {
-  return (
-    <>
-      <Navbar />
-      <Hero />
-      <AboutMissionVision />
-      <Features />
-      <ScreenshotsSlider />
-      <DownloadApp />
-      <HowItWorks />
-      <Investors />
-      <Contact />
-      <Footer />
-    </>
-  );
+  const [showDashboard, setShowDashboard] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const run = async () => {
+      const auth = getAuth();
+      if (!auth?.token) {
+        if (active) setShowDashboard(false);
+        return;
+      }
+      const valid = await validateStoredToken();
+      if (active) setShowDashboard(valid);
+    };
+    run();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (showDashboard) {
+    return <ServicesDashboard />;
+  }
+
+  return <PublicHome />;
 }
