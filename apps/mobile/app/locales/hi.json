@@ -1177,6 +1177,13 @@
     "singular": "प्लास्टर मिस्त्री",
     "plural": "प्लास्टर मिस्त्री"
   },
+  "mason": { "singular": "मेसन", "plural": "मेसन" },
+  "helperLabour": { "singular": "हेल्पर मज़दूर", "plural": "हेल्पर मज़दूर" },
+  "barBender": { "singular": "बार बेंडर", "plural": "बार बेंडर" },
+  "scaffoldingMistri": {
+    "singular": "स्कैफोल्डिंग मिस्त्री",
+    "plural": "स्कैफोल्डिंग मिस्त्री"
+  },
   "shuttering": { "singular": "शटरिंग मजदूर", "plural": "शटरिंग मजदूर" },
   "steelFixer": { "singular": "स्टील फिक्सर", "plural": "स्टील फिक्सर" },
   "welder": { "singular": "वेल्डर", "plural": "वेल्डर" },

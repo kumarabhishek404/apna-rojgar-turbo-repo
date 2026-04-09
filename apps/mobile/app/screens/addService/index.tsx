@@ -54,6 +54,7 @@ const AddServiceScreen = () => {
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const pollingRef = useRef<any>(null);
+  const submitGuardRef = useRef(false);
 
   const [startDate, setStartDate] = useState(
     addService?.startDate
@@ -127,6 +128,9 @@ const AddServiceScreen = () => {
         err?.response?.data?.message ||
           "Failed to update service. Please try again.",
       );
+    },
+    onSettled: () => {
+      submitGuardRef.current = false;
     },
   });
 
@@ -496,6 +500,11 @@ const AddServiceScreen = () => {
         );
 
       case 8:
+        const handleFinalSubmit = () => {
+          if (submitGuardRef.current || mutationAddService?.isPending) return;
+          submitGuardRef.current = true;
+          mutationAddService.mutate();
+        };
         return (
           <FinalScreen
             setStep={setStep}
@@ -509,11 +518,8 @@ const AddServiceScreen = () => {
             requirements={requirements}
             images={images}
             facilities={facilities}
-            handleOnSubmit={
-              addService?._id
-                ? (data: any) => mutationAddService?.mutate(data)
-                : (data: any) => mutationAddService?.mutate(data)
-            }
+            handleOnSubmit={handleFinalSubmit}
+            isSubmitting={mutationAddService?.isPending}
           />
         );
 

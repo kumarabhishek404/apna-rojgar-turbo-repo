@@ -1175,6 +1175,13 @@
   "tileMistri": { "singular": "Tile Mason", "plural": "Tile Masons" },
   "brickMistri": { "singular": "Brick Mason", "plural": "Brick Masons" },
   "plasterMistri": { "singular": "Plaster Mason", "plural": "Plaster Masons" },
+  "mason": { "singular": "Mason", "plural": "Masons" },
+  "helperLabour": { "singular": "Helper Labour", "plural": "Helper Labour" },
+  "barBender": { "singular": "Bar Bender", "plural": "Bar Benders" },
+  "scaffoldingMistri": {
+    "singular": "Scaffolding Mistri",
+    "plural": "Scaffolding Mistris"
+  },
   "shuttering": {
     "singular": "Shuttering Worker",
     "plural": "Shuttering Workers"

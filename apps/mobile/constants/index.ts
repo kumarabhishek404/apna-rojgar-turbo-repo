@@ -423,6 +423,10 @@ export const WORKTYPES = [
         label: "mistriWork",
         value: "mistriWork",
         workerTypes: [
+          { label: "mason", value: "mason" },
+          { label: "helperLabour", value: "helperLabour" },
+          { label: "barBender", value: "barBender" },
+          { label: "scaffoldingMistri", value: "scaffoldingMistri" },
           { label: "tileMistri", value: "tileMistri" },
           { label: "brickMistri", value: "brickMistri" },
           { label: "plasterMistri", value: "plasterMistri" },

@@ -21,6 +21,7 @@ interface FinalScreenProps {
   facilities: any;
   images: Array<string>;
   handleOnSubmit: any;
+  isSubmitting?: boolean;
 }
 
 const FinalScreen: React.FC<FinalScreenProps> = ({
@@ -36,6 +37,7 @@ const FinalScreen: React.FC<FinalScreenProps> = ({
   facilities,
   images,
   handleOnSubmit,
+  isSubmitting = false,
 }: FinalScreenProps) => {
   const handleFinish = () => {
     handleOnSubmit();
@@ -293,6 +295,8 @@ const FinalScreen: React.FC<FinalScreenProps> = ({
             title={t("submitAllDetails")}
             onPress={handleFinish}
             style={{ flex: 1 }}
+            disabled={isSubmitting}
+            loading={isSubmitting}
           />
         </View>
       </View>
