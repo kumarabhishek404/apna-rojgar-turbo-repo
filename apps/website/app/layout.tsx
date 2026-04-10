@@ -2,6 +2,8 @@ import "./globals.css";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
 import SocialWall from "@/components/SocialWall";
+import WebsiteActivityTracker from "@/components/WebsiteActivityTracker";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Apna Rojgar | Find Work Opportunities",
@@ -52,6 +54,9 @@ export default function RootLayout({
       <body className="bg-gradient-to-b from-white to-gray-50">
         <LanguageProvider>
           <AuthBootstrap />
+          <Suspense fallback={null}>
+            <WebsiteActivityTracker />
+          </Suspense>
           <SocialWall />
           {children}
         </LanguageProvider>

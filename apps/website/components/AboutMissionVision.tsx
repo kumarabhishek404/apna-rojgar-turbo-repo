@@ -2,9 +2,46 @@
 
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import LOGO from "../public/logo.png";
+import { useLanguage } from "@/components/LanguageProvider";
+import ShlokBadge from "@/components/ShlokBadge";
+
+type PlatformStats = {
+  totalUsers: number;
+};
 
 const AboutMissionVision = () => {
+  const { t, language } = useLanguage();
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const base =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
+        const response = await fetch(`${base}/service/public/platform-stats`);
+        const json = await response.json();
+        if (!response.ok || json?.success === false || !json?.data) return;
+        if (!cancelled) {
+          setStats({ totalUsers: Number(json.data.totalUsers) || 0 });
+        }
+      } catch {
+        // Keep fallback null state
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const totalUsersText = useMemo(() => {
+    const value = stats?.totalUsers ?? 0;
+    return new Intl.NumberFormat(language === "hi" ? "hi-IN" : "en-IN").format(value);
+  }, [stats, language]);
+
   const redirectToApp = () => {
     window.open(
       "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
@@ -37,33 +74,40 @@ const AboutMissionVision = () => {
         </div>
 
         <div className="flex-1 z-10">
+          <ShlokBadge
+            text="कर्मण्येवाधिकारस्ते मा फलेषु कदाचन॥"
+            meaningKey="aboutShlokMeaning"
+            meaningDefault="Focus on your duty with full dedication; the right outcomes follow through sincere action."
+            dark
+            className="mb-5"
+          />
           <div className="relative inline-block mb-6">
             <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              About <br /> Apna Rojgar
+              {t("aboutHeadingLine1", "About")} <br /> {t("aboutHeadingLine2", "Apna Rojgar")}
             </h2>
 
             <div className="absolute bottom-1 left-0 w-full h-3 bg-[#FFE492] -z-10 opacity-70 translate-y-1"></div>
           </div>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            Apna Rojgar is a digital initiative aimed at connecting skilled and
-            unskilled workers with businesses, contractors, and employers across
-            India. Our platform simplifies the process of finding work
-            opportunities and hiring reliable workers in sectors like
-            construction, manufacturing, delivery, and services.
+            {t(
+              "aboutLongP1",
+              "Apna Rojgar is a digital initiative aimed at connecting skilled and unskilled workers with businesses, contractors, and employers across India. Our platform simplifies the process of finding work opportunities and hiring reliable workers in sectors like construction, manufacturing, delivery, and services.",
+            )}
           </p>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            By leveraging technology, Apna Rojgar helps workers access better
-            employment opportunities while enabling businesses to find trusted
-            manpower quickly and efficiently.
+            {t(
+              "aboutLongP2",
+              "By leveraging technology, Apna Rojgar helps workers access better employment opportunities while enabling businesses to find trusted manpower quickly and efficiently.",
+            )}
           </p>
 
           <button
             onClick={redirectToApp}
             className="flex items-center gap-2 bg-[#4F9CF9] hover:bg-blue-600 text-white px-10 py-4 rounded-lg font-medium transition-all shadow-md"
           >
-            Explore Platform <ArrowRight size={18} />
+            {t("explorePlatform", "Explore Platform")} <ArrowRight size={18} />
           </button>
         </div>
 
@@ -75,20 +119,22 @@ const AboutMissionVision = () => {
           <div className="relative bg-white p-6 rounded-2xl shadow-2xl border border-gray-100 w-64">
             <div className="h-32 bg-[#c4deff] rounded-lg mb-4"></div>
             <p className="text-sm text-gray-600">
-              Workers can easily discover nearby job opportunities.
+              {t("aboutCardMain", "Workers can easily discover nearby job opportunities.")}
             </p>
           </div>
 
           {/* Floating Card 1 */}
           <div className="absolute -top-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100 w-40">
             <div className="h-6 w-6 bg-[#4F9CF9] rounded-full mb-2"></div>
-            <p className="text-xs text-gray-600">Find Local Jobs</p>
+            <p className="text-xs text-gray-600">{t("aboutCardFindJobs", "Find Local Jobs")}</p>
           </div>
 
           {/* Floating Card 2 */}
           <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100 w-40">
             <div className="h-6 w-6 bg-[#50C878] rounded-full mb-2"></div>
-            <p className="text-xs text-gray-600">Hire Skilled Workers</p>
+            <p className="text-xs text-gray-600">
+              {t("aboutCardHireWorkers", "Hire Skilled Workers")}
+            </p>
           </div>
         </div>
       </section>
@@ -149,44 +195,53 @@ const AboutMissionVision = () => {
 
           {/* Floating Card - Workers */}
           <div className="absolute -top-6 left-6 bg-white p-3 rounded-xl shadow-lg border border-gray-100">
-            <p className="text-xs font-medium text-gray-700">Workers</p>
-            <p className="text-sm font-bold text-[#22409a]">10K+</p>
+            <p className="text-xs font-medium text-gray-700">{t("totalAppUsers", "Total App Users")}</p>
+            <p className="text-sm font-bold text-[#22409a]">{totalUsersText}</p>
           </div>
 
           {/* Floating Card - Jobs */}
           <div className="absolute -bottom-6 right-6 bg-white p-3 rounded-xl shadow-lg border border-gray-100">
-            <p className="text-xs font-medium text-gray-700">Jobs</p>
-            <p className="text-sm font-bold text-[#50C878]">Daily Updates</p>
+            <p className="text-xs font-medium text-gray-700">{t("jobs", "Jobs")}</p>
+            <p className="text-sm font-bold text-[#50C878]">{t("dailyUpdates", "Daily Updates")}</p>
           </div>
         </div>
 
         {/* TEXT SECOND */}
         <div className="flex-1 z-10">
+          <ShlokBadge
+            text="संगच्छध्वं संवदध्वं सं वो मनांसि जानताम्॥"
+            meaningKey="missionShlokMeaning"
+            meaningDefault="Move together, speak together, and align your minds for a shared purpose and progress."
+            dark
+            className="mb-5"
+          />
           <div className="relative inline-block mb-6">
             <h2 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-              Our <br /> Mission
+              {t("missionHeadingLine1", "Our")} <br /> {t("missionHeadingLine2", "Mission")}
             </h2>
 
             <div className="absolute bottom-1 left-0 w-full h-3 bg-[#FFE492] -z-10 opacity-70 translate-y-1"></div>
           </div>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            Our mission is to bridge the gap between job seekers and employers
-            by creating a transparent, reliable, and accessible digital
-            ecosystem for employment in India.
+            {t(
+              "missionP1",
+              "Our mission is to bridge the gap between job seekers and employers by creating a transparent, reliable, and accessible digital ecosystem for employment in India.",
+            )}
           </p>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            Apna Rojgar aims to empower millions of workers by providing them
-            with direct access to job opportunities while helping businesses
-            find the right workforce quickly and efficiently.
+            {t(
+              "missionP2",
+              "Apna Rojgar aims to empower millions of workers by providing them with direct access to job opportunities while helping businesses find the right workforce quickly and efficiently.",
+            )}
           </p>
 
           <button
             onClick={redirectToApp}
             className="flex items-center gap-2 bg-[#4F9CF9] hover:bg-blue-600 text-white px-10 py-4 rounded-lg font-medium transition-all shadow-md"
           >
-            Join the Mission <ArrowRight size={18} />
+            {t("joinMission", "Join the Mission")} <ArrowRight size={18} />
           </button>
         </div>
       </section>
@@ -198,30 +253,40 @@ const AboutMissionVision = () => {
       >
         {/* Orbital Graphic */}
         <div className="flex-1">
+          <ShlokBadge
+            text="तमसो मा ज्योतिर्गमय॥"
+            meaningKey="visionShlokMeaning"
+            meaningDefault="Lead us from darkness to light, from confusion to clarity, and towards a better future."
+            dark
+            className="mb-5"
+          />
           <div className="relative inline-block mb-6">
             <h2 className="text-5xl lg:text-6xl font-bold text-gray-900">
-              Our Vision
+              {t("visionTitle", "Our Vision")}
             </h2>
 
             <div className="absolute bottom-1 left-0 w-full h-3 bg-[#FFE492] -z-10 opacity-70 translate-y-1"></div>
           </div>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            Our vision is to become India’s most trusted digital employment
-            platform that empowers workers and businesses alike.
+            {t(
+              "visionP1",
+              "Our vision is to become India’s most trusted digital employment platform that empowers workers and businesses alike.",
+            )}
           </p>
 
           <p className="text-gray-600 text-lg mb-10 leading-relaxed max-w-lg">
-            Apna Rojgar aims to create a future where finding work or hiring
-            skilled manpower is fast, transparent, and accessible to everyone,
-            regardless of location or background.
+            {t(
+              "visionP2",
+              "Apna Rojgar aims to create a future where finding work or hiring skilled manpower is fast, transparent, and accessible to everyone, regardless of location or background.",
+            )}
           </p>
 
           <button
             onClick={redirectToApp}
             className="flex items-center gap-2 bg-[#4F9CF9] hover:bg-blue-600 text-white px-10 py-4 rounded-lg font-medium transition-all shadow-md"
           >
-            Discover the Vision <ArrowRight size={18} />
+            {t("discoverVision", "Discover the Vision")} <ArrowRight size={18} />
           </button>
         </div>
 
@@ -234,7 +299,7 @@ const AboutMissionVision = () => {
           <div className="relative z-10 shadow-xl rounded-full border border-gray-100">
             <Image
               src={LOGO}
-              alt="Apna Rojgar Logo"
+              alt={t("apnaRojgarLogoAlt", "Apna Rojgar Logo")}
               width={120}
               height={120}
               className="object-contain rounded-full"

@@ -2,8 +2,11 @@
 
 import { Mail, Phone, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/LanguageProvider";
+import ShlokBadge from "@/components/ShlokBadge";
 
 export default function Contact() {
+  const { t } = useLanguage();
   return (
     <section
       id="contact"
@@ -14,13 +17,23 @@ export default function Contact() {
       <div className="absolute bottom-[-120px] right-[-80px] w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
 
       <div className="max-w-6xl mx-auto px-6 lg:px-20 text-center relative z-10">
+        <ShlokBadge
+          text="संगच्छध्वं संवदध्वं सं वो मनांसि जानताम्॥"
+          meaningKey="contactShlokMeaning"
+          meaningDefault="Come together, communicate openly, and build shared understanding."
+          align="center"
+          dark
+          className="mb-5"
+        />
         <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
-          Contact Us
+          {t("contactUs", "Contact Us")}
         </h2>
 
         <p className="text-gray-600 max-w-2xl mx-auto mb-14">
-          Have questions, partnership ideas, or investor inquiries? Our team is
-          always happy to connect and help.
+          {t(
+            "contactSubtitle",
+            "Have questions, partnership ideas, or investor inquiries? Our team is always happy to connect and help.",
+          )}
         </p>
 
         {/* Contact Cards */}
@@ -35,7 +48,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <h3 className="font-semibold mb-2 text-gray-900">Email</h3>
+            <h3 className="font-semibold mb-2 text-gray-900">{t("email", "Email")}</h3>
             <p className="text-gray-600 text-sm">info@apnarojgarindia.com</p>
           </motion.div>
 
@@ -49,7 +62,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <h3 className="font-semibold mb-2 text-gray-900">Phone</h3>
+            <h3 className="font-semibold mb-2 text-gray-900">{t("phone", "Phone")}</h3>
             <p className="text-gray-600 text-sm">+91 6397308499</p>
           </motion.div>
 
@@ -63,7 +76,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <h3 className="font-semibold mb-2 text-gray-900">Location</h3>
+            <h3 className="font-semibold mb-2 text-gray-900">{t("location", "Location")}</h3>
             <p className="text-gray-600 text-sm">
               Jalesar, Etah Uttar Predesh India, 207302
             </p>
@@ -76,7 +89,7 @@ export default function Contact() {
             href="mailto:info@apnarojgarindia.com"
             className="inline-block bg-[#22409a] text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:scale-105 transition"
           >
-            Send Email
+            {t("sendEmail", "Send Email")}
           </a>
         </div>
       </div>

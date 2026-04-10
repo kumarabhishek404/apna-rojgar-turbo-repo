@@ -2,23 +2,35 @@
 
 import { UserPlus, Search, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/LanguageProvider";
+import ShlokBadge from "@/components/ShlokBadge";
 
 export default function HowItWorks() {
+  const { t } = useLanguage();
   const steps = [
     {
       icon: UserPlus,
-      title: "Create Profile",
-      desc: "Workers and employers sign up and create their profiles in just a few simple steps.",
+      title: t("howItWorksStepCreateProfileTitle", "Create Profile"),
+      desc: t(
+        "howItWorksStepCreateProfileDesc",
+        "Workers and employers sign up and create their profiles in just a few simple steps.",
+      ),
     },
     {
       icon: Search,
-      title: "Connect & Discover",
-      desc: "Businesses find skilled workers while workers discover nearby job opportunities.",
+      title: t("howItWorksStepConnectDiscoverTitle", "Connect & Discover"),
+      desc: t(
+        "howItWorksStepConnectDiscoverDesc",
+        "Businesses find skilled workers while workers discover nearby job opportunities.",
+      ),
     },
     {
       icon: Briefcase,
-      title: "Start Working",
-      desc: "Coordinate jobs, communicate easily, and grow opportunities digitally.",
+      title: t("howItWorksStepStartWorkingTitle", "Start Working"),
+      desc: t(
+        "howItWorksStepStartWorkingDesc",
+        "Coordinate jobs, communicate easily, and grow opportunities digitally.",
+      ),
     },
   ];
 
@@ -29,13 +41,23 @@ export default function HowItWorks() {
       <div className="absolute bottom-[-120px] right-[-80px] w-96 h-96 bg-blue-300/20 rounded-full blur-3xl"></div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-20 text-center relative z-10">
+        <ShlokBadge
+          text="योगः कर्मसु कौशलम्॥"
+          meaningKey="howItWorksShlokMeaning"
+          meaningDefault="Excellence in action is true yoga; skillful work with discipline creates meaningful results."
+          align="center"
+          dark
+          className="mb-5"
+        />
         <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-gray-900">
-          How Apna Rojgar Works
+          {t("howApnaRojgarWorksTitle", "How Apna Rojgar Works")}
         </h2>
 
         <p className="text-gray-600 max-w-2xl mx-auto mb-16">
-          Apna Rojgar makes it simple for workers and employers to connect,
-          collaborate, and grow opportunities together.
+          {t(
+            "howApnaRojgarWorksSubtitle",
+            "Apna Rojgar makes it simple for workers and employers to connect, collaborate, and grow opportunities together.",
+          )}
         </p>
 
         {/* Timeline */}

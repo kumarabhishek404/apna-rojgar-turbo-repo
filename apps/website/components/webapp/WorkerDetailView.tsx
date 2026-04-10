@@ -54,7 +54,7 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
   useEffect(() => {
     if (workerId === STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) return;
     if (!workerId) {
-      setError("Invalid worker id");
+      setError(t("invalidWorkerId", "Invalid worker id"));
       return;
     }
     const load = async () => {
@@ -62,22 +62,28 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
         const response = await apiRequest<{ data: UserDetail }>(`/user/detail/${workerId}`);
         setData(response.data);
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Failed to load profile");
+        setError(e instanceof Error ? e.message : t("failedToLoadProfile", "Failed to load profile"));
       }
     };
     load();
-  }, [workerId]);
+  }, [workerId, t]);
 
   if (workerId === STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
     return (
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-        Open a worker from the list to view this profile.
+        {t("openWorkerFromList", "Open a worker from the list to view this profile.")}
       </div>
     );
   }
 
   if (error) return <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</div>;
-  if (!data) return <div className="rounded-xl bg-white p-6 text-sm text-gray-600 shadow">Loading profile...</div>;
+  if (!data) {
+    return (
+      <div className="rounded-xl bg-white p-6 text-sm text-gray-600 shadow">
+        {t("loadingProfile", "Loading profile...")}
+      </div>
+    );
+  }
 
   return (
     <section className="rounded-xl bg-white p-5 shadow">
@@ -88,7 +94,9 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
           </div>
           <div>
             <h1 className="text-2xl font-bold">{data.name || t("workers")}</h1>
-            <p className="text-sm text-slate-200">{data.role || "WORKER"} - {data.status || "-"}</p>
+            <p className="text-sm text-slate-200">
+              {data.role || t("worker", "WORKER")} - {data.status || "-"}
+            </p>
           </div>
         </div>
       </div>
@@ -98,8 +106,8 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
         </div>
         <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("mobileNumber", "Mobile")}</p><p className="font-medium">{data.mobile || "-"}</p></div>
         <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("address")}</p><p className="font-medium">{data.address || "-"}</p></div>
-        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">Email</p><p className="font-medium">{data.email?.value || "-"}</p></div>
-        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">Rating</p><p className="font-medium">{data.rating?.average?.toFixed?.(1) || "0.0"} ({data.rating?.count || 0})</p></div>
+        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("email", "Email")}</p><p className="font-medium">{data.email?.value || "-"}</p></div>
+        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("rating", "Rating")}</p><p className="font-medium">{data.rating?.average?.toFixed?.(1) || "0.0"} ({data.rating?.count || 0})</p></div>
       </div>
       {data.description ? (
         <div className="mt-4 rounded-lg bg-gray-50 p-3">
@@ -119,25 +127,25 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-lg bg-gray-50 p-3">
-          <p className="text-sm font-semibold text-gray-700">{t("serviceStats")}</p>
-          <p className="mt-1 text-xs text-gray-600">Total: {data.serviceDetails?.byService?.total || 0}</p>
-          <p className="text-xs text-gray-600">Completed: {data.serviceDetails?.byService?.completed || 0}</p>
-          <p className="text-xs text-gray-600">Pending: {data.serviceDetails?.byService?.pending || 0}</p>
-          <p className="text-xs text-gray-600">Cancelled: {data.serviceDetails?.byService?.cancelled || 0}</p>
+          <p className="text-sm font-semibold text-gray-700">{t("serviceStats", "Service stats")}</p>
+          <p className="mt-1 text-xs text-gray-600">{t("total", "Total")}: {data.serviceDetails?.byService?.total || 0}</p>
+          <p className="text-xs text-gray-600">{t("completed", "Completed")}: {data.serviceDetails?.byService?.completed || 0}</p>
+          <p className="text-xs text-gray-600">{t("pending", "Pending")}: {data.serviceDetails?.byService?.pending || 0}</p>
+          <p className="text-xs text-gray-600">{t("cancelled", "Cancelled")}: {data.serviceDetails?.byService?.cancelled || 0}</p>
         </div>
         <div className="rounded-lg bg-gray-50 p-3">
-          <p className="text-sm font-semibold text-gray-700">{t("workStats")}</p>
+          <p className="text-sm font-semibold text-gray-700">{t("workStats", "Work stats")}</p>
           <p className="mt-1 text-xs text-gray-600">
-            Individual Total: {data.workDetails?.byService?.appliedIndividually?.total || 0}
+            {t("individualTotal", "Individual Total")}: {data.workDetails?.byService?.appliedIndividually?.total || 0}
           </p>
           <p className="text-xs text-gray-600">
-            Individual Completed: {data.workDetails?.byService?.appliedIndividually?.completed || 0}
+            {t("individualCompleted", "Individual Completed")}: {data.workDetails?.byService?.appliedIndividually?.completed || 0}
           </p>
           <p className="text-xs text-gray-600">
-            Mediator Total: {data.workDetails?.byService?.appliedByMediator?.total || 0}
+            {t("mediatorTotal", "Mediator Total")}: {data.workDetails?.byService?.appliedByMediator?.total || 0}
           </p>
           <p className="text-xs text-gray-600">
-            Mediator Completed: {data.workDetails?.byService?.appliedByMediator?.completed || 0}
+            {t("mediatorCompleted", "Mediator Completed")}: {data.workDetails?.byService?.appliedByMediator?.completed || 0}
           </p>
         </div>
       </div>
@@ -146,28 +154,30 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
         <div className="mt-2 space-y-2">
           {(data.workHistory || []).slice(0, 6).map((item) => (
             <div key={item._id} className="rounded-lg border border-gray-200 p-2.5">
-              <p className="text-sm font-semibold text-gray-800">{item.subType || "Service"}</p>
+              <p className="text-sm font-semibold text-gray-800">{item.subType || t("service", "Service")}</p>
               <p className="text-xs text-gray-600">{item.address || "-"}</p>
               <p className="text-xs text-gray-500">
-                {item.startDate ? new Date(item.startDate).toLocaleDateString() : "-"} | {item.duration || 0} day(s) | {item.status || "-"}
+                {item.startDate ? new Date(item.startDate).toLocaleDateString() : "-"} | {item.duration || 0} {t("days", "day(s)")} | {item.status || "-"}
               </p>
             </div>
           ))}
-          {!data.workHistory?.length ? <p className="text-xs text-gray-500">No work history available.</p> : null}
+          {!data.workHistory?.length ? (
+            <p className="text-xs text-gray-500">{t("noWorkHistoryAvailable", "No work history available.")}</p>
+          ) : null}
         </div>
       </div>
       <div className="mt-4">
-        <p className="text-sm font-semibold text-gray-700">{t("recentReviews")}</p>
+        <p className="text-sm font-semibold text-gray-700">{t("recentReviews", "Recent reviews")}</p>
         <div className="mt-2 space-y-2">
           {(data.ratings || []).slice(0, 5).map((rating, idx) => (
             <div key={rating._id || idx} className="rounded-lg border border-gray-200 p-2.5">
               <p className="text-xs font-semibold text-gray-800">
-                {rating.user?.name || "User"} - {rating.score || 0}/5
+                {rating.user?.name || t("user", "User")} - {rating.score || 0}/5
               </p>
-              <p className="text-xs text-gray-600">{rating.comment || "No comment"}</p>
+              <p className="text-xs text-gray-600">{rating.comment || t("noComment", "No comment")}</p>
             </div>
           ))}
-          {!data.ratings?.length ? <p className="text-xs text-gray-500">No reviews yet.</p> : null}
+          {!data.ratings?.length ? <p className="text-xs text-gray-500">{t("noReviewsYet", "No reviews yet.")}</p> : null}
         </div>
       </div>
     </section>

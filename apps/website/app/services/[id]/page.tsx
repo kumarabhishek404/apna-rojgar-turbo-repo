@@ -1,9 +1,9 @@
 import Navbar from "@/components/Navbar";
 import ServiceDetailsView from "@/components/webapp/ServiceDetailsView";
-import { staticExportDynamicParamList } from "@/lib/staticExportDynamicRoutes";
+import { staticExportDynamicParamListAsync } from "@/lib/staticExportDynamicRoutes";
 
-export function generateStaticParams(): { id: string }[] {
-  return staticExportDynamicParamList();
+export async function generateStaticParams(): Promise<{ id: string }[]> {
+  return staticExportDynamicParamListAsync();
 }
 
 export default async function ServiceDetailsRoutePage({

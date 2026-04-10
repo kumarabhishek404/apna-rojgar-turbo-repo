@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { staticExportDynamicParamList } from "@/lib/staticExportDynamicRoutes";
+import { staticExportDynamicParamListAsync } from "@/lib/staticExportDynamicRoutes";
 
-/** Static export needs at least one path per dynamic segment (see lib/staticExportDynamicRoutes). */
-export function generateStaticParams(): { id: string }[] {
-  return staticExportDynamicParamList();
+/** Static export: prerender service IDs so `/webapp/services/:id` deep links work on static hosts. */
+export async function generateStaticParams(): Promise<{ id: string }[]> {
+  return staticExportDynamicParamListAsync();
 }
 
 export default function Layout({ children }: { children: ReactNode }) {

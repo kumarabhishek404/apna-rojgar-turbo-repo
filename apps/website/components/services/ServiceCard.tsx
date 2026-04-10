@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Clock, MapPin } from "lucide-react";
@@ -50,6 +49,7 @@ type Props = {
   selectedSkill: string;
   onSkillChange: (serviceId: string, skill: string) => void;
   onApply: (serviceId: string) => void;
+  onViewDetails: (serviceId: string) => void;
   t: (key: string, fallback?: string) => string;
 };
 
@@ -158,6 +158,7 @@ function ServiceCardComponent({
   selectedSkill,
   onSkillChange,
   onApply,
+  onViewDetails,
   t,
 }: Props) {
   const { language } = useLanguage();
@@ -284,7 +285,7 @@ function ServiceCardComponent({
             <span className="font-medium text-[#16264f]">
               {t("duration")}:{" "}
             </span>
-            {service.duration} day(s)
+            {service.duration} {t("days", "days")}
           </p>
         ) : null}
 
@@ -318,12 +319,13 @@ function ServiceCardComponent({
         ) : null}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Link
-            href={`/services/${service._id}`}
+          <button
+            type="button"
+            onClick={() => onViewDetails(service._id)}
             className="rounded-lg border border-[#22409a]/20 px-3 py-2 text-sm font-semibold text-[#22409a] transition hover:bg-[#f2f6ff]"
           >
             {t("viewDetails")}
-          </Link>
+          </button>
           {showApply ? (
             <>
               <select

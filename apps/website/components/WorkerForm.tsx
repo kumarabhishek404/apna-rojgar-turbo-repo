@@ -3,18 +3,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-
-const SKILLS = [
-  "Mason",
-  "Electrician",
-  "Plumber",
-  "Carpenter",
-  "Painter",
-  "Driver",
-  "Helper",
-  "Welder",
-  "Tile Worker",
-];
+import { useLanguage } from "@/components/LanguageProvider";
 
 type FormValues = {
   name: string;
@@ -28,6 +17,20 @@ type FormValues = {
 };
 
 export default function WorkerForm() {
+  const { t } = useLanguage();
+
+  const SKILLS = [
+    { id: "mason", fallback: "Mason" },
+    { id: "electrician", fallback: "Electrician" },
+    { id: "plumber", fallback: "Plumber" },
+    { id: "carpenter", fallback: "Carpenter" },
+    { id: "painter", fallback: "Painter" },
+    { id: "driver", fallback: "Driver" },
+    { id: "helper", fallback: "Helper" },
+    { id: "welder", fallback: "Welder" },
+    { id: "tileWorker", fallback: "Tile Worker" },
+  ] as const;
+
   const {
     register,
     handleSubmit,
@@ -98,7 +101,7 @@ export default function WorkerForm() {
 
         setValue("address", address);
       } catch (error) {
-        console.error("Address fetch failed");
+        console.error(t("addressFetchFailed", "Address fetch failed"));
       }
     });
   };
@@ -128,14 +131,14 @@ export default function WorkerForm() {
         formData
       );
 
-      alert("Profile submitted successfully");
+      alert(t("profileSubmittedSuccessfully", "Profile submitted successfully"));
 
       reset();
       setImage(null);
       setPreview(null);
     } catch (error) {
       console.error(error);
-      alert("Submission failed");
+      alert(t("submissionFailed", "Submission failed"));
     } finally {
       setLoading(false);
     }
@@ -147,14 +150,14 @@ export default function WorkerForm() {
       className="max-w-xl mx-auto bg-white shadow-xl rounded-2xl p-8 space-y-6"
     >
       <h2 className="text-2xl font-bold text-center">
-        Worker Registration
+        {t("workerRegistration", "Worker Registration")}
       </h2>
 
       {/* NAME */}
       <div>
-        <label className="font-medium">Full Name</label>
+        <label className="font-medium">{t("fullName", "Full Name")}</label>
         <input
-          {...register("name", { required: "Name is required" })}
+          {...register("name", { required: t("nameIsRequired", "Name is required") })}
           className="w-full border p-3 rounded mt-1"
         />
         {errors.name && (
@@ -164,13 +167,13 @@ export default function WorkerForm() {
 
       {/* MOBILE */}
       <div>
-        <label className="font-medium">Mobile</label>
+        <label className="font-medium">{t("mobile", "Mobile")}</label>
         <input
           {...register("mobile", {
-            required: "Mobile required",
+            required: t("mobileRequired", "Mobile required"),
             pattern: {
               value: /^[0-9]{10}$/,
-              message: "Enter valid 10 digit number",
+              message: t("enterValid10DigitNumber", "Enter valid 10 digit number"),
             },
           })}
           className="w-full border p-3 rounded mt-1"
@@ -182,12 +185,12 @@ export default function WorkerForm() {
 
       {/* AGE */}
       <div>
-        <label className="font-medium">Age</label>
+        <label className="font-medium">{t("age", "Age")}</label>
         <input
           type="number"
           {...register("age", {
-            required: "Age required",
-            min: { value: 18, message: "Age must be 18+" },
+            required: t("ageIsRequired", "Age required"),
+            min: { value: 18, message: t("ageMustBe18Plus", "Age must be 18+") },
           })}
           className="w-full border p-3 rounded mt-1"
         />
@@ -198,16 +201,16 @@ export default function WorkerForm() {
 
       {/* ROLE SELECT */}
       <div>
-        <label className="font-medium">Role</label>
+        <label className="font-medium">{t("role", "Role")}</label>
 
         <select
-          {...register("role", { required: "Role required" })}
+          {...register("role", { required: t("roleIsRequired", "Role required") })}
           className="w-full border p-3 rounded mt-1"
         >
-          <option value="">Select Role</option>
-          <option value="Worker">Worker</option>
-          <option value="Mediator">Mediator</option>
-          <option value="Employer">Employer</option>
+          <option value="">{t("selectRole", "Select Role")}</option>
+          <option value="Worker">{t("worker", "Worker")}</option>
+          <option value="Mediator">{t("mediator", "Mediator")}</option>
+          <option value="Employer">{t("employer", "Employer")}</option>
         </select>
 
         {errors.role && (
@@ -218,28 +221,28 @@ export default function WorkerForm() {
       {/* SKILLS (CONDITIONAL) */}
       {(role === "Worker" || role === "Mediator") && (
         <div>
-          <label className="font-medium">Skills</label>
+          <label className="font-medium">{t("skills", "Skills")}</label>
 
           <div className="flex flex-wrap gap-2 mt-2">
             {SKILLS.map((skill) => (
               <button
-                key={skill}
+                key={skill.id}
                 type="button"
-                onClick={() => toggleSkill(skill)}
+                onClick={() => toggleSkill(skill.fallback)}
                 className={`px-3 py-1 rounded-full border ${
-                  selectedSkills?.includes(skill)
+                  selectedSkills?.includes(skill.fallback)
                     ? "bg-[#22409a] text-white"
                     : "bg-gray-100"
                 }`}
               >
-                {skill}
+                {t(skill.id, skill.fallback)}
               </button>
             ))}
           </div>
 
           {selectedSkills?.length === 0 && (
             <p className="text-red-500 text-sm mt-1">
-              Select at least one skill
+              {t("selectAtLeastOneSkill", "Select at least one skill")}
             </p>
           )}
         </div>
@@ -247,10 +250,10 @@ export default function WorkerForm() {
 
       {/* ADDRESS */}
       <div>
-        <label className="font-medium">Address</label>
+        <label className="font-medium">{t("address", "Address")}</label>
 
         <textarea
-          {...register("address", { required: "Address required" })}
+          {...register("address", { required: t("addressIsRequired", "Address required") })}
           className="w-full border p-3 rounded mt-1"
         />
 
@@ -259,7 +262,7 @@ export default function WorkerForm() {
           onClick={getLocation}
           className="text-blue-600 text-sm mt-2"
         >
-          📍 Use Current Location
+          📍 {t("useCurrentLocation", "Use Current Location")}
         </button>
 
         {errors.address && (
@@ -269,7 +272,7 @@ export default function WorkerForm() {
 
       {/* IMAGE */}
       <div>
-        <label className="font-medium">Profile Picture</label>
+        <label className="font-medium">{t("profilePicture", "Profile Picture")}</label>
 
         <input
           type="file"
@@ -291,7 +294,7 @@ export default function WorkerForm() {
         disabled={loading}
         className="w-full bg-[#22409a] text-white py-3 rounded-lg font-semibold hover:bg-blue-900"
       >
-        {loading ? "Submitting..." : "Submit Profile"}
+        {loading ? t("submitting", "Submitting...") : t("submitProfile", "Submit Profile")}
       </button>
     </form>
   );

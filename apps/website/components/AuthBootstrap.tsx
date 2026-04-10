@@ -1,19 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { getAuth, validateStoredToken } from "@/lib/auth";
+import { clearAuth, getAuth, validateStoredToken } from "@/lib/auth";
 
 export default function AuthBootstrap() {
   useEffect(() => {
     const run = async () => {
       const auth = getAuth();
-      if (!auth?.token) return;
+      if (!auth?.token) {
+        if (typeof window !== "undefined") {
+          window.sessionStorage.removeItem("auth_redirect_in_flight");
+        }
+        return;
+      }
       const valid = await validateStoredToken();
       if (valid) return;
       if (typeof window === "undefined") return;
-      const publicPaths = new Set(["/", "/about", "/register"]);
+      clearAuth();
+      const publicPaths = new Set(["/", "/register"]);
       if (publicPaths.has(window.location.pathname)) return;
-      window.location.href = "/?login=1";
+      const inFlight = window.sessionStorage.getItem("auth_redirect_in_flight") === "1";
+      if (inFlight) return;
+      window.sessionStorage.setItem("auth_redirect_in_flight", "1");
+      window.location.replace("/?login=1");
     };
     run();
   }, []);

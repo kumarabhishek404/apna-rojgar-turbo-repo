@@ -7,6 +7,7 @@ type RegisterPayload = {
   mobile: string;
   countryCode: string;
   locale: string;
+  source?: "web";
 };
 
 type LoginPayload = {
@@ -18,7 +19,7 @@ export async function registerUser(payload: RegisterPayload) {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ source: "web", ...payload }),
   });
 
   const data = await response.json();
@@ -50,6 +51,7 @@ export function saveAuth(data: StoredAuth) {
   authStore.set(authAtom, data);
   if (typeof window !== "undefined") {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
+    window.sessionStorage.removeItem("auth_redirect_in_flight");
   }
 }
 
@@ -83,7 +85,13 @@ export function clearAuth() {
 
 function redirectToLoginIfNeeded() {
   if (typeof window === "undefined") return;
-  window.location.href = "/?login=1";
+  const pathname = window.location.pathname;
+  const searchParams = new URLSearchParams(window.location.search);
+  const alreadyOnLoginPrompt = pathname === "/" && searchParams.get("login") === "1";
+  const inFlight = window.sessionStorage.getItem("auth_redirect_in_flight") === "1";
+  if (alreadyOnLoginPrompt || inFlight) return;
+  window.sessionStorage.setItem("auth_redirect_in_flight", "1");
+  window.location.replace("/?login=1");
 }
 
 function isAuthTokenError(responseStatus: number, data: unknown): boolean {
@@ -149,7 +157,8 @@ export async function apiRequest<T = unknown>(
   });
 
   const data = await response.json();
-  if (isAuthTokenError(response.status, data)) {
+  if (auth?.token && isAuthTokenError(response.status, data)) {
+    clearAuth();
     redirectToLoginIfNeeded();
   }
   if (!response.ok || data?.success === false) {

@@ -3,8 +3,11 @@
 import Image from "next/image";
 import { Download } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/LanguageProvider";
+import ShlokBadge from "@/components/ShlokBadge";
 
 export default function DownloadApp() {
+  const { t } = useLanguage();
   return (
     <section
       id="download"
@@ -24,14 +27,22 @@ export default function DownloadApp() {
           viewport={{ once: true }}
           className="flex-1 text-center lg:text-left"
         >
+          <ShlokBadge
+            text="उत्तिष्ठत जाग्रत प्राप्य वरान्निबोधत॥"
+            meaningKey="downloadShlokMeaning"
+            meaningDefault="Rise, awaken, and move forward with purpose until you achieve your best."
+            align="centerMobileLeftDesktop"
+            className="mb-5"
+          />
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
-            Download the <br /> Apna Rojgar App
+            {t("downloadAppTitleLine1", "Download the")} <br /> {t("downloadAppTitleLine2", "Apna Rojgar App")}
           </h2>
 
           <p className="text-blue-100 mb-10 max-w-lg">
-            Discover job opportunities, connect with workers, and manage
-            employment easily through the Apna Rojgar mobile app.
-            Start growing your opportunities today.
+            {t(
+              "downloadAppSubtitle",
+              "Discover job opportunities, connect with workers, and manage employment easily through the Apna Rojgar mobile app. Start growing your opportunities today.",
+            )}
           </p>
 
           <a
@@ -40,7 +51,7 @@ export default function DownloadApp() {
             className="inline-flex items-center gap-3 bg-white text-[#22409a] font-semibold px-8 py-4 rounded-xl shadow-lg hover:scale-105 transition"
           >
             <Download size={20} />
-            Install Android App
+            {t("installAndroidApp", "Install Android App")}
           </a>
         </motion.div>
 
@@ -61,7 +72,7 @@ export default function DownloadApp() {
               src="/screenshots/screenshot1.webp"
               width={320}
               height={640}
-              alt="Apna Rojgar App"
+              alt={t("apnaRojgarAppAlt", "Apna Rojgar App")}
               className="relative rounded-3xl shadow-2xl border border-white/20"
             />
           </div>

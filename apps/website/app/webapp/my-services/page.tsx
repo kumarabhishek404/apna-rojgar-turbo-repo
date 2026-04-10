@@ -1,135 +1,239 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
-import { apiRequest, getAuth } from "@/lib/auth";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { apiRequest } from "@/lib/auth";
+import { useLanguage } from "@/components/LanguageProvider";
+import CreateServiceModal from "@/components/services/CreateServiceModal";
+import ServiceDetailsModal from "@/components/services/ServiceDetailsModal";
+import { ServiceCard, type ServiceItem } from "@/components/services/ServiceCard";
+import ListLoader from "@/components/services/ListLoader";
+import type { BrowserGeo } from "@/lib/serviceDistance";
+import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
 
 type UserInfo = {
   _id: string;
   role?: "WORKER" | "MEDIATOR" | "EMPLOYER";
   status?: string;
-};
-
-type Service = {
-  _id: string;
-  subType: string;
-  address: string;
-  status: string;
+  geoLocation?: { type?: string; coordinates?: [number, number] } | null;
 };
 
 export default function MyServicesPage() {
+  const { t } = useLanguage();
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [items, setItems] = useState<Service[]>([]);
+  const [items, setItems] = useState<ServiceItem[]>([]);
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [form, setForm] = useState({
-    type: "Construction",
-    subType: "",
-    address: "",
-    description: "",
-    startDate: "",
-    duration: 1,
-    skillName: "",
-    skillCount: 1,
-  });
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedSkill, setSelectedSkill] = useState<Record<string, string>>({});
+  const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setError("");
+    setLoading(true);
     try {
       const userRes = await apiRequest<{ data: UserInfo }>("/user/info");
       setUser(userRes.data);
 
       if (userRes.data.role === "EMPLOYER") {
-        const myRes = await apiRequest<{ data: Service[] }>(
+        const myRes = await apiRequest<{ data: ServiceItem[] }>(
           "/employer/my-services?status=HIRING&page=1&limit=20",
         );
         setItems(myRes.data || []);
       } else {
-        const myApplied = await apiRequest<{ data: Service[] }>(
+        const myApplied = await apiRequest<{ data: ServiceItem[] }>(
           "/worker/applied-services?page=1&limit=20",
         );
         setItems(myApplied.data || []);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load");
+      setError(e instanceof Error ? e.message : t("failedToLoad", "Failed to load"));
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        requestAnimationFrame(() =>
+          setBrowserGeo({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          }),
+        );
+      },
+      () => undefined,
+      { enableHighAccuracy: false, maximumAge: 300_000, timeout: 12_000 },
+    );
   }, []);
 
-  const canCreate = user?.role === "EMPLOYER" && user?.status === "ACTIVE";
+  const canCreate = user?.status === "ACTIVE";
+  const canApply =
+    (user?.role === "WORKER" || user?.role === "MEDIATOR") && user?.status === "ACTIVE";
 
-  const createService = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!canCreate) return;
-    setError("");
-    setMessage("");
-    try {
-      const fd = new FormData();
-      fd.append("type", form.type);
-      fd.append("subType", form.subType);
-      fd.append("description", form.description);
-      fd.append("address", form.address);
-      fd.append("startDate", form.startDate);
-      fd.append("duration", String(form.duration));
-      fd.append("bookingType", "byService");
-      fd.append(
-        "requirements",
-        JSON.stringify([{ name: form.skillName, count: Number(form.skillCount) }]),
-      );
-      fd.append("facilities", JSON.stringify({}));
+  const distanceKmForService = useCallback(
+    (service: ServiceItem) =>
+      resolveServiceDistanceKm({
+        serviceDistance: service.distance,
+        serviceGeo: service.geoLocation ?? undefined,
+        userGeo: user?.geoLocation ?? undefined,
+        browserGeo,
+      }),
+    [browserGeo, user?.geoLocation],
+  );
 
-      const auth = getAuth();
-      const base =
-        process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
-      const response = await fetch(`${base}/employer/add-service`, {
-        method: "POST",
-        headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
-        body: fd,
-      });
-      const data = await response.json();
-      if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Service create failed");
+  const openDetailsModal = useCallback((serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    setShowDetailsModal(true);
+  }, []);
+
+  const closeDetailsModal = useCallback(() => {
+    setShowDetailsModal(false);
+    window.setTimeout(() => setSelectedServiceId(null), 150);
+  }, []);
+
+  const onSkillChange = useCallback((serviceId: string, skill: string) => {
+    setSelectedSkill((prev) => ({ ...prev, [serviceId]: skill }));
+  }, []);
+
+  const noopApply = useCallback((_serviceId: string) => {}, []);
+
+  const applyToService = useCallback(
+    async (serviceId: string, skillOverride?: string) => {
+      const skill = skillOverride || selectedSkill[serviceId];
+      if (!skill) {
+        setError(
+          t("selectSkillBeforeApply", "Please choose a required skill before applying."),
+        );
+        return;
       }
-      setMessage("Service created successfully.");
-      await load();
-    } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : "Service create failed");
-    }
-  };
+      setError("");
+      setMessage("");
+      setApplyingServiceId(serviceId);
+      try {
+        await apiRequest("/worker/apply", {
+          method: "POST",
+          body: JSON.stringify({ serviceId, skills: skill }),
+        });
+        setMessage(t("serviceAppliedSuccessfully", "Service applied successfully"));
+        closeDetailsModal();
+        await load();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : t("applyFailed", "Apply failed"));
+      } finally {
+        setApplyingServiceId(null);
+      }
+    },
+    [closeDetailsModal, load, selectedSkill, t],
+  );
+
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          item.subType.toLowerCase().includes(search.toLowerCase()) ||
+          item.address.toLowerCase().includes(search.toLowerCase()) ||
+          (item.description || "").toLowerCase().includes(search.toLowerCase()),
+      ),
+    [items, search],
+  );
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow">
-      <h1 className="text-2xl font-bold text-[#22409a]">
-        {user?.role === "EMPLOYER" ? "My Services" : "My Applied Services"}
-      </h1>
-      {error ? <p className="mt-3 rounded bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      {message ? <p className="mt-3 rounded bg-green-50 p-2 text-sm text-green-700">{message}</p> : null}
+    <section className="space-y-4">
+      <div className="rounded-2xl bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 text-white shadow-lg">
+        <h1 className="text-2xl font-bold">{t("myServices", "My Services")}</h1>
+        <p className="mt-1 text-sm text-fuchsia-100">
+          {t("myServicesSubtitle", "Track services created or associated with your account.")}
+        </p>
+      </div>
 
-      {canCreate ? (
-        <form onSubmit={createService} className="mt-4 grid gap-2 rounded border p-3 md:grid-cols-2">
-          <input className="rounded border p-2" value={form.type} onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))} />
-          <input className="rounded border p-2" required placeholder="Sub Type" value={form.subType} onChange={(e) => setForm((p) => ({ ...p, subType: e.target.value }))} />
-          <input className="rounded border p-2" required placeholder="Address" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
-          <input className="rounded border p-2" type="date" required value={form.startDate} onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))} />
-          <input className="rounded border p-2" type="number" min={1} value={form.duration} onChange={(e) => setForm((p) => ({ ...p, duration: Number(e.target.value) }))} />
-          <input className="rounded border p-2" required placeholder="Required Skill" value={form.skillName} onChange={(e) => setForm((p) => ({ ...p, skillName: e.target.value }))} />
-          <input className="rounded border p-2" type="number" min={1} value={form.skillCount} onChange={(e) => setForm((p) => ({ ...p, skillCount: Number(e.target.value) }))} />
-          <textarea className="rounded border p-2 md:col-span-2" placeholder="Description" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} />
-          <button className="rounded bg-[#22409a] px-3 py-2 font-semibold text-white md:col-span-2">Create Service</button>
-        </form>
+      {error ? <p className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
+      {message ? <p className="rounded bg-green-50 p-2 text-sm text-green-700">{message}</p> : null}
+      <div className="rounded-xl bg-white p-4 shadow">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("searchServices", "Search Services")}
+            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
+          />
+          {canCreate ? (
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#22409a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b357f]"
+            >
+              {t("addNewService", "Add New Service")}
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {loading && items.length === 0 ? <ListLoader count={4} /> : null}
+
+      {!loading && filteredItems.length > 0 ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {filteredItems.map((item) => (
+            <ServiceCard
+              key={item._id}
+              service={item}
+              distanceKm={distanceKmForService(item)}
+              showApply={false}
+              selectedSkill={selectedSkill[item._id] || ""}
+              onSkillChange={onSkillChange}
+              onApply={noopApply}
+              onViewDetails={openDetailsModal}
+              t={t}
+            />
+          ))}
+        </div>
       ) : null}
 
-      <div className="mt-5 space-y-3">
-        {items.map((item) => (
-          <div key={item._id} className="rounded border p-3">
-            <p className="font-semibold">{item.subType}</p>
-            <p className="text-sm text-gray-600">{item.address}</p>
-            <p className="text-xs text-gray-500">Status: {item.status}</p>
-          </div>
-        ))}
+      {!loading && filteredItems.length === 0 ? (
+        <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">
+          {t("noServicesFound", "No services found")}
+        </div>
+      ) : null}
+      <div className="text-center text-xs text-gray-500">
+        {t("totalServices", "Total Services")}: {filteredItems.length}
       </div>
+
+      <ServiceDetailsModal
+        open={showDetailsModal}
+        serviceId={selectedServiceId}
+        onClose={closeDetailsModal}
+        canApply={canApply}
+        applying={applyingServiceId === selectedServiceId}
+        selectedSkill={selectedServiceId ? selectedSkill[selectedServiceId] || "" : ""}
+        onSkillChange={(skill) => {
+          if (!selectedServiceId) return;
+          onSkillChange(selectedServiceId, skill);
+        }}
+        onApply={async (skill) => {
+          if (!selectedServiceId) return;
+          await applyToService(selectedServiceId, skill);
+        }}
+      />
+
+      <CreateServiceModal
+        open={showCreateModal}
+        canCreate={canCreate}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={async () => {
+          setMessage(t("serviceCreatedSuccessfully", "Service created successfully."));
+          await load();
+        }}
+      />
     </section>
   );
 }

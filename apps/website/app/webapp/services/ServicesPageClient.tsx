@@ -1,8 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import ServiceDetailsModal from "@/components/services/ServiceDetailsModal";
 import {
-  type FormEvent,
   type RefObject,
   useCallback,
   useEffect,
@@ -11,9 +11,9 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "next/navigation";
-import { apiRequest, getAuth } from "@/lib/auth";
+import { apiRequest } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
-import { ADDSERVICESTEPS, WORKTYPES } from "@/constants";
+import CreateServiceModal from "@/components/services/CreateServiceModal";
 import EmptyState from "@/components/services/EmptyState";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
@@ -39,8 +39,6 @@ type ServicesResponse = {
   };
 };
 
-type RequirementDraft = { name: string; count: number; payPerDay: string };
-
 export type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 
 export type ServicesPageShellProps = {
@@ -64,6 +62,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const globalQuery = (searchParams.get("global") || "").trim();
+  const shouldAutoOpenCreate = searchParams.get("create") === "1";
   const [user, setUser] = useState<UserInfo | null>(null);
   const [activeTab] = useState<ServicesTabKey>("all");
   const [servicesByTab, setServicesByTab] = useState<Record<ServicesTabKey, ServiceItem[]>>({
@@ -97,48 +96,10 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createStep, setCreateStep] = useState(1);
-  const [createIssue, setCreateIssue] = useState("");
-  const [creatingService, setCreatingService] = useState(false);
-  const [createForm, setCreateForm] = useState({
-    type: "",
-    subType: "",
-    address: "",
-    description: "",
-    startDate: "",
-    duration: 1,
-    requirements: [{ name: "", count: 1, payPerDay: "" }] as RequirementDraft[],
-    facilities: {
-      food: false,
-      living: false,
-      travelling: false,
-      esi_pf: false,
-    },
-    images: [] as File[],
-  });
-
-  const selectedWorkType = useMemo(
-    () => WORKTYPES.find((item: { value: string }) => item.value === createForm.type),
-    [createForm.type],
-  );
-  const availableSubTypes = useMemo(
-    () =>
-      (selectedWorkType?.subTypes || []) as Array<{
-        label: string;
-        value: string;
-        workerTypes?: Array<{ label: string; value: string }>;
-      }>,
-    [selectedWorkType],
-  );
-  const selectedSubType = useMemo(
-    () => availableSubTypes.find((item) => item.value === createForm.subType),
-    [availableSubTypes, createForm.subType],
-  );
-  const availableWorkerTypes = (selectedSubType?.workerTypes || []) as Array<{
-    label: string;
-    value: string;
-  }>;
 
   const inFlightRef = useRef<Record<ServicesTabKey, boolean>>({
     all: false,
@@ -246,7 +207,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
 
   const canApply =
     (user?.role === "WORKER" || user?.role === "MEDIATOR") && user?.status === "ACTIVE";
-  const canCreate = user?.role === "EMPLOYER" && user?.status === "ACTIVE";
+  const canCreate = user?.status === "ACTIVE";
 
   const distanceKmForService = useCallback(
     (service: ServiceItem) =>
@@ -294,8 +255,8 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     return items;
   }, [filtered, sortBy]);
 
-  const applyToService = async (serviceId: string) => {
-    const skill = selectedSkill[serviceId];
+  const applyToService = async (serviceId: string, skillOverride?: string) => {
+    const skill = skillOverride || selectedSkill[serviceId];
     if (!skill) {
       setError("Please choose a required skill before applying.");
       return;
@@ -303,6 +264,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
 
     setError("");
     setMessage("");
+    setApplyingServiceId(serviceId);
     try {
       await apiRequest("/worker/apply", {
         method: "POST",
@@ -311,8 +273,12 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       setMessage("Applied successfully.");
       setInitializedByTab((prev) => ({ ...prev, applied: false }));
       fetchForTab("all", 1, false);
+      fetchForTab("applied", 1, false);
+      closeDetailsModal();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Apply failed");
+    } finally {
+      setApplyingServiceId(null);
     }
   };
 
@@ -322,13 +288,16 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
 
   const openCreateModal = useCallback(() => {
     if (!canCreate) {
-      setError("Only active employers can create services.");
+      setError(t("onlyActiveUsersCanCreateServices", "Only active users can create services."));
       return;
     }
-    setCreateIssue("");
-    setCreateStep(1);
     setShowCreateModal(true);
-  }, [canCreate]);
+  }, [canCreate, t]);
+
+  useEffect(() => {
+    if (!shouldAutoOpenCreate) return;
+    openCreateModal();
+  }, [openCreateModal, shouldAutoOpenCreate]);
 
   const toolbarApi = useMemo<ServicesToolbarApi>(
     () => ({
@@ -386,149 +355,41 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   }, [onFiltersMergedChange, scrollContainerRef]);
 
   const closeCreateModal = useCallback(() => {
-    if (creatingService) return;
-    setCreateStep(1);
-    setCreateIssue("");
     setShowCreateModal(false);
-  }, [creatingService]);
+  }, []);
 
-  const createService = useCallback(
-    async (event: FormEvent) => {
-      event.preventDefault();
-      if (!canCreate) return;
-      if (!createForm.type || !createForm.subType) {
-        setCreateIssue("Please select work type and work subtype.");
-        return;
-      }
-      if (!createForm.address.trim() || !createForm.startDate) {
-        setCreateIssue("Please fill all required fields.");
-        return;
-      }
-      if (!createForm.requirements.length) {
-        setCreateIssue("Please add at least one requirement.");
-        return;
-      }
-      const invalidRequirement = createForm.requirements.find(
-        (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
-      );
-      if (invalidRequirement) {
-        setCreateIssue("Please complete requirement details (worker, count and pay/day).");
-        return;
-      }
+  const openDetailsModal = useCallback((serviceId: string) => {
+    setSelectedServiceId(serviceId);
+    setShowDetailsModal(true);
+  }, []);
 
-      setCreatingService(true);
-      setCreateIssue("");
-      setMessage("");
-      try {
-        const fd = new FormData();
-        fd.append("type", createForm.type);
-        fd.append("subType", createForm.subType.trim());
-        fd.append("description", createForm.description.trim());
-        fd.append("address", createForm.address.trim());
-        fd.append("startDate", createForm.startDate);
-        fd.append("duration", String(createForm.duration));
-        fd.append("bookingType", "byService");
-        fd.append("requirements", JSON.stringify(createForm.requirements));
-        fd.append("facilities", JSON.stringify(createForm.facilities));
-        createForm.images.forEach((file) => fd.append("images", file));
-
-        const auth = getAuth();
-        const base =
-          process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
-        const response = await fetch(`${base}/employer/add-service`, {
-          method: "POST",
-          headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
-          body: fd,
-        });
-        const data = await response.json();
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.message || "Service create failed");
-        }
-
-        setMessage("Service created successfully.");
-        setShowCreateModal(false);
-        setCreateIssue("");
-        setCreateForm((prev) => ({
-          ...prev,
-          type: "",
-          subType: "",
-          address: "",
-          description: "",
-          startDate: "",
-          duration: 1,
-          requirements: [{ name: "", count: 1, payPerDay: "" }],
-          images: [],
-          facilities: {
-            food: false,
-            living: false,
-            travelling: false,
-            esi_pf: false,
-          },
-        }));
-        setCreateStep(1);
-        await Promise.all([fetchForTab("all", 1, false), fetchForTab("my", 1, false)]);
-      } catch (e) {
-        setCreateIssue(e instanceof Error ? e.message : "Service create failed");
-      } finally {
-        setCreatingService(false);
-      }
-    },
-    [canCreate, createForm, fetchForTab],
-  );
+  const closeDetailsModal = useCallback(() => {
+    setShowDetailsModal(false);
+    // Delay unmount to keep closing animation smooth.
+    window.setTimeout(() => setSelectedServiceId(null), 150);
+  }, []);
 
   const loading = loadingByTab[activeTab];
   const hasMore = hasMoreByTab[activeTab];
-  const onCreateNext = () => {
-    if (createStep === 1 && (!createForm.type || !createForm.subType)) {
-      setCreateIssue("Please select work type and subtype.");
-      return;
-    }
-    if (
-      createStep === 2 &&
-      createForm.requirements.some(
-        (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
-      )
-    ) {
-      setCreateIssue("Complete requirement details first.");
-      return;
-    }
-    if (
-      createStep === 3 &&
-      (!createForm.address.trim() || !createForm.startDate || createForm.duration < 1)
-    ) {
-      setCreateIssue("Please complete address, date and duration.");
-      return;
-    }
-    if (createStep === 5 && createForm.images.length > 3) {
-      setCreateIssue("You can upload maximum 3 images.");
-      return;
-    }
-    setCreateIssue("");
-    setCreateStep((s) => Math.min(s + 1, 6));
-  };
-
-  const onCreateBack = () => {
-    setCreateStep((s) => Math.max(s - 1, 1));
-  };
   const emptyConfig =
     activeTab === "my"
       ? {
-          title: "No services found",
-          subtitle: "You have not posted any service yet.",
-          ctaLabel: "Add New Service",
+          title: t("noServicesFound", "No services found"),
+          subtitle: t("noPostedServicesYet", "You have not posted any service yet."),
+          ctaLabel: t("addNewService", "Add New Service"),
           ctaHref: "/my-work",
         }
       : activeTab === "applied"
         ? {
-            title: "No applied services",
-            subtitle: "You have not applied to any service yet.",
-            ctaLabel: "Browse Services",
+            title: t("noAppliedServices", "No applied services"),
+            subtitle: t("noAppliedServicesYet", "You have not applied to any service yet."),
+            ctaLabel: t("browseServices", "Browse Services"),
             ctaHref: "/all-services",
           }
         : {
-            title: "No services found",
-            subtitle: "Try changing filters or search terms.",
-            ctaLabel: "Reset Search",
+            title: t("noServicesFound", "No services found"),
+            subtitle: t("tryChangeFilters", "Try changing filters or search terms."),
+            ctaLabel: t("resetSearch", "Reset Search"),
             ctaHref: "/all-services",
           };
 
@@ -574,6 +435,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
                   selectedSkill={selectedSkill[service._id] || ""}
                   onSkillChange={onSkillChange}
                   onApply={applyToService}
+                  onViewDetails={openDetailsModal}
                   t={t}
                 />
               ))}
@@ -583,341 +445,39 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
           {loading && services.length > 0 ? <ListLoader count={2} /> : null}
           {hasMore && ordered.length > 0 ? <div ref={loadMoreRef} className="h-8 w-full" /> : null}
           {!hasMore && ordered.length > 0 ? (
-            <p className="text-center text-xs text-gray-500">You reached the end of the list.</p>
+            <p className="text-center text-xs text-gray-500">
+              {t("endOfList", "You reached the end of the list.")}
+            </p>
           ) : null}
         </motion.div>
       </AnimatePresence>
 
-      {showCreateModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-[#16264f]">Add New Service</h3>
-              <button
-                type="button"
-                onClick={closeCreateModal}
-                className="rounded-lg px-2 py-1 text-sm text-gray-600 hover:bg-gray-100"
-              >
-                Close
-              </button>
-            </div>
+      <ServiceDetailsModal
+        open={showDetailsModal}
+        serviceId={selectedServiceId}
+        onClose={closeDetailsModal}
+        canApply={canApply}
+        applying={applyingServiceId === selectedServiceId}
+        selectedSkill={selectedServiceId ? selectedSkill[selectedServiceId] || "" : ""}
+        onSkillChange={(skill) => {
+          if (!selectedServiceId) return;
+          onSkillChange(selectedServiceId, skill);
+        }}
+        onApply={async (skill) => {
+          if (!selectedServiceId) return;
+          await applyToService(selectedServiceId, skill);
+        }}
+      />
 
-            {createIssue ? (
-              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {createIssue}
-              </p>
-            ) : null}
-
-            <div className="mb-4 flex items-center gap-2 text-xs text-gray-500">
-              {ADDSERVICESTEPS.map((step, idx) => (
-                <span
-                  key={step.label}
-                  className={`rounded-full px-2.5 py-1 ${
-                    createStep === idx + 1
-                      ? "bg-[#22409a] text-white"
-                      : "border border-[#22409a]/20 text-[#22409a]"
-                  }`}
-                >
-                  {idx + 1}. {t(step.label)}
-                </span>
-              ))}
-              <span
-                className={`rounded-full px-2.5 py-1 ${
-                  createStep === 5 ? "bg-[#22409a] text-white" : "border border-[#22409a]/20 text-[#22409a]"
-                }`}
-              >
-                5. {t("images")}
-              </span>
-              <span
-                className={`rounded-full px-2.5 py-1 ${
-                  createStep === 6 ? "bg-[#22409a] text-white" : "border border-[#22409a]/20 text-[#22409a]"
-                }`}
-              >
-                6. {t("checkDetails")}
-              </span>
-            </div>
-
-            <form onSubmit={createService} className="grid gap-4 md:grid-cols-2">
-              {createStep === 1 ? (
-                <>
-                  <div className="rounded-xl border border-[#22409a]/10 bg-[#f8faff] p-3 md:col-span-2">
-                    <p className="text-sm font-semibold text-[#16264f]">{t("typeAndSubType")}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">Choose the work category and subtype.</p>
-                  </div>
-                  <label className="space-y-1">
-                    <span className="text-xs font-semibold text-[#22409a]">{t("workType")}</span>
-                    <select
-                      className="w-full rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
-                      value={createForm.type}
-                      onChange={(e) =>
-                        setCreateForm((p) => ({
-                          ...p,
-                          type: e.target.value,
-                          subType: "",
-                          requirements: [{ name: "", count: 1, payPerDay: "" }],
-                        }))
-                      }
-                    >
-                      <option value="">{t("selectWorkType")}</option>
-                      {WORKTYPES.map((item: { value: string; label: string }) => (
-                        <option key={item.value} value={item.value}>
-                          {t(item.label)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-xs font-semibold text-[#22409a]">{t("workSubType")}</span>
-                    <select
-                      className="w-full rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
-                      value={createForm.subType}
-                      onChange={(e) => setCreateForm((p) => ({ ...p, subType: e.target.value }))}
-                      disabled={!createForm.type}
-                    >
-                      <option value="">{t("selectWorkSubType")}</option>
-                      {availableSubTypes.map((item) => (
-                        <option key={item.value} value={item.value}>
-                          {t(item.label)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                </>
-              ) : null}
-
-              {createStep === 2 ? (
-                <div className="space-y-2 md:col-span-2">
-                  {createForm.requirements.map((req, idx) => (
-                    <div key={`req-${idx}`} className="grid gap-2 rounded-xl border p-3 md:grid-cols-3">
-                      <select
-                        className="rounded-lg border border-[#22409a]/20 px-3 py-2 text-sm outline-none"
-                        value={req.name}
-                        onChange={(e) =>
-                          setCreateForm((p) => {
-                            const requirements = [...p.requirements];
-                            requirements[idx] = { ...requirements[idx], name: e.target.value };
-                            return { ...p, requirements };
-                          })
-                        }
-                      >
-                        <option value="">{t("selectAWorker")}</option>
-                        {availableWorkerTypes.map((worker) => (
-                          <option key={worker.value} value={worker.value}>
-                            {t(worker.label)}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="number"
-                        min={1}
-                        className="rounded-lg border border-[#22409a]/20 px-3 py-2 text-sm outline-none"
-                        value={req.count}
-                        onChange={(e) =>
-                          setCreateForm((p) => {
-                            const requirements = [...p.requirements];
-                            requirements[idx] = {
-                              ...requirements[idx],
-                              count: Number(e.target.value) || 1,
-                            };
-                            return { ...p, requirements };
-                          })
-                        }
-                        placeholder={t("count")}
-                      />
-                      <input
-                        type="number"
-                        min={1}
-                        className="rounded-lg border border-[#22409a]/20 px-3 py-2 text-sm outline-none"
-                        value={req.payPerDay}
-                        onChange={(e) =>
-                          setCreateForm((p) => {
-                            const requirements = [...p.requirements];
-                            requirements[idx] = { ...requirements[idx], payPerDay: e.target.value };
-                            return { ...p, requirements };
-                          })
-                        }
-                        placeholder={t("pricePerDay")}
-                      />
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="text-sm font-medium text-[#22409a] hover:underline"
-                    onClick={() =>
-                      setCreateForm((p) => ({
-                        ...p,
-                        requirements: [...p.requirements, { name: "", count: 1, payPerDay: "" }],
-                      }))
-                    }
-                  >
-                    + {t("addNeed")}
-                  </button>
-                </div>
-              ) : null}
-
-              {createStep === 3 ? (
-                <>
-                  <div className="rounded-xl border border-[#22409a]/10 bg-[#f8faff] p-3 md:col-span-2">
-                    <p className="text-sm font-semibold text-[#16264f]">{t("addressDate")}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">Set work location and start date.</p>
-                  </div>
-                  <label className="space-y-1 md:col-span-2">
-                    <span className="text-xs font-semibold text-[#22409a]">{t("address")}</span>
-                    <input
-                      required
-                      className="w-full rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
-                      value={createForm.address}
-                      onChange={(e) => setCreateForm((p) => ({ ...p, address: e.target.value }))}
-                      placeholder={t("address")}
-                    />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-xs font-semibold text-[#22409a]">{t("startDate")}</span>
-                    <input
-                      required
-                      type="date"
-                      className="w-full rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
-                      value={createForm.startDate}
-                      onChange={(e) => setCreateForm((p) => ({ ...p, startDate: e.target.value }))}
-                    />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-xs font-semibold text-[#22409a]">{t("duration")}</span>
-                    <input
-                      type="number"
-                      min={1}
-                      className="w-full rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
-                      value={createForm.duration}
-                      onChange={(e) =>
-                        setCreateForm((p) => ({ ...p, duration: Number(e.target.value) || 1 }))
-                      }
-                      placeholder={t("duration")}
-                    />
-                  </label>
-                </>
-              ) : null}
-
-              {createStep === 4 ? (
-                <>
-                  <textarea
-                    className="rounded-xl border border-[#22409a]/20 px-3 py-2 text-sm outline-none focus:border-[#22409a] md:col-span-2"
-                    value={createForm.description}
-                    onChange={(e) => setCreateForm((p) => ({ ...p, description: e.target.value }))}
-                    placeholder={t("description")}
-                    rows={3}
-                  />
-                  <div className="md:col-span-2">
-                    <p className="mb-1 text-sm font-semibold text-[#16264f]">{t("facilities")}</p>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      {(["food", "living", "travelling", "esi_pf"] as const).map((key) => (
-                        <label key={key} className="flex items-center gap-2 rounded-lg border p-2">
-                          <input
-                            type="checkbox"
-                            checked={createForm.facilities[key]}
-                            onChange={(e) =>
-                              setCreateForm((p) => ({
-                                ...p,
-                                facilities: { ...p.facilities, [key]: e.target.checked },
-                              }))
-                            }
-                          />
-                          <span>{t(key)}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              ) : null}
-
-              {createStep === 5 ? (
-                <>
-                  <div className="md:col-span-2">
-                    <div className="rounded-xl border border-[#22409a]/10 bg-[#f8faff] p-3">
-                      <p className="text-sm font-semibold text-[#16264f]">{t("images")}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">
-                        Upload up to 3 images for better reach.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="mb-1 block text-xs font-semibold text-[#22409a]">
-                      {t("workImages")}
-                    </label>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) =>
-                        setCreateForm((p) => ({
-                          ...p,
-                          images: Array.from(e.target.files || []).slice(0, 3),
-                        }))
-                      }
-                    />
-                    <p className="mt-1 text-xs text-gray-500">Max 3 images</p>
-                    {createForm.images.length > 0 ? (
-                      <p className="mt-1 text-xs text-[#22409a]">
-                        {createForm.images.length} file(s) selected
-                      </p>
-                    ) : null}
-                  </div>
-                </>
-              ) : null}
-
-              {createStep === 6 ? (
-                <div className="space-y-2 rounded-xl border bg-[#f8faff] p-3 text-sm md:col-span-2">
-                  <p><span className="font-semibold">{t("workType")}:</span> {t(createForm.type)}</p>
-                  <p><span className="font-semibold">{t("workSubType")}:</span> {t(createForm.subType)}</p>
-                  <p><span className="font-semibold">{t("address")}:</span> {createForm.address}</p>
-                  <p><span className="font-semibold">{t("startDate")}:</span> {createForm.startDate}</p>
-                  <p><span className="font-semibold">{t("duration")}:</span> {createForm.duration}</p>
-                  <p><span className="font-semibold">{t("images")}:</span> {createForm.images.length}</p>
-                  <p><span className="font-semibold">{t("workRequirements")}:</span></p>
-                  <ul className="ml-4 list-disc space-y-1">
-                    {createForm.requirements.map((req, idx) => (
-                      <li key={`review-req-${idx}`}>
-                        {t(req.name)} - {req.count} - ₹{req.payPerDay} {t("perDay")}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              <div className="md:col-span-2 flex items-center justify-between">
-                {createStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={onCreateBack}
-                    className="rounded-xl border border-[#22409a]/20 px-4 py-2 text-sm font-semibold text-[#22409a]"
-                  >
-                    {t("back")}
-                  </button>
-                ) : (
-                  <span />
-                )}
-
-                {createStep < 6 ? (
-                  <button
-                    type="button"
-                    onClick={onCreateNext}
-                    className="rounded-xl bg-[#22409a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f]"
-                  >
-                    {t("next")}
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={creatingService}
-                    className="rounded-xl bg-[#22409a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f] disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {creatingService ? t("submitting") : t("submitAllDetails")}
-                  </button>
-                )}
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      <CreateServiceModal
+        open={showCreateModal}
+        canCreate={canCreate}
+        onClose={closeCreateModal}
+        onCreated={async () => {
+          setMessage("Service created successfully.");
+          await Promise.all([fetchForTab("all", 1, false), fetchForTab("my", 1, false)]);
+        }}
+      />
     </section>
   );
 }

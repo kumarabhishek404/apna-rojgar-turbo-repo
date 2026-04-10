@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, MapPin, MoreHorizontal, Plus, Search, X } from "lucide-react";
+import { Clock, MapPin, Plus, Search, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import { useContainerMinWidth } from "@/lib/useContainerMinWidth";
@@ -9,9 +9,8 @@ import { useContainerMinWidth } from "@/lib/useContainerMinWidth";
 const TOOLBAR_SPACIOUS_PX = 560;
 
 const sortOptions = [
-  ["nearest", "Nearest", MapPin],
-  ["latest", "Latest", Clock],
-  ["more", "More", MoreHorizontal],
+  ["nearest", "nearest", MapPin],
+  ["latest", "latest", Clock],
 ] as const;
 
 export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarApi }) {
@@ -42,7 +41,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={`${t("search")} work...`}
+            placeholder={t("searchWorkPlaceholder", "Search work...")}
             autoFocus
             className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2"
           />
@@ -66,7 +65,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={`${t("search")} work...`}
+            placeholder={t("searchWorkPlaceholder", "Search work...")}
             className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2 sm:max-w-md"
           />
         ) : null}
@@ -81,7 +80,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
                   ? "border-[#22409a]/40 bg-[#eef3ff] text-[#22409a] shadow-sm"
                   : "border-[#22409a]/20 bg-white text-[#22409a] hover:bg-[#eef3ff]"
               }`}
-              aria-label={`${t("search")} work...`}
+              aria-label={t("searchWorkPlaceholder", "Search work...")}
               aria-expanded={compactSearchOpen}
             >
               <Search className="h-[1.125rem] w-[1.125rem]" strokeWidth={2} aria-hidden />
@@ -118,8 +117,9 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
             role="group"
             aria-label="Sort services"
           >
-            {sortOptions.map(([key, label, Icon]) => {
+            {sortOptions.map(([key, labelKey, Icon]) => {
               const active = sortBy === key;
+              const label = t(labelKey, labelKey);
               return (
                 <button
                   key={key}

@@ -1,15 +1,28 @@
 "use client";
 
 import ServicesPage from "@/app/webapp/services/ServicesPageClient";
+import ProfilePage from "@/app/webapp/profile/page";
+import MyWorkPage from "@/app/webapp/my-services/page";
+import AppliedServicesPage from "@/app/webapp/applied-services/page";
+import SettingsPage from "@/app/webapp/settings/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import Link from "next/link";
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { clearAuth, getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   BriefcaseBusiness,
+  ClipboardList,
   Download,
   Info,
   LogOut,
@@ -18,7 +31,7 @@ import {
   type LucideIcon,
   Settings,
   Share2,
-  User,
+  Languages,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -42,9 +55,12 @@ function DashboardSidebarContent({
   userName,
   userMobile,
   userInitial,
+  viewProfileLabel,
   onNavigate,
   onDismiss,
   brandSurface = "sidebar",
+  onShareWebsite,
+  onShareApp,
 }: {
   pathname: string;
   router: ReturnType<typeof useRouter>;
@@ -54,43 +70,53 @@ function DashboardSidebarContent({
   userName: string;
   userMobile: string;
   userInitial: string;
+  viewProfileLabel: string;
   onNavigate?: () => void;
   onDismiss?: () => void;
   brandSurface?: "sidebar" | "drawer";
+  onShareWebsite?: () => void;
+  onShareApp?: () => void;
 }) {
+  const { t } = useLanguage();
   const isDrawer = brandSurface === "drawer";
   const gutter = isDrawer ? "px-4" : "px-0.5";
   const dividerInset = isDrawer ? "mx-4" : "";
+  const isProfileActive = pathname === "/my-profile";
 
   const brandSidebar =
-    "group w-[calc(100%+2rem)] -mx-4 -mt-4 flex min-h-[3.875rem] shrink-0 items-center gap-3 rounded-t-3xl border-b border-slate-200/80 bg-white px-4 py-3 transition-colors hover:bg-slate-50/95";
+    "group w-[calc(100%+2rem)] -mx-4 -mt-4 flex min-h-[4.75rem] shrink-0 items-center gap-3 rounded-t-3xl border-b border-slate-200/80 bg-white px-4 py-3.5 transition-colors hover:bg-slate-50/95";
   const brandDrawerShell =
-    "flex w-full min-h-[3.875rem] shrink-0 items-stretch overflow-hidden rounded-tr-3xl border-b border-slate-200/80 bg-white pt-[max(1rem,env(safe-area-inset-top,0px))]";
+    "flex w-full min-h-[4.75rem] shrink-0 items-stretch overflow-hidden rounded-tr-3xl border-b border-slate-200/80 bg-white pt-[max(1rem,env(safe-area-inset-top,0px))]";
   const brandLinkInner =
-    "group flex min-w-0 flex-1 items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50/95";
+    "group flex min-w-0 flex-1 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-slate-50/95";
 
   const navItemBase =
     brandSurface === "drawer"
-      ? "flex min-h-[2.875rem] items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-medium transition duration-150 active:scale-[0.99]"
-      : "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition duration-150";
+      ? "flex min-h-[2.875rem] cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-[14px] font-medium transition duration-150 active:scale-[0.99]"
+      : "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition duration-150";
   const navInactive = `${navItemBase} text-white/[0.88] hover:bg-white/12 hover:text-white`;
   const navActive = `${navItemBase} bg-white text-[#152a5c] shadow-[0_6px_20px_rgba(0,0,0,0.18)]`;
+  const navMotion = {
+    whileHover: { x: 3, scale: 1.01 },
+    whileTap: { scale: 0.985 },
+    transition: { duration: 0.16, ease: "easeOut" as const },
+  };
 
   const brandMark = (
     <>
-      <span className="relative aspect-square h-[2.375rem] w-[2.375rem] shrink-0 overflow-hidden rounded-full bg-slate-50 ring-1 ring-slate-200/70">
+      <span className="relative aspect-square h-[2.5rem] w-[2.5rem] shrink-0 overflow-hidden rounded-full bg-transparent">
         <Image
           src={LOGO}
           alt=""
           fill
-          sizes="38px"
-          className="rounded-full object-contain p-1.5"
+          sizes="40px"
+          className="rounded-full object-contain"
           priority
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[1.05rem] font-bold leading-snug tracking-[-0.025em] text-[#152a5c] transition-colors group-hover:text-[#22409a]">
-          Apna Rojgar
+        <p className="truncate text-[1.9rem] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#1a2f69] transition-colors group-hover:text-[#22409a]">
+          {t("brandName", "Apna Rojgar")}
         </p>
       </div>
     </>
@@ -100,13 +126,18 @@ function DashboardSidebarContent({
     <div className="flex h-full min-h-0 flex-col">
       {isDrawer && onDismiss ? (
         <div className={brandDrawerShell}>
-          <Link href="/" aria-label="Apna Rojgar home" className={brandLinkInner} onClick={onNavigate}>
+          <Link
+            href="/"
+            aria-label="Apna Rojgar home"
+            className={brandLinkInner}
+            onClick={onNavigate}
+          >
             {brandMark}
           </Link>
           <button
             type="button"
             onClick={onDismiss}
-            className="flex min-w-[3.25rem] items-center justify-center border-l border-slate-200/70 text-slate-500 transition hover:bg-slate-100 active:bg-slate-200/80"
+            className="flex min-w-[3.25rem] cursor-pointer items-center justify-center border-l border-slate-200/70 text-slate-500 transition hover:bg-slate-100 active:bg-slate-200/80"
             aria-label="Close menu"
           >
             <X size={22} strokeWidth={1.75} />
@@ -124,21 +155,38 @@ function DashboardSidebarContent({
       />
 
       <div className={`mb-1 flex shrink-0 items-center gap-3 py-1 ${gutter}`}>
-        {userPhoto ? (
-          <img
-            src={userPhoto}
-            alt={userName}
-            className="h-11 w-11 rounded-full object-cover ring-2 ring-white/50 shadow-md ring-offset-2 ring-offset-[#1e3f8a]"
-          />
-        ) : (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/15 text-sm font-bold text-white shadow-inner backdrop-blur-sm">
-            {userInitial}
+        <Link
+          href="/my-profile"
+          onClick={onNavigate}
+          className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 transition ${
+            isProfileActive
+              ? "bg-white/12 ring-1 ring-white/20"
+              : "hover:bg-white/8"
+          }`}
+        >
+          {userPhoto ? (
+            <img
+              src={userPhoto}
+              alt={userName}
+              className="h-11 w-11 rounded-full object-cover ring-2 ring-white/50 shadow-md ring-offset-2 ring-offset-[#1e3f8a]"
+            />
+          ) : (
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/15 text-sm font-bold text-white shadow-inner backdrop-blur-sm">
+              {userInitial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-white">
+              {userName}
+            </p>
+            <p className="truncate text-xs text-white/80">
+              {userMobile || "No mobile number"}
+            </p>
+            <p className="mt-0.5 text-[11px] font-semibold text-[#d5e2ff]">
+              {viewProfileLabel}
+            </p>
           </div>
-        )}
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">{userName}</p>
-          <p className="truncate text-xs text-white/60">{userMobile || "No mobile number"}</p>
-        </div>
+        </Link>
       </div>
 
       <div
@@ -154,35 +202,41 @@ function DashboardSidebarContent({
             const Icon = item.icon;
             if (item.external) {
               return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={onNavigate}
-                  className={navInactive}
-                >
-                  <Icon size={18} className="shrink-0 text-white/75" strokeWidth={1.75} />
-                  <span>{item.label}</span>
-                </a>
+                <motion.div key={item.label} {...navMotion}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={onNavigate}
+                    className={navInactive}
+                  >
+                    <Icon
+                      size={18}
+                      className="shrink-0 text-white/75"
+                      strokeWidth={1.75}
+                    />
+                    <span>{item.label}</span>
+                  </a>
+                </motion.div>
               );
             }
 
             const active = pathname === item.href;
             return (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={onNavigate}
-                className={active ? navActive : navInactive}
-              >
-                <Icon
-                  size={18}
-                  className={`shrink-0 ${active ? "text-[#22409a]" : "text-white/80"}`}
-                  strokeWidth={1.75}
-                />
-                <span>{item.label}</span>
-              </Link>
+              <motion.div key={item.label} {...navMotion}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={active ? navActive : navInactive}
+                >
+                  <Icon
+                    size={18}
+                    className={`shrink-0 ${active ? "text-[#22409a]" : "text-white/80"}`}
+                    strokeWidth={1.75}
+                  />
+                  <span>{item.label}</span>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
@@ -191,44 +245,91 @@ function DashboardSidebarContent({
           className={`my-4 h-px shrink-0 bg-gradient-to-r from-transparent via-white/15 to-transparent ${dividerInset}`}
         />
 
+        {isDrawer ? (
+          <div className="mb-4 space-y-2">
+            <a
+              href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
+              target="_blank"
+              rel="noreferrer"
+              onClick={onNavigate}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+            >
+              <Download size={16} />
+              {t("installApp", "Install App")}
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                onShareWebsite?.();
+                onNavigate?.();
+              }}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-white/15"
+            >
+              <Share2 size={16} />
+              {t("shareWebsite", "Share Website")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                onShareApp?.();
+                onNavigate?.();
+              }}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-sm font-semibold text-[#22409a] transition hover:bg-[#eef3ff]"
+            >
+              <Share2 size={16} />
+              {t("shareAppLink", "Share App Link")}
+            </button>
+          </div>
+        ) : null}
+
         <div
           className={`mt-auto space-y-0.5 ${isDrawer ? "pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]" : "pb-0.5"}`}
         >
           {bottomItems.map((item) => {
             const Icon = item.icon;
-            if (item.label === "Logout") {
+            if (item.href === "/logout") {
               return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => {
-                    onNavigate?.();
-                    clearAuth();
-                    router.push("/");
-                  }}
-                  className={`${navItemBase} w-full text-left text-red-200 hover:bg-red-500/20 hover:text-red-50`}
-                >
-                  <Icon size={18} className="shrink-0 text-red-300" strokeWidth={1.75} />
-                  <span>{item.label}</span>
-                </button>
+                <motion.div key={item.label} {...navMotion}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate?.();
+                      clearAuth();
+                      router.push("/");
+                    }}
+                    className={`${navItemBase} w-full text-left text-red-200 hover:bg-red-500/20 hover:text-red-50`}
+                  >
+                    <Icon
+                      size={18}
+                      className="shrink-0 text-red-300"
+                      strokeWidth={1.75}
+                    />
+                    <span>{item.label}</span>
+                  </button>
+                </motion.div>
               );
             }
 
             const isActive = pathname === item.href;
             return (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={onNavigate}
-                className={isActive ? navActive : navInactive}
-              >
-                <Icon
-                  size={18}
-                  className={isActive ? "shrink-0 text-[#22409a]" : "shrink-0 text-white/80"}
-                  strokeWidth={1.75}
-                />
-                <span>{item.label}</span>
-              </Link>
+              <motion.div key={item.label} {...navMotion}>
+                <Link
+                  href={item.href}
+                  onClick={onNavigate}
+                  className={isActive ? navActive : navInactive}
+                >
+                  <Icon
+                    size={18}
+                    className={
+                      isActive
+                        ? "shrink-0 text-[#22409a]"
+                        : "shrink-0 text-white/80"
+                    }
+                    strokeWidth={1.75}
+                  />
+                  <span>{item.label}</span>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
@@ -238,13 +339,23 @@ function DashboardSidebarContent({
 }
 
 export default function ServicesDashboard() {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+  const currentYear = 2024;
   const pathname = usePathname();
+  const isProfileView = pathname === "/my-profile";
+  const isMyWorkView = pathname === "/my-work";
+  const isAppliedView = pathname === "/applied-service";
+  const isAboutView = pathname === "/about";
+  const isSettingsView = pathname === "/settings";
+  const isAllServicesView = pathname === "/all-services" || pathname === "/";
+  const isServicesListView = isAllServicesView;
   const router = useRouter();
   const mainScrollRef = useRef<HTMLElement | null>(null);
+  const languageMenuRef = useRef<HTMLDivElement | null>(null);
   const [filtersMerged, setFiltersMerged] = useState(false);
   const [toolbarApi, setToolbarApi] = useState<ServicesToolbarApi | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
   const [userName, setUserName] = useState("User");
   const [userMobile, setUserMobile] = useState("");
@@ -255,42 +366,42 @@ export default function ServicesDashboard() {
     () =>
       [
         {
-          label: "My Services",
+          label: t("allServices", "All Services"),
+          href: "/all-services",
+          icon: BriefcaseBusiness,
+        },
+        {
+          label: t("myServices", "My Services"),
           href: "/my-work",
-          icon: BriefcaseBusiness,
+          icon: ClipboardList,
         },
         {
-          label: "My Profile",
-          href: "/my-profile",
-          icon: User,
-        },
-        {
-          label: "Applied Services",
+          label: t("appliedServices", "Applied Services"),
           href: "/applied-service",
-          icon: BriefcaseBusiness,
+          icon: ClipboardList,
         },
         {
-          label: "About us",
+          label: t("aboutUs", "About us"),
           href: "/about",
           icon: Info,
         },
         {
-          label: "Install App",
+          label: t("installApp", "Install App"),
           href: "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
           external: true,
           icon: Download,
         },
       ] satisfies PrimaryNavItem[],
-    [],
+    [t],
   );
 
   const bottomItems = useMemo(
     () =>
       [
-        { label: "Settings", href: "/settings", icon: Settings },
-        { label: "Logout", href: "/logout", icon: LogOut },
+        { label: t("settings", "Settings"), href: "/settings", icon: Settings },
+        { label: t("logOut", "Logout"), href: "/logout", icon: LogOut },
       ] satisfies BottomNavItem[],
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -339,6 +450,29 @@ export default function ServicesDashboard() {
     };
   }, [mobileNavOpen, closeMobileNav]);
 
+  useEffect(() => {
+    if (!languageOpen) return;
+    const onOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (
+        languageMenuRef.current &&
+        target &&
+        !languageMenuRef.current.contains(target)
+      ) {
+        setLanguageOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLanguageOpen(false);
+    };
+    document.addEventListener("mousedown", onOutsideClick);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onOutsideClick);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [languageOpen]);
+
   const shareLink = async (url: string, title: string) => {
     try {
       if (navigator.share) {
@@ -351,6 +485,11 @@ export default function ServicesDashboard() {
       // noop for dismissed share action
     }
   };
+  const microLift = {
+    whileHover: { y: -2, scale: 1.01 },
+    whileTap: { scale: 0.985 },
+    transition: { duration: 0.16, ease: "easeOut" as const },
+  };
 
   const sidebarProps = {
     pathname,
@@ -361,6 +500,14 @@ export default function ServicesDashboard() {
     userName,
     userMobile,
     userInitial,
+    viewProfileLabel: t("viewYourProfile", "View Your Profile"),
+    onShareWebsite: () =>
+      shareLink(window.location.origin, "Apna Rojgar Website"),
+    onShareApp: () =>
+      shareLink(
+        "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
+        "Apna Rojgar App",
+      ),
   };
 
   return (
@@ -368,7 +515,9 @@ export default function ServicesDashboard() {
       {/* Mobile slide-in menu */}
       <div
         className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
-          mobileNavOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          mobileNavOpen
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
         }`}
         aria-hidden={!mobileNavOpen}
         onClick={closeMobileNav}
@@ -404,37 +553,104 @@ export default function ServicesDashboard() {
             <div className="flex min-w-0 flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setMobileNavOpen(true)}
-                    className="inline-flex shrink-0 rounded-xl border border-[#22409a]/20 bg-white p-2 text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#eef3ff] lg:hidden"
+                    className="inline-flex shrink-0 cursor-pointer rounded-xl border border-[#22409a]/20 bg-white p-2 text-[#22409a] shadow-sm transition hover:bg-[#eef3ff] lg:hidden"
                     aria-label="Open menu"
+                    {...microLift}
                   >
                     <Menu size={22} />
-                  </button>
+                  </motion.button>
                   <h1 className="min-w-0 truncate text-lg font-bold tracking-tight text-[#16264f] md:text-xl">
-                    {t("allServices")}
+                    {isProfileView
+                      ? t("myProfile", "My Profile")
+                      : isMyWorkView
+                        ? t("myServices", "My Services")
+                        : isAppliedView
+                          ? t("appliedServices", "Applied Services")
+                          : isAboutView
+                            ? t("aboutUs", "About us")
+                            : isSettingsView
+                              ? t("settings", "Settings")
+                              : t("allServices")}
                   </h1>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <a
+                  <div className="relative" ref={languageMenuRef}>
+                    <motion.button
+                      type="button"
+                      onClick={() => setLanguageOpen((prev) => !prev)}
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#22409a]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#edf3ff]"
+                      aria-haspopup="menu"
+                      aria-expanded={languageOpen}
+                      {...microLift}
+                    >
+                      <Languages size={14} />
+                      {language === "hi" ? "हिन्दी" : "English"}
+                    </motion.button>
+                    {languageOpen ? (
+                      <div
+                        role="menu"
+                        className="absolute right-0 z-30 mt-2 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.16)]"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLanguage("en");
+                            setLanguageOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition ${
+                            language === "en"
+                              ? "bg-[#eef3ff] font-semibold text-[#22409a]"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                          role="menuitem"
+                        >
+                          <span>English</span>
+                          {language === "en" ? <span>✓</span> : null}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLanguage("hi");
+                            setLanguageOpen(false);
+                          }}
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition ${
+                            language === "hi"
+                              ? "bg-[#eef3ff] font-semibold text-[#22409a]"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                          role="menuitem"
+                        >
+                          <span>हिन्दी</span>
+                          {language === "hi" ? <span>✓</span> : null}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                  <motion.a
                     href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#22409a]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#edf3ff]"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#22409a]/20 bg-white px-2.5 py-1.5 text-xs font-semibold text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#edf3ff] lg:px-3"
+                    {...microLift}
                   >
                     <Download size={14} />
-                    Install App
-                  </a>
-                  <button
+                    <span className="hidden sm:inline">{t("installApp", "Install App")}</span>
+                  </motion.a>
+                  <motion.button
                     type="button"
-                    onClick={() => shareLink(window.location.origin, "Apna Rojgar Website")}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#22409a]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#edf3ff]"
+                    onClick={() =>
+                      shareLink(window.location.origin, "Apna Rojgar Website")
+                    }
+                    className="hidden cursor-pointer items-center gap-1.5 rounded-lg border border-[#22409a]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#edf3ff] lg:inline-flex"
+                    {...microLift}
                   >
                     <Share2 size={14} />
-                    Share Website
-                  </button>
-                  <button
+                    {t("shareWebsite", "Share Website")}
+                  </motion.button>
+                  <motion.button
                     type="button"
                     onClick={() =>
                       shareLink(
@@ -442,14 +658,15 @@ export default function ServicesDashboard() {
                         "Apna Rojgar App",
                       )
                     }
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#22409a] to-[#3154bf] px-3 py-1.5 text-xs font-semibold text-white shadow-[0_8px_16px_rgba(34,64,154,0.25)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2947a8]"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-gradient-to-r from-[#22409a] to-[#3154bf] px-2.5 py-1.5 text-xs font-semibold text-white shadow-[0_8px_16px_rgba(34,64,154,0.25)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2947a8] lg:px-3"
+                    {...microLift}
                   >
                     <Share2 size={14} />
-                    Share App Link
-                  </button>
+                    <span className="hidden sm:inline">{t("shareAppLink", "Share App Link")}</span>
+                  </motion.button>
                 </div>
               </div>
-              {filtersMerged && toolbarApi ? (
+              {isServicesListView && filtersMerged && toolbarApi ? (
                 <div className="min-w-0 border-t border-slate-200/80 pt-3">
                   <ServicesToolbarFilters api={toolbarApi} />
                 </div>
@@ -457,21 +674,45 @@ export default function ServicesDashboard() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-slate-200/90 bg-white p-3 shadow-[0_20px_50px_rgba(34,64,154,0.08)] md:p-4">
-            <Suspense
-              fallback={
-                <div className="flex min-h-[200px] items-center justify-center text-sm text-slate-500">
-                  Loading…
-                </div>
-              }
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="rounded-3xl border border-slate-200/90 bg-white p-3 shadow-[0_20px_50px_rgba(34,64,154,0.08)] md:p-4"
             >
-              <ServicesPage
-                filtersMerged={filtersMerged}
-                onFiltersMergedChange={setFiltersMerged}
-                onRegisterToolbar={setToolbarApi}
-                scrollContainerRef={mainScrollRef}
-              />
-            </Suspense>
+              {isProfileView ? (
+                <ProfilePage />
+              ) : isMyWorkView ? (
+                <MyWorkPage />
+              ) : isAppliedView ? (
+                <AppliedServicesPage />
+              ) : isSettingsView ? (
+                <SettingsPage />
+              ) : (
+                <Suspense
+                  fallback={
+                    <div className="flex min-h-[200px] items-center justify-center text-sm text-slate-500">
+                      Loading…
+                    </div>
+                  }
+                >
+                  <ServicesPage
+                    filtersMerged={isServicesListView ? filtersMerged : false}
+                    onFiltersMergedChange={setFiltersMerged}
+                    onRegisterToolbar={setToolbarApi}
+                    scrollContainerRef={mainScrollRef}
+                  />
+                </Suspense>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="pb-2 pt-1 text-center text-xs text-slate-500">
+            {"\u00a9"} {currentYear} {t("apnaRojgarIndia", "Apna Rojgar India")}
+            . {t("allRightsReserved", "All rights reserved.")}
           </div>
         </main>
       </div>
