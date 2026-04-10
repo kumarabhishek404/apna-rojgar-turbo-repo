@@ -1,7 +1,10 @@
 import { Share } from "react-native";
 import moment from "moment";
 import { getDynamicWorkerType } from "@/utils/i18n";
-import { PLAY_STORE_LISTING_URL } from "@/utils/serviceDeepLink";
+import {
+  getServiceDetailsUniversalLink,
+  PLAY_STORE_LISTING_URL,
+} from "@/utils/serviceDeepLink";
 import { getServiceJobId } from "@/utils/serviceJobId";
 
 export type ShareMessageOptions = {
@@ -36,6 +39,7 @@ const HI = {
   step4: "४) उस काम पर टैप करें, पूरा विवरण पढ़ें और आवेदन करें।",
   playStoreLine:
     "ऐप फोन में नहीं है तो पहले प्ले स्टोर से \"अपना रोज़गार\" इंस्टॉल करें, फिर ऊपर के चरण दोहराएँ।",
+  openLinkDirectly: "या क्लिक करें",
   footer: "अपना रोज़गार से साझा किया गया। ज़रूरतमंद मजदूर भाइयों तक पहुँचाएँ।",
 } as const;
 
@@ -189,6 +193,8 @@ export function buildServiceShareMessage(
   }
 
   const jobRef = getServiceJobId(service);
+  const serviceId = String(service?._id || "").trim();
+  const directLink = serviceId ? getServiceDetailsUniversalLink(serviceId) : "";
   if (jobRef) {
     blocks.push(HI.divider);
     blocks.push(`*${HI.jobIdTitle}*\n${jobRef}`);
@@ -196,6 +202,9 @@ export function buildServiceShareMessage(
       `*${HI.howToOpenInApp}*\n${HI.step1}\n${HI.step2}\n${HI.step3}\n${HI.step4}`,
     );
     blocks.push(`${HI.playStoreLine}\n${PLAY_STORE_LISTING_URL}`);
+  }
+  if (directLink) {
+    blocks.push(`🔗 ${HI.openLinkDirectly}: ${directLink}`);
   }
 
   blocks.push(`_${HI.footer}_`);

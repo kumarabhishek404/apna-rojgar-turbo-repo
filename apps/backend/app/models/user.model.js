@@ -84,6 +84,11 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    registrationSource: {
+      type: String,
+      enum: ["android", "ios", "web"],
+      default: "web",
+    },
     likedServices: [
       {
         type: mongoose.Types.ObjectId,

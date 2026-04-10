@@ -3,6 +3,7 @@ import auth from "@react-native-firebase/auth";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 import axios from "axios";
+import { Platform } from "react-native";
 
 const checkMobileExistance = async (payload: any) => {
   console.log("Pay---", payload);
@@ -30,7 +31,16 @@ const checkMobileExistance = async (payload: any) => {
 
 const register = async (payload: any) => {
   try {
-    const data = await API_CLIENT.makePostRequest("/auth/register", payload);
+    const source =
+      Platform.OS === "ios"
+        ? "ios"
+        : Platform.OS === "android"
+          ? "android"
+          : "web";
+    const data = await API_CLIENT.makePostRequest("/auth/register", {
+      ...payload,
+      source,
+    });
     router.push("/screens/auth/login");
     return data?.data;
   } catch (error: any) {

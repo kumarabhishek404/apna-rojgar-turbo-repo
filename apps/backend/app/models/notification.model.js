@@ -46,6 +46,10 @@ const notificationSchema = new mongoose.Schema(
         ref: "User", // Reference to the user who is the subject of the action
         required: true,
       },
+      serviceId: {
+        type: Schema.Types.ObjectId,
+        ref: "Service",
+      },
     },
     status: {
       type: String,

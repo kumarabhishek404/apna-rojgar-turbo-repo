@@ -5,6 +5,93 @@ import User from "../models/user.model.js";
 import logError from "../utils/addErrorLog.js";
 import { haversineDistance } from "../utils/functions.js";
 
+/**
+ * Public paginated list of service `_id`s for Next static export (shareable `/services/:id` URLs).
+ * No auth — only ObjectIds; details still require the existing authenticated service-info API in the browser.
+ */
+export const getPublicServiceIdsForStaticExport = async (req, res) => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 200));
+    const skip = (page - 1) * limit;
+    const query = {};
+    const [rows, total] = await Promise.all([
+      Service.find(query)
+        .select("_id")
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Service.countDocuments(query),
+    ]);
+    const pages = Math.ceil(total / limit) || 1;
+    res.json({
+      success: true,
+      data: {
+        ids: rows.map((r) => String(r._id)),
+        page,
+        limit,
+        total,
+        pages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching public service ids for static export:", error);
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong.",
+    });
+  }
+};
+
+/**
+ * Public aggregate counters for website hero stats.
+ * No auth required.
+ */
+export const getPublicPlatformStats = async (req, res) => {
+  try {
+    const [totalUsers, totalServices, cityStats] = await Promise.all([
+      User.countDocuments(),
+      Service.countDocuments(),
+      User.aggregate([
+        { $match: { status: "ACTIVE", address: { $type: "string", $ne: "" } } },
+        {
+          $project: {
+            cityKey: {
+              $toLower: {
+                $trim: {
+                  input: { $arrayElemAt: [{ $split: ["$address", ","] }, 0] },
+                },
+              },
+            },
+          },
+        },
+        { $match: { cityKey: { $ne: "" } } },
+        { $group: { _id: "$cityKey" } },
+        { $count: "totalCities" },
+      ]),
+    ]);
+    const totalCities = cityStats?.[0]?.totalCities || 0;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalUsers,
+        totalServices,
+        totalCities,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching public platform stats:", error);
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong.",
+    });
+  }
+};
+
 export const getAllServices = async (req, res) => {
   const { _id } = req.user;
   const { page = 1, limit = 10, status } = req.query;

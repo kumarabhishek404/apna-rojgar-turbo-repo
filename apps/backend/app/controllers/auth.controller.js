@@ -17,9 +17,16 @@ function generateVerificationCode() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+function normalizeRegistrationSource(value) {
+  if (!value) return null;
+  const v = String(value).toLowerCase().trim();
+  if (v === "android" || v === "ios" || v === "web") return v;
+  return null;
+}
+
 export const handleRegister = async (req, res) => {
   try {
-    const { mobile, locale, countryCode } = req.body;
+    const { mobile, locale, countryCode, source } = req.body;
     console.log("API HIT: Register Endpoint", req.body);
 
     if (!mobile || !countryCode || !locale) {
@@ -38,10 +45,18 @@ export const handleRegister = async (req, res) => {
       });
     }
 
+    const headerSource = normalizeRegistrationSource(
+      req.headers["x-client-platform"],
+    );
+    const bodySource = normalizeRegistrationSource(source);
+    const registrationSource = bodySource || headerSource || "web";
+
     const user = new User({
       locale,
       countryCode,
       mobile,
+      registrationSource,
+      status: "ACTIVE",
     });
 
     await user.save();

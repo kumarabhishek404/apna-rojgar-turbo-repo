@@ -7,9 +7,26 @@ import logError from "../utils/addErrorLog.js";
 
 let expo = new Expo();
 const Device = db.device;
+const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * Allow real push delivery only from deployed production runtime.
+ * Local/dev sessions must never send notifications to real users.
+ */
+const canDeliverNotifications = () => isProd;
 
 const sendBatchNotifications = async (userIds, messageData, req) => {
   try {
+    if (!canDeliverNotifications()) {
+      console.log(
+        `[Notification] Skipped batch send in '${process.env.NODE_ENV || "development"}' mode.`,
+      );
+      return {
+        success: false,
+        message: "Notification delivery disabled outside production",
+      };
+    }
+
     // Fetch users with notification consent
     const consentedUsers = await User.find({
       _id: { $in: userIds },
@@ -177,6 +194,16 @@ export const handleSendNotificationController = async (
   req
 ) => {
   try {
+    if (!canDeliverNotifications()) {
+      console.log(
+        `[Notification] Skipped send in '${process.env.NODE_ENV || "development"}' mode for user ${userId}.`,
+      );
+      return {
+        success: false,
+        message: "Notification delivery disabled outside production",
+      };
+    }
+
     // Fetch user details including notificationConsent
     const user = await User.findById(userId).select(
       "locale.language status notificationConsent"
@@ -265,6 +292,16 @@ export const handlebroadcastNotificationController = async (
   req
 ) => {
   try {
+    if (!canDeliverNotifications()) {
+      console.log(
+        `[Notification] Skipped broadcast in '${process.env.NODE_ENV || "development"}' mode.`,
+      );
+      return {
+        success: false,
+        message: "Notification delivery disabled outside production",
+      };
+    }
+
     // Fetch users who have enabled notification consent
     const usersWithConsent = await User.find({
       _id: { $in: userIds },

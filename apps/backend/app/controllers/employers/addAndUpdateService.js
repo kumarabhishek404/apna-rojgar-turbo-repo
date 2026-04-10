@@ -17,7 +17,19 @@ export const handleAddService = asyncHandler(async (req, res) => {
 
     const { _id } = req.user;
 
+    const validateOnly =
+      req.body?.validateOnly === "true" ||
+      req.body?.validateOnly === true;
+
     const serviceData = await parseAndValidateRequest(req);
+
+    if (validateOnly) {
+      return res.status(200).json({
+        success: true,
+        validated: true,
+        message: "Service details verified. You can submit to publish.",
+      });
+    }
 
     const employer = await User.findById(_id);
     if (!employer) {

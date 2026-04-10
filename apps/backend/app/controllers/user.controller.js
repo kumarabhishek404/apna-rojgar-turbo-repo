@@ -99,6 +99,82 @@ export const handleUpdateInfo = async (req, res) => {
       skills,
     } = req.body;
 
+    const parseSkillsInput = (rawSkills) => {
+      if (!rawSkills) return null;
+      if (Array.isArray(rawSkills)) {
+        // Handle accidental shape: ["[{\"skill\":\"jutai\"}]"]
+        if (
+          rawSkills.length === 1 &&
+          typeof rawSkills[0] === "string" &&
+          rawSkills[0].trim().startsWith("[")
+        ) {
+          try {
+            const parsed = JSON.parse(rawSkills[0]);
+            return Array.isArray(parsed) ? parsed : null;
+          } catch {
+            return null;
+          }
+        }
+        return rawSkills;
+      }
+      if (typeof rawSkills === "string") {
+        try {
+          const parsed = JSON.parse(rawSkills);
+          return Array.isArray(parsed) ? parsed : null;
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    };
+
+    const normalizeGeoLocation = (rawGeoLocation) => {
+      if (!rawGeoLocation) return null;
+      let candidate = rawGeoLocation;
+      if (typeof candidate === "string") {
+        try {
+          candidate = JSON.parse(candidate);
+        } catch {
+          return null;
+        }
+      }
+      if (!candidate || typeof candidate !== "object") return null;
+      const type = candidate.type === "Point" ? "Point" : null;
+      const coordinates = Array.isArray(candidate.coordinates)
+        ? candidate.coordinates.map((value) => Number(value))
+        : null;
+      if (
+        !type ||
+        !coordinates ||
+        coordinates.length !== 2 ||
+        !Number.isFinite(coordinates[0]) ||
+        !Number.isFinite(coordinates[1])
+      ) {
+        return null;
+      }
+      return { type: "Point", coordinates };
+    };
+    const geocodeAddress = async (rawAddress) => {
+      const safeAddress = typeof rawAddress === "string" ? rawAddress.trim() : "";
+      if (!safeAddress) return null;
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+            `${safeAddress}, India`,
+          )}`,
+        );
+        const payload = await response.json();
+        const first = Array.isArray(payload) ? payload[0] : null;
+        if (!first?.lat || !first?.lon) return null;
+        const lat = Number(first.lat);
+        const lon = Number(first.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+        return { type: "Point", coordinates: [lon, lat] };
+      } catch {
+        return null;
+      }
+    };
+
     console.log("Fetching user from database");
     const user = await User.findById(_id);
     if (!user) {
@@ -116,10 +192,24 @@ export const handleUpdateInfo = async (req, res) => {
       age,
       locale,
       savedAddresses,
-      geoLocation,
       role,
-      skills,
     };
+
+    const parsedGeoLocation = normalizeGeoLocation(geoLocation);
+    if (parsedGeoLocation) {
+      updateData.geoLocation = parsedGeoLocation;
+    } else {
+      const geocodedFromAddress = await geocodeAddress(address || user?.address);
+      if (geocodedFromAddress) {
+        updateData.geoLocation = geocodedFromAddress;
+      } else {
+        // Heal legacy invalid geoLocation values stored as malformed strings.
+        const existingGeoLocation = normalizeGeoLocation(user?.geoLocation);
+        if (!existingGeoLocation) {
+          updateData.geoLocation = { type: "Point", coordinates: [0, 0] };
+        }
+      }
+    }
 
     // Update email if valid and changed
     if (
@@ -147,10 +237,32 @@ export const handleUpdateInfo = async (req, res) => {
     //   }
     // }
 
-    // Handle skills update (prevent duplicate skills)
-    if (skills && Array.isArray(skills)) {
-      const uniqueSkills = [...new Set([...user.skills, ...skills])];
-      updateData.skills = uniqueSkills;
+    // Handle skills update from multipart/json body and normalize duplicates by skill id.
+    const parsedSkills = parseSkillsInput(skills);
+    if (parsedSkills) {
+      const normalizedSkills = parsedSkills
+        .map((item) => {
+          if (!item) return null;
+          if (typeof item === "string") {
+            return { skill: item, pricePerDay: null };
+          }
+          if (typeof item === "object" && item.skill) {
+            return {
+              skill: item.skill,
+              pricePerDay:
+                item.pricePerDay == null || item.pricePerDay === ""
+                  ? null
+                  : Number(item.pricePerDay),
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      const uniqueBySkill = Array.from(
+        new Map(normalizedSkills.map((item) => [String(item.skill), item])).values(),
+      );
+      updateData.skills = uniqueBySkill;
     }
 
     // Normalize address before saving
