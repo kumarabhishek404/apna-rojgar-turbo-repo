@@ -1,17 +1,23 @@
 import Navbar from "@/components/Navbar";
-import ContractorDetailPage from "@/app/webapp/contractors/[id]/page";
+import ContractorDetailView from "@/components/webapp/ContractorDetailView";
+import { staticExportDynamicParamList } from "@/lib/staticExportDynamicRoutes";
 
-export default function ContractorDetailsRoutePage({
+export function generateStaticParams(): { id: string }[] {
+  return staticExportDynamicParamList();
+}
+
+export default async function ContractorDetailsRoutePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   return (
     <>
       <Navbar />
       <div className="px-4 py-8">
         <div className="mx-auto max-w-6xl">
-          <ContractorDetailPage params={params} />
+          <ContractorDetailView id={id} />
         </div>
       </div>
     </>

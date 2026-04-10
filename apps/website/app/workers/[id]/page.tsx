@@ -1,17 +1,23 @@
 import Navbar from "@/components/Navbar";
-import WorkerDetailPage from "@/app/webapp/workers/[id]/page";
+import WorkerDetailView from "@/components/webapp/WorkerDetailView";
+import { staticExportDynamicParamList } from "@/lib/staticExportDynamicRoutes";
 
-export default function WorkerDetailsRoutePage({
+export function generateStaticParams(): { id: string }[] {
+  return staticExportDynamicParamList();
+}
+
+export default async function WorkerDetailsRoutePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   return (
     <>
       <Navbar />
       <div className="px-4 py-8">
         <div className="mx-auto max-w-6xl">
-          <WorkerDetailPage params={params} />
+          <WorkerDetailView id={id} />
         </div>
       </div>
     </>
