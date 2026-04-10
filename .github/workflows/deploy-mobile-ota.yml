@@ -1,5 +1,9 @@
 # Publishes an Expo EAS Update (OTA) for Android — no native rebuild.
 # Required repo secret: EXPO_TOKEN (https://expo.dev/accounts/[account]/settings/access-tokens)
+#
+# Runs on push to main only if the pushed commit message contains [deploy:all] or [deploy:app].
+# Plain git push (no tag) does not run this workflow. Use: ./scripts/push-deploy.sh -app
+# Or put [deploy:app] in your commit message. workflow_dispatch always runs.
 
 name: Deploy Mobile (EAS OTA)
 
@@ -18,6 +22,13 @@ permissions:
 
 jobs:
   ota:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+        github.ref == 'refs/heads/main' && (
+          contains(github.event.head_commit.message, '[deploy:all]') ||
+          contains(github.event.head_commit.message, '[deploy:app]')
+        ))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

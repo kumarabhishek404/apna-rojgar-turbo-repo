@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,7 @@ import LOGO from "../public/logo.png";
 import { useLanguage } from "@/components/LanguageProvider";
 import { clearAuth, getAuth, loginUser, saveAuth, validateStoredToken } from "@/lib/auth";
 
-const Navbar = () => {
+function NavbarContent() {
   const { t, language, setLanguage } = useLanguage();
   const searchParams = useSearchParams();
   const [scrolled, setScrolled] = useState(false);
@@ -438,6 +438,19 @@ const Navbar = () => {
       ) : null}
     </>
   );
-};
+}
 
-export default Navbar;
+export default function Navbar() {
+  return (
+    <Suspense
+      fallback={
+        <nav
+          className="sticky top-0 z-50 flex min-h-[72px] w-full items-center justify-between bg-[#22409a] px-6 py-4 lg:px-12"
+          aria-hidden
+        />
+      }
+    >
+      <NavbarContent />
+    </Suspense>
+  );
+}

@@ -116,7 +116,9 @@ export default function DashboardPage() {
         method: "PATCH",
         body: JSON.stringify({ _id: user._id, role: nextRole }),
       });
-      setUser((prev) => ({ ...(prev || {}), role: response.data?.role || nextRole }));
+      setUser((prev) =>
+        prev ? { ...prev, role: response.data?.role ?? nextRole } : null,
+      );
       const auth = getAuth();
       saveAuth({ ...(auth || {}), user: response.data, token: auth?.token || response.token });
       setMessage("Role updated successfully.");

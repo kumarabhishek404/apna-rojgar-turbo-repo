@@ -1,10 +1,10 @@
 "use client";
 
-import ServicesPage from "@/app/webapp/services/page";
+import ServicesPage from "@/app/webapp/services/ServicesPageClient";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { clearAuth, getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -458,12 +458,20 @@ export default function ServicesDashboard() {
           </div>
 
           <div className="rounded-3xl border border-slate-200/90 bg-white p-3 shadow-[0_20px_50px_rgba(34,64,154,0.08)] md:p-4">
-            <ServicesPage
-              filtersMerged={filtersMerged}
-              onFiltersMergedChange={setFiltersMerged}
-              onRegisterToolbar={setToolbarApi}
-              scrollContainerRef={mainScrollRef}
-            />
+            <Suspense
+              fallback={
+                <div className="flex min-h-[200px] items-center justify-center text-sm text-slate-500">
+                  Loading…
+                </div>
+              }
+            >
+              <ServicesPage
+                filtersMerged={filtersMerged}
+                onFiltersMergedChange={setFiltersMerged}
+                onRegisterToolbar={setToolbarApi}
+                scrollContainerRef={mainScrollRef}
+              />
+            </Suspense>
           </div>
         </main>
       </div>
