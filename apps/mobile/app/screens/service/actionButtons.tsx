@@ -767,7 +767,8 @@ const ServiceActionButtons = ({
             ? mutationUnApplyService?.mutate
             : () =>
                 mutationApplyService?.mutate({
-                  workers: selectedWorkers,
+                  // Solo worker skill picker — never send team worker ids (stale state could trigger mediator path on API).
+                  workers: [],
                   serviceId: id,
                   skills: selectedSkill,
                 }),

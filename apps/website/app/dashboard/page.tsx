@@ -7,6 +7,7 @@ import {
   getAuth,
   saveAuth,
 } from "@/lib/auth";
+import { localizeApiErrorMessage } from "@/lib/i18n";
 
 type UserInfo = {
   _id: string;
@@ -177,7 +178,11 @@ export default function DashboardPage() {
       );
       const data = await response.json();
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Create service failed");
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : "Create service failed",
+        );
       }
       setMessage("Service created successfully.");
       setCreateForm((prev) => ({ ...prev, subType: "", description: "", skillName: "" }));

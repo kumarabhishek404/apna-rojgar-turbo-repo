@@ -32,6 +32,10 @@ import StickButtonWithWall from "@/components/commons/StickButtonWithWall";
 import APP_CONTEXT from "@/app/context/locale";
 import MobileNumberField from "@/components/inputs/MobileNumber";
 import ContactSupport from "@/components/commons/ContactSupport";
+import {
+  DEV_OTP_PLACEHOLDER,
+  shouldSkipOtpClient,
+} from "@/utils/devOtp";
 
 export default function Login() {
   APP_CONTEXT?.useApp();
@@ -41,6 +45,7 @@ export default function Login() {
   const [countryCode, setCountryCode] = useState<string>("+91");
 
   const [step, setStep] = useState<1 | 2>(1);
+  const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const { mobile } = useLocalSearchParams();
   const [loading, setLoading] = useState(false);
@@ -98,8 +103,13 @@ export default function Login() {
   /* -------------------- STEP 1: SEND OTP -------------------- */
   const sendOtpMutation = useMutation({
     mutationFn: (payload: { mobile: string }) => AUTH.signIn(payload),
-    onSuccess: () => {
+    onSuccess: (data: { otpSessionId?: string }) => {
       setLoginError(null);
+      setOtpSessionId(
+        typeof data?.otpSessionId === "string" && data.otpSessionId.trim()
+          ? data.otpSessionId.trim()
+          : null,
+      );
       setStep(2);
     },
     onError: (err: any) => {
@@ -109,8 +119,11 @@ export default function Login() {
 
   /* -------------------- STEP 2: VERIFY OTP -------------------- */
   const verifyOtpMutation = useMutation({
-    mutationFn: (payload: { mobile: string; otp: string }) =>
-      AUTH.signIn(payload),
+    mutationFn: (payload: {
+      mobile: string;
+      otp: string;
+      otpSessionId?: string;
+    }) => AUTH.signIn(payload),
 
     onSuccess: async (response) => {
       const { token, user } = response;
@@ -167,12 +180,20 @@ export default function Login() {
 
   /* -------------------- HANDLERS -------------------- */
   const handleLoginPress = (data: any) => {
+    if (shouldSkipOtpClient()) {
+      verifyOtpMutation.mutate({
+        mobile: data.mobile,
+        otp: DEV_OTP_PLACEHOLDER,
+      });
+      return;
+    }
     if (step === 1) {
       sendOtpMutation.mutate({ mobile: data.mobile });
     } else {
       verifyOtpMutation.mutate({
         mobile: data.mobile,
         otp: data.otp,
+        ...(otpSessionId ? { otpSessionId } : {}),
       });
     }
   };
@@ -327,7 +348,13 @@ export default function Login() {
 
                 <Button
                   isPrimary
-                  title={step === 1 ? t("sendOtp") : t("login")}
+                  title={
+                    shouldSkipOtpClient()
+                      ? t("login")
+                      : step === 1
+                        ? t("sendOtp")
+                        : t("login")
+                  }
                   onPress={handleSubmit(handleLoginPress)}
                   style={styles.loginButtonWrapper}
                   textStyle={{ fontSize: 24, fontWeight: "600" }}

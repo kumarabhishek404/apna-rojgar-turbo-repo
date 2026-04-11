@@ -15,6 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import * as ImageManipulator from "expo-image-manipulator";
+import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
 import TOAST from "@/app/hooks/toast";
 import CustomText from "../commons/CustomText";
 import { t } from "@/utils/translationHelper";
@@ -102,11 +103,12 @@ const SelfieScreen = ({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.6,
+        quality: 0.85,
       });
 
       if (!result.canceled && result.assets[0]?.uri) {
-        setProfilePicture(result.assets[0].uri);
+        const uri = await normalizePickedImageUriForUpload(result.assets[0].uri);
+        setProfilePicture(uri);
         onBlur();
       }
     } catch (err) {

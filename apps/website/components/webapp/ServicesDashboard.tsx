@@ -3,7 +3,6 @@
 import ServicesPage from "@/app/webapp/services/ServicesPageClient";
 import ProfilePage from "@/app/webapp/profile/page";
 import MyWorkPage from "@/app/webapp/my-services/page";
-import AppliedServicesPage from "@/app/webapp/applied-services/page";
 import SettingsPage from "@/app/webapp/settings/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
@@ -45,6 +44,13 @@ type PrimaryNavItem = {
 };
 
 type BottomNavItem = { label: string; href: string; icon: LucideIcon };
+
+/** Home `/` renders the same “all services” view as `/all-services`; keep sidebar highlight in sync. */
+function isPrimaryNavActive(pathname: string, href: string) {
+  if (pathname === href) return true;
+  if (href === "/all-services" && pathname === "/") return true;
+  return false;
+}
 
 function DashboardSidebarContent({
   pathname,
@@ -221,7 +227,7 @@ function DashboardSidebarContent({
               );
             }
 
-            const active = pathname === item.href;
+            const active = isPrimaryNavActive(pathname, item.href);
             return (
               <motion.div key={item.label} {...navMotion}>
                 <Link
@@ -348,7 +354,9 @@ export default function ServicesDashboard() {
   const isAboutView = pathname === "/about";
   const isSettingsView = pathname === "/settings";
   const isAllServicesView = pathname === "/all-services" || pathname === "/";
-  const isServicesListView = isAllServicesView;
+  const isAppliedServiceRoute = pathname === "/applied-service";
+  /** Same list chrome (merged toolbar on scroll) for browse + applied jobs. */
+  const isServicesListView = isAllServicesView || isAppliedServiceRoute;
   const router = useRouter();
   const mainScrollRef = useRef<HTMLElement | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
@@ -688,7 +696,21 @@ export default function ServicesDashboard() {
               ) : isMyWorkView ? (
                 <MyWorkPage />
               ) : isAppliedView ? (
-                <AppliedServicesPage />
+                <Suspense
+                  fallback={
+                    <div className="flex min-h-[200px] items-center justify-center text-sm text-slate-500">
+                      Loading…
+                    </div>
+                  }
+                >
+                  <ServicesPage
+                    forcedTab="applied"
+                    filtersMerged={isServicesListView ? filtersMerged : false}
+                    onFiltersMergedChange={setFiltersMerged}
+                    onRegisterToolbar={setToolbarApi}
+                    scrollContainerRef={mainScrollRef}
+                  />
+                </Suspense>
               ) : isSettingsView ? (
                 <SettingsPage />
               ) : (

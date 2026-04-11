@@ -41,6 +41,7 @@ import USE_LOGOUT from "@/app/hooks/useLogout";
 import JoinWhatsAppGroup from "@/components/commons/JoinWhatsappGroup";
 import FollowInstagram from "@/components/commons/JoinInstagramAccount";
 import RoleSwitcher from "@/components/commons/RoleSwitcher";
+import { isCoreProfileIncomplete } from "@/constants/functions";
 
 const UserProfile = () => {
   APP_CONTEXT?.useApp();
@@ -384,10 +385,9 @@ const UserProfile = () => {
               </CustomHeading>
             </View>
 
-            {(!userDetails?.email?.value ||
-              !userDetails?.address ||
-              !userDetails?.dateOfBirth ||
-              !userDetails?.gender) && <ProfileNotification />}
+            {isCoreProfileIncomplete(userDetails as Record<string, unknown>) && (
+              <ProfileNotification />
+            )}
 
             {(userDetails?.status === "SUSPENDED" ||
               userDetails?.status === "DISABLED") && <InactiveAccountMessage />}

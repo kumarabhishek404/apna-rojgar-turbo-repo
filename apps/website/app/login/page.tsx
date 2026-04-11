@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { loginUser, saveAuth } from "@/lib/auth";
+import { DEV_OTP_PLACEHOLDER, shouldSkipOtpClient } from "@/lib/devOtp";
 
 export default function LoginPage() {
+  const skipOtp = shouldSkipOtpClient();
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -24,7 +27,22 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
+      if (skipOtp) {
+        const response = await loginUser({
+          mobile: mobile.trim(),
+          otp: DEV_OTP_PLACEHOLDER,
+        });
+        saveAuth({ user: response?.user, token: response?.token });
+        setMessage("Login successful. You are now logged in on website.");
+        window.location.href = "/all-services";
+        return;
+      }
       const response = await loginUser({ mobile: mobile.trim() });
+      setOtpSessionId(
+        typeof response?.otpSessionId === "string" && response.otpSessionId.trim()
+          ? response.otpSessionId.trim()
+          : null,
+      );
       setOtpSent(true);
       setMessage(response?.message || "OTP sent successfully");
     } catch (requestError) {
@@ -46,7 +64,11 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const response = await loginUser({ mobile: mobile.trim(), otp: otp.trim() });
+      const response = await loginUser({
+        mobile: mobile.trim(),
+        otp: otp.trim(),
+        ...(otpSessionId ? { otpSessionId } : {}),
+      });
       saveAuth({ user: response?.user, token: response?.token });
       setMessage("Login successful. You are now logged in on website.");
       window.location.href = "/all-services";
@@ -62,7 +84,9 @@ export default function LoginPage() {
       <div className="mx-auto w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="text-2xl font-bold text-[#22409a]">Login</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Login with mobile OTP using existing app backend.
+          {skipOtp
+            ? "Development mode: sign in with your mobile number only (no SMS)."
+            : "Login with mobile OTP using existing app backend."}
         </p>
 
         {!otpSent ? (
@@ -94,7 +118,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full rounded-lg bg-[#22409a] px-4 py-2.5 font-semibold text-white transition hover:bg-[#1b357f] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {loading ? (skipOtp ? "Signing in..." : "Sending OTP...") : skipOtp ? "Login" : "Send OTP"}
             </button>
           </form>
         ) : (

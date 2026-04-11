@@ -405,14 +405,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    resetPasswordToken: {
-      type: String,
-      default: "",
-    },
-    resetPasswordExpires: {
-      type: Date,
-      default: null,
-    },
     emailVerificationCode: {
       type: String,
       default: "",

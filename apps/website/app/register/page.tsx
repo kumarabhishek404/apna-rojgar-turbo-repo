@@ -7,7 +7,7 @@ import { registerUser, saveAuth } from "@/lib/auth";
 export default function RegisterPage() {
   const [mobile, setMobile] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
-  const [locale, setLocale] = useState("en");
+  const [locale, setLocale] = useState("hi");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -86,8 +86,8 @@ export default function RegisterPage() {
               onChange={(event) => setLocale(event.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-[#22409a] focus:outline-none"
             >
-              <option value="en">English</option>
               <option value="hi">Hindi</option>
+              <option value="en">English</option>
             </select>
           </div>
 

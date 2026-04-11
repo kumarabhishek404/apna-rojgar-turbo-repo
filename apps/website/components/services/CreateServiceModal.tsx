@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { ADDSERVICESTEPS, WORKTYPES } from "@/constants";
 import { getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
+import { localizeApiErrorMessage } from "@/lib/i18n";
 import { ArrowRight, Check, ChevronDown, Loader2 } from "lucide-react";
 
 type RequirementDraft = { name: string; count: number; payPerDay: string };
@@ -148,7 +149,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
     return () => {
       cancelled = true;
     };
-  }, [open, createStep, canCreate]);
+  }, [open, createStep, canCreate, t]);
 
   const onCreateNext = () => {
     if (createStep === 1 && (!createForm.type || !createForm.subType)) {
@@ -229,7 +230,11 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       });
       const data = await response.json();
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Service create failed");
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : t("serviceCreateFailed", "Service create failed"),
+        );
       }
 
       setCreateForm({

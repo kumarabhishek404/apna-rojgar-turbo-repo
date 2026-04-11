@@ -17,6 +17,8 @@ import {
   saveAuth,
   validateStoredToken,
 } from "@/lib/auth";
+import { DEV_OTP_PLACEHOLDER, shouldSkipOtpClient } from "@/lib/devOtp";
+import { localizeApiErrorMessage } from "@/lib/i18n";
 import { STATES, WORKERTYPES } from "@/constants";
 
 type RegisterRole = "WORKER" | "MEDIATOR" | "EMPLOYER";
@@ -54,6 +56,7 @@ function NavbarContent() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
+  const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
   const [authStep, setAuthStep] = useState<UnifiedAuthStep>("mobile");
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
@@ -181,6 +184,7 @@ function NavbarContent() {
   const openLoginModal = () => {
     setAuthError("");
     setAuthMessage("");
+    setOtpSessionId(null);
     setAuthStep("mobile");
     setMissingProfileFields([]);
     setProfileMissingFields([]);
@@ -192,6 +196,7 @@ function NavbarContent() {
     setShowLoginModal(false);
     setMobile("");
     setOtp("");
+    setOtpSessionId(null);
     setAuthStep("mobile");
     setAuthError("");
     setAuthMessage("");
@@ -240,9 +245,18 @@ function NavbarContent() {
       setAuthError(t("mobileNumberIsRequired", "Mobile number is required"));
       return;
     }
+    if (shouldSkipOtpClient()) {
+      await verifyOtp(DEV_OTP_PLACEHOLDER);
+      return;
+    }
     setAuthLoading(true);
     try {
       const response = await loginUser({ mobile: mobile.trim() });
+      setOtpSessionId(
+        typeof response?.otpSessionId === "string" && response.otpSessionId.trim()
+          ? response.otpSessionId.trim()
+          : null,
+      );
       setAuthStep("otp");
       setAuthMessage(response?.message || t("otpSentSuccess", "OTP sent successfully"));
     } catch (error) {
@@ -254,10 +268,11 @@ function NavbarContent() {
     }
   };
 
-  const verifyOtp = async () => {
+  const verifyOtp = async (otpOverride?: string) => {
     setAuthError("");
     setAuthMessage("");
-    if (!otp.trim()) {
+    const code = (otpOverride ?? otp).trim();
+    if (!code) {
       setAuthError(t("otpRequired", "Code is required"));
       return;
     }
@@ -265,7 +280,8 @@ function NavbarContent() {
     try {
       const response = await loginUser({
         mobile: mobile.trim(),
-        otp: otp.trim(),
+        otp: code,
+        ...(otpSessionId ? { otpSessionId } : {}),
       });
       const token = response?.token;
       if (!token) {
@@ -721,7 +737,11 @@ function NavbarContent() {
       });
       const data = await response.json();
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Profile completion failed");
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : t("profileCompletionFailed", "Profile completion failed"),
+        );
       }
 
       saveAuth({
@@ -1592,7 +1612,7 @@ function NavbarContent() {
                 ) : authStep === "otp" ? (
                   <button
                     type="button"
-                    onClick={verifyOtp}
+                    onClick={() => void verifyOtp()}
                     disabled={authLoading}
                     className="group w-full rounded-xl bg-gradient-to-r from-[#22409a] to-[#3154bf] px-4 py-3.5 font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.32)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2947a8] disabled:cursor-not-allowed disabled:opacity-70"
                   >

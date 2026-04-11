@@ -45,13 +45,16 @@ type Props = {
   service: ServiceItem;
   /** Precomputed km from user/device to service (preferred over raw `service.distance`). */
   distanceKm?: number | null;
-  showApply: boolean;
-  selectedSkill: string;
-  onSkillChange: (serviceId: string, skill: string) => void;
-  onApply: (serviceId: string) => void;
   onViewDetails: (serviceId: string) => void;
   t: (key: string, fallback?: string) => string;
-};
+} & (
+  | {
+      showApply: true;
+      /** Opens the details modal and scrolls to the apply section (no inline apply on the card). */
+      onOpenApplyInDetails: (serviceId: string) => void;
+    }
+  | { showApply: false; onOpenApplyInDetails?: undefined }
+);
 
 type RequirementEntry = NonNullable<ServiceItem["requirements"]>[number];
 
@@ -143,7 +146,10 @@ function RequirementsCarousel({
                 ? "w-5 bg-[#22409a]"
                 : "w-1.5 bg-[#22409a]/25 hover:bg-[#22409a]/40"
             }`}
-            onClick={() => setIndex(i)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIndex(i);
+            }}
           />
         ))}
       </div>
@@ -155,9 +161,7 @@ function ServiceCardComponent({
   service,
   distanceKm = null,
   showApply,
-  selectedSkill,
-  onSkillChange,
-  onApply,
+  onOpenApplyInDetails,
   onViewDetails,
   t,
 }: Props) {
@@ -183,13 +187,16 @@ function ServiceCardComponent({
   const distanceLabel =
     resolvedDistanceKm != null ? formatDistanceLabel(resolvedDistanceKm) : "";
 
+  const openDetails = () => onViewDetails(service._id);
+
   return (
     <motion.article
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
-      className="overflow-hidden rounded-2xl border border-[#22409a]/10 bg-white shadow-[0_10px_30px_rgba(34,64,154,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(34,64,154,0.14)]"
+      className="cursor-pointer overflow-hidden rounded-2xl border border-[#22409a]/10 bg-white shadow-[0_10px_30px_rgba(34,64,154,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(34,64,154,0.14)]"
+      onClick={openDetails}
     >
       <div className="relative h-36 w-full shrink-0 bg-slate-100 sm:h-40">
         {firstImage ? (
@@ -241,6 +248,10 @@ function ServiceCardComponent({
           </h3>
           <p className="mt-1 line-clamp-1 text-sm text-gray-600">
             {service.address || "-"}
+          </p>
+          <p className="mt-2 text-xs text-gray-600">
+            <span className="font-semibold text-[#16264f]">{t("status", "Status")}: </span>
+            {t(service.status?.toLowerCase?.() || "unknown", service.status || "-")}
           </p>
           {distanceLabel ? (
             <div className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-emerald-200/80 bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-1 text-xs font-semibold text-emerald-950 shadow-sm">
@@ -318,7 +329,7 @@ function ServiceCardComponent({
           </>
         ) : null}
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => onViewDetails(service._id)}
@@ -327,32 +338,14 @@ function ServiceCardComponent({
             {t("viewDetails")}
           </button>
           {showApply ? (
-            <>
-              <select
-                className="min-w-40 flex-1 rounded-lg border border-[#22409a]/20 bg-white p-2 text-sm"
-                value={selectedSkill}
-                onChange={(event) =>
-                  onSkillChange(service._id, event.target.value)
-                }
-              >
-                <option value="">{t("selectSkill")}</option>
-                {(service.requirements || []).map((req) => (
-                  <option
-                    key={`${service._id}-${req.name}-opt`}
-                    value={req.name}
-                  >
-                    {req.name} ({req.count})
-                  </option>
-                ))}
-              </select>
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={() => onApply(service._id)}
-                className="rounded-lg bg-[#22409a] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f]"
-              >
-                {t("apply")}
-              </motion.button>
-            </>
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onOpenApplyInDetails(service._id)}
+              className="rounded-lg bg-[#22409a] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f]"
+            >
+              {t("apply")}
+            </motion.button>
           ) : null}
         </div>
       </div>

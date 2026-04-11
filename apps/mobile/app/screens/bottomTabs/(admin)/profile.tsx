@@ -43,6 +43,7 @@ import ProfileNotification from "@/components/commons/CompletProfileNotify";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import ProfileTabs from "../../../../components/inputs/TabsSwitcher";
 import PendingApprovalMessage from "@/components/commons/PendingApprovalAccountMessage";
+import { isCoreProfileIncomplete } from "@/constants/functions";
 
 const AdminProfile = () => {
   APP_CONTEXT?.useApp();
@@ -358,10 +359,9 @@ const AdminProfile = () => {
               </CustomHeading>
             </View>
 
-            {(!userDetails?.email?.value ||
-              !userDetails?.address ||
-              !userDetails?.name ||
-              !userDetails?.gender) && <ProfileNotification />}
+            {isCoreProfileIncomplete(userDetails as Record<string, unknown>) && (
+              <ProfileNotification />
+            )}
 
             {(userDetails?.status === "SUSPENDED" ||
               userDetails?.status === "DISABLED") && <InactiveAccountMessage />}

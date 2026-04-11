@@ -2,9 +2,7 @@ import express from "express";
 import {
   handleRegister,
   handleLogin,
-  handleResetPassword,
-  handleForgotPasswordCode,
-  handleSetForgotPassword,
+  handleSmsOtp,
   handleSendEmailVerificationCode,
   handleVerifyEmailVerificationCode,
   handleValidateToken,
@@ -23,9 +21,8 @@ const router = express.Router();
 router.get("/validate-token", handleValidateToken);
 router.post("/register", handleRegister);
 router.post("/login", handleLogin);
-router.patch("/reset-password", verifyToken, handleResetPassword);
-router.post("/forgot-password-code", handleForgotPasswordCode);
-router.patch("/set-forgot-password", handleSetForgotPassword);
+/** Registration OTP — backend (dev bypass) instead of client → 2factor */
+router.post("/sms-otp", handleSmsOtp);
 
 // Email Verification
 

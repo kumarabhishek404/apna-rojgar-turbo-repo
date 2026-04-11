@@ -3,7 +3,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
-import ServiceDetailsView from "@/components/webapp/ServiceDetailsView";
+import ServiceDetailsView, {
+  type WebServiceApplyPayload,
+} from "@/components/webapp/ServiceDetailsView";
+
+const APPLY_SECTION_SCROLL_ID = "webapp-service-apply-section";
 
 export type ServiceDetailsModalProps = {
   open: boolean;
@@ -11,9 +15,10 @@ export type ServiceDetailsModalProps = {
   onClose: () => void;
   canApply?: boolean;
   applying?: boolean;
-  selectedSkill?: string;
-  onSkillChange?: (skill: string) => void;
-  onApply?: (skill: string) => Promise<void> | void;
+  /** When true, scrolls the modal body to the apply block after details load. */
+  scrollToApply?: boolean;
+  onApply?: (payload: WebServiceApplyPayload) => Promise<void> | void;
+  onAppliedMutation?: () => void;
 };
 
 export default function ServiceDetailsModal({
@@ -22,11 +27,42 @@ export default function ServiceDetailsModal({
   onClose,
   canApply = false,
   applying = false,
-  selectedSkill = "",
-  onSkillChange,
+  scrollToApply = false,
   onApply,
+  onAppliedMutation,
 }: ServiceDetailsModalProps) {
   const { t } = useLanguage();
+
+  useEffect(() => {
+    if (!open || !scrollToApply || !serviceId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 40;
+    /** DOM timer handles are `number` in the browser; avoid `ReturnType<typeof setTimeout>` (Node types use `Timeout`). */
+    const timeoutIds: number[] = [];
+
+    const tryScroll = () => {
+      if (cancelled) return;
+      const el = document.getElementById(APPLY_SECTION_SCROLL_ID);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        timeoutIds.push(window.setTimeout(tryScroll, 80));
+      }
+    };
+
+    const startId = window.requestAnimationFrame(() => {
+      timeoutIds.push(window.setTimeout(tryScroll, 60));
+    });
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(startId);
+      timeoutIds.forEach((id) => window.clearTimeout(id));
+    };
+  }, [open, scrollToApply, serviceId]);
 
   useEffect(() => {
     if (!open) return;
@@ -80,9 +116,8 @@ export default function ServiceDetailsModal({
                 id={serviceId}
                 canApply={canApply}
                 applying={applying}
-                selectedSkill={selectedSkill}
-                onSkillChange={onSkillChange}
                 onApply={onApply}
+                onAppliedMutation={onAppliedMutation}
               />
             </div>
           </motion.div>

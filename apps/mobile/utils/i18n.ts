@@ -1,4 +1,3 @@
-import * as Localization from "expo-localization";
 import { I18n } from "i18n-js";
 import { useCallback } from "react";
 
@@ -34,8 +33,8 @@ const i18n: any = new I18n({
   ur, // Urdu
 });
 
-// Set the default locale to the device's locale
-i18n.locale = Localization.getLocales()[0].languageCode;
+/** Default UI is Hindi until persisted `LanguageAtom` hydrates from storage. */
+i18n.locale = "hi";
 
 // Enable fallback to default language if a translation key is missing
 i18n.fallbacks = true;

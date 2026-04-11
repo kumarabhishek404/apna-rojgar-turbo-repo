@@ -2,7 +2,6 @@ import { router } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
-import axios from "axios";
 import { Platform } from "react-native";
 
 const checkMobileExistance = async (payload: any) => {
@@ -79,81 +78,36 @@ const signIn = async (payload: any) => {
   }
 };
 
-// const forgotPassword = async (payload: any) => {
-//   try {
-//     const response: any = await API_CLIENT.makePostRequest(
-//       `/auth/forgot-password-code`,
-//       payload
-//     );
-//     TOAST?.success("Password reset code is sent to your email successfully");
-//     return response;
-//   } catch (error: any) {
-//     console.log(
-//       `[Forget Password] [userService] An error occured while sending reset password code to your email : `,
-//       error
-//     );
-//     TOAST?.error(
-//       error?.response?.data?.message ||
-//         "An error occured while sending reset password code to your email"
-//     );
-//     throw error;
-//   }
-// };
-
-// const resetPassword = async (payload: any) => {
-//   try {
-//     const data = await API_CLIENT.makePatchRequest(
-//       `/auth/set-forgot-password`,
-//       payload
-//     );
-//     return data;
-//   } catch (error: any) {
-//     console.log(
-//       `[Forget Password] [userService] An error occured while reseting password : `,
-//       error
-//     );
-//     TOAST?.error(
-//       error?.response?.data?.message ||
-//         "An error occurred while reseting password"
-//     );
-//     throw error;
-//   }
-// };
-
+/** Registration OTP — backend only (dev SMS bypass, no client → 2factor). */
 const sendOTP = async (mobile: string) => {
   console.log("mobile--", mobile);
-
   try {
-    const response = await axios?.get(
-      `https://2factor.in/API/V1/${"d0fa8207-0f16-11f0-8b17-0200cd936042"}/SMS/${mobile}/AUTOGEN/temp1`,
-    );
-    console.log("response", response?.data);
-
-    return response?.data;
-    // return {
-    //   Status: "Success",
-    // };
-  } catch (error) {
+    const res = await API_CLIENT.makePostRequest("/auth/sms-otp", { mobile });
+    return res.data;
+  } catch (error: any) {
     console.error("Error during mobile number authentication:", error);
-    TOAST.error(`Error during mobile number authentication: ${error}`);
+    TOAST.error(
+      error?.response?.data?.message ||
+        "Error during mobile number authentication",
+    );
     throw error;
   }
 };
 
-const verifyOTP = async (payload: any) => {
+const verifyOTP = async (payload: {
+  mobile: string;
+  otp: string;
+  otpSessionId?: string;
+}) => {
   console.log("payload", payload);
   try {
-    const response = await axios?.get(
-      `https://2factor.in/API/V1/${"d0fa8207-0f16-11f0-8b17-0200cd936042"}/SMS/VERIFY3/${
-        payload?.mobile
-      }/${payload?.otp}`,
-    );
-    return response?.data;
-    // return {
-    //   Status: "Success",
-    // };
-  } catch (error) {
+    const res = await API_CLIENT.makePostRequest("/auth/sms-otp", payload);
+    return res.data;
+  } catch (error: any) {
     console.error("Error verifying OTP code:", error);
+    TOAST.error(
+      error?.response?.data?.message || "Error verifying OTP code",
+    );
     throw error;
   }
 };
@@ -201,8 +155,6 @@ const AUTH = {
   checkMobileExistance,
   register,
   signIn,
-  // forgotPassword,
-  // resetPassword,
   sendOTP,
   verifyOTP,
   sendEmailCode,

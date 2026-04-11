@@ -677,6 +677,8 @@
   "addingNewService": "Adding New Service",
   "completeProfileButton": "Complete Profile",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to unlock all features!",
+  "completeProfileRoleHint": "Use the role switcher on your profile to choose Employer, Worker, or Mediator.",
+  "completeProfilePhotoHint": "Choose a clear photo of yourself for your profile.",
   "pleaseFetchNearestWorkers": "Please Fetch your current location to get nearest workers",
   "callWorker": "Call Worker",
   "callTeamAdmin": "Call Team Admin",

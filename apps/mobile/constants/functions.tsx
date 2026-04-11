@@ -68,6 +68,49 @@ export const isEmptyObject = (obj: object) => {
   return Object?.entries(obj).length === 0 && obj.constructor === Object;
 };
 
+const trimmedCoreField = (v: unknown) => {
+  if (v == null) return "";
+  return typeof v === "string" ? v.trim() : String(v).trim();
+};
+
+/** Fields that gate the "Complete profile" banner on the profile tab. */
+export const CORE_PROFILE_FIELDS = [
+  "name",
+  "age",
+  "address",
+  "gender",
+  "role",
+  "mobile",
+  "profilePicture",
+] as const;
+
+export type CoreProfileField = (typeof CORE_PROFILE_FIELDS)[number];
+
+/** Which core profile fields are empty on the user record. */
+export function getMissingCoreProfileFields(
+  user: Record<string, unknown> | null | undefined,
+): Set<CoreProfileField> {
+  const missing = new Set<CoreProfileField>();
+  if (!user) {
+    CORE_PROFILE_FIELDS.forEach((k) => missing.add(k));
+    return missing;
+  }
+  if (!trimmedCoreField(user.name)) missing.add("name");
+  if (!trimmedCoreField(user.age)) missing.add("age");
+  if (!trimmedCoreField(user.address)) missing.add("address");
+  if (!trimmedCoreField(user.gender)) missing.add("gender");
+  if (!trimmedCoreField(user.role)) missing.add("role");
+  if (!trimmedCoreField(user.mobile)) missing.add("mobile");
+  if (!trimmedCoreField(user.profilePicture)) missing.add("profilePicture");
+  return missing;
+}
+
+export function isCoreProfileIncomplete(
+  user: Record<string, unknown> | null | undefined,
+): boolean {
+  return getMissingCoreProfileFields(user).size > 0;
+}
+
 export const removeEmptyStrings = (arr: any) => {
   return arr?.filter((item: any) => item !== "");
 };

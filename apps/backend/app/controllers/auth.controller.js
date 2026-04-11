@@ -1,11 +1,15 @@
 import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
 import logError from "../utils/addErrorLog.js";
 import { performance } from "perf_hooks";
 import axios from "axios";
 
 import User from "../models/user.model.js";
+import {
+  rememberOtpSession,
+  getOtpSession,
+  clearOtpSession,
+} from "../utils/otpSessionCache.js";
 
 const generateToken = (user) => {
   return jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -23,6 +27,57 @@ function normalizeRegistrationSource(value) {
   if (v === "android" || v === "ios" || v === "web") return v;
   return null;
 }
+
+function getTwoFactorApiKey() {
+  const key = process.env.TWOFACTOR_API_KEY;
+  if (key != null && String(key).trim()) return String(key).trim();
+  return "d0fa8207-0f16-11f0-8b17-0200cd936042";
+}
+
+function getTwoFactorTemplateName() {
+  const t = process.env.TWOFACTOR_TEMPLATE_NAME;
+  if (t != null && String(t).trim()) return String(t).trim();
+  return "temp1";
+}
+
+/**
+ * 2factor.in expects the number with country code (e.g. 91XXXXXXXXXX for India).
+ * Clients often send a 10-digit local number.
+ */
+function normalizePhoneForTwoFactor(mobile) {
+  const raw = String(mobile ?? "").replace(/\D/g, "");
+  if (raw.length === 10) return `91${raw}`;
+  if (raw.length === 12 && raw.startsWith("91")) return raw;
+  if (raw.length === 11 && raw.startsWith("0")) return `91${raw.slice(1)}`;
+  return raw;
+}
+
+function twoFactorResponseOk(data) {
+  return data && String(data.Status).toLowerCase() === "success";
+}
+
+/**
+ * Dev OTP bypass: no 2factor SMS; any 6-digit code verifies.
+ * Only when NODE_ENV is "development" (override with DEV_BYPASS_OTP=false or OTP_FORCE_LIVE=true).
+ * Production / staging / test: always real 2factor (session + VERIFY flow).
+ */
+function isDevOtpBypassEnabled() {
+  const forceLive = String(process.env.OTP_FORCE_LIVE ?? "").toLowerCase().trim();
+  if (forceLive === "1" || forceLive === "true" || forceLive === "yes") {
+    return false;
+  }
+  if (process.env.NODE_ENV !== "development") {
+    return false;
+  }
+  const raw = String(
+    process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "",
+  ).toLowerCase().trim();
+  if (raw === "0" || raw === "false" || raw === "no") return false;
+  if (raw === "1" || raw === "true" || raw === "yes") return true;
+  return true;
+}
+
+const DEV_OTP_PATTERN = /^\d{6}$/;
 
 export const handleRegister = async (req, res) => {
   try {
@@ -83,40 +138,177 @@ export const handleRegister = async (req, res) => {
 };
 
 const sendOTP = async (mobile) => {
-  console.log("mobile--", mobile);
+  const phoneKey = normalizePhoneForTwoFactor(mobile);
+  console.log("[auth] OTP send raw mobile:", mobile, "→ 2factor phone key:", phoneKey);
+
+  if (isDevOtpBypassEnabled()) {
+    console.warn(
+      "[auth] DEV_BYPASS_OTP: skipping SMS send (2factor). Use any 6-digit code to verify.",
+    );
+    clearOtpSession(phoneKey);
+    return { Status: "Success", Details: "dev-bypass-no-sms" };
+  }
+
+  if (!phoneKey || phoneKey.length < 10) {
+    throw new Error("Invalid mobile number for SMS");
+  }
+
+  const apiKey = getTwoFactorApiKey();
+  const template = getTwoFactorTemplateName();
+  /** Same shape as original integration: …/SMS/{no}/AUTOGEN/{templateName} */
+  const url = `https://2factor.in/API/V1/${apiKey}/SMS/${phoneKey}/AUTOGEN/${template}`;
 
   try {
-    const response = await axios?.get(
-      `https://2factor.in/API/V1/${"d0fa8207-0f16-11f0-8b17-0200cd936042"}/SMS/${mobile}/AUTOGEN/temp1`,
-    );
-    console.log("response", response?.data);
+    const response = await axios.get(url);
+    const data = response?.data;
+    console.log("[auth] 2factor send response:", data);
 
-    return response?.data;
+    if (!twoFactorResponseOk(data)) {
+      const detail =
+        (data && (data.Details || data.Message)) ||
+        JSON.stringify(data || {}) ||
+        "SMS send failed";
+      throw new Error(typeof detail === "string" ? detail : "SMS send failed");
+    }
+
+    /** AUTOGEN success: Details = session id for SMS/VERIFY (not VERIFY3/phone/otp). */
+    if (data?.Details && String(data.Details) !== "dev-bypass-no-sms") {
+      rememberOtpSession(phoneKey, data.Details);
+    }
+
+    return data;
   } catch (error) {
     console.error("Error during mobile number authentication:", error);
-    TOAST.error(`Error during mobile number authentication: ${error}`);
     throw error;
   }
 };
 
 const verifyOTP = async (payload) => {
-  console.log("payload", payload);
+  const otp = payload?.otp != null ? String(payload.otp).trim() : "";
+  const phoneKey = normalizePhoneForTwoFactor(payload?.mobile);
+  console.log("[auth] OTP verify phone key:", phoneKey);
+
+  if (isDevOtpBypassEnabled()) {
+    clearOtpSession(phoneKey);
+    if (DEV_OTP_PATTERN.test(otp)) {
+      console.warn("[auth] DEV_BYPASS_OTP: accepting 6-digit code without 2factor verify.");
+      return { Status: "Success", Details: "dev-bypass" };
+    }
+    return { Status: "Error", Details: "Dev mode: enter any 6-digit OTP" };
+  }
+
+  if (!phoneKey || !otp) {
+    return { Status: "Error", Details: "Missing mobile or OTP" };
+  }
+
+  const apiKey = getTwoFactorApiKey();
+  const explicitSession =
+    payload?.otpSessionId != null && String(payload.otpSessionId).trim()
+      ? String(payload.otpSessionId).trim()
+      : null;
+  const sessionId = explicitSession || getOtpSession(phoneKey);
+
   try {
-    const response = await axios?.get(
-      `https://2factor.in/API/V1/${"d0fa8207-0f16-11f0-8b17-0200cd936042"}/SMS/VERIFY3/${
-        payload?.mobile
-      }/${payload?.otp}`,
-    );
-    return response?.data;
+    let data;
+
+    if (sessionId) {
+      /** Official 2factor flow after AUTOGEN (session id from send response Details) */
+      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY/${sessionId}/${otp}`;
+      const response = await axios.get(url);
+      data = response?.data;
+      console.log("[auth] 2factor VERIFY (session) response:", data);
+    } else {
+      /**
+       * Legacy fallback: VERIFY3 with phone + OTP (older code path).
+       * Uses same normalized key as AUTOGEN send when possible.
+       */
+      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY3/${phoneKey}/${otp}`;
+      const response = await axios.get(url);
+      data = response?.data;
+      console.warn("[auth] 2factor VERIFY3 (legacy, no session) response:", data);
+    }
+
+    if (!twoFactorResponseOk(data)) {
+      return {
+        Status: "Error",
+        Details:
+          (data && (data.Details || data.Message)) || "Invalid or expired OTP",
+      };
+    }
+
+    clearOtpSession(phoneKey);
+    return data;
   } catch (error) {
     console.error("Error verifying OTP code:", error);
     throw error;
   }
 };
 
+/**
+ * SMS OTP for registration (not login). Uses same send/verify + dev bypass as /auth/login.
+ * Mobile must call this instead of 2factor.in directly to avoid SMS cost in dev.
+ */
+export const handleSmsOtp = async (req, res) => {
+  const { mobile, otp, otpSessionId } = req.body;
+
+  if (!mobile) {
+    return res.status(400).json({
+      success: false,
+      Status: "Error",
+      message: "Mobile number is required",
+    });
+  }
+
+  try {
+    if (!otp) {
+      const sent = await sendOTP(mobile);
+      const bypass = isDevOtpBypassEnabled();
+      return res.status(200).json({
+        success: true,
+        Status: "Success",
+        message: bypass
+          ? "Dev: SMS skipped — use any 6-digit code."
+          : "OTP sent successfully",
+        devOtpBypass: bypass,
+        otpSessionId:
+          bypass ||
+          !sent?.Details ||
+          String(sent.Details).includes("dev-bypass")
+            ? undefined
+            : sent.Details,
+      });
+    }
+
+    const otpResponse = await verifyOTP({ mobile, otp, otpSessionId });
+    if (otpResponse?.Status !== "Success") {
+      return res.status(400).json({
+        success: false,
+        Status: "Error",
+        message: isDevOtpBypassEnabled()
+          ? "Dev mode: OTP must be exactly 6 digits."
+          : "Invalid or expired OTP",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      Status: "Success",
+      message: "OTP verified",
+    });
+  } catch (error) {
+    console.error("handleSmsOtp:", error);
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      Status: "Error",
+      message: error?.message || "OTP service error",
+    });
+  }
+};
+
 export const handleLogin = async (req, res) => {
   const tStart = performance.now();
-  const { mobile, otp } = req.body;
+  const { mobile, otp, otpSessionId } = req.body;
 
   if (!mobile) {
     return res.status(400).json({
@@ -132,12 +324,22 @@ export const handleLogin = async (req, res) => {
      * =====================================================
      */
     if (!otp) {
-      await sendOTP(mobile);
+      const sent = await sendOTP(mobile);
+      const bypass = isDevOtpBypassEnabled();
 
       return res.status(200).json({
         success: true,
         step: "OTP_SENT",
-        message: "OTP sent successfully",
+        message: bypass
+          ? "Dev: SMS skipped — use any 6-digit code as OTP."
+          : "OTP sent successfully",
+        devOtpBypass: bypass,
+        otpSessionId:
+          bypass ||
+          !sent?.Details ||
+          String(sent.Details).includes("dev-bypass")
+            ? undefined
+            : sent.Details,
       });
     }
 
@@ -146,12 +348,14 @@ export const handleLogin = async (req, res) => {
      * STEP 2️⃣ → VERIFY OTP
      * =====================================================
      */
-    const otpResponse = await verifyOTP({ mobile, otp });
+    const otpResponse = await verifyOTP({ mobile, otp, otpSessionId });
 
     if (otpResponse?.Status !== "Success") {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP",
+        message: isDevOtpBypassEnabled()
+          ? "Dev mode: OTP must be exactly 6 digits."
+          : "Invalid or expired OTP",
       });
     }
 
@@ -238,118 +442,6 @@ export const handleLogin = async (req, res) => {
       success: false,
       message: "Something went wrong, please try again",
     });
-  }
-};
-
-export const handleResetPassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  try {
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({
-        message: "All fields are compulsory",
-      });
-    }
-
-    const user = await User.findById(req.user._id);
-    console.log(user);
-    const isPasswordMatch = bcrypt.compareSync(oldPassword, user?.password);
-    console.log(isPasswordMatch, oldPassword);
-
-    if (!isPasswordMatch) {
-      return res.status(400).json({
-        message: "Your current password is incorrect",
-      });
-    }
-
-    // const hashedPassword = bcrypt.hashSync(newPassword, 10);
-
-    // const updatedUser = await User.findByIdAndUpdate(
-    //   user._id,
-    //   {
-    //     password: hashedPassword,
-    //   },
-    //   {
-    //     new: true,
-    //   }
-    // );
-
-    return res.status(200).json({
-      message: "Password updated successfully",
-    });
-  } catch (error) {
-    logError(error, req, 500);
-    return res.status(500).json({
-      message: "Unable to reset password",
-    });
-  }
-};
-
-export const handleForgotPasswordCode = async (req, res) => {
-  const { email } = req.body;
-  console.log(email);
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-
-    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000;
-
-    await user.save();
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "officialsujitmemane@gmail.com",
-        pass: "cktsvgoaftkdicuq ",
-      },
-    });
-
-    const mailOptions = {
-      to: user.email,
-      subject: "Password Reset Code",
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n
-          Please use the following code to reset your password:\n\n
-          ${resetToken}\n\n
-          If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-    };
-
-    await transporter.sendMail(mailOptions);
-
-    res
-      .status(200)
-      .json({ success: true, message: "Reset code sent to your email" });
-  } catch (err) {
-    console.log(err);
-    logError(err, req, 500);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-export const handleSetForgotPassword = async (req, res) => {
-  const { userId, mobile, password } = req.body;
-
-  try {
-    const user = await User.findOne({ _id: userId, mobile });
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: "User not found or mobile number does not match" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-
-    await user.save();
-
-    res.status(200).json({ message: "Password has been reset successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
   }
 };
 

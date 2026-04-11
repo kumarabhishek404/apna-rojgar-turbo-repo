@@ -4,6 +4,7 @@ import State from "../models/state.model.js";
 import User from "../models/user.model.js";
 import logError from "../utils/addErrorLog.js";
 import { haversineDistance } from "../utils/functions.js";
+import { PUBLIC_STATS_DISPLAY_OFFSET } from "../config/publicStatsDisplay.config.js";
 
 /**
  * Public paginated list of service `_id`s for Next static export (shareable `/services/:id` URLs).
@@ -74,11 +75,16 @@ export const getPublicPlatformStats = async (req, res) => {
     ]);
     const totalCities = cityStats?.[0]?.totalCities || 0;
 
+    const displayUsers =
+      totalUsers + (PUBLIC_STATS_DISPLAY_OFFSET.totalUsers ?? 0);
+    const displayServices =
+      totalServices + (PUBLIC_STATS_DISPLAY_OFFSET.totalServices ?? 0);
+
     return res.status(200).json({
       success: true,
       data: {
-        totalUsers,
-        totalServices,
+        totalUsers: displayUsers,
+        totalServices: displayServices,
         totalCities,
       },
     });

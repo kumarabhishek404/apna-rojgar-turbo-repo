@@ -4,10 +4,11 @@ import dotenv from "dotenv";
 import { connectDB } from "./app/utils/connectDB.js";
 import logError from "./app/utils/addErrorLog.js";
 
-// ✅ Load environment file dynamically
+// ✅ Load env: base `.env` then env-specific file (`.env.local` / `.env.production`) overrides
+dotenv.config({ path: ".env" });
 const envFile =
   process.env.NODE_ENV === "production" ? ".env.production" : ".env.local";
-dotenv.config({ path: envFile });
+dotenv.config({ path: envFile, override: true });
 
 const app = express();
 /** Behind Render/nginx so req.ip / X-Forwarded-* behave for error logs and analytics */

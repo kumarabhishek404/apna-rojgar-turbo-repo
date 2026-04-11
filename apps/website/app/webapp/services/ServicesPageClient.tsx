@@ -20,6 +20,7 @@ import type { ServicesToolbarApi } from "@/components/services/servicesToolbarAp
 import type { ServicesTabKey } from "@/components/services/HeaderTabs";
 import ListLoader from "@/components/services/ListLoader";
 import { ServiceCard, type ServiceItem } from "@/components/services/ServiceCard";
+import type { WebServiceApplyPayload } from "@/components/webapp/ServiceDetailsView";
 import type { BrowserGeo } from "@/lib/serviceDistance";
 import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
 
@@ -42,6 +43,8 @@ type ServicesResponse = {
 export type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 
 export type ServicesPageShellProps = {
+  /** When set, only that tab’s data and UI are used (e.g. `"applied"` on the applied-jobs route). */
+  forcedTab?: ServicesTabKey;
   /** When true, inline filter bar is hidden (controls shown in dashboard header). */
   filtersMerged?: boolean;
   onFiltersMergedChange?: (merged: boolean) => void;
@@ -54,6 +57,7 @@ const UNMERGE_SCROLL_Y = 36;
 
 export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const {
+    forcedTab,
     filtersMerged = false,
     onFiltersMergedChange,
     onRegisterToolbar,
@@ -64,7 +68,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const globalQuery = (searchParams.get("global") || "").trim();
   const shouldAutoOpenCreate = searchParams.get("create") === "1";
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [activeTab] = useState<ServicesTabKey>("all");
+  const activeTab: ServicesTabKey = forcedTab ?? "all";
   const [servicesByTab, setServicesByTab] = useState<Record<ServicesTabKey, ServiceItem[]>>({
     all: [],
     my: [],
@@ -90,7 +94,6 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     my: false,
     applied: false,
   });
-  const [selectedSkill, setSelectedSkill] = useState<Record<string, string>>({});
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"latest" | "nearest" | "more">("latest");
   const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
@@ -99,6 +102,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [scrollModalToApply, setScrollModalToApply] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const inFlightRef = useRef<Record<ServicesTabKey, boolean>>({
@@ -255,11 +259,30 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     return items;
   }, [filtered, sortBy]);
 
-  const applyToService = async (serviceId: string, skillOverride?: string) => {
-    const skill = skillOverride || selectedSkill[serviceId];
-    if (!skill) {
-      setError("Please choose a required skill before applying.");
-      return;
+  const applyToService = async (
+    serviceId: string,
+    arg?: string | WebServiceApplyPayload,
+  ) => {
+    let body: Record<string, unknown>;
+
+    if (arg && typeof arg === "object" && Array.isArray(arg.selectedSkills)) {
+      if (arg.selectedSkills.length === 0) {
+        throw new Error(
+          t("selectRequirementsBeforeApply", "Select at least one requirement before applying."),
+        );
+      }
+      body = {
+        serviceId,
+        skills: arg.selectedSkills,
+        applicationType: arg.applicationType,
+        ...(arg.applicationType === "contractor"
+          ? { contractorManpower: arg.contractorManpower }
+          : {}),
+      };
+    } else {
+      throw new Error(
+        t("selectRequirementsBeforeApply", "Select at least one requirement before applying."),
+      );
     }
 
     setError("");
@@ -268,23 +291,21 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     try {
       await apiRequest("/worker/apply", {
         method: "POST",
-        body: JSON.stringify({ serviceId, skills: skill }),
+        body: JSON.stringify(body),
       });
-      setMessage("Applied successfully.");
+      setMessage(t("serviceAppliedSuccessfully", "Applied successfully."));
       setInitializedByTab((prev) => ({ ...prev, applied: false }));
       fetchForTab("all", 1, false);
       fetchForTab("applied", 1, false);
       closeDetailsModal();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Apply failed");
+      throw new Error(
+        e instanceof Error ? e.message : t("applyFailed", "Apply failed"),
+      );
     } finally {
       setApplyingServiceId(null);
     }
   };
-
-  const onSkillChange = useCallback((serviceId: string, skill: string) => {
-    setSelectedSkill((prev) => ({ ...prev, [serviceId]: skill }));
-  }, []);
 
   const openCreateModal = useCallback(() => {
     if (!canCreate) {
@@ -307,9 +328,14 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       setSortBy,
       openCreateModal,
       canCreate,
+      showCreateButton: activeTab !== "applied",
+      searchPlaceholder:
+        activeTab === "applied"
+          ? t("searchAppliedService", "Search applied service by name or location")
+          : undefined,
       t,
     }),
-    [search, sortBy, setSearch, setSortBy, canCreate, openCreateModal, t],
+    [search, sortBy, setSearch, setSortBy, canCreate, openCreateModal, t, activeTab],
   );
 
   useEffect(() => {
@@ -358,13 +384,18 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     setShowCreateModal(false);
   }, []);
 
-  const openDetailsModal = useCallback((serviceId: string) => {
-    setSelectedServiceId(serviceId);
-    setShowDetailsModal(true);
-  }, []);
+  const openDetailsModal = useCallback(
+    (serviceId: string, options?: { scrollToApply?: boolean }) => {
+      setSelectedServiceId(serviceId);
+      setShowDetailsModal(true);
+      setScrollModalToApply(options?.scrollToApply === true);
+    },
+    [],
+  );
 
   const closeDetailsModal = useCallback(() => {
     setShowDetailsModal(false);
+    setScrollModalToApply(false);
     // Delay unmount to keep closing animation smooth.
     window.setTimeout(() => setSelectedServiceId(null), 150);
   }, []);
@@ -431,10 +462,13 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
                   key={service._id}
                   service={service}
                   distanceKm={distanceKmForService(service)}
-                  showApply={activeTab === "all" && canApply}
-                  selectedSkill={selectedSkill[service._id] || ""}
-                  onSkillChange={onSkillChange}
-                  onApply={applyToService}
+                  {...(activeTab === "all" && canApply
+                    ? {
+                        showApply: true as const,
+                        onOpenApplyInDetails: (id: string) =>
+                          openDetailsModal(id, { scrollToApply: true }),
+                      }
+                    : { showApply: false as const })}
                   onViewDetails={openDetailsModal}
                   t={t}
                 />
@@ -456,16 +490,17 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
         open={showDetailsModal}
         serviceId={selectedServiceId}
         onClose={closeDetailsModal}
-        canApply={canApply}
+        canApply={canApply && activeTab !== "applied"}
         applying={applyingServiceId === selectedServiceId}
-        selectedSkill={selectedServiceId ? selectedSkill[selectedServiceId] || "" : ""}
-        onSkillChange={(skill) => {
+        scrollToApply={scrollModalToApply}
+        onApply={async (payload) => {
           if (!selectedServiceId) return;
-          onSkillChange(selectedServiceId, skill);
+          await applyToService(selectedServiceId, payload);
         }}
-        onApply={async (skill) => {
-          if (!selectedServiceId) return;
-          await applyToService(selectedServiceId, skill);
+        onAppliedMutation={() => {
+          setInitializedByTab((prev) => ({ ...prev, applied: false }));
+          void fetchForTab("all", 1, false);
+          void fetchForTab("applied", 1, false);
         }}
       />
 

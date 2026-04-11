@@ -1,4 +1,5 @@
 import { AUTH_STORAGE_KEY, authAtom, authStore, StoredAuth } from "@/lib/authAtom";
+import { getClientAppLanguage, localizeApiErrorMessage, translate } from "@/lib/i18n";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
@@ -13,6 +14,8 @@ type RegisterPayload = {
 type LoginPayload = {
   mobile: string;
   otp?: string;
+  /** From send-OTP response; pass on verify so load-balanced APIs need no shared cache. */
+  otpSessionId?: string;
 };
 
 export async function registerUser(payload: RegisterPayload) {
@@ -25,7 +28,13 @@ export async function registerUser(payload: RegisterPayload) {
   const data = await response.json();
 
   if (!response.ok || !data?.success) {
-    throw new Error(data?.message || "Registration failed");
+    const raw = data?.message;
+    const lang = getClientAppLanguage();
+    const msg =
+      typeof raw === "string" && raw.trim()
+        ? localizeApiErrorMessage(raw)
+        : translate(lang, "registrationFailed", "Registration failed");
+    throw new Error(msg);
   }
 
   return data;
@@ -41,7 +50,13 @@ export async function loginUser(payload: LoginPayload) {
   const data = await response.json();
 
   if (!response.ok || data?.success === false) {
-    throw new Error(data?.message || "Login failed");
+    const raw = data?.message;
+    const lang = getClientAppLanguage();
+    const msg =
+      typeof raw === "string" && raw.trim()
+        ? localizeApiErrorMessage(raw)
+        : translate(lang, "loginFailed", "Login failed");
+    throw new Error(msg);
   }
 
   return data;
@@ -162,7 +177,13 @@ export async function apiRequest<T = unknown>(
     redirectToLoginIfNeeded();
   }
   if (!response.ok || data?.success === false) {
-    throw new Error(data?.message || "Request failed");
+    const raw = data?.message;
+    const lang = getClientAppLanguage();
+    const msg =
+      typeof raw === "string" && raw.trim()
+        ? localizeApiErrorMessage(raw)
+        : translate(lang, "requestFailed", "Request failed");
+    throw new Error(msg);
   }
 
   return data as T;

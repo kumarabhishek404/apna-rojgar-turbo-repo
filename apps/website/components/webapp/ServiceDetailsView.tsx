@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { CheckCircle2, Clock, MapPin, Share2, ShieldCheck, XCircle } from "lucide-react";
 import { apiRequest } from "@/lib/auth";
 import {
@@ -13,6 +14,12 @@ import { formatRelativePosted } from "@/lib/formatRelativePosted";
 import type { BrowserGeo, GeoPoint } from "@/lib/serviceDistance";
 import { formatDistanceLabel, resolveServiceDistanceKm } from "@/lib/serviceDistance";
 import { shareServiceToApps } from "@/lib/shareService";
+
+type AppliedUserEntry = {
+  user?: string | { _id?: string };
+  status?: string;
+  workers?: Array<{ worker?: string | { _id?: string }; status?: string }>;
+};
 
 type ServiceDetail = {
   _id: string;
@@ -33,24 +40,53 @@ type ServiceDetail = {
   geoLocation?: GeoPoint | null;
   requirements?: Array<{ name: string; count: number; payPerDay?: number }>;
   employer?: { _id?: string; name?: string; mobile?: string } | string;
+  appliedUsers?: AppliedUserEntry[];
+};
+
+function idFromRef(ref: string | { _id?: string } | undefined | null): string {
+  if (ref == null) return "";
+  if (typeof ref === "object" && ref._id != null) return String(ref._id);
+  return String(ref);
+}
+
+/** Matches worker `cancel-apply` eligibility: pending direct application or pending as worker under mediator. */
+export function viewerHasPendingApplication(
+  service: { appliedUsers?: AppliedUserEntry[] } | null,
+  userId: string | null,
+): boolean {
+  if (!service?.appliedUsers?.length || !userId) return false;
+  const uid = String(userId);
+  for (const app of service.appliedUsers) {
+    if (app.status !== "PENDING") continue;
+    if (idFromRef(app.user) === uid) return true;
+    for (const w of app.workers || []) {
+      if (w.status === "PENDING" && idFromRef(w.worker) === uid) return true;
+    }
+  }
+  return false;
+}
+
+export type WebServiceApplyPayload = {
+  selectedSkills: string[];
+  applicationType: "individual" | "contractor";
+  contractorManpower?: number;
 };
 
 type ServiceDetailsViewProps = {
   id?: string;
   canApply?: boolean;
   applying?: boolean;
-  selectedSkill?: string;
-  onSkillChange?: (skill: string) => void;
-  onApply?: (skill: string) => Promise<void> | void;
+  onApply?: (payload: WebServiceApplyPayload) => Promise<void> | void;
+  /** After cancel-apply succeeds; parent can refetch lists. */
+  onAppliedMutation?: () => void;
 };
 
 export default function ServiceDetailsView({
   id: idProp,
   canApply = false,
   applying = false,
-  selectedSkill = "",
-  onSkillChange,
   onApply,
+  onAppliedMutation,
 }: ServiceDetailsViewProps) {
   const { t, language } = useLanguage();
   const routeParams = useParams<{ id?: string }>();
@@ -60,11 +96,45 @@ export default function ServiceDetailsView({
   const [userGeo, setUserGeo] = useState<GeoPoint | null>(null);
   const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
   const [error, setError] = useState("");
-  const [modalSkill, setModalSkill] = useState(selectedSkill);
+  const [applySelections, setApplySelections] = useState<string[]>([]);
+  const [applyAsContractor, setApplyAsContractor] = useState(false);
+  const [contractorManpowerInput, setContractorManpowerInput] = useState("");
+  const [applySubmitError, setApplySubmitError] = useState("");
+  const [showCancelApplyConfirm, setShowCancelApplyConfirm] = useState(false);
+  const [cancelApplyError, setCancelApplyError] = useState("");
+
+  const requirementNames = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (service?.requirements || [])
+            .map((r) => r?.name)
+            .filter((n): n is string => Boolean(n)),
+        ),
+      ),
+    [service?.requirements],
+  );
+
+  const allSelected =
+    requirementNames.length > 0 &&
+    requirementNames.every((n) => applySelections.includes(n));
+
+  const toggleRequirement = (name: string) => {
+    setApplySubmitError("");
+    setApplySelections((prev) =>
+      prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name],
+    );
+  };
+
+  const toggleSelectAllRequirements = () => {
+    setApplySubmitError("");
+    if (allSelected) setApplySelections([]);
+    else setApplySelections([...requirementNames]);
+  };
 
   useEffect(() => {
-    setModalSkill(selectedSkill);
-  }, [selectedSkill]);
+    setApplySubmitError("");
+  }, [serviceId, service?._id]);
 
   useEffect(() => {
     if (
@@ -141,6 +211,38 @@ export default function ServiceDetailsView({
     return Boolean(employerId && employerId === String(currentUserId));
   }, [currentUserId, employerIsUnpopulatedId, service]);
 
+  const hasPendingApplication = useMemo(
+    () => Boolean(currentUserId && viewerHasPendingApplication(service, currentUserId)),
+    [service, currentUserId],
+  );
+
+  const reloadService = async () => {
+    if (
+      !serviceId ||
+      serviceId === STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID ||
+      serviceId === STATIC_EXPORT_DYNAMIC_LITERAL_ID
+    ) {
+      return;
+    }
+    const data = await apiRequest<{ data: ServiceDetail }>(`/service/service-info/${serviceId}`);
+    setService(data.data);
+  };
+
+  const executeCancelApply = async () => {
+    if (!service?._id || !currentUserId) return;
+    setCancelApplyError("");
+    try {
+      await apiRequest("/worker/cancel-apply", {
+        method: "POST",
+        body: JSON.stringify({ serviceId: service._id }),
+      });
+      await reloadService();
+      onAppliedMutation?.();
+    } catch (e) {
+      setCancelApplyError(e instanceof Error ? e.message : t("applyFailed", "Apply failed"));
+    }
+  };
+
   const distanceLabel = distanceKm != null ? formatDistanceLabel(distanceKm) : "";
   const statusLabel = service?.status ? t(String(service.status).toLowerCase(), service.status) : "-";
   const metricCards = [
@@ -167,23 +269,52 @@ export default function ServiceDetailsView({
     service?.createdAt && hasValidCreated
       ? formatRelativePosted(service.createdAt, language)
       : "";
-  const requirementSkillOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (service?.requirements || [])
-            .map((req) => req?.name)
-            .filter((name): name is string => Boolean(name)),
-        ),
-      ),
-    [service?.requirements],
-  );
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined" || !service?._id) return "";
     return `${window.location.origin}/services/${service._id}`;
   }, [service?._id]);
 
+  const hiringOpen = service?.status === "HIRING";
+
+  const handleSubmitApply = async () => {
+    if (!onApply || applySelections.length === 0) return;
+    setApplySubmitError("");
+
+    let payload: WebServiceApplyPayload;
+    if (applyAsContractor) {
+      const n = Number(contractorManpowerInput);
+      if (!Number.isInteger(n) || n < 1) {
+        setApplySubmitError(
+          t(
+            "enterValidManpower",
+            "Please enter how many workers you can provide (a whole number, at least 1).",
+          ),
+        );
+        return;
+      }
+      payload = {
+        selectedSkills: applySelections,
+        applicationType: "contractor",
+        contractorManpower: n,
+      };
+    } else {
+      payload = {
+        selectedSkills: applySelections,
+        applicationType: "individual",
+      };
+    }
+
+    try {
+      await Promise.resolve(onApply(payload));
+    } catch (e) {
+      setApplySubmitError(
+        e instanceof Error ? e.message : t("applyFailed", "Apply failed"),
+      );
+    }
+  };
+
   const handleShareService = async () => {
+    if (!service) return;
     const { ok, copied } = await shareServiceToApps(service, {
       language,
       shareUrl,
@@ -224,6 +355,7 @@ export default function ServiceDetailsView({
   }
 
   return (
+    <>
     <section className="rounded-2xl border border-[#22409a]/10 bg-white p-5 shadow-[0_16px_40px_rgba(34,64,154,0.12)]">
       <div className="rounded-2xl bg-gradient-to-r from-[#1c3788] via-[#22409a] to-[#355ed8] p-5 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
         <h1 className="text-2xl font-bold">{t(service.subType, service.subType)}</h1>
@@ -240,6 +372,11 @@ export default function ServiceDetailsView({
           {service.bookingType ? (
             <span className="rounded-full border border-white/25 bg-white/20 px-2.5 py-1 font-semibold">
               {t("booking", "Booking")}: {t(service.bookingType, service.bookingType)}
+            </span>
+          ) : null}
+          {hasPendingApplication && !isViewerEmployer ? (
+            <span className="rounded-full border border-emerald-300/70 bg-emerald-500/35 px-2.5 py-1 font-semibold text-white shadow-sm">
+              {t("appliedServiceTag", "Applied")}
             </span>
           ) : null}
           <button
@@ -418,37 +555,186 @@ export default function ServiceDetailsView({
           </p>
         </div>
       ) : null}
-      {canApply ? (
-        <div className="mt-4 rounded-xl border border-[#22409a]/15 bg-[#f8faff] p-4">
-          <p className="text-sm font-semibold text-[#16264f]">{t("applyInService", "Apply in this service")}</p>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <select
-              value={modalSkill}
-              onChange={(event) => {
-                const skill = event.target.value;
-                setModalSkill(skill);
-                onSkillChange?.(skill);
-              }}
-              className="w-full rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm outline-none focus:border-[#22409a] sm:max-w-xs"
+      {hasPendingApplication && !isViewerEmployer ? (
+        <div
+          id="webapp-service-pending-application-section"
+          className="mt-5 rounded-xl border border-[#22409a]/15 bg-gradient-to-br from-[#f0f4ff] via-white to-[#f8faff] p-4 shadow-sm"
+        >
+          <p className="text-base font-bold text-[#16264f]">
+            {t("appliedServiceTag", "Applied")}
+          </p>
+          <p className="mt-1 text-sm text-gray-600">
+            {t(
+              "pendingApplicationDetailsHint",
+              "Your application is pending. You can withdraw it with the button below.",
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowCancelApplyConfirm(true)}
+            disabled={showCancelApplyConfirm}
+            className="mt-4 inline-flex w-full items-center justify-center rounded-xl border-2 border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-700 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px]"
+          >
+            {t("cancelApply")}
+          </button>
+          {cancelApplyError ? (
+            <p
+              role="alert"
+              className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
             >
-              <option value="">{t("selectRequiredSkill", "Select required skill")}</option>
-              {requirementSkillOptions.map((skill) => (
-                <option key={skill} value={skill}>
-                  {t(skill, skill)}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() => onApply?.(modalSkill)}
-              disabled={applying || !modalSkill}
-              className="inline-flex items-center justify-center rounded-xl bg-[#22409a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {applying ? t("applying", "Applying...") : t("applyNow", "Apply Now")}
-            </button>
-          </div>
+              {cancelApplyError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+      {canApply && !isViewerEmployer && !hasPendingApplication ? (
+        <div
+          id="webapp-service-apply-section"
+          className="mt-5 rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/90 via-white to-[#f8faff] p-4 shadow-sm"
+        >
+          <p className="text-base font-bold text-[#16264f]">
+            {t("applyToThisJob", "Apply to this job")}
+          </p>
+          <p className="mt-1 text-sm text-gray-600">
+            {t(
+              "applyFlowHint",
+              "Choose which roles you are applying for, then tell us if you are one worker or a contractor with a team.",
+            )}
+          </p>
+          {!hiringOpen ? (
+            <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+              {t("serviceNotHiring", "This job is not accepting applications right now.")}
+            </p>
+          ) : requirementNames.length === 0 ? (
+            <p className="mt-3 text-sm text-gray-600">
+              {t("noRequirementsToApply", "This job has no listed requirements yet.")}
+            </p>
+          ) : (
+            <>
+              <div className="mt-4">
+                <p className="text-sm font-semibold text-[#16264f]">
+                  {t("whichRequirementsApply", "Which requirements are you applying for?")}
+                </p>
+                <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm font-medium text-[#22409a]">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleSelectAllRequirements}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  {t("selectAllRequirements", "All requirements")}
+                </label>
+                <ul className="mt-2 space-y-2">
+                  {requirementNames.map((name) => (
+                    <li key={name}>
+                      <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-[#22409a]/10 bg-white px-3 py-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={applySelections.includes(name)}
+                          onChange={() => toggleRequirement(name)}
+                          className="mt-0.5 h-4 w-4 rounded border-gray-300"
+                        />
+                        <span className="font-medium text-[#16264f]">{t(name, name)}</span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-4 border-t border-[#22409a]/10 pt-4">
+                <p className="text-sm font-semibold text-[#16264f]">
+                  {t("howAreYouApplying", "How are you applying?")}
+                </p>
+                <div className="mt-2 space-y-2">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#22409a]/10 bg-white px-3 py-2 text-sm">
+                    <input
+                      type="radio"
+                      name="apply-mode"
+                      checked={!applyAsContractor}
+                      onChange={() => {
+                        setApplySubmitError("");
+                        setApplyAsContractor(false);
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span>{t("applyAsIndividualLabour", "I am an individual worker (myself only)")}</span>
+                  </label>
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#22409a]/10 bg-white px-3 py-2 text-sm">
+                    <input
+                      type="radio"
+                      name="apply-mode"
+                      checked={applyAsContractor}
+                      onChange={() => {
+                        setApplySubmitError("");
+                        setApplyAsContractor(true);
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <span>{t("applyAsContractor", "I am a contractor / I have a team")}</span>
+                  </label>
+                </div>
+              </div>
+
+              {applyAsContractor ? (
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-[#16264f]" htmlFor="manpower-count">
+                    {t("howManyLabour", "How many workers can you provide?")}
+                  </label>
+                  <input
+                    id="manpower-count"
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={contractorManpowerInput}
+                    onChange={(e) => setContractorManpowerInput(e.target.value)}
+                    placeholder={t("manpowerPlaceholder", "e.g. 5")}
+                    className="mt-1 w-full max-w-xs rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm outline-none focus:border-[#22409a]"
+                  />
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={() => void handleSubmitApply()}
+                disabled={
+                  applying ||
+                  applySelections.length === 0 ||
+                  (applyAsContractor &&
+                    (!contractorManpowerInput.trim() ||
+                      !Number.isInteger(Number(contractorManpowerInput)) ||
+                      Number(contractorManpowerInput) < 1))
+                }
+                className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-[#16a34a] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#15803d] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[200px]"
+              >
+                {applying ? t("applying", "Applying...") : t("submitApplication", "Submit application")}
+              </button>
+              {applySubmitError ? (
+                <p
+                  role="alert"
+                  className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
+                >
+                  {applySubmitError}
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
       ) : null}
     </section>
+    <ConfirmDialog
+      open={showCancelApplyConfirm}
+      onClose={() => setShowCancelApplyConfirm(false)}
+      title={t("confirmCancelApplyTitle", "Withdraw application?")}
+      description={t(
+        "confirmCancelApply",
+        "Cancel your application for this job? You can apply again later if the job is still open.",
+      )}
+      variant="danger"
+      confirmLabel={t("cancelApply")}
+      pendingLabel={t("cancellingApply", "Cancelling...")}
+      onConfirm={executeCancelApply}
+    />
+    </>
   );
 }

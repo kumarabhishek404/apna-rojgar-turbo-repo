@@ -6,7 +6,7 @@ const UserProblemSchema = new mongoose.Schema(
     problemType: {
       type: String,
       required: true,
-      enum: ["forgotPassword", "otherIssues"], // Add more types as needed
+      enum: ["forgotPassword", "otherIssues"],
     },
     status: {
       type: String,

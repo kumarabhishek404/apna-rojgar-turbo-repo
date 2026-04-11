@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import Colors from "@/constants/Colors";
 import Button from "../inputs/Button";
 import CustomText from "./CustomText";
@@ -11,22 +17,31 @@ import { useAtom, useSetAtom } from "jotai";
 import { Controller, useForm } from "react-hook-form";
 import TextInputComponent from "../inputs/TextInputWithIcon";
 import { Ionicons } from "@expo/vector-icons";
-import EmailAddressField from "../inputs/EmailAddress";
 import { t } from "@/utils/translationHelper";
 import AddLocationAndAddress from "./AddLocationAndAddress";
 import Gender from "../inputs/Gender";
-import DateField from "../inputs/DateField";
-import moment from "moment";
-import { isEmptyObject } from "@/constants/functions";
+import { isEmptyObject, getMissingCoreProfileFields } from "@/constants/functions";
 import Loader from "./Loaders/Loader";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
+import * as ImagePicker from "expo-image-picker";
+import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
+import TOAST from "@/app/hooks/toast";
+
+function isFormDataPayload(p: unknown): p is FormData {
+  return (
+    p != null &&
+    typeof p === "object" &&
+    typeof (p as FormData).append === "function"
+  );
+}
 
 const ProfileNotification: React.FC = () => {
   const [isCompleteProfileModel, setIsCompleteProfileModel] = useState(false);
+  const [pickedProfileUri, setPickedProfileUri] = useState<string | null>(null);
   const setDrawerState: any = useSetAtom(Atoms?.SideDrawerAtom);
   const [location, setLocation] = useState<any>({});
   const [selectedOption, setSelectedOption] = useState(
-    !isEmptyObject(location) ? "currentLocation" : "address"
+    !isEmptyObject(location) ? "currentLocation" : "address",
   );
   const { refreshUser, isLoading } = REFRESH_USER.useRefreshUser();
 
@@ -38,46 +53,46 @@ const ProfileNotification: React.FC = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      email: userDetails?.email?.value || "",
+      name: userDetails?.name || "",
+      age: userDetails?.age != null ? String(userDetails.age) : "",
+      mobile: userDetails?.mobile != null ? String(userDetails.mobile) : "",
       address: userDetails?.address || "",
       location: userDetails?.location || {},
-      dateOfBirth:
-        userDetails?.dateOfBirth ||
-        moment().subtract(18, "years").startOf("year"),
       gender: userDetails?.gender || "",
     },
   });
 
   useEffect(() => {
-    setValue("email", userDetails?.email?.value);
-    setValue("address", userDetails?.address);
-    setValue("location", userDetails?.location);
-    setValue(
-      "dateOfBirth",
-      userDetails?.dateOfBirth || moment().subtract(18, "years").startOf("year")
-    );
-    setValue("gender", userDetails?.gender);
-  }, [isCompleteProfileModel, userDetails]);
+    setValue("name", userDetails?.name || "");
+    setValue("age", userDetails?.age != null ? String(userDetails.age) : "");
+    setValue("mobile", userDetails?.mobile != null ? String(userDetails.mobile) : "");
+    setValue("address", userDetails?.address || "");
+    setValue("location", userDetails?.location || {});
+    setValue("gender", userDetails?.gender || "");
+  }, [isCompleteProfileModel, userDetails, setValue]);
 
   const mutationUpdateProfileInfo = useMutation({
     mutationKey: ["completeProfile"],
-    mutationFn: (payload: any) =>
-      USER?.updateUserById({
+    mutationFn: (payload: Record<string, string> | FormData) => {
+      if (isFormDataPayload(payload)) {
+        return USER?.updateUserById(payload);
+      }
+      return USER?.updateUserById({
         _id: userDetails?._id,
         ...payload,
-      }),
-    onSuccess: (response) => {
-      let user = response?.data?.data;
-      refreshUser();
-      setUserDetails({
-        ...userDetails,
-        email: user?.email?.value,
-        address: user?.address,
-        location: user?.location,
-        dateOfBirth: user?.dateOfBirth,
-        gender: user?.gender,
       });
-      setDrawerState({ visible: false }); // Close the drawer after success
+    },
+    onSuccess: (response) => {
+      const user = response?.data?.data;
+      setPickedProfileUri(null);
+      refreshUser();
+      if (user && typeof user === "object") {
+        setUserDetails({
+          ...userDetails,
+          ...user,
+        });
+      }
+      setDrawerState({ visible: false });
     },
     onError: (err) => {
       console.error("error while updating the profile ", err);
@@ -85,55 +100,151 @@ const ProfileNotification: React.FC = () => {
     },
   });
 
-  const onSubmitCompleteProfile = (data: any) => {
-    let updatedFields: any = {};
-
-    if (data.email && data.email !== userDetails?.email?.value) {
-      updatedFields.email = data.email;
-    }
-    if (data.address && data.address !== userDetails?.address) {
-      updatedFields.address = data.address;
-    }
-    if (data.dateOfBirth && data.dateOfBirth !== userDetails?.dateOfBirth) {
-      updatedFields.dateOfBirth = moment(data.dateOfBirth).format("YYYY-MM-DD");
-    }
-    if (data.gender && data.gender !== userDetails?.gender) {
-      updatedFields.gender = data.gender;
-    }
-
-    if (Object.keys(updatedFields).length > 0) {
-      const payload = {
-        _id: userDetails?._id,
-        ...updatedFields,
-      };
-
-      console.log("Payload being sent:", payload);
-      mutationUpdateProfileInfo.mutate(payload);
+  const pickProfilePhoto = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        TOAST.error(t("galleryPermissionRequired"));
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (!result.canceled && result.assets[0]?.uri) {
+        const uri = await normalizePickedImageUriForUpload(result.assets[0].uri);
+        setPickedProfileUri(uri);
+      }
+    } catch (e) {
+      console.warn(e);
+      TOAST.error(t("somethingWentWrong"));
     }
   };
 
+  const trim = (v: unknown) =>
+    v == null ? "" : typeof v === "string" ? v.trim() : String(v).trim();
+
+  const onSubmitCompleteProfile = (data: {
+    name?: string;
+    age?: string;
+    mobile?: string;
+    address?: string;
+    gender?: string;
+  }) => {
+    const missing = getMissingCoreProfileFields(
+      userDetails as Record<string, unknown>,
+    );
+    const updates: Record<string, string> = {};
+
+    if (missing.has("name")) {
+      const v = trim(data.name);
+      if (!v) {
+        TOAST.error(t("firstNameIsRequired"));
+        return;
+      }
+      if (v !== trim(userDetails?.name)) updates.name = v;
+    }
+
+    if (missing.has("age")) {
+      const v = trim(data.age);
+      if (!v) {
+        TOAST.error(t("ageIsRequired"));
+        return;
+      }
+      if (v !== trim(userDetails?.age)) updates.age = v;
+    }
+
+    if (missing.has("mobile")) {
+      const v = trim(data.mobile);
+      if (!v) {
+        TOAST.error(t("mobileIsRequired"));
+        return;
+      }
+      if (v !== trim(userDetails?.mobile)) updates.mobile = v;
+    }
+
+    if (missing.has("address")) {
+      const v = trim(data.address);
+      if (!v) {
+        TOAST.error(t("addressIsRequired"));
+        return;
+      }
+      if (v !== trim(userDetails?.address)) updates.address = v;
+    }
+
+    if (missing.has("gender")) {
+      const v = trim(data.gender);
+      if (!v) {
+        TOAST.error(t("genderIsRequired"));
+        return;
+      }
+      if (v !== trim(userDetails?.gender)) updates.gender = v;
+    }
+
+    const hasPhotoPick = Boolean(pickedProfileUri);
+
+    if (Object.keys(updates).length === 0 && !hasPhotoPick) {
+      if (missing.has("profilePicture")) {
+        TOAST.error(t("pleaseSelectAProfilePicture"));
+      } else {
+        TOAST.error(t("makeChangesToSave"));
+      }
+      return;
+    }
+
+    if (hasPhotoPick && pickedProfileUri) {
+      const fd = new FormData();
+      fd.append("_id", String(userDetails?._id));
+      Object.entries(updates).forEach(([k, v]) => fd.append(k, v));
+      const uri = pickedProfileUri;
+      fd.append("profileImage", {
+        uri: Platform.OS === "android" ? uri : uri.replace(/^file:\/\//, ""),
+        type: "image/jpeg",
+        name: "profile.jpg",
+      } as any);
+      mutationUpdateProfileInfo.mutate(fd);
+      return;
+    }
+
+    mutationUpdateProfileInfo.mutate(updates);
+  };
+
   const completeProfileModalContent = () => {
+    const missing = getMissingCoreProfileFields(
+      userDetails as Record<string, unknown>,
+    );
+
     return (
       <View style={styles.formContainer}>
         <View style={{ flexDirection: "column", gap: 25 }}>
-          {!userDetails?.email?.value && (
+          {missing.has("role") && (
+            <CustomText baseFont={15} color={Colors.secondary}>
+              {t("completeProfileRoleHint")}
+            </CustomText>
+          )}
+
+          {missing.has("name") && (
             <Controller
               control={control}
-              name="email"
-              defaultValue=""
+              name="name"
+              rules={{ required: t("firstNameIsRequired") }}
               render={({ field: { onChange, onBlur, value } }) => (
-                <EmailAddressField
-                  name="email"
-                  email={value}
-                  setEmail={onChange}
+                <TextInputComponent
+                  label="name"
+                  name="name"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={t("enterYourFirstName")}
                   errors={errors}
-                  placeholder={t("enterYourEmailAddress")}
                   icon={
                     <Ionicons
-                      name={"mail-outline"}
+                      name="person"
                       size={30}
                       color={Colors.secondary}
-                      style={{ paddingVertical: 10, marginRight: 10 }}
+                      style={{ paddingVertical: 10, paddingRight: 10 }}
                     />
                   }
                 />
@@ -141,13 +252,68 @@ const ProfileNotification: React.FC = () => {
             />
           )}
 
-          {!userDetails?.address && (
+          {missing.has("age") && (
+            <Controller
+              control={control}
+              name="age"
+              rules={{ required: t("ageIsRequired") }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInputComponent
+                  label="age"
+                  name="age"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={t("age")}
+                  type="number"
+                  errors={errors}
+                  icon={
+                    <Ionicons
+                      name="calendar-outline"
+                      size={30}
+                      color={Colors.secondary}
+                      style={{ paddingVertical: 10, paddingRight: 10 }}
+                    />
+                  }
+                />
+              )}
+            />
+          )}
+
+          {missing.has("mobile") && (
+            <Controller
+              control={control}
+              name="mobile"
+              rules={{ required: t("mobileIsRequired") }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInputComponent
+                  label="mobile"
+                  name="mobile"
+                  value={value}
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder={t("mobile")}
+                  errors={errors}
+                  icon={
+                    <Ionicons
+                      name="call-outline"
+                      size={30}
+                      color={Colors.secondary}
+                      style={{ paddingVertical: 10, paddingRight: 10 }}
+                    />
+                  }
+                />
+              )}
+            />
+          )}
+
+          {missing.has("address") && (
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Controller
                 control={control}
                 name="address"
-                defaultValue=""
-                render={({ field: { onChange, onBlur, value } }) => (
+                rules={{ required: t("addressIsRequired") }}
+                render={({ field: { onChange, value } }) => (
                   <AddLocationAndAddress
                     label={t("address")}
                     name="address"
@@ -163,44 +329,12 @@ const ProfileNotification: React.FC = () => {
             </View>
           )}
 
-          {/* {!userDetails?.dateOfBirth && (
-            <Controller
-              control={control}
-              name="dateOfBirth"
-              defaultValue={moment().subtract(18, "years").startOf("year")}
-              rules={{
-                // required: t("dateOfBirthIsRequired"),
-                validate: (value) => {
-                  const selectedDate = moment(value);
-                  const today = moment(new Date());
-                  const eighteenYearsAgo = moment(new Date());
-                  eighteenYearsAgo.set("year", today.year() - 18);
-
-                  if (selectedDate > eighteenYearsAgo) {
-                    return t("youMustBeAtLeast18YearsOld");
-                  } else {
-                    return true;
-                  }
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <DateField
-                  title={t("dateOfBirth")}
-                  name="dateOfBirth"
-                  type="dateOfBirth"
-                  date={moment(value)}
-                  setDate={onChange}
-                  errors={errors}
-                />
-              )}
-            />
-          )} */}
-
-          {!userDetails?.gender && (
+          {missing.has("gender") && (
             <Controller
               control={control}
               name="gender"
-              render={({ field: { onChange, onBlur, value } }) => (
+              rules={{ required: t("genderIsRequired") }}
+              render={({ field: { onChange, value } }) => (
                 <Gender
                   name="gender"
                   label={t("whatIsYourGender")}
@@ -215,6 +349,25 @@ const ProfileNotification: React.FC = () => {
                 />
               )}
             />
+          )}
+
+          {missing.has("profilePicture") && (
+            <View style={{ gap: 12 }}>
+              <CustomText baseFont={15} color={Colors.secondary}>
+                {t("completeProfilePhotoHint")}
+              </CustomText>
+              {pickedProfileUri ? (
+                <Image
+                  source={{ uri: pickedProfileUri }}
+                  style={styles.previewImage}
+                />
+              ) : null}
+              <TouchableOpacity onPress={pickProfilePhoto} activeOpacity={0.8}>
+                <CustomText color={Colors.primary} fontWeight="600">
+                  {t("chooseFromGallery")}
+                </CustomText>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>
@@ -300,6 +453,13 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingVertical: 20,
+  },
+  previewImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: "center",
+    backgroundColor: Colors.inputBorder,
   },
 });
 

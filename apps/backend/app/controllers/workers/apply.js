@@ -5,10 +5,37 @@ import { handleSendNotificationController } from "../notification.controller.js"
 import logError from "../../utils/addErrorLog.js";
 import { getEnglishTitles } from "../../utils/translations.js";
 
+/** Normalize `skills` from mobile (string) or web (string[] / JSON). */
+const normalizeSkillsList = (raw) => {
+  if (raw == null) return [];
+  if (Array.isArray(raw)) {
+    return [...new Set(raw.map((s) => String(s).trim()).filter(Boolean))];
+  }
+  if (typeof raw === "string") {
+    const t = raw.trim();
+    if (!t) return [];
+    if (t.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(t);
+        if (Array.isArray(parsed)) {
+          return [
+            ...new Set(parsed.map((s) => String(s).trim()).filter(Boolean)),
+          ];
+        }
+      } catch {
+        /* fall through */
+      }
+    }
+    return [t];
+  }
+  return [];
+};
+
 export const handleApplyToService = async (req, res) => {
   try {
     const { _id: userId } = req.user;
-    const { serviceId, workers, skills } = req.body;
+    const { serviceId, workers, skills, applicationType, contractorManpower } =
+      req.body;
     const isMediator = Array.isArray(workers) && workers.length > 0;
 
     if (isMediator && workers.includes(userId.toString())) {
@@ -38,28 +65,51 @@ export const handleApplyToService = async (req, res) => {
     );
 
     if (!isMediator) {
-      if (!skills || !requiredSkills.includes(skills.toLowerCase())) {
-        logError(new Error("Invalid or missing skill"), req, 400);
+      const typeNorm = String(applicationType || "individual")
+        .toLowerCase()
+        .trim();
+      const isContractorApply = typeNorm === "contractor";
+      const skillsList = normalizeSkillsList(skills);
+
+      if (skillsList.length === 0) {
         return res.status(400).json({
           success: false,
           message:
-            "Invalid or missing skill. Please select a skill from the service requirements.",
+            "Please select at least one requirement from the service to apply.",
         });
       }
 
-      const hasValidSkill = await validateUserSkills(
-        userId,
-        requiredSkills,
-        req,
-      );
-      if (!hasValidSkill) {
-        logError(new Error("User does not have the required skill"), req, 400);
-        return res.status(400).json({
-          success: false,
-          message: "You do not have the required skill.",
-        });
+      for (const name of skillsList) {
+        if (!requiredSkills.includes(name.toLowerCase())) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid requirement: ${name}`,
+          });
+        }
       }
-      await applyAsWorker(user, service, skills, req);
+
+      if (isContractorApply) {
+        const mp = Number(contractorManpower);
+        if (!Number.isFinite(mp) || mp < 1 || !Number.isInteger(mp)) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Please enter how many workers you can provide (whole number, at least 1).",
+          });
+        }
+        await applyAsContractor(user, service, skillsList, mp, req);
+      } else {
+        for (const name of skillsList) {
+          const ok = await validateUserHasSpecificSkill(userId, name, req);
+          if (!ok) {
+            return res.status(400).json({
+              success: false,
+              message: `You do not have "${name}" on your profile. Add it to your skills or apply only for roles you have.`,
+            });
+          }
+        }
+        await applyAsWorker(user, service, skillsList, req);
+      }
     } else {
       await applyAsMediator(
         user,
@@ -220,35 +270,58 @@ const applyAsMediator = async (
   }
 };
 
-const applyAsWorker = async (user, service, skill, req) => {
+const notifyEmployerApplied = (user, service, req) => {
+  handleSendNotificationController(
+    service.employer?._id,
+    getEnglishTitles()?.APPLIED_IN_YOUR_SERVICE,
+    {
+      serviceName: service.subType,
+      workerName: user.name,
+    },
+    {
+      actionBy: user._id,
+      actionOn: service.employer,
+    },
+    req,
+  );
+};
+
+const assertSoloApplySlotFree = (user, service) => {
+  const alreadyAppliedAsMediator = service.appliedUsers.some(
+    (entry) =>
+      entry.user?.toString() === user._id.toString() &&
+      entry.status === "PENDING" &&
+      entry.workers.length > 0,
+  );
+  if (alreadyAppliedAsMediator) {
+    throw new Error(
+      "You cannot apply as a worker after applying as a mediator.",
+    );
+  }
+
+  const alreadyApplied = service.appliedUsers.some(
+    (entry) =>
+      entry.user?.toString() === user._id.toString() &&
+      entry.status === "PENDING" &&
+      entry.workers.length === 0,
+  );
+  if (alreadyApplied) {
+    throw new Error("You have already applied.");
+  }
+};
+
+/** Individual labour: one or more requirement names; user must have each skill on profile. */
+const applyAsWorker = async (user, service, skillsList, req) => {
   try {
-    const alreadyAppliedAsMediator = service.appliedUsers.some(
-      (entry) =>
-        entry.user?.toString() === user._id.toString() &&
-        entry.status === "PENDING" &&
-        entry.workers.length > 0,
-    );
-    if (alreadyAppliedAsMediator) {
-      throw new Error(
-        "You cannot apply as a worker after applying as a mediator.",
-      );
-    }
+    assertSoloApplySlotFree(user, service);
 
-    const alreadyApplied = service.appliedUsers.some(
-      (entry) =>
-        entry.user?.toString() === user._id.toString() &&
-        entry.status === "PENDING" &&
-        entry.workers.length === 0,
-    );
-    if (alreadyApplied) {
-      throw new Error("You have already applied.");
-    }
-
-    // ✅ Fix: Add `skill` at the top level (as required by schema)
+    const primary = skillsList[0];
     service.appliedUsers.push({
       user: user._id,
-      skill: skill, // ✅ Required at the top level
-      workers: [], // ✅ Required since workers array exists in schema
+      skill: primary,
+      appliedSkills: skillsList,
+      applicantType: "INDIVIDUAL",
+      workers: [],
       status: "PENDING",
     });
 
@@ -259,21 +332,37 @@ const applyAsWorker = async (user, service, skill, req) => {
       "APPLIED_IN_SERVICE_WHEN_APPLIED_INDIVIDUALLY",
     );
 
-    console.log("service-------------", service.employer);
-    
-    handleSendNotificationController(
-      service.employer?._id,
-      getEnglishTitles()?.APPLIED_IN_YOUR_SERVICE,
-      {
-        serviceName: service.subType,
-        workerName: user.name,
-      },
-      {
-        actionBy: user._id,
-        actionOn: service.employer,
-      },
-      req,
+    notifyEmployerApplied(user, service, req);
+  } catch (error) {
+    logError(error, req);
+    throw error;
+  }
+};
+
+/** Contractor / team lead: requirement coverage + manpower count (no per-skill profile check). */
+const applyAsContractor = async (user, service, skillsList, manpower, req) => {
+  try {
+    assertSoloApplySlotFree(user, service);
+
+    const primary = skillsList[0];
+    service.appliedUsers.push({
+      user: user._id,
+      skill: primary,
+      appliedSkills: skillsList,
+      applicantType: "CONTRACTOR",
+      contractorManpower: manpower,
+      workers: [],
+      status: "PENDING",
+    });
+
+    await service.save();
+
+    await updateUserStats(
+      user._id,
+      "APPLIED_IN_SERVICE_WHEN_APPLIED_INDIVIDUALLY",
     );
+
+    notifyEmployerApplied(user, service, req);
   } catch (error) {
     logError(error, req);
     throw error;
@@ -336,6 +425,18 @@ const validateUserSkills = async (userId, requiredSkills, req) => {
     return user.skills.some((skill) =>
       requiredSkills.includes(skill.skill.toLowerCase()),
     );
+  } catch (error) {
+    logError(error, req);
+    throw error;
+  }
+};
+
+const validateUserHasSpecificSkill = async (userId, skillName, req) => {
+  try {
+    const user = await User.findById(userId).select("skills");
+    if (!user?.skills?.length) return false;
+    const needle = String(skillName).toLowerCase().trim();
+    return user.skills.some((s) => String(s.skill).toLowerCase().trim() === needle);
   } catch (error) {
     logError(error, req);
     throw error;

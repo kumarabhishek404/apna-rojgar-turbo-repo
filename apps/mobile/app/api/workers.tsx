@@ -1,9 +1,35 @@
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 
+/**
+ * POST /worker/apply — keep mobile payloads compatible with backend:
+ * - Mediator: { serviceId, workers: string[], skills: Record<workerId, skill> }
+ * - Individual: { serviceId, skills: string, workers: [] } (skills may also be string[] from future clients)
+ */
+function normalizeApplyPayload(payload: Record<string, unknown>) {
+  if (!payload || typeof payload !== "object") return payload;
+  const serviceId = payload.serviceId;
+  const rawWorkers = payload.workers;
+  const workers = Array.isArray(rawWorkers)
+    ? rawWorkers.filter((w) => w != null && String(w).trim() !== "")
+    : [];
+  const skills = payload.skills;
+
+  if (workers.length > 0) {
+    return { serviceId, workers, skills };
+  }
+
+  return {
+    serviceId,
+    skills,
+    workers: [],
+  };
+}
+
 const applyService = async (payload: any) => {
   try {
-    const data = await API_CLIENT.makePostRequest("/worker/apply", payload);
+    const body = normalizeApplyPayload(payload as Record<string, unknown>);
+    const data = await API_CLIENT.makePostRequest("/worker/apply", body);
     return data.data;
   } catch (error: any) {
     console.error(

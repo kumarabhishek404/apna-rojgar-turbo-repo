@@ -48,7 +48,8 @@ const UploadProfilePictureScreen = () => {
 
       router.replace("/(tabs)");
 
-      void uploadPendingProfileImage();
+      // Backup trigger if save finished after this callback (registration photo flow).
+      uploadPendingProfileImage();
 
       if (user?._id) {
         void PUSH_NOTIFICATION.registerForPushNotificationsAsync(
@@ -79,12 +80,19 @@ const UploadProfilePictureScreen = () => {
             ? data.profilePicture
             : data.profilePicture.replace("file://", "");
 
-        await savePendingProfileUpload({
+        void savePendingProfileUpload({
           uri,
           userId: String(userId),
-        });
+        })
+          .then(() => {
+            uploadPendingProfileImage();
+          })
+          .catch((e) => {
+            console.error("Could not queue profile photo upload", e);
+          });
       }
 
+      // Save role/skills immediately; profile image uploads in background (with retries).
       mutationFinishRegistration.mutate({
         _id: userId,
         role,

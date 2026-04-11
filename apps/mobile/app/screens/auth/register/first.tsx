@@ -26,6 +26,10 @@ import Atoms from "@/app/AtomStore";
 import Loader from "@/components/commons/Loaders/Loader";
 import { saveToken } from "@/utils/authStorage";
 import StickButtonWithWall from "@/components/commons/StickButtonWithWall";
+import {
+  DEV_OTP_PLACEHOLDER,
+  shouldSkipOtpClient,
+} from "@/utils/devOtp";
 
 interface FormData {
   mobile: string;
@@ -40,6 +44,7 @@ const RegisterScreen: React.FC = () => {
 
   const [step, setStep] = useState<number>(1);
   const [countryCode, setCountryCode] = useState<string>("+91");
+  const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
   const [otp, setOtp] = useState<string>("");
   const [mobileNumberExist, setMobileNumberExist] = useState<string>("notSet");
   const [timer, setTimer] = useState<number>(30);
@@ -189,10 +194,15 @@ const RegisterScreen: React.FC = () => {
 
   const sendOtp = useMutation({
     mutationFn: async (mobile: string) => AUTH.sendOTP(mobile),
-    onSuccess: ({ Status }) => {
-      console.log("Status---", Status);
+    onSuccess: (data: { Status?: string; success?: boolean; otpSessionId?: string }) => {
+      console.log("sendOtp response---", data);
 
-      if (Status === "Success") {
+      if (data?.Status === "Success" || data?.success === true) {
+        setOtpSessionId(
+          typeof data?.otpSessionId === "string" && data.otpSessionId.trim()
+            ? data.otpSessionId.trim()
+            : null,
+        );
         setStep(2);
         startResendTimer();
         TOAST.success(t("otpSentSuccess"));
@@ -203,8 +213,11 @@ const RegisterScreen: React.FC = () => {
   });
 
   const verifyOtp = useMutation({
-    mutationFn: async (payload: { mobile: string; otp: string }) =>
-      AUTH.verifyOTP(payload),
+    mutationFn: async (payload: {
+      mobile: string;
+      otp: string;
+      otpSessionId?: string;
+    }) => AUTH.verifyOTP(payload),
     onSuccess: ({ Status }) => {
       if (Status === "Success") {
         TOAST.success(t("otpVerified"));
@@ -315,10 +328,22 @@ const RegisterScreen: React.FC = () => {
                 />
                 <Button
                   isPrimary
-                  title={t("sendOtp")}
-                  onPress={() =>
-                    sendOtp.mutate(`${countryCode}${watch("mobile")}`)
+                  title={
+                    shouldSkipOtpClient()
+                      ? t("nextContinue")
+                      : t("sendOtp")
                   }
+                  onPress={() => {
+                    const fullMobile = `${countryCode}${watch("mobile")}`;
+                    if (shouldSkipOtpClient()) {
+                      verifyOtp.mutate({
+                        mobile: fullMobile,
+                        otp: DEV_OTP_PLACEHOLDER,
+                      });
+                    } else {
+                      sendOtp.mutate(fullMobile);
+                    }
+                  }}
                   style={styles.button}
                   disabled={
                     checkMobileNumber?.isPending ||
@@ -380,6 +405,7 @@ const RegisterScreen: React.FC = () => {
                     verifyOtp.mutate({
                       mobile: `${countryCode}${watch("mobile")}`,
                       otp,
+                      ...(otpSessionId ? { otpSessionId } : {}),
                     })
                   }
                   style={styles.button}

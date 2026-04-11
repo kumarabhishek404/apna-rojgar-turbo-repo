@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
 import CustomText from "./CustomText";
 import placeholderProfileImage from "../../assets/person-placeholder.jpg";
 import { t } from "@/utils/translationHelper";
@@ -38,9 +39,10 @@ const AvatarComponent = ({
       quality: 1,
     });
   
-    if (!result.canceled) {
+    if (!result.canceled && result.assets[0]?.uri) {
       try {
-        await onUpload(result?.assets[0]?.uri);
+        const uri = await normalizePickedImageUriForUpload(result.assets[0].uri);
+        await onUpload(uri);
       } catch (err) {
         console.log("Error --", err);
       }

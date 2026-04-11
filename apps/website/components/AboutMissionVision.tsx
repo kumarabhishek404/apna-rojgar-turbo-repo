@@ -195,7 +195,7 @@ const AboutMissionVision = () => {
 
           {/* Floating Card - Workers */}
           <div className="absolute -top-6 left-6 bg-white p-3 rounded-xl shadow-lg border border-gray-100">
-            <p className="text-xs font-medium text-gray-700">{t("totalAppUsers", "Total App Users")}</p>
+            <p className="text-xs font-medium text-gray-700">{t("totalUsers", "Total Users")}</p>
             <p className="text-sm font-bold text-[#22409a]">{totalUsersText}</p>
           </div>
 

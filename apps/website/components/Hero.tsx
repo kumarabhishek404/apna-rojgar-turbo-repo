@@ -148,7 +148,7 @@ const HeroSection = () => {
           <div className="mt-10 grid grid-cols-3 gap-4 text-blue-100 sm:mt-12 sm:gap-6">
             <div>
               <p className="text-3xl font-bold text-white sm:text-4xl">{formattedStats.totalUsers}</p>
-              <p className="text-sm">{t("totalAppUsers", "Total App Users")}</p>
+              <p className="text-sm">{t("totalUsers", "Total Users")}</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white sm:text-4xl">{formattedStats.totalServices}</p>

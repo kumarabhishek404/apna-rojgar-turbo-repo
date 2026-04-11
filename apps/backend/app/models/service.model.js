@@ -144,6 +144,14 @@ const serviceSchema = new mongoose.Schema(
           },
         ],
         removedWorkers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+        /** When set, lists every service requirement name this application covers (web apply). */
+        appliedSkills: [{ type: String }],
+        applicantType: {
+          type: String,
+          enum: ["INDIVIDUAL", "CONTRACTOR"],
+          default: "INDIVIDUAL",
+        },
+        contractorManpower: { type: Number },
         status: {
           type: String,
           enum: [

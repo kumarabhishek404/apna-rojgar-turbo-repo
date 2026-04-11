@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiRequest, getAuth, saveAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
-import { resolveLanguage } from "@/lib/i18n";
+import { localizeApiErrorMessage, resolveLanguage } from "@/lib/i18n";
+import { APPLINK, WORKERTYPES } from "@/constants";
 import {
   BriefcaseBusiness,
   ChartColumnIncreasing,
@@ -12,9 +13,10 @@ import {
   Phone,
   Camera,
   ShieldCheck,
+  Smartphone,
 } from "lucide-react";
 
-type Skill = { skill: string };
+type Skill = { skill: string; pricePerDay?: number | null };
 type UserInfo = {
   _id: string;
   name?: string;
@@ -66,8 +68,97 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [draftSkillIds, setDraftSkillIds] = useState<string[]>([]);
+  const [savingSkills, setSavingSkills] = useState(false);
   const [updatingPhoto, setUpdatingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+
+  const allowedSkillIds = useMemo(() => new Set(WORKERTYPES.map((w) => w.value)), []);
+
+  const canManageSkills =
+    user?.role === "WORKER" || user?.role === "MEDIATOR";
+
+  const openSkillsModal = useCallback(() => {
+    if (!user || !canManageSkills) return;
+    const picked =
+      user.skills
+        ?.map((s) => s.skill)
+        .filter((id) => allowedSkillIds.has(id)) ?? [];
+    setDraftSkillIds(Array.from(new Set(picked)));
+    setShowSkillsModal(true);
+  }, [user, canManageSkills, allowedSkillIds]);
+
+  const toggleDraftSkill = (value: string) => {
+    setDraftSkillIds((prev) =>
+      prev.includes(value) ? prev.filter((x) => x !== value) : [...prev, value],
+    );
+  };
+
+  const saveSkills = async () => {
+    if (!user?._id) return;
+    setError("");
+    setMessage("");
+    setSavingSkills(true);
+    try {
+      const priceBySkill = new Map(
+        (user.skills || []).map((s) => [s.skill, s.pricePerDay ?? null]),
+      );
+      const fromPicker = draftSkillIds.map((skill) => ({
+        skill,
+        pricePerDay: priceBySkill.get(skill) ?? null,
+      }));
+      const legacyOther = (user.skills || []).filter(
+        (s) => !allowedSkillIds.has(s.skill),
+      );
+      const merged = [
+        ...fromPicker,
+        ...legacyOther.map((s) => ({
+          skill: s.skill,
+          pricePerDay: s.pricePerDay ?? null,
+        })),
+      ];
+      const uniqueBySkill = Array.from(
+        new Map(merged.map((item) => [item.skill, item])).values(),
+      );
+
+      const fd = new FormData();
+      fd.append("_id", user._id);
+      fd.append("skills", JSON.stringify(uniqueBySkill));
+
+      const auth = getAuth();
+      const base =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
+      const response = await fetch(`${base}/user/info`, {
+        method: "PATCH",
+        headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
+        body: fd,
+      });
+      const data = await response.json();
+      if (!response.ok || data?.success === false) {
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : t("skillsUpdateFailed", "Skills update failed"),
+        );
+      }
+      const currentAuth = getAuth();
+      saveAuth({
+        ...(currentAuth || {}),
+        user: data?.data,
+        token: currentAuth?.token || data?.token,
+      });
+      setMessage(
+        t("skillsUpdatedSuccessfully", "Your skills were updated successfully."),
+      );
+      setShowSkillsModal(false);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Skills update failed");
+    } finally {
+      setSavingSkills(false);
+    }
+  };
   const workerTotals = {
     total:
       (user?.workDetails?.byService?.appliedIndividually?.total || 0) +
@@ -151,7 +242,11 @@ export default function ProfilePage() {
       });
       const data = await response.json();
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Profile update failed");
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : t("profileUpdateFailed", "Profile update failed"),
+        );
       }
       const currentAuth = getAuth();
       saveAuth({
@@ -187,7 +282,11 @@ export default function ProfilePage() {
       });
       const data = await response.json();
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Profile image update failed");
+        throw new Error(
+          data?.message?.trim()
+            ? localizeApiErrorMessage(String(data.message))
+            : t("profileImageUpdateFailed", "Profile image update failed"),
+        );
       }
       const currentAuth = getAuth();
       saveAuth({
@@ -213,6 +312,23 @@ export default function ProfilePage() {
             "profileSubtitle",
             "Professional account settings, role controls, and skill management.",
           )}
+        </p>
+        <p className="mt-3 flex items-start gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-xs leading-relaxed text-orange-50">
+          <Smartphone className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+          <span>
+            {t(
+              "profileFullUpdateUseAppNote",
+              "To update more profile details, please use the Apna Rojgar mobile app — the website supports basic edits only.",
+            )}{" "}
+            <a
+              href={APPLINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-white underline decoration-white/70 underline-offset-2 hover:decoration-white"
+            >
+              {t("getTheApp", "Get the app")}
+            </a>
+          </span>
         </p>
       </div>
 
@@ -289,6 +405,15 @@ export default function ProfilePage() {
             >
               {t("editProfile", "Edit Profile")}
             </button>
+            {canManageSkills ? (
+              <button
+                type="button"
+                onClick={openSkillsModal}
+                className="rounded-lg border border-[#22409a]/35 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] transition hover:bg-[#f2f6ff]"
+              >
+                {t("manageSkills", "Manage skills")}
+              </button>
+            ) : null}
             <span className="inline-flex items-center rounded-full bg-[#eef3ff] px-3 py-1 text-xs font-semibold text-[#22409a]">
               {t(user?.role?.toLowerCase?.() || "user", user?.role || t("user", "User"))}
             </span>
@@ -296,10 +421,49 @@ export default function ProfilePage() {
               <ShieldCheck className="h-3.5 w-3.5" />
               {t(user?.status?.toLowerCase?.() || "active", user?.status || "ACTIVE")}
             </span>
-            <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              {t("skills", "Skills")}: {user?.skills?.length || 0}
-            </span>
+            {canManageSkills ? (
+              <button
+                type="button"
+                onClick={openSkillsModal}
+                className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
+              >
+                {t("skills", "Skills")}: {user?.skills?.length || 0}
+              </button>
+            ) : (
+              <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                {t("skills", "Skills")}: {user?.skills?.length || 0}
+              </span>
+            )}
           </div>
+
+          {user?.skills && user.skills.length > 0 ? (
+            <div className="mt-4 w-full shrink-0 border-t border-slate-100 pt-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#22409a]">
+                {t("yourSkills", "Your skills")}
+              </p>
+              <ul className="flex flex-wrap gap-2" aria-label={t("yourSkills", "Your skills")}>
+                {user.skills.map((s, index) => (
+                  <li key={`${s.skill}-${index}`}>
+                    <span className="inline-flex rounded-full bg-[#eef3ff] px-2.5 py-1 text-xs font-medium text-[#22409a] ring-1 ring-[#22409a]/10">
+                      {t(s.skill, s.skill)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : canManageSkills ? (
+            <div className="mt-4 w-full shrink-0 border-t border-slate-100 pt-4">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#22409a]">
+                {t("yourSkills", "Your skills")}
+              </p>
+              <p className="text-xs text-slate-500">
+                {t(
+                  "noSkillsOnProfileYet",
+                  "No skills added yet. Tap “Manage skills” to choose from the predefined list.",
+                )}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -380,6 +544,80 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {showSkillsModal && canManageSkills ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3"
+          onClick={() => {
+            if (!savingSkills) setShowSkillsModal(false);
+          }}
+          role="presentation"
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="profile-skills-modal-title"
+          >
+            <div className="border-b border-slate-200 px-5 py-4">
+              <h3
+                id="profile-skills-modal-title"
+                className="text-lg font-semibold text-[#16264f]"
+              >
+                {t("manageSkills", "Manage skills")}
+              </h3>
+              <p className="mt-1 text-xs text-slate-600">
+                {t(
+                  "manageSkillsHint",
+                  "Choose skills from the predefined list. Only these options can be added or removed here.",
+                )}
+              </p>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+              <div className="flex flex-wrap gap-2">
+                {WORKERTYPES.map((skill) => {
+                  const selected = draftSkillIds.includes(skill.value);
+                  return (
+                    <button
+                      key={skill.value}
+                      type="button"
+                      onClick={() => toggleDraftSkill(skill.value)}
+                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                        selected
+                          ? "border-[#22409a] bg-[#22409a] text-white"
+                          : "border-slate-300 bg-white text-slate-700 hover:border-[#22409a]/40"
+                      }`}
+                    >
+                      {t(skill.label, skill.label)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-slate-200 px-5 py-4">
+              <button
+                type="button"
+                onClick={() => setShowSkillsModal(false)}
+                disabled={savingSkills}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {t("cancel", "Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={() => void saveSkills()}
+                disabled={savingSkills}
+                className="rounded-lg bg-[#22409a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b357f] disabled:opacity-60"
+              >
+                {savingSkills
+                  ? t("saving", "Saving...")
+                  : t("saveSkills", "Save skills")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {showEditModal ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3">

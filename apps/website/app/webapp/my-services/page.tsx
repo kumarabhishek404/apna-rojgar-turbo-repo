@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import CreateServiceModal from "@/components/services/CreateServiceModal";
 import ServiceDetailsModal from "@/components/services/ServiceDetailsModal";
 import { ServiceCard, type ServiceItem } from "@/components/services/ServiceCard";
+import type { WebServiceApplyPayload } from "@/components/webapp/ServiceDetailsView";
 import ListLoader from "@/components/services/ListLoader";
 import type { BrowserGeo } from "@/lib/serviceDistance";
 import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
@@ -29,7 +30,6 @@ export default function MyServicesPage() {
   const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<Record<string, string>>({});
   const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -102,39 +102,50 @@ export default function MyServicesPage() {
     window.setTimeout(() => setSelectedServiceId(null), 150);
   }, []);
 
-  const onSkillChange = useCallback((serviceId: string, skill: string) => {
-    setSelectedSkill((prev) => ({ ...prev, [serviceId]: skill }));
-  }, []);
-
-  const noopApply = useCallback((_serviceId: string) => {}, []);
-
   const applyToService = useCallback(
-    async (serviceId: string, skillOverride?: string) => {
-      const skill = skillOverride || selectedSkill[serviceId];
-      if (!skill) {
-        setError(
-          t("selectSkillBeforeApply", "Please choose a required skill before applying."),
+    async (serviceId: string, arg?: string | WebServiceApplyPayload) => {
+      let body: Record<string, unknown>;
+
+      if (arg && typeof arg === "object" && Array.isArray(arg.selectedSkills)) {
+        if (arg.selectedSkills.length === 0) {
+          throw new Error(
+            t("selectRequirementsBeforeApply", "Select at least one requirement before applying."),
+          );
+        }
+        body = {
+          serviceId,
+          skills: arg.selectedSkills,
+          applicationType: arg.applicationType,
+          ...(arg.applicationType === "contractor"
+            ? { contractorManpower: arg.contractorManpower }
+            : {}),
+        };
+      } else {
+        throw new Error(
+          t("selectRequirementsBeforeApply", "Select at least one requirement before applying."),
         );
-        return;
       }
+
       setError("");
       setMessage("");
       setApplyingServiceId(serviceId);
       try {
         await apiRequest("/worker/apply", {
           method: "POST",
-          body: JSON.stringify({ serviceId, skills: skill }),
+          body: JSON.stringify(body),
         });
         setMessage(t("serviceAppliedSuccessfully", "Service applied successfully"));
         closeDetailsModal();
         await load();
       } catch (e) {
-        setError(e instanceof Error ? e.message : t("applyFailed", "Apply failed"));
+        throw new Error(
+          e instanceof Error ? e.message : t("applyFailed", "Apply failed"),
+        );
       } finally {
         setApplyingServiceId(null);
       }
     },
-    [closeDetailsModal, load, selectedSkill, t],
+    [closeDetailsModal, load, t],
   );
 
   const filteredItems = useMemo(
@@ -189,9 +200,6 @@ export default function MyServicesPage() {
               service={item}
               distanceKm={distanceKmForService(item)}
               showApply={false}
-              selectedSkill={selectedSkill[item._id] || ""}
-              onSkillChange={onSkillChange}
-              onApply={noopApply}
               onViewDetails={openDetailsModal}
               t={t}
             />
@@ -214,14 +222,12 @@ export default function MyServicesPage() {
         onClose={closeDetailsModal}
         canApply={canApply}
         applying={applyingServiceId === selectedServiceId}
-        selectedSkill={selectedServiceId ? selectedSkill[selectedServiceId] || "" : ""}
-        onSkillChange={(skill) => {
+        onApply={async (payload) => {
           if (!selectedServiceId) return;
-          onSkillChange(selectedServiceId, skill);
+          await applyToService(selectedServiceId, payload);
         }}
-        onApply={async (skill) => {
-          if (!selectedServiceId) return;
-          await applyToService(selectedServiceId, skill);
+        onAppliedMutation={() => {
+          void load();
         }}
       />
 

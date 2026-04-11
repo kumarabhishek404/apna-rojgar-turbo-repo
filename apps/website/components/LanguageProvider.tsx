@@ -15,7 +15,7 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<AppLanguage>("en");
+  const [language, setLanguageState] = useState<AppLanguage>("hi");
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -26,7 +26,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     const auth = getAuth() as { user?: { locale?: unknown } } | null;
     const locale = auth?.user?.locale;
-    let detected: AppLanguage = "en";
+    let detected: AppLanguage = "hi";
 
     if (typeof locale === "string") {
       detected = resolveLanguage(locale);

@@ -25,6 +25,8 @@ module.exports = [
         setTimeout: "readonly", // Add setTimeout as a global variable
         setInterval: "readonly",
         clearInterval: "readonly",
+        clearTimeout: "readonly",
+        __DEV__: "readonly",
         console: "readonly", // line to define `console` as a global variable
         FormData: "readonly",
         process: "readonly", // Define process as a global variable

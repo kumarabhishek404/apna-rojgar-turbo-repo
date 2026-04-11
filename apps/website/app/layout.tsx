@@ -41,7 +41,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="hi">
       <head>
         <script
           type="application/ld+json"

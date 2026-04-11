@@ -14,7 +14,17 @@ const sortOptions = [
 ] as const;
 
 export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarApi }) {
-  const { search, setSearch, sortBy, setSortBy, openCreateModal, t } = api;
+  const {
+    search,
+    setSearch,
+    sortBy,
+    setSortBy,
+    openCreateModal,
+    showCreateButton = true,
+    searchPlaceholder,
+    t,
+  } = api;
+  const searchPh = searchPlaceholder ?? t("searchWorkPlaceholder", "Search work...");
   const containerRef = useRef<HTMLDivElement>(null);
   const spacious = useContainerMinWidth(containerRef, TOOLBAR_SPACIOUS_PX);
   const [compactSearchOpen, setCompactSearchOpen] = useState(false);
@@ -41,7 +51,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchWorkPlaceholder", "Search work...")}
+            placeholder={searchPh}
             autoFocus
             className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2"
           />
@@ -65,7 +75,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchWorkPlaceholder", "Search work...")}
+            placeholder={searchPh}
             className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2 sm:max-w-md"
           />
         ) : null}
@@ -80,7 +90,7 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
                   ? "border-[#22409a]/40 bg-[#eef3ff] text-[#22409a] shadow-sm"
                   : "border-[#22409a]/20 bg-white text-[#22409a] hover:bg-[#eef3ff]"
               }`}
-              aria-label={t("searchWorkPlaceholder", "Search work...")}
+              aria-label={searchPh}
               aria-expanded={compactSearchOpen}
             >
               <Search className="h-[1.125rem] w-[1.125rem]" strokeWidth={2} aria-hidden />
@@ -90,25 +100,27 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
         ) : null}
 
         <div className="flex shrink-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className={`inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#22409a] to-[#3154bf] font-semibold text-white shadow-[0_2px_8px_rgba(15,23,42,0.14)] transition hover:from-[#1d3889] hover:to-[#2947a8] ${
-              spacious
-                ? "px-3 py-2 text-xs sm:px-4 sm:text-sm"
-                : "h-10 w-10 p-0 text-xs"
-            }`}
-            aria-label={t("newService")}
-          >
-            <Plus
-              className={`shrink-0 ${spacious ? "h-3.5 w-3.5 sm:h-4 sm:w-4" : "h-[1.125rem] w-[1.125rem]"}`}
-              strokeWidth={2.5}
-              aria-hidden
-            />
-            {spacious ? <span>{t("newService")}</span> : null}
-          </button>
+          {showCreateButton ? (
+            <button
+              type="button"
+              onClick={openCreateModal}
+              className={`inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#22409a] to-[#3154bf] font-semibold text-white shadow-[0_2px_8px_rgba(15,23,42,0.14)] transition hover:from-[#1d3889] hover:to-[#2947a8] ${
+                spacious
+                  ? "px-3 py-2 text-xs sm:px-4 sm:text-sm"
+                  : "h-10 w-10 p-0 text-xs"
+              }`}
+              aria-label={t("newService")}
+            >
+              <Plus
+                className={`shrink-0 ${spacious ? "h-3.5 w-3.5 sm:h-4 sm:w-4" : "h-[1.125rem] w-[1.125rem]"}`}
+                strokeWidth={2.5}
+                aria-hidden
+              />
+              {spacious ? <span>{t("newService")}</span> : null}
+            </button>
+          ) : null}
 
-          {spacious ? (
+          {spacious && showCreateButton ? (
             <div className="mx-0.5 hidden h-8 w-px shrink-0 bg-[#22409a]/20 sm:block" aria-hidden />
           ) : null}
 
