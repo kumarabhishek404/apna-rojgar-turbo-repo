@@ -28,6 +28,15 @@ function normalizeRegistrationSource(value) {
   return null;
 }
 
+/** Body `source` wins over `X-Client-Platform` (same rules as register). */
+function getRegistrationSourceFromRequest(req) {
+  const headerSource = normalizeRegistrationSource(
+    req.get?.("x-client-platform") ?? req.headers["x-client-platform"],
+  );
+  const bodySource = normalizeRegistrationSource(req.body?.source);
+  return bodySource ?? headerSource ?? null;
+}
+
 function getTwoFactorApiKey() {
   const key = process.env.TWOFACTOR_API_KEY;
   if (key != null && String(key).trim()) return String(key).trim();
@@ -81,7 +90,7 @@ const DEV_OTP_PATTERN = /^\d{6}$/;
 
 export const handleRegister = async (req, res) => {
   try {
-    const { mobile, locale, countryCode, source } = req.body;
+    const { mobile, locale, countryCode } = req.body;
     console.log("API HIT: Register Endpoint", req.body);
 
     if (!mobile || !countryCode || !locale) {
@@ -100,11 +109,7 @@ export const handleRegister = async (req, res) => {
       });
     }
 
-    const headerSource = normalizeRegistrationSource(
-      req.get?.("x-client-platform") ?? req.headers["x-client-platform"],
-    );
-    const bodySource = normalizeRegistrationSource(source);
-    const registrationSource = bodySource ?? headerSource ?? null;
+    const registrationSource = getRegistrationSourceFromRequest(req);
 
     const user = new User({
       locale,
@@ -373,11 +378,13 @@ export const handleLogin = async (req, res) => {
     const t1 = performance.now();
     console.log("User lookup time:", (t1 - t0).toFixed(2), "ms");
 
-    // Auto-create user if not exists
+    // Auto-create user if not exists (login OTP flow — same client headers/body as register)
     if (!user) {
+      const registrationSource = getRegistrationSourceFromRequest(req);
       user = await User.create({
         mobile,
         status: "ACTIVE",
+        registrationSource,
       });
     }
 

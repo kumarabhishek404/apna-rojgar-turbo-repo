@@ -56,11 +56,22 @@ const register = async (payload: any) => {
 
 const signIn = async (payload: any) => {
   try {
+    const source: "ios" | "android" | "web" | null =
+      Platform.OS === "ios"
+        ? "ios"
+        : Platform.OS === "android"
+          ? "android"
+          : Platform.OS === "web"
+            ? "web"
+            : null;
     console.log(
       `[Sign In] [userService] Signing in the user with API /auth/login and payload `,
       payload,
     );
-    const data = await API_CLIENT.makePostRequest("/auth/login", payload);
+    const data = await API_CLIENT.makePostRequest("/auth/login", {
+      ...payload,
+      ...(source ? { source } : {}),
+    });
     console.log(
       `[Sign In] [userService] User signed in with the response `,
       data.data,
