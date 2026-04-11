@@ -86,8 +86,11 @@ const UserSchema = new mongoose.Schema(
     },
     registrationSource: {
       type: String,
-      enum: ["android", "ios", "web"],
-      default: "web",
+      default: null,
+      validate: {
+        validator: (v) => v == null || ["android", "ios", "web"].includes(v),
+        message: "Invalid registration source",
+      },
     },
     likedServices: [
       {

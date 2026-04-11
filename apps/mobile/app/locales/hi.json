@@ -1547,6 +1547,23 @@
 
   "skipAndContinue": "छोड़ें और आगे बढ़ें",
   "profilePictureOptional": "फोटो लगाना जरूरी नहीं है। चाहें तो इस चरण को छोड़ सकते हैं।",
+  "addProfilePhotoTitle": "आपकी प्रोफ़ाइल फोटो",
+  "chooseFromGallery": "गैलरी से चुनें",
+  "galleryPermissionRequired": "फोटो चुनने के लिए गैलरी की अनुमति चाहिए।",
+  "cameraPermissionRequired": "फोटो लेने के लिए कैमरे की अनुमति चाहिए।",
   "openCamera": "कैमरा चालू करें",
-  "selfieHelpsWork": "फोटो वाले प्रोफ़ाइल पर लोग ज़्यादा भरोसा करते हैं और काम जल्दी मिलता है।"
+  "selfieHelpsWork": "फोटो वाले प्रोफ़ाइल पर लोग ज़्यादा भरोसा करते हैं और काम जल्दी मिलता है।",
+  "profilePhotoOptionalBadge": "ज़रूरी नहीं — छोड़ सकते हैं",
+  "profilePhotoPickOne": "एक तरीका चुनें:",
+  "profilePhotoFromPhoneTitle": "फोन की फोटो",
+  "profilePhotoFromPhoneDesc": "जो फोटो पहले से फोन में है, वह चुनें",
+  "profilePhotoCameraTitle": "अभी फोटो लें",
+  "profilePhotoCameraDesc": "कैमरा खोलकर अपनी फोटो लें",
+  "profilePhotoBackToChoices": "दूसरा तरीका आज़माएँ",
+  "profilePhotoTapShutter": "फोटो लेने के लिए नीचे गोल बटन दबाएँ",
+  "profilePhotoFaceInFrame": "अपना चेहरा गोले के अंदर रखें",
+  "profilePhotoSelected": "फोटो चुन ली",
+  "profilePhotoTryDifferent": "दूसरी फोटो चुनें",
+  "profilePhotoLooksGood": "अगर ठीक लगे तो नीचे हरा बटन दबाकर आगे बढ़ें।",
+  "profilePhotoCameraDeniedHelp": "कोई दिक्कत नहीं — गैलरी से फोटो चुन सकते हैं।"
 }

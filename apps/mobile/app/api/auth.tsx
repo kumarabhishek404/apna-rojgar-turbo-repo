@@ -31,12 +31,12 @@ const checkMobileExistance = async (payload: any) => {
 
 const register = async (payload: any) => {
   try {
-    const source =
+    const source: "ios" | "android" | null =
       Platform.OS === "ios"
         ? "ios"
         : Platform.OS === "android"
           ? "android"
-          : "web";
+          : null;
     const data = await API_CLIENT.makePostRequest("/auth/register", {
       ...payload,
       source,

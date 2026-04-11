@@ -46,10 +46,10 @@ export const handleRegister = async (req, res) => {
     }
 
     const headerSource = normalizeRegistrationSource(
-      req.headers["x-client-platform"],
+      req.get?.("x-client-platform") ?? req.headers["x-client-platform"],
     );
     const bodySource = normalizeRegistrationSource(source);
-    const registrationSource = bodySource || headerSource || "web";
+    const registrationSource = bodySource ?? headerSource ?? null;
 
     const user = new User({
       locale,

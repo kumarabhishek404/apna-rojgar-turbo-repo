@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import React from "react";
+import { View, StyleSheet, Platform, ScrollView, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/Colors";
 import Button from "@/components/inputs/Button";
 import { Controller, useForm } from "react-hook-form";
@@ -7,23 +10,22 @@ import SelfieScreen from "@/components/inputs/Selfie";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import CustomHeading from "@/components/commons/CustomHeading";
 import { useMutation } from "@tanstack/react-query";
 import USER from "@/app/api/user";
-import Loader from "@/components/commons/Loaders/Loader";
 import { saveToken } from "@/utils/authStorage";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
 import {
   savePendingProfileUpload,
   uploadPendingProfileImage,
 } from "@/utils/backgroundImageUpload";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
-import CustomText from "@/components/commons/CustomText";
 
 const UploadProfilePictureScreen = () => {
-  const { userId, role, skills } = useLocalSearchParams();
-  const [userDetails, setUserDetails] = useAtom(Atoms.UserAtom);
+  const insets = useSafeAreaInsets();
+  const { userId: userIdParam, role, skills } = useLocalSearchParams();
+  const userId = Array.isArray(userIdParam) ? userIdParam[0] : userIdParam;
+  const setUserDetails = useSetAtom(Atoms.UserAtom);
   const {
     control,
     watch,
@@ -44,19 +46,18 @@ const UploadProfilePictureScreen = () => {
       await saveToken(token);
       setUserDetails({ isAuth: true, ...user });
 
-      if (user?._id) {
-        try {
-          await PUSH_NOTIFICATION.registerForPushNotificationsAsync(
-            true,
-            user._id,
-          );
-        } catch (err) {
-          console.error("Push notification registration failed: ", err);
-        }
-      }
-
       router.replace("/(tabs)");
-      uploadPendingProfileImage();
+
+      void uploadPendingProfileImage();
+
+      if (user?._id) {
+        void PUSH_NOTIFICATION.registerForPushNotificationsAsync(
+          true,
+          user._id,
+        ).catch((err) =>
+          console.error("Push notification registration failed: ", err),
+        );
+      }
     },
     onError: (error) => {
       console.error("Error finishing registration: ", error);
@@ -67,16 +68,20 @@ const UploadProfilePictureScreen = () => {
     try {
       const parsedSkills = skills ? JSON.parse(skills as string) : [];
 
-      // If user selected image
+      if (!userId) {
+        TOAST?.error(t("somethingWentWrong"));
+        return;
+      }
+
       if (data?.profilePicture) {
-        let uri =
+        const uri =
           Platform.OS === "android"
             ? data.profilePicture
             : data.profilePicture.replace("file://", "");
 
         await savePendingProfileUpload({
           uri,
-          userId,
+          userId: String(userId),
         });
       }
 
@@ -91,62 +96,94 @@ const UploadProfilePictureScreen = () => {
     }
   };
 
+  const hasPhoto = Boolean(watch("profilePicture"));
+  const footerPad = Math.max(insets.bottom, 16);
+
   return (
-    <View style={styles?.container}>
+    <View style={styles.screen}>
       <Stack.Screen options={{ headerShown: false }} />
-      {/* <Loader loading={mutationUpdateProfile?.isPending} /> */}
-      <CustomHeading baseFont={25} style={styles.heading}>
-        {t("takeSelfieForRegistration")}
-      </CustomHeading>
-{/* 
-      <CustomText
-        baseFont={14}
-        color={Colors.primary}
-        style={{ marginBottom: 10 }}
+      <LinearGradient
+        colors={[Colors.primary, "#3558b8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.hero, { paddingTop: insets.top + 8 }]}
       >
-        {t("profilePictureOptional")}
-      </CustomText> */}
-      <CustomText
-        baseFont={16}
-        fontWeight="600"
-        color={Colors.primary}
-        style={{ marginBottom: 15 }}
+        <View style={styles.heroRow}>
+          <View style={styles.heroIconWrap}>
+            <Ionicons name="person" size={28} color={Colors.primary} />
+          </View>
+          <View style={styles.heroTextCol}>
+            <Text style={styles.heroTitle} numberOfLines={2}>
+              {t("addProfilePhotoTitle")}
+            </Text>
+            <View style={styles.optionalPill}>
+              <Ionicons name="checkmark-circle" size={16} color="#fff" />
+              <Text style={styles.optionalPillText}>
+                {t("profilePhotoOptionalBadge")}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        {t("selfieHelpsWork")}
-      </CustomText>
-      <Controller
-        control={control}
-        name="profilePicture"
-        defaultValue=""
-        rules={{}}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <SelfieScreen
+        <View style={styles.card}>
+          {!hasPhoto && (
+            <View style={styles.tipRow}>
+              <Ionicons name="bulb-outline" size={22} color={Colors.action} />
+              <Text style={styles.tipText}>{t("selfieHelpsWork")}</Text>
+            </View>
+          )}
+
+          <Controller
+            control={control}
             name="profilePicture"
-            profilePicture={value}
-            setProfilePicture={onChange}
-            onBlur={onBlur}
-            errors={errors}
+            defaultValue=""
+            rules={{}}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <SelfieScreen
+                name="profilePicture"
+                profilePicture={value}
+                setProfilePicture={onChange}
+                onBlur={onBlur}
+                errors={errors}
+              />
+            )}
           />
-        )}
-      />
-      <View style={styles?.buttonContainer}>
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.buttonContainer,
+          {
+            paddingBottom: footerPad,
+            paddingTop: 12,
+          },
+        ]}
+      >
         <Button
           isPrimary={true}
           title={t("back")}
-          onPress={() => router?.back()}
-          bgColor={Colors?.danger}
-          borderColor={Colors?.danger}
-          style={{ width: "35%", paddingHorizontal: 6 }}
+          onPress={() => router.back()}
+          bgColor={Colors.danger}
+          borderColor={Colors.danger}
+          style={styles.footerBackBtn}
         />
         <Button
           isPrimary={true}
-          title={
-            watch("profilePicture")
-              ? t("saveProfilePicture")
-              : t("skipAndContinue")
-          }
+          title={hasPhoto ? t("saveAndNext") : t("skipAndContinue")}
           onPress={handleSubmit(handleProfilePictureSubmit)}
-          style={{ width: "60%", paddingHorizontal: 8 }}
+          bgColor={hasPhoto ? Colors.success : Colors.primary}
+          borderColor={hasPhoto ? Colors.success : Colors.primary}
+          style={styles.footerContinueBtn}
+          loading={mutationFinishRegistration.isPending}
+          disabled={mutationFinishRegistration.isPending}
         />
       </View>
     </View>
@@ -154,87 +191,121 @@ const UploadProfilePictureScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    height: "100%",
-    backgroundColor: Colors?.fourth,
-    paddingVertical: 0,
-    justifyContent: "center",
-    paddingHorizontal: 20,
+    backgroundColor: Colors.secondaryBackground,
   },
-  customHeader: {
-    width: "100%",
-    marginTop: 40,
-    paddingHorizontal: 20,
+  hero: {
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+  },
+  heroRow: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 14,
   },
-  headerText: {
+  heroIconWrap: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  heroTextCol: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "center",
+    gap: 6,
+  },
+  heroTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "800",
+    textAlign: "left",
+    letterSpacing: 0.15,
+    lineHeight: 24,
+  },
+  optionalPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    flexWrap: "wrap",
+    gap: 6,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 16,
+    maxWidth: "100%",
+  },
+  optionalPillText: {
+    color: "#fff",
+    fontSize: 12,
     fontWeight: "700",
-    fontSize: 20,
+    flexShrink: 1,
   },
-  formContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    marginBottom: 40,
-  },
-  heading: {
-    marginBottom: 10,
-  },
-  label: {
-    marginVertical: 10,
-  },
-  input: {
-    borderColor: "#ccc",
+  tipRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    backgroundColor: "#FFF6ED",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 16,
-    borderRadius: 8,
+    borderColor: "rgba(255, 140, 66, 0.35)",
+    marginBottom: 14,
+  },
+  tipText: {
+    flex: 1,
+    color: Colors.text,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "500",
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 100,
+  },
+  card: {
+    marginTop: 8,
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 18,
+    shadowColor: "#22409a",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
   },
   buttonContainer: {
-    position: "absolute",
-    bottom: 0,
-    left: 20,
-    width: "100%",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    marginVertical: 20,
+    gap: 16,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.secondaryBackground,
   },
-  buttonText: {
-    color: Colors?.white,
-    fontWeight: "700",
-    textAlign: "center",
-    fontSize: 18,
-  },
-
-  forgotPasswordText: {
-    textAlign: "right",
-    color: Colors.primary,
-    // fontFamily: fonts.SemiBold,
-    marginVertical: 10,
-  },
-  loginButtonWrapper: {
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
+  footerBackBtn: {
+    width: "32%",
     paddingHorizontal: 6,
-    paddingVertical: 3,
-    marginTop: 20,
+    minHeight: 48,
   },
-  loginText: {
-    color: Colors.white,
-    fontSize: 20,
-    // fontFamily: fonts.SemiBold,
-    textAlign: "center",
-    padding: 10,
-  },
-
-  conditionsContainer: {},
-  conditionText: {
-    fontSize: 13,
-    marginBottom: 6,
-  },
-  successText: {
-    color: "green",
+  footerContinueBtn: {
+    flex: 1,
+    minHeight: 48,
+    paddingHorizontal: 8,
   },
 });
 

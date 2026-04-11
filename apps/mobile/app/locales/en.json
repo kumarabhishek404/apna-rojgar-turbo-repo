@@ -1559,6 +1559,23 @@
   "addNewWork": "Add new work",
 
   "profilePictureOptional": "Profile photo is optional. You can skip this step.",
+  "addProfilePhotoTitle": "Your profile photo",
+  "chooseFromGallery": "Choose from gallery",
+  "galleryPermissionRequired": "Photo library access is needed to choose a picture.",
+  "cameraPermissionRequired": "Camera access is needed to take a photo.",
   "openCamera": "Open Camera",
-  "selfieHelpsWork": "People trust profiles with photos more, and they get work faster."
+  "selfieHelpsWork": "People trust profiles with photos more, and they get work faster.",
+  "profilePhotoOptionalBadge": "Optional — you can skip",
+  "profilePhotoPickOne": "Choose a method:",
+  "profilePhotoFromPhoneTitle": "Photo from phone",
+  "profilePhotoFromPhoneDesc": "Pick a picture already saved on your phone",
+  "profilePhotoCameraTitle": "Take new photo",
+  "profilePhotoCameraDesc": "Open camera and take a selfie",
+  "profilePhotoBackToChoices": "Try the other way",
+  "profilePhotoTapShutter": "Tap the round button below to take the picture",
+  "profilePhotoFaceInFrame": "Keep your whole face inside the circle",
+  "profilePhotoSelected": "Photo selected",
+  "profilePhotoTryDifferent": "Pick another photo",
+  "profilePhotoLooksGood": "If this looks good, tap the green button below to go ahead.",
+  "profilePhotoCameraDeniedHelp": "No worries — you can still choose a photo from your gallery."
 }
