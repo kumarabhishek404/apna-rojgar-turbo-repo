@@ -46,6 +46,29 @@ function normalizeProfileGender(value: unknown): string {
   return "";
 }
 
+function userHasProfilePicture(user: { profilePicture?: unknown } | null | undefined): boolean {
+  const p = user?.profilePicture;
+  return typeof p === "string" && p.trim().length > 0;
+}
+
+/** New file chosen or existing / preview URL present (blob or https). */
+function registerFormHasProfilePhoto(form: {
+  profileImage: File | null;
+  profileImagePreview: string;
+}): boolean {
+  if (form.profileImage) return true;
+  return Boolean(form.profileImagePreview?.trim());
+}
+
+function roleHasRequiredSkillsOnServer(
+  role: string,
+  skillsLength: number,
+): boolean {
+  if (role === "EMPLOYER") return true;
+  if (role === "WORKER" || role === "MEDIATOR") return skillsLength > 0;
+  return true;
+}
+
 function NavbarContent() {
   const { t, language, setLanguage } = useLanguage();
   const searchParams = useSearchParams();
@@ -330,8 +353,17 @@ function NavbarContent() {
       ) {
         missingAtOtp.push("skills");
       }
+      if (!userHasProfilePicture(user)) {
+        missingAtOtp.push("profilePicture");
+      }
 
-      if (hasCoreProfile && hasRoleSpecificProfile) {
+      const canEnterDashboard =
+        hasCoreProfile &&
+        hasRoleSpecificProfile &&
+        userHasProfilePicture(user) &&
+        roleHasRequiredSkillsOnServer(resolvedRole, userSkills.length);
+
+      if (canEnterDashboard) {
         saveAuth({ user, token });
         setIsLoggedIn(true);
         closeLoginModal();
@@ -382,9 +414,8 @@ function NavbarContent() {
       return;
     }
     setAuthError("");
-    setRegisterForm((prev) => ({
-      ...prev,
-      skills: prev.skills.some((item) => item.skill === skill)
+    setRegisterForm((prev) => {
+      const nextSkills = prev.skills.some((item) => item.skill === skill)
         ? prev.skills.filter((item) => item.skill !== skill)
         : [
             ...prev.skills,
@@ -392,8 +423,13 @@ function NavbarContent() {
               skill,
               pricePerDay: prev.role === "WORKER" ? 0 : null,
             },
-          ],
-    }));
+          ];
+      if (nextSkills.length > 0) {
+        setMissingProfileFields((fields) => fields.filter((item) => item !== "skills"));
+        setProfileMissingFields((fields) => fields.filter((item) => item !== "skills"));
+      }
+      return { ...prev, skills: nextSkills };
+    });
   };
 
   const updateRegisterSkillPrice = (skill: string, priceRaw: string) => {
@@ -411,6 +447,7 @@ function NavbarContent() {
   const handleRegisterImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     if (!file) return;
+    clearMissingField("profilePicture");
     setRegisterForm((prev) => ({
       ...prev,
       profileImage: file,
@@ -484,12 +521,19 @@ function NavbarContent() {
   );
 
   const shouldShowAllProfileFields = profileMissingFields.length === 0;
+  /** ≥2 missing → first-time style wizard (photo, work prefs, skills). 1 missing → only those inputs (e.g. name only). */
+  const isFullProfileOnboarding = profileMissingFields.length >= 2;
+  const showProfileMediaField =
+    isFullProfileOnboarding || profileMissingFields.includes("profilePicture");
   const showNameField = shouldShowAllProfileFields || profileMissingFields.includes("name");
   const showAgeField = shouldShowAllProfileFields || profileMissingFields.includes("age");
   const showGenderField = shouldShowAllProfileFields || profileMissingFields.includes("gender");
   const showAddressField = shouldShowAllProfileFields || profileMissingFields.includes("address");
   const showRoleField = shouldShowAllProfileFields || profileMissingFields.includes("role");
-  const showSkillsField = shouldShowAllProfileFields || profileMissingFields.includes("skills");
+  const showSkillsField =
+    profileMissingFields.includes("skills") ||
+    (isFullProfileOnboarding &&
+      (registerForm.role === "WORKER" || registerForm.role === "MEDIATOR"));
   const showBasicSection = showNameField || showAgeField || showGenderField;
 
   useEffect(() => {
@@ -571,61 +615,128 @@ function NavbarContent() {
       setAuthStep("mobile");
       return;
     }
-    const missingFields: string[] = [];
-    if (!registerForm.name.trim()) missingFields.push("name");
-    if (!registerForm.age) missingFields.push("age");
-    if (!registerForm.gender) missingFields.push("gender");
-    if (!registerForm.role) missingFields.push("role");
-    if (showAddressBuilder) {
+    const validateStructuredAddress = (out: string[]) => {
       const shouldValidateStructuredAddress =
         !hasSavedAddress || hasStartedStructuredAddress;
-      if (shouldValidateStructuredAddress && !registerForm.state) missingFields.push("state");
-      if (shouldValidateStructuredAddress && !registerForm.district) missingFields.push("district");
-      if (shouldValidateStructuredAddress && !registerForm.subDistrict) missingFields.push("subDistrict");
-      if (shouldValidateStructuredAddress && !registerForm.village) missingFields.push("village");
+      if (shouldValidateStructuredAddress && !registerForm.state) out.push("state");
+      if (shouldValidateStructuredAddress && !registerForm.district) out.push("district");
+      if (shouldValidateStructuredAddress && !registerForm.subDistrict) {
+        out.push("subDistrict");
+      }
+      if (shouldValidateStructuredAddress && !registerForm.village) out.push("village");
       if (
         shouldValidateStructuredAddress &&
         registerForm.pinCode.trim().length !== 6
       ) {
-        missingFields.push("pinCode");
+        out.push("pinCode");
       }
-    } else if (!registerForm.address.trim()) {
-      missingFields.push("address");
-    }
-    if (
-      missingFields.length > 0
-    ) {
-      setMissingProfileFields(missingFields);
-      setAuthError(
-        t(
-          "completeNameAgeGenderAddress",
-          "Please complete name, age, gender and address.",
-        ),
-      );
-      return;
-    }
-    if (
-      (registerForm.role === "WORKER" || registerForm.role === "MEDIATOR") &&
-      registerForm.skills.length === 0
-    ) {
-      setMissingProfileFields((prev) =>
-        prev.includes("skills") ? prev : [...prev, "skills"],
-      );
-      setAuthError(t("selectAtLeastOneSkill", "Select at least one skill"));
-      return;
-    }
-    if (registerForm.role === "WORKER") {
-      const invalidPrice = registerForm.skills.some(
-        (item) => !item.pricePerDay || Number(item.pricePerDay) <= 0,
-      );
-      if (invalidPrice) {
+    };
+
+    if (!isFullProfileOnboarding) {
+      const missingFields: string[] = [];
+      for (const field of profileMissingFields) {
+        if (field === "name" && !registerForm.name.trim()) {
+          missingFields.push("name");
+        }
+        if (field === "age" && !registerForm.age) {
+          missingFields.push("age");
+        }
+        if (field === "gender" && !registerForm.gender) {
+          missingFields.push("gender");
+        }
+        if (field === "role" && !registerForm.role) {
+          missingFields.push("role");
+        }
+        if (field === "address") {
+          if (showAddressBuilder) {
+            validateStructuredAddress(missingFields);
+          } else if (!registerForm.address.trim()) {
+            missingFields.push("address");
+          }
+        }
+        if (field === "skills") {
+          if (
+            (registerForm.role === "WORKER" || registerForm.role === "MEDIATOR") &&
+            registerForm.skills.length === 0
+          ) {
+            missingFields.push("skills");
+          }
+          if (registerForm.role === "WORKER" && registerForm.skills.length > 0) {
+            const invalidPrice = registerForm.skills.some(
+              (item) => !item.pricePerDay || Number(item.pricePerDay) <= 0,
+            );
+            if (invalidPrice) {
+              setAuthError(
+                t(
+                  "validPricePerDayForSkills",
+                  "Please enter valid price/day for selected worker skills.",
+                ),
+              );
+              return;
+            }
+          }
+        }
+        if (field === "profilePicture" && !registerFormHasProfilePhoto(registerForm)) {
+          missingFields.push("profilePicture");
+        }
+      }
+      if (missingFields.length > 0) {
+        setMissingProfileFields(missingFields);
+        setAuthError(
+          t("pleaseCompleteMissingFields", "Please complete the highlighted fields."),
+        );
+        return;
+      }
+    } else {
+      const missingFields: string[] = [];
+      if (!registerForm.name.trim()) missingFields.push("name");
+      if (!registerForm.age) missingFields.push("age");
+      if (!registerForm.gender) missingFields.push("gender");
+      if (!registerForm.role) missingFields.push("role");
+      if (showAddressBuilder) {
+        validateStructuredAddress(missingFields);
+      } else if (!registerForm.address.trim()) {
+        missingFields.push("address");
+      }
+      if (!registerFormHasProfilePhoto(registerForm)) {
+        missingFields.push("profilePicture");
+      }
+      if (missingFields.length > 0) {
+        setMissingProfileFields(missingFields);
         setAuthError(
           t(
-            "validPricePerDayForSkills",
-            "Please enter valid price/day for selected worker skills.",
+            "completeNameAgeGenderAddress",
+            "Please complete name, age, gender, address, and profile photo.",
           ),
         );
         return;
+      }
+      if (
+        (registerForm.role === "WORKER" || registerForm.role === "MEDIATOR") &&
+        registerForm.skills.length === 0
+      ) {
+        setMissingProfileFields((prev) =>
+          prev.includes("skills") ? prev : [...prev, "skills"],
+        );
+        setProfileMissingFields((prev) =>
+          prev.includes("skills") ? prev : [...prev, "skills"],
+        );
+        setAuthError(t("selectAtLeastOneSkill", "Select at least one skill"));
+        return;
+      }
+      if (registerForm.role === "WORKER") {
+        const invalidPrice = registerForm.skills.some(
+          (item) => !item.pricePerDay || Number(item.pricePerDay) <= 0,
+        );
+        if (invalidPrice) {
+          setAuthError(
+            t(
+              "validPricePerDayForSkills",
+              "Please enter valid price/day for selected worker skills.",
+            ),
+          );
+          return;
+        }
       }
     }
 
@@ -1462,8 +1573,14 @@ function NavbarContent() {
                       ) : null}
                     </div>
                     ) : null}
-                    {shouldShowAllProfileFields ? (
-                    <div className="space-y-2 rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+                    {showProfileMediaField ? (
+                    <div
+                      className={`space-y-2 rounded-2xl border bg-gradient-to-b from-slate-50 to-white p-4 sm:p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ${
+                        missingProfileFields.includes("profilePicture")
+                          ? "border-red-300"
+                          : "border-slate-200"
+                      }`}
+                    >
                       <p className="text-xs font-bold uppercase tracking-[0.1em] text-slate-500">
                         {t("profileMedia", "Profile Media")}
                       </p>

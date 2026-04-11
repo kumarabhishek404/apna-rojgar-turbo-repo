@@ -557,6 +557,7 @@
   "confirmPasswordIsRequired": "पासवर्ड सत्यापित करें",
   "addNewAddress": "नया पता जोड़ें",
   "selectAtLeastOneSkill": "कम से कम एक कौशल चुनें",
+  "youCanSelectMaxSkills": "आप अधिकतम 5 कौशल ही चुन सकते हैं।",
   "whatYouCanDo": "आप क्या कर सकते हैं?",
   "selectAnySkills": "नीचे दी गई श्रेणियों में से कोई भी कौशल चुनें",
   "enterYourConfirmPassword": "अपना पासवर्ड सत्यापित करें",
@@ -1799,7 +1800,8 @@
 
   "skipAndContinue": "छोड़ें और आगे बढ़ें",
   "profilePictureOptional": "फोटो लगाना जरूरी नहीं है। चाहें तो इस चरण को छोड़ सकते हैं।",
-  "completeNameAgeGenderAddress": "कृपया नाम, उम्र, लिंग और पता पूरा भरें।",
+  "completeNameAgeGenderAddress": "कृपया नाम, उम्र, लिंग, पता और प्रोफ़ाइल फ़ोटो पूरा भरें।",
+  "pleaseCompleteMissingFields": "कृपया हाइलाइट किए गए फ़ील्ड पूरे करें।",
   "openCamera": "कैमरा चालू करें",
   "selfieHelpsWork": "फोटो वाले प्रोफ़ाइल पर लोग ज़्यादा भरोसा करते हैं और काम जल्दी मिलता है।",
   "missingProfileDetailsToast": "कुछ जानकारी छूट गई है। कृपया हाइलाइट किए गए फ़ील्ड भरें।"

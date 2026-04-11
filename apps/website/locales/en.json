@@ -549,6 +549,7 @@
   "verifyAddress": "Verify Address",
   "addressIsRequired": "Address is required,",
   "selectAtLeastOneSkill": "Select at least one skill",
+  "youCanSelectMaxSkills": "You can select maximum 5 skills.",
   "whatYouCanDo": "What you can do?",
   "selectAnySkills": "Select Any Skills from below categories",
   "enterAValidMobileNumber": "Enter a valid mobile number",
@@ -1805,7 +1806,8 @@
   "addNewWork": "Add new work",
 
   "profilePictureOptional": "Profile photo is optional. You can skip this step.",
-  "completeNameAgeGenderAddress": "Please complete name, age, gender and address.",
+  "completeNameAgeGenderAddress": "Please complete name, age, gender, address, and profile photo.",
+  "pleaseCompleteMissingFields": "Please complete the highlighted fields.",
   "openCamera": "Open Camera",
   "selfieHelpsWork": "People trust profiles with photos more, and they get work faster.",
   "missingProfileDetailsToast": "Some details are missing. Please fill highlighted fields."

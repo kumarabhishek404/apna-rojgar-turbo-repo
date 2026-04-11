@@ -4,6 +4,12 @@ import { getClientAppLanguage, localizeApiErrorMessage, translate } from "@/lib/
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
 
+/** So `/auth/register` and `/auth/login` (auto-create user) persist `registrationSource: "web"`. */
+const WEB_AUTH_JSON_HEADERS: HeadersInit = {
+  "Content-Type": "application/json",
+  "X-Client-Platform": "web",
+};
+
 type RegisterPayload = {
   mobile: string;
   countryCode: string;
@@ -16,13 +22,15 @@ type LoginPayload = {
   otp?: string;
   /** From send-OTP response; pass on verify so load-balanced APIs need no shared cache. */
   otpSessionId?: string;
+  /** Set by loginUser for new-user creation; omit from call sites. */
+  source?: "web";
 };
 
 export async function registerUser(payload: RegisterPayload) {
   const response = await fetch(`${API_BASE_URL}/auth/register`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ source: "web", ...payload }),
+    headers: WEB_AUTH_JSON_HEADERS,
+    body: JSON.stringify({ ...payload, source: "web" }),
   });
 
   const data = await response.json();
@@ -43,8 +51,8 @@ export async function registerUser(payload: RegisterPayload) {
 export async function loginUser(payload: LoginPayload) {
   const response = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    headers: WEB_AUTH_JSON_HEADERS,
+    body: JSON.stringify({ ...payload, source: "web" }),
   });
 
   const data = await response.json();
