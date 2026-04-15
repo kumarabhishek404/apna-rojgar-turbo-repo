@@ -1,16 +1,16 @@
-import { WORKERTYPES } from "@/constants";
-import Colors from "@/constants/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Controller, useForm } from "react-hook-form";
+import { useAtom } from "jotai";
+
+import Atoms from "@/app/AtomStore";
+import Colors from "@/constants/Colors";
 import SelectableTags from "../../../../../components/inputs/SingleSelectedTag";
 import CustomText from "../../../../../components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
-import { useAtom } from "jotai";
-import Atoms from "@/app/AtomStore";
-import MultiSelectDropdown from "../../../../../components/inputs/MultiSelectDropdown";
 import CustomHeading from "@/components/commons/CustomHeading";
+import { getDynamicWorkerType } from "@/utils/i18n";
 
 const SERVICE_COMPLETED = [
   { label: "more_than_10", value: "more_than_10" },
@@ -27,14 +27,18 @@ const DISTANCE = [
   { label: "anywhere", value: "anywhere" },
 ];
 
-const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
+const FiltersWorkers = ({
+  filterVisible,
+  setFilterVisible,
+  onApply,
+  skills,
+}: any) => {
   const [drawerAtom, setDrawerState]: any = useAtom(Atoms?.BottomDrawerAtom);
 
   const {
     control,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -46,7 +50,6 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
   });
 
   const handleApply = (data: any) => {
-    reset();
     setFilterVisible(false);
     onApply(data);
   };
@@ -56,9 +59,22 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
     setFilterVisible(false);
   };
 
+  // Logic to toggle skills in the array
+  const toggleSkill = (
+    skill: string,
+    currentSkills: string[],
+    onChange: any,
+  ) => {
+    if (currentSkills.includes(skill)) {
+      onChange(currentSkills.filter((s) => s !== skill));
+    } else {
+      onChange([...currentSkills, skill]);
+    }
+  };
+
   const filterContent = () => (
     <View style={styles.scrollbarContent}>
-      <Controller
+      {/* <Controller
         control={control}
         name="completedServices"
         render={({ field: { onChange, value } }) => (
@@ -69,9 +85,9 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
             setSelectedTag={onChange}
           />
         )}
-      />
+      /> */}
 
-      <Controller
+      {/* <Controller
         control={control}
         name="rating"
         render={({ field: { onChange, value } }) => (
@@ -107,24 +123,67 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
             </View>
           </View>
         )}
-      />
+      /> */}
 
-      <Controller
-        control={control}
-        name="skills"
-        render={({ field: { onChange, value } }) => (
-          <MultiSelectDropdown
-            label="selectSkills"
-            options={WORKERTYPES}
-            selectedOptions={value}
-            onSelect={onChange}
-            searchEnabled={true}
-            placeholder="searchAndSelectSkills"
+      {/* Skills Section - Pill Design */}
+      <View style={styles.section}>
+        <CustomText
+          baseFont={22}
+          fontWeight="700"
+          textAlign="left"
+          color={Colors.inputLabel}
+          style={styles.label}
+        >
+          {t("selectSkills")}
+        </CustomText>
+
+        <View style={styles.pillContainer}>
+          <Controller
+            control={control}
+            name="skills"
+            render={({ field: { onChange, value } }) => (
+              <>
+                {skills?.map((skill: string) => {
+                  const isSelected = value.includes(skill);
+                  return (
+                    <TouchableOpacity
+                      key={skill}
+                      activeOpacity={0.8}
+                      onPress={() => toggleSkill(skill, value, onChange)}
+                      style={[
+                        styles.pill,
+                        isSelected
+                          ? styles.pillSelected
+                          : styles.pillUnselected,
+                      ]}
+                    >
+                      {isSelected && (
+                        <View style={styles.checkCircle}>
+                          <AntDesign
+                            name="check"
+                            size={10}
+                            color={Colors.white}
+                          />
+                        </View>
+                      )}
+                      <CustomText
+                        baseFont={13}
+                        fontWeight={isSelected ? "700" : "600"}
+                        color={isSelected ? Colors.white : Colors.primary}
+                      >
+                        {/* Fallback for missing translations observed in your screenshots */}
+                        {getDynamicWorkerType(skill as string, 1)}
+                      </CustomText>
+                    </TouchableOpacity>
+                  );
+                })}
+              </>
+            )}
           />
-        )}
-      />
+        </View>
+      </View>
 
-      <Controller
+      {/* <Controller
         control={control}
         name="distance"
         render={({ field: { onChange, value } }) => (
@@ -135,7 +194,7 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
             setSelectedTag={onChange}
           />
         )}
-      />
+      /> */}
     </View>
   );
 
@@ -154,20 +213,76 @@ const FiltersWorkers = ({ filterVisible, setFilterVisible, onApply }: any) => {
           action: handleClear,
         },
         onClose: () => {
-          setDrawerState((prev: any) => ({ ...prev, visible: false }));
+          // Ensure state is synced
           setFilterVisible(false);
+          setDrawerState((prev: any) => ({ ...prev, visible: false }));
         },
       });
+    } else {
+      // Force hide if filterVisible becomes false from parent
+      setDrawerState((prev: any) => ({ ...prev, visible: false }));
     }
+
+    // Cleanup on unmount
     return () => {
       setDrawerState((prev: any) => ({ ...prev, visible: false }));
     };
-  }, [filterVisible]);
+  }, [filterVisible]); // Only depend on visibility
 
   return null;
 };
 
 const styles = StyleSheet.create({
+  scrollbarContent: {
+    paddingTop: 10,
+    paddingBottom: 40,
+  },
+  section: {
+    marginBottom: 28,
+  },
+  labelHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  pillContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10, // Increased gap for better tap targets
+  },
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14, // Squircle-style radius
+    borderWidth: 1.5,
+  },
+  pillUnselected: {
+    backgroundColor: Colors.secondaryBackground, // Soft glass
+    borderColor: Colors.secondaryBackground,
+  },
+  pillSelected: {
+    backgroundColor: Colors.primary, // Vibrant primary color
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    // Premium Shadow
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  checkCircle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "flex-end",
@@ -180,10 +295,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingTop: 20,
-  },
-  scrollbarContent: {
-    marginTop: 15,
-    gap: 20,
   },
   header: {
     flexDirection: "row",
@@ -207,12 +318,10 @@ const styles = StyleSheet.create({
   applyButton: {
     flex: 1,
   },
-  section: {
-    marginBottom: 20,
-  },
+
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    marginBottom: 12,
+    paddingHorizontal: 4,
   },
   ratingContainer: {
     flexDirection: "row",

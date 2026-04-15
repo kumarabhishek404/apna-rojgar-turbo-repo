@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302414874371",
+    "project_id": "labour-8a665",
+    "storage_bucket": "labour-8a665.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302414874371:android:483eb7761074dbff7b4b36",
+        "android_client_info": {
+          "package_name": "com.kumarabhishek404.labourapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWi4h78YXBQFZi0dNjTtC6VAGwipYBRyg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

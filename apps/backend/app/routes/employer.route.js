@@ -4,6 +4,7 @@ import {
   getMyUploadedServices,
   getAllSentInvitations,
   getMyAllBookedWorker,
+  getAllUniqueSkills,
 } from "../controllers/employer.controller.js";
 import {
   upload,
@@ -68,5 +69,7 @@ router.get("/booked-worker/all", getMyAllBookedWorker);
 router.post("/booking/remove-worker", handleRemoveBookedWorkerOrMediator);
 router.post("/booking/cancel", handleCancelBooking);
 router.post("/booking/complete", handleCompleteBooking);
+
+router.get("/skills/all", getAllUniqueSkills);
 
 export default router;

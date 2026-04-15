@@ -5,6 +5,7 @@
   },
   "build": {
     "production": {
+      "environment": "production",
       "node": "20.19.4",
       "android": {
         "buildType": "app-bundle"
@@ -12,6 +13,7 @@
       "channel": "production"
     },
     "development": {
+      "environment": "development",
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -20,12 +22,14 @@
       "channel": "development"
     },
     "preview": {
+      "environment": "preview",
       "android": {
         "buildType": "apk"
       },
       "channel": "preview"
     },
     "release": {
+      "environment": "release",
       "android": {
         "gradleCommand": ":app:bundleRelease"
       },

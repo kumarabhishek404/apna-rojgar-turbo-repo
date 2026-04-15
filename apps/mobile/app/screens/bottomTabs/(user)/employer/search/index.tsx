@@ -1,14 +1,12 @@
 import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import { router } from "expo-router";
-import IconButtonGroup from "@/components/commons/IconGroupButtons";
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
 import AllTopWorkers from "../topWorkers";
 
-import bookedWorkers from "../../../../../../assets/add.gif";
-import myServices from "../../../../../../assets/myServices.png";
+import HeaderAction from "@/components/commons/IconGroupButtons";
 
 const EmployerSearchScreen = () => {
   const ClickAddService = () =>
@@ -20,24 +18,15 @@ const EmployerSearchScreen = () => {
       params: { title: "titleMyAllServicesAndBookings", type: "myServices" },
     });
 
-  const buttons = [
-    {
-      icon: bookedWorkers,
-      label: t("addNewWork"),
-      onPress: ClickAddService,
-    },
-    // {
-    //   icon: myServices,
-    //   label: t("myServices"),
-    //   onPress: ClickMyAllServices,
-    // },
-  ];
-
+  const buttons = {
+    label: t("addNewWork"),
+    onPress: ClickAddService,
+  };
   return (
     <View style={{ flex: 1, backgroundColor: Colors.primary }}>
       {/* Top Buttons */}
       <View style={styles.header}>
-        <IconButtonGroup buttons={buttons} />
+        <HeaderAction buttons={buttons} />
       </View>
 
       {/* ⭐ IMPORTANT: No ScrollView here */}
@@ -57,11 +46,10 @@ export default EmployerSearchScreen;
 const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.primary,
-    paddingBottom: 10,
+    paddingBottom: 4, // Minimal padding
   },
   container: {
-    flexGrow: 1,
-    justifyContent: "space-between",
-    minHeight: "100%",
+    flex: 1, // Changed from flexGrow to flex to keep it contained
+    // Remove minHeight: "100%" to prevent unnecessary stretching
   },
 });

@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { View, StyleSheet, RefreshControl } from "react-native";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 import USER from "@/app/api/user";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
@@ -12,12 +17,25 @@ import CustomText from "@/components/commons/CustomText";
 import Colors from "@/constants/Colors";
 import { WORKERTYPES } from "@/constants";
 import { t } from "@/utils/translationHelper";
+import FiltersWorkers from "../../search/filterWorkers";
+import { router, useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import EMPLOYER from "@/app/api/employer";
 
 const AllTopWorkers = () => {
+  const [isAddFilters, setIsAddFilters] = useState(false);
   const [filteredData, setFilteredData]: any = useState([]);
 
   /* ---------------- API FETCH (Infinite Scroll) ---------------- */
 
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        setIsAddFilters(false);
+      };
+    }, [])
+  );
+  
   const {
     data: response,
     isLoading,
@@ -42,6 +60,13 @@ const AllTopWorkers = () => {
     },
   });
 
+  const { data: uniqueSkills } = useQuery({
+    queryKey: ["uniqueSkills"],
+    queryFn: () => EMPLOYER?.getAllUniqueSkills(),
+  });
+
+  console.log("uniqueSkills", uniqueSkills);
+
   /* ---------------- Merge + Deduplicate Workers ---------------- */
 
   React.useEffect(() => {
@@ -63,6 +88,25 @@ const AllTopWorkers = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
+  };
+
+  const onSearchWorkers = (data: any) => {
+    setIsAddFilters(false);
+    const searchCategory = {
+      distance: data?.distance,
+      completedServices: data?.completedServices,
+      rating: data?.rating,
+      skills: data?.skills,
+    };
+
+    router?.push({
+      pathname: "/screens/users",
+      params: {
+        title: "allWorkers",
+        type: "all",
+        searchCategory: JSON.stringify(searchCategory),
+      },
+    });
   };
 
   /* ---------------- Pull To Refresh ---------------- */
@@ -96,24 +140,28 @@ const AllTopWorkers = () => {
   return (
     <View style={styles.container}>
       {/* ⭐ Friendly Guided Heading */}
-      <View style={styles.headingContainer}>
-        <CustomText
-          baseFont={28}
-          fontWeight="800"
-          color={Colors.white}
-          style={styles.heading}
-          textAlign="left"
-        >
-          👷 {t("discoverWorkers")}
-        </CustomText>
+      <View style={styles.headerRow}>
+        <View style={styles.headingTextWrapper}>
+          <CustomText
+            baseFont={26}
+            fontWeight="800"
+            color={Colors.white}
+            textAlign="left"
+          >
+            👷 {t("discoverWorkers")}
+          </CustomText>
+        </View>
 
-        {/* <CustomText
-          baseFont={15}
-          color={Colors.white}
-          style={styles.subHeading}
+        {/* Modern Filter Trigger */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setIsAddFilters(true)}
+          style={styles.filterTrigger}
         >
-          {t("discoverWorkersSubHeading")}
-        </CustomText> */}
+          <Ionicons name="options-outline" size={22} color={Colors.white} />
+          {/* Subtle indicator dot if filters are active (optional) */}
+          <View style={styles.filterDot} />
+        </TouchableOpacity>
       </View>
 
       {/* Worker List */}
@@ -135,6 +183,13 @@ const AllTopWorkers = () => {
       ) : (
         <EmptyDataPlaceholder title="worker" type="gradient" />
       )}
+
+      <FiltersWorkers
+        filterVisible={isAddFilters}
+        setFilterVisible={setIsAddFilters}
+        onApply={onSearchWorkers}
+        skills={uniqueSkills?.data}
+      />
     </View>
   );
 };
@@ -147,24 +202,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    // paddingBottom: 140,
-    paddingTop: 10,
+    paddingTop: 0, // Remove top padding as HeaderAction handles it
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10, // Reduced from 20
+    marginTop: 5, // Reduced from 10
+  },
+  filterTrigger: {
+    width: 40, // Reduced from 46
+    height: 40, // Reduced from 46
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  headingContainer: {
-    marginBottom: 12,
+  headingTextWrapper: {
+    flex: 1,
   },
 
-  heading: {
-    paddingLeft: 4,
+  filterDot: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#4ADE80", // Success green dot to show it's interactive
+    borderWidth: 1.5,
+    borderColor: "#1E3A8A", // Match background color to make it "pop"
   },
-
-  subHeading: {
-    opacity: 0.95,
-    lineHeight: 22,
-    marginTop: 6,
-  },
-
   listContainer: {
     flexGrow: 1,
   },

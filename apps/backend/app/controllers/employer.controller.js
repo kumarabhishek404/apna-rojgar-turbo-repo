@@ -58,8 +58,8 @@ export const handleDeleteService = async (req, res) => {
           actionBy: employer._id,
           actionOn: user._id,
         },
-        req
-      )
+        req,
+      ),
     );
 
     await Promise.all(notificationPromises);
@@ -160,7 +160,7 @@ export const getMyUploadedServices = async (req, res) => {
                   console.log("Handling single mediator:", selectedUser.user);
 
                   const userDetails = await User.findById(
-                    selectedUser.user
+                    selectedUser.user,
                   ).select("skills");
 
                   console.log("User details fetched:", userDetails);
@@ -205,7 +205,7 @@ export const getMyUploadedServices = async (req, res) => {
                   }
                 }
               }
-            })
+            }),
           );
         }
 
@@ -228,7 +228,7 @@ export const getMyUploadedServices = async (req, res) => {
           ...service,
           requirements: updatedRequirements,
         };
-      })
+      }),
     );
 
     res.status(200).json({
@@ -321,8 +321,7 @@ export const getMyAllBookedWorker = async (req, res) => {
         },
         {
           path: "bookedWorker",
-          select:
-            "_id name mobile email rating address profilePicture skills",
+          select: "_id name mobile email rating address profilePicture skills",
         },
       ])
       .lean(); // ✅ Convert to plain JSON for better performance
@@ -331,7 +330,7 @@ export const getMyAllBookedWorker = async (req, res) => {
     services = services.filter((service) => {
       if (service.bookingType === "byService") {
         return service.selectedUsers.some(
-          (selected) => selected.status === "SELECTED"
+          (selected) => selected.status === "SELECTED",
         );
       }
       return !!service.bookedWorker; // Allow only if bookedWorker exists
@@ -404,7 +403,7 @@ export const getMyAllBookedWorker = async (req, res) => {
     const totalBookings = formattedServices.length;
     const paginatedServices = formattedServices.slice(
       skip,
-      skip + Number(limit)
+      skip + Number(limit),
     );
 
     // ✅ If no bookings are found, return empty response instead of error
@@ -427,6 +426,55 @@ export const getMyAllBookedWorker = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch booked workers.",
+      error: error.message,
+    });
+  }
+};
+
+export const getAllUniqueSkills = async (req, res) => {
+  try {
+    const skills = await User.aggregate([
+      // 1. Only process users that have at least one skill
+      { $match: { "skills.0": { $exists: true } } },
+
+      // 2. Break down the skills array into individual documents
+      { $unwind: "$skills" },
+
+      // 3. Group by the skill name ONLY to get unique strings
+      {
+        $group: {
+          _id: null,
+          // Use $addToSet on the specific 'skill' field (the name)
+          uniqueSkillNames: { $addToSet: "$skills.skill" },
+        },
+      },
+
+      // 4. Sort alphabetically (optional but professional)
+      { $unwind: "$uniqueSkillNames" },
+      { $sort: { uniqueSkillNames: 1 } },
+      {
+        $group: {
+          _id: null,
+          allSkills: { $push: "$uniqueSkillNames" },
+        },
+      },
+
+      // 5. Final output format
+      { $project: { _id: 0, allSkills: 1 } },
+    ]);
+
+    // Flatten to a simple array of strings
+    const responseData = skills.length > 0 ? skills[0].allSkills : [];
+
+    return res.status(200).json({
+      success: true,
+      count: responseData.length,
+      data: responseData, // This will now be ["beldaarConstruction", "supervisor", ...]
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching skills",
       error: error.message,
     });
   }

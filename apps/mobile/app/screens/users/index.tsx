@@ -17,6 +17,7 @@ import { WORKERTYPES } from "@/constants";
 import Colors from "@/constants/Colors";
 import AppliedFilters from "@/components/commons/AppliedFilters";
 import ListingsWorkersPlaceholder from "@/components/commons/LoadingPlaceholders/ListingVerticalWorkerPlaceholder";
+import { head } from "axios";
 
 const Users = () => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
@@ -105,6 +106,7 @@ const Users = () => {
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => (
             <CustomHeader
               title={title as string}
@@ -118,7 +120,7 @@ const Users = () => {
         <ListingsWorkersPlaceholder />
       ) : (
         <View style={styles.container}>
-          {appliedFilters &&
+          {/* {appliedFilters &&
             (appliedFilters?.completedServices ||
               appliedFilters?.distance ||
               appliedFilters?.rating > 0 ||
@@ -130,7 +132,7 @@ const Users = () => {
                   fetchUsers={() => {}}
                 />
               </View>
-            )}
+            )} */}
           <View style={{ marginVertical: 6 }}>
             <PaginationString
               type="workers"

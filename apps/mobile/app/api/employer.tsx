@@ -265,6 +265,15 @@ const restoreService = async (payload: any) => {
   }
 };
 
+const getAllUniqueSkills = async () => {
+  try {
+    const response = await API_CLIENT.makeGetRequest("/employer/skills/all");
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const EMPLOYER = {
   addNewService,
   getServiceUploadStatus,
@@ -280,6 +289,7 @@ const EMPLOYER = {
   removeBookedWorker,
   completeBooking,
   restoreService,
+  getAllUniqueSkills,
 };
 
 export default EMPLOYER;
