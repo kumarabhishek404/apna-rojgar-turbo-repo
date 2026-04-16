@@ -895,7 +895,8 @@
   "available_worker_types": "उपलब्ध मज़दूर प्रकार",
   "available_worker_help": "चयन करने के लिए किसी मज़दूर प्रकार पर टैप करें",
   "no_available_workers": "कोई उपलब्ध मज़दूर नहीं।",
-  "filters": "फ़िल्टर",
+  "filtersServices": "कामों के लिए फ़िल्टर",
+  "filtersWorkers": "मज़दूरों के लिए फ़िल्टर",
   "clear": "साफ करें",
   "apply": "लागू करें",
   "distance_of_service": "काम के स्थान की दूरी",
@@ -1371,6 +1372,14 @@
   "roleTagLabour": "मजदूर",
   "roleTagContractor": "ठेकेदार",
   "roleTagEmployer": "नियोक्ता",
+  "filterWorkerByRoleTitle": "आप किसे देखना चाहते हैं?",
+  "filterWorkerByRoleHint": "जिस प्रकार की प्रोफाइल चाहिए, उसे चुनें।",
+  "filterDistanceHelp": "पास की दूरी चुनें ताकि सही और काम की सूची जल्दी दिखे।",
+  "filterDurationHelp": "काम कितने समय का है, वह चुनें।",
+  "filterStartHelp": "काम कब शुरू होगा, वह चुनें।",
+  "filterSkillsHelp": "एक या अधिक कौशल चुनें। सूची लंबी हो तो खोजें।",
+  "workerFilterHelp": "भूमिका, दूरी और कौशल चुनकर अपने पास का सही व्यक्ति जल्दी ढूंढें।",
+  "serviceFilterHelp": "सरल फ़िल्टर लगाकर अपने कौशल और समय के अनुसार पास का काम खोजें।",
   "refresh": "फिर से लोड करें",
   "serviceListPullHint": "सूची ताज़ा करने के लिए नीचे खींचें",
   "serviceListCountBadge": "{{count}} खुले",
@@ -1543,6 +1552,55 @@
   "mediatorTip": "सुझाव: सक्रिय रूप से आवेदन करें और अपनी प्रोफ़ाइल अपडेट रखें ताकि ठेकेदार के रूप में चयन होने की संभावना बढ़ सके।",
   "noMediatorServicesTitle": "अभी तक कोई काम असाइन नहीं हुआ",
   "exploreServices": "उपलब्ध काम देखें",
+
+  "customerServiceAssistant": {
+    "singular": "ग्राहक सेवा सहायक",
+    "plural": "ग्राहक सेवा सहायक"
+  },
+  "farmConsultant": {
+    "singular": "खेती सलाहकार",
+    "plural": "खेती सलाहकार"
+  },
+  "glassFitter": {
+    "singular": "शीशा फिटिंग मजदूर",
+    "plural": "शीशा फिटिंग मजदूर"
+  },
+  "inventoryTaker": {
+    "singular": "स्टॉक गिनने वाला",
+    "plural": "स्टॉक गिनने वाले"
+  },
+  "laborers": {
+    "singular": "मजदूर",
+    "plural": "मजदूर"
+  },
+  "manualCutting": {
+    "singular": "हाथ से कटाई मजदूर",
+    "plural": "हाथ से कटाई मजदूर"
+  },
+  "marbleFitter": {
+    "singular": "मार्बल फिटिंग मजदूर",
+    "plural": "मार्बल फिटिंग मजदूर"
+  },
+  "masons": {
+    "singular": "राजमिस्त्री",
+    "plural": "राजमिस्त्री"
+  },
+  "plowing": {
+    "singular": "जुताई मजदूर",
+    "plural": "जुताई मजदूर"
+  },
+  "seasonalFarmLabor": {
+    "singular": "मौसमी खेत मजदूर",
+    "plural": "मौसमी खेत मजदूर"
+  },
+  "tileLayer": {
+    "singular": "टाइल लगाने वाला मजदूर",
+    "plural": "टाइल लगाने वाले मजदूर"
+  },
+  "waterDistribution": {
+    "singular": "पानी वितरण मजदूर",
+    "plural": "पानी वितरण मजदूर"
+  },
 
   "uploadImages": "काम की तस्वीरें अपलोड करें",
   "addNewWork": "नया काम जोड़ें",

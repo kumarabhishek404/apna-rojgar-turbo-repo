@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import USER from "@/app/api/user";
 import TOAST from "@/app/hooks/toast";
 import Atoms from "@/app/AtomStore";
@@ -15,7 +15,7 @@ interface UseRefreshUserReturn {
 }
 
 const useRefreshUser = (): UseRefreshUserReturn => {
-  const [userDetails, setUserDetails] = useAtom(Atoms?.UserAtom);
+  const [, setUserDetails] = useAtom(Atoms?.UserAtom);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -26,12 +26,17 @@ const useRefreshUser = (): UseRefreshUserReturn => {
     try {
       const response = await USER?.getUserInfo();
       if (response?.success) {
-        setUserDetails({
+        const freshUser = response.data || {};
+        const nextProfilePicture =
+          freshUser?.profilePicture || freshUser?.profileImage || "";
+        setUserDetails((prev: Record<string, unknown>) => ({
+          ...(prev && typeof prev === "object" ? prev : {}),
           isAuth: true,
-          ...userDetails,
-          ...response.data,
-        });
-        return response.data;
+          ...freshUser,
+          profilePicture: nextProfilePicture || freshUser?.profilePicture,
+          profileImage: nextProfilePicture || freshUser?.profileImage,
+        }));
+        return freshUser;
       }
     } catch (error: any) {
       const errorMessage = error?.message || "Error refreshing user details";

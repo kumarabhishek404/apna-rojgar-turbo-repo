@@ -227,7 +227,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const services = servicesByTab[activeTab];
   const filtered = useMemo(
     () =>
-      services.filter(
+      services?.filter(
         (service) =>
           service.subType.toLowerCase().includes(search.toLowerCase()) ||
           service.address.toLowerCase().includes(search.toLowerCase()) ||

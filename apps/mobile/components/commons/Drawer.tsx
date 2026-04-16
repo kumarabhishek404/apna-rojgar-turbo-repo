@@ -8,6 +8,7 @@ import {
   ScrollView,
   BackHandler,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useAtom } from "jotai";
 import Colors from "@/constants/Colors";
@@ -16,7 +17,7 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import ButtonComp from "../inputs/Button";
 import Atoms from "@/app/AtomStore";
 import { t } from "@/utils/translationHelper";
-// import { useIsFocused } from "expo-router";
+import Loader from "./Loaders/Loader";
 
 const { width } = Dimensions.get("window");
 
@@ -66,6 +67,7 @@ const GlobalSideDrawer = () => {
 
   // Close drawer animation
   const closeDrawer = () => {
+    if (drawerState?.isLoading) return;
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: width,
@@ -84,7 +86,10 @@ const GlobalSideDrawer = () => {
 
   return (
     <>
-      <TouchableWithoutFeedback onPress={closeDrawer}>
+      <Loader loading={drawerState?.isLoading || false} />
+      <TouchableWithoutFeedback
+        onPress={drawerState?.isLoading ? undefined : closeDrawer}
+      >
         <Animated.View
           style={[styles.backdrop, { opacity: backdropOpacity }]}
         />
@@ -98,7 +103,14 @@ const GlobalSideDrawer = () => {
       >
         <View style={styles.wrapper}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={closeDrawer} style={{ marginLeft: 10 }}>
+            <TouchableOpacity
+              onPress={closeDrawer}
+              style={{
+                marginLeft: 10,
+                opacity: drawerState?.isLoading ? 0.5 : 1,
+              }}
+              disabled={drawerState?.isLoading || true}
+            >
               <Feather name="arrow-left" size={28} color={Colors.white} />
             </TouchableOpacity>
             <CustomHeading
@@ -140,12 +152,21 @@ const GlobalSideDrawer = () => {
                 title={t(drawerState.primaryButton?.title)}
                 onPress={drawerState.primaryButton?.action}
                 disabled={drawerState.primaryButton?.disabled}
+                loading={drawerState.primaryButton?.loading}
                 bgColor={Colors?.success}
                 borderColor={Colors?.success}
                 textColor={Colors?.white}
                 style={{ flex: 1 }}
               />
             )}
+          </View>
+        )}
+
+        {drawerState?.isLoading && (
+          <View style={styles.drawerLoadingOverlay}>
+            <View style={styles.drawerLoadingCard}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+            </View>
           </View>
         )}
       </Animated.View>
@@ -202,5 +223,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 10,
+  },
+  drawerLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 200,
+  },
+  drawerLoadingCard: {
+    width: 92,
+    height: 92,
+    borderRadius: 12,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 8,
   },
 });

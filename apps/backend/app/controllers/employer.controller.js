@@ -327,7 +327,7 @@ export const getMyAllBookedWorker = async (req, res) => {
       .lean(); // ✅ Convert to plain JSON for better performance
 
     // ✅ Filter services that have a bookedWorker OR a selectedUser with status "SELECTED"
-    services = services.filter((service) => {
+    services = services?.filter((service) => {
       if (service.bookingType === "byService") {
         return service.selectedUsers.some(
           (selected) => selected.status === "SELECTED",

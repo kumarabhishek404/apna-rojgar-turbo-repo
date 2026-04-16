@@ -2,14 +2,16 @@ import SERVICE from "@/app/api/services";
 import USER from "@/app/api/user";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import TabSwitcher from "@/components/inputs/Tabs";
+import HeaderAction from "@/components/commons/IconGroupButtons";
 import Colors from "@/constants/Colors";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import * as Speech from "expo-speech";
 import React, { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import AllServices from "./allServices";
 import AllWorkers from "./allWorkers";
+import { t } from "@/utils/translationHelper";
 
 const MediatorSearch = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -116,8 +118,16 @@ const MediatorSearch = () => {
     },
   );
 
+  const buttons = {
+    label: t("addNewWork"),
+    onPress: () => router.push({ pathname: "/screens/addService" }),
+  };
+
   return (
-    <View style={{ paddingTop: 6, backgroundColor: Colors?.primary }}>
+    <View style={{ paddingTop: 2, backgroundColor: Colors?.primary }}>
+      <View style={styles.header}>
+        <HeaderAction buttons={buttons} />
+      </View>
       <TabSwitcher
           tabs={TABS}
           actvieTab={selectedTab}
@@ -159,6 +169,10 @@ const MediatorSearch = () => {
 export default MediatorSearch;
 
 const styles = StyleSheet.create({
+  header: {
+    backgroundColor: Colors.primary,
+    paddingBottom: 2,
+  },
   container: {
     flexGrow: 1,
     justifyContent: "space-between",

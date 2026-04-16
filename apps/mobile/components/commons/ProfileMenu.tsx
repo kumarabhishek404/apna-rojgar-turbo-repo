@@ -27,6 +27,7 @@ import { Divider } from "react-native-paper";
 import BadgeComponent from "./Badge";
 import { removeToken } from "@/utils/authStorage";
 import USE_LOGOUT from "@/app/hooks/useLogout";
+import APP_CONTEXT from "@/app/context/locale";
 
 const ProfileMenu = ({ disabled }: any) => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
@@ -38,6 +39,7 @@ const ProfileMenu = ({ disabled }: any) => {
   );
   const [isAdmin, setIsAdmin] = useState(false);
   const { logout } = USE_LOGOUT.useLogout();
+  const { role } = APP_CONTEXT.useApp();
 
   const mutationDeactivateAccount = useMutation({
     mutationKey: ["updateProfile"],
@@ -183,6 +185,23 @@ const ProfileMenu = ({ disabled }: any) => {
           },
         }),
       roleCondition: isAdmin,
+      style: [styles?.menuItem],
+      isSuspended: disabled,
+    },
+    {
+      title: t("myServices"),
+      icon: (
+        <MaterialIcons name="post-add" size={28} color={Colors.primary} />
+      ),
+      onPress: () =>
+        router?.push({
+          pathname: "/screens/service",
+          params: {
+            title: "myServices",
+            type: "myServices",
+          },
+        }),
+      roleCondition: role !== "MEDIATOR",
       style: [styles?.menuItem],
       isSuspended: disabled,
     },

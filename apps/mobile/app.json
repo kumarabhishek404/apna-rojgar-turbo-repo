@@ -59,13 +59,16 @@
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.kumarabhishek404.labourapp",
-      "associatedDomains": ["applinks:apnarojgar.com"]
+      "associatedDomains": [
+        "applinks:apnarojgarindia.com",
+        "applinks:www.apnarojgarindia.com"
+      ]
     },
 
     "android": {
       "versionCode": 41,
       "package": "com.kumarabhishek404.labourapp",
-      "googleServicesFile": "env:GOOGLE_SERVICES_JSON",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/app/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -91,7 +94,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "apnarojgar.com",
+              "host": "apnarojgarindia.com",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "www.apnarojgarindia.com",
               "pathPrefix": "/"
             }
           ],
@@ -106,7 +114,7 @@
 
     "extra": {
       "router": {
-        "origin": "https://apnarojgar.com"
+        "origin": "https://www.apnarojgarindia.com"
       },
       "eas": {
         "projectId": "38023a03-3848-401a-bc2c-04efd071ef83"

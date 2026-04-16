@@ -17,7 +17,7 @@ import { WORKERTYPES } from "@/constants";
 import Colors from "@/constants/Colors";
 import AppliedFilters from "@/components/commons/AppliedFilters";
 import ListingsWorkersPlaceholder from "@/components/commons/LoadingPlaceholders/ListingVerticalWorkerPlaceholder";
-import { head } from "axios";
+import { applyWorkerClientFilters } from "@/utils/searchFilters";
 
 const Users = () => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
@@ -59,7 +59,6 @@ const Users = () => {
             payload: {
               completedServices: appliedFilters?.completedServices,
               rating: appliedFilters?.rating,
-              distance: appliedFilters?.distance,
               skills: appliedFilters?.skills,
             },
           }),
@@ -78,11 +77,16 @@ const Users = () => {
     React.useCallback(() => {
       const totalData = (response?.pages[0] as any)?.pagination?.total;
       setTotalData(totalData);
+      const nextUsers = response?.pages.flatMap((page: any) => page?.data || []);
       const unsubscribe = setFilteredData(
-        response?.pages.flatMap((page: any) => page?.data || [])
+        applyWorkerClientFilters(
+          nextUsers,
+          appliedFilters,
+          userDetails?.geoLocation ?? userDetails?.location,
+        ),
       );
       return () => unsubscribe;
-    }, [response])
+    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
   );
 
   const loadMore = () => {
@@ -120,9 +124,10 @@ const Users = () => {
         <ListingsWorkersPlaceholder />
       ) : (
         <View style={styles.container}>
-          {/* {appliedFilters &&
+          {appliedFilters &&
             (appliedFilters?.completedServices ||
               appliedFilters?.distance ||
+              appliedFilters?.role ||
               appliedFilters?.rating > 0 ||
               appliedFilters?.skills?.length > 0) && (
               <View style={{ marginTop: 6 }}>
@@ -132,7 +137,7 @@ const Users = () => {
                   fetchUsers={() => {}}
                 />
               </View>
-            )} */}
+            )}
           <View style={{ marginVertical: 6 }}>
             <PaginationString
               type="workers"

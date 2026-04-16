@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
+import { View, StyleSheet, Platform, ActivityIndicator } from "react-native";
 import Colors from "@/constants/Colors";
 import Button from "../inputs/Button";
 import CustomText from "./CustomText";
@@ -20,11 +14,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { t } from "@/utils/translationHelper";
 import AddLocationAndAddress from "./AddLocationAndAddress";
 import Gender from "../inputs/Gender";
-import { isEmptyObject, getMissingCoreProfileFields } from "@/constants/functions";
+import {
+  isEmptyObject,
+  getMissingCoreProfileFields,
+} from "@/constants/functions";
 import Loader from "./Loaders/Loader";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
-import * as ImagePicker from "expo-image-picker";
-import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
+import SelfieScreen from "../inputs/Selfie";
 import TOAST from "@/app/hooks/toast";
 
 function isFormDataPayload(p: unknown): p is FormData {
@@ -59,40 +55,49 @@ const ProfileNotification: React.FC = () => {
       address: userDetails?.address || "",
       location: userDetails?.location || {},
       gender: userDetails?.gender || "",
+      profilePicture: "",
     },
   });
 
   useEffect(() => {
     setValue("name", userDetails?.name || "");
     setValue("age", userDetails?.age != null ? String(userDetails.age) : "");
-    setValue("mobile", userDetails?.mobile != null ? String(userDetails.mobile) : "");
+    setValue(
+      "mobile",
+      userDetails?.mobile != null ? String(userDetails.mobile) : "",
+    );
     setValue("address", userDetails?.address || "");
     setValue("location", userDetails?.location || {});
     setValue("gender", userDetails?.gender || "");
+    setValue("profilePicture", pickedProfileUri || "");
   }, [isCompleteProfileModel, userDetails, setValue]);
 
   const mutationUpdateProfileInfo = useMutation({
     mutationKey: ["completeProfile"],
-    mutationFn: (payload: Record<string, string> | FormData) => {
+    mutationFn: async (payload: Record<string, string> | FormData) => {
       if (isFormDataPayload(payload)) {
-        return USER?.updateUserById(payload);
+        return await USER?.updateUserById(payload);
       }
-      return USER?.updateUserById({
+      return await USER?.updateUserById({
         _id: userDetails?._id,
         ...payload,
       });
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const user = response?.data?.data;
+      const nextProfilePicture =
+        user?.profilePicture || user?.profileImage || "";
       setPickedProfileUri(null);
-      refreshUser();
+      await refreshUser();
       if (user && typeof user === "object") {
         setUserDetails({
           ...userDetails,
           ...user,
+          profilePicture: nextProfilePicture || userDetails?.profilePicture,
+          profileImage: nextProfilePicture || userDetails?.profileImage,
         });
       }
-      setDrawerState({ visible: false });
+      await setDrawerState({ visible: false });
     },
     onError: (err) => {
       console.error("error while updating the profile ", err);
@@ -100,38 +105,16 @@ const ProfileNotification: React.FC = () => {
     },
   });
 
-  const pickProfilePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        TOAST.error(t("galleryPermissionRequired"));
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.85,
-      });
-      if (!result.canceled && result.assets[0]?.uri) {
-        const uri = await normalizePickedImageUriForUpload(result.assets[0].uri);
-        setPickedProfileUri(uri);
-      }
-    } catch (e) {
-      console.warn(e);
-      TOAST.error(t("somethingWentWrong"));
-    }
-  };
-
   const trim = (v: unknown) =>
     v == null ? "" : typeof v === "string" ? v.trim() : String(v).trim();
 
-  const onSubmitCompleteProfile = (data: {
+  const onSubmitCompleteProfile = async (data: {
     name?: string;
     age?: string;
     mobile?: string;
     address?: string;
     gender?: string;
+    profilePicture?: string;
   }) => {
     const missing = getMissingCoreProfileFields(
       userDetails as Record<string, unknown>,
@@ -183,7 +166,8 @@ const ProfileNotification: React.FC = () => {
       if (v !== trim(userDetails?.gender)) updates.gender = v;
     }
 
-    const hasPhotoPick = Boolean(pickedProfileUri);
+    const photoUri = trim(data.profilePicture) || pickedProfileUri || "";
+    const hasPhotoPick = Boolean(photoUri);
 
     if (Object.keys(updates).length === 0 && !hasPhotoPick) {
       if (missing.has("profilePicture")) {
@@ -194,21 +178,29 @@ const ProfileNotification: React.FC = () => {
       return;
     }
 
-    if (hasPhotoPick && pickedProfileUri) {
+    if (hasPhotoPick && photoUri) {
+      // Optimistic update so avatar updates right away in profile tabs.
+      setPickedProfileUri(photoUri);
+      setUserDetails({
+        ...userDetails,
+        profilePicture: photoUri,
+        profileImage: photoUri,
+      });
+
       const fd = new FormData();
       fd.append("_id", String(userDetails?._id));
       Object.entries(updates).forEach(([k, v]) => fd.append(k, v));
-      const uri = pickedProfileUri;
+      const uri = photoUri;
       fd.append("profileImage", {
         uri: Platform.OS === "android" ? uri : uri.replace(/^file:\/\//, ""),
         type: "image/jpeg",
         name: "profile.jpg",
       } as any);
-      mutationUpdateProfileInfo.mutate(fd);
+      await mutationUpdateProfileInfo.mutateAsync(fd);
       return;
     }
 
-    mutationUpdateProfileInfo.mutate(updates);
+    await mutationUpdateProfileInfo.mutateAsync(updates);
   };
 
   const completeProfileModalContent = () => {
@@ -218,6 +210,13 @@ const ProfileNotification: React.FC = () => {
 
     return (
       <View style={styles.formContainer}>
+        {mutationUpdateProfileInfo?.isPending && (
+          <View style={styles.inlineLoadingOverlay}>
+            <View style={styles.inlineLoadingCard}>
+              <ActivityIndicator size="large" color={Colors.primary} />
+            </View>
+          </View>
+        )}
         <View style={{ flexDirection: "column", gap: 25 }}>
           {missing.has("role") && (
             <CustomText baseFont={15} color={Colors.secondary}>
@@ -352,22 +351,28 @@ const ProfileNotification: React.FC = () => {
           )}
 
           {missing.has("profilePicture") && (
-            <View style={{ gap: 12 }}>
-              <CustomText baseFont={15} color={Colors.secondary}>
-                {t("completeProfilePhotoHint")}
-              </CustomText>
-              {pickedProfileUri ? (
-                <Image
-                  source={{ uri: pickedProfileUri }}
-                  style={styles.previewImage}
-                />
-              ) : null}
-              <TouchableOpacity onPress={pickProfilePhoto} activeOpacity={0.8}>
-                <CustomText color={Colors.primary} fontWeight="600">
-                  {t("chooseFromGallery")}
-                </CustomText>
-              </TouchableOpacity>
-            </View>
+            <Controller
+              control={control}
+              name="profilePicture"
+              defaultValue=""
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={{ gap: 12 }}>
+                  <CustomText baseFont={15} color={Colors.secondary}>
+                    {t("completeProfilePhotoHint")}
+                  </CustomText>
+                  <SelfieScreen
+                    name="profilePicture"
+                    profilePicture={value}
+                    setProfilePicture={(uri: string) => {
+                      onChange(uri);
+                      setPickedProfileUri(uri);
+                    }}
+                    onBlur={onBlur}
+                    errors={errors}
+                  />
+                </View>
+              )}
+            />
           )}
         </View>
       </View>
@@ -379,9 +384,12 @@ const ProfileNotification: React.FC = () => {
       visible: true,
       title: "completeProfile",
       content: completeProfileModalContent,
+      isLoading: mutationUpdateProfileInfo?.isPending,
       primaryButton: {
         title: "save",
         action: handleSubmit(onSubmitCompleteProfile),
+        disabled: mutationUpdateProfileInfo?.isPending,
+        loading: mutationUpdateProfileInfo?.isPending,
       },
       secondaryButton: {
         title: "cancel",
@@ -389,6 +397,28 @@ const ProfileNotification: React.FC = () => {
       },
     });
   };
+
+  console.log(
+    "mutationUpdateProfileInfo?.isPending----",
+    mutationUpdateProfileInfo?.isPending,
+  );
+
+  useEffect(() => {
+    setDrawerState((prev: any) => {
+      if (!prev?.visible || prev?.title !== "completeProfile") return prev;
+      return {
+        ...prev,
+        isLoading: mutationUpdateProfileInfo?.isPending,
+        primaryButton: prev?.primaryButton
+          ? {
+              ...prev.primaryButton,
+              disabled: mutationUpdateProfileInfo?.isPending,
+              loading: mutationUpdateProfileInfo?.isPending,
+            }
+          : prev?.primaryButton,
+      };
+    });
+  }, [mutationUpdateProfileInfo?.isPending, setDrawerState]);
 
   return (
     <View style={styles.notificationContainer}>
@@ -453,13 +483,23 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     paddingVertical: 20,
+    position: "relative",
   },
-  previewImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignSelf: "center",
-    backgroundColor: Colors.inputBorder,
+  inlineLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    zIndex: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inlineLoadingCard: {
+    width: 90,
+    height: 90,
+    borderRadius: 10,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
   },
 });
 

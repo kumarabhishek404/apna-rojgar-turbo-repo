@@ -1,16 +1,15 @@
-import { AntDesign } from "@expo/vector-icons";
-import React, { useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { AntDesign, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { useAtom } from "jotai";
 
 import Atoms from "@/app/AtomStore";
 import Colors from "@/constants/Colors";
-import SelectableTags from "../../../../../components/inputs/SingleSelectedTag";
 import CustomText from "../../../../../components/commons/CustomText";
-import { t } from "@/utils/translationHelper";
-import CustomHeading from "@/components/commons/CustomHeading";
+import { t, tBi } from "@/utils/translationHelper";
 import { getDynamicWorkerType } from "@/utils/i18n";
+import { WORKERTYPES } from "@/constants";
 
 const SERVICE_COMPLETED = [
   { label: "more_than_10", value: "more_than_10" },
@@ -21,10 +20,30 @@ const SERVICE_COMPLETED = [
 ];
 
 const DISTANCE = [
+  { label: "within_5km", value: "within_5km" },
   { label: "within_10km", value: "within_10km" },
+  { label: "within_25km", value: "within_25km" },
   { label: "within_50km", value: "within_50km" },
   { label: "within_100km", value: "within_100km" },
   { label: "anywhere", value: "anywhere" },
+];
+
+const ROLE_OPTIONS = [
+  {
+    label: "roleTagLabour",
+    value: "WORKER",
+    icon: "account-hard-hat-outline",
+  },
+  {
+    label: "roleTagContractor",
+    value: "MEDIATOR",
+    icon: "account-group-outline",
+  },
+  {
+    label: "roleTagEmployer",
+    value: "EMPLOYER",
+    icon: "briefcase-outline",
+  },
 ];
 
 const FiltersWorkers = ({
@@ -34,18 +53,20 @@ const FiltersWorkers = ({
   skills,
 }: any) => {
   const [drawerAtom, setDrawerState]: any = useAtom(Atoms?.BottomDrawerAtom);
+  const [skillSearch, setSkillSearch] = useState("");
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    watch,
   } = useForm({
     defaultValues: {
       completedServices: "",
       rating: 0,
       distance: "",
       skills: [],
+      role: "",
     },
   });
 
@@ -57,9 +78,9 @@ const FiltersWorkers = ({
   const handleClear = () => {
     reset();
     setFilterVisible(false);
+    setSkillSearch("");
   };
 
-  // Logic to toggle skills in the array
   const toggleSkill = (
     skill: string,
     currentSkills: string[],
@@ -72,129 +93,243 @@ const FiltersWorkers = ({
     }
   };
 
-  const filterContent = () => (
-    <View style={styles.scrollbarContent}>
-      {/* <Controller
-        control={control}
-        name="completedServices"
-        render={({ field: { onChange, value } }) => (
-          <SelectableTags
-            label={t("number_of_service_completed")}
-            options={SERVICE_COMPLETED}
-            selectedTag={value}
-            setSelectedTag={onChange}
-          />
-        )}
-      /> */}
+  const selectedSkills = watch("skills");
 
-      {/* <Controller
-        control={control}
-        name="rating"
-        render={({ field: { onChange, value } }) => (
-          <View style={styles.section}>
-            <CustomHeading style={styles.label} textAlign="left">
-              {t("rating_of_worker")}
-            </CustomHeading>
-            <View style={styles.ratingContainer}>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <TouchableOpacity
-                  key={num}
-                  onPress={() => onChange(num)}
-                  style={[styles.star, value === num && styles.selectedStar]}
-                >
-                  <CustomText
-                    color={
-                      value === num ? Colors?.white : Colors?.inputPlaceholder
-                    }
-                    fontWeight="600"
-                    baseFont={24}
-                  >
-                    {num}
-                  </CustomText>
-                  <AntDesign
-                    name="star"
-                    size={22}
-                    color={
-                      value === num ? Colors?.white : Colors?.inputPlaceholder
-                    }
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-      /> */}
+  const filteredSkills = useMemo(() => {
+    const query = skillSearch.trim().toLowerCase();
+    const allSkills = (skills?.length ? skills : WORKERTYPES.map((item) => item.value))
+      .filter(Boolean);
 
-      {/* Skills Section - Pill Design */}
-      <View style={styles.section}>
-        <CustomText
-          baseFont={22}
-          fontWeight="700"
-          textAlign="left"
-          color={Colors.inputLabel}
-          style={styles.label}
-        >
-          {t("selectSkills")}
-        </CustomText>
+    return allSkills.filter((skill: string) => {
+      if (!query) return true;
+      const label = getDynamicWorkerType(skill, 1).toLowerCase();
+      return label.includes(query);
+    });
+  }, [skillSearch, skills]);
 
-        <View style={styles.pillContainer}>
-          <Controller
-            control={control}
-            name="skills"
-            render={({ field: { onChange, value } }) => (
-              <>
-                {skills?.map((skill: string) => {
-                  const isSelected = value.includes(skill);
-                  return (
-                    <TouchableOpacity
-                      key={skill}
-                      activeOpacity={0.8}
-                      onPress={() => toggleSkill(skill, value, onChange)}
-                      style={[
-                        styles.pill,
-                        isSelected
-                          ? styles.pillSelected
-                          : styles.pillUnselected,
-                      ]}
-                    >
-                      {isSelected && (
-                        <View style={styles.checkCircle}>
-                          <AntDesign
-                            name="check"
-                            size={10}
-                            color={Colors.white}
-                          />
-                        </View>
-                      )}
-                      <CustomText
-                        baseFont={13}
-                        fontWeight={isSelected ? "700" : "600"}
-                        color={isSelected ? Colors.white : Colors.primary}
-                      >
-                        {/* Fallback for missing translations observed in your screenshots */}
-                        {getDynamicWorkerType(skill as string, 1)}
-                      </CustomText>
-                    </TouchableOpacity>
-                  );
-                })}
-              </>
-            )}
-          />
+  const activeFilterCount = [
+    !!watch("distance"),
+    !!watch("role"),
+    Array.isArray(selectedSkills) && selectedSkills.length > 0,
+  ].filter(Boolean).length;
+
+  const renderSection = ({
+    icon,
+    title,
+    subtitle,
+    children,
+  }: {
+    icon: React.ReactNode;
+    title: string;
+    subtitle: string;
+    children: React.ReactNode;
+  }) => (
+    <View style={styles.sectionCard}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionIconWrap}>{icon}</View>
+        <View style={styles.sectionTextWrap}>
+          <CustomText
+            baseFont={17}
+            fontWeight="800"
+            color={Colors.heading}
+            textAlign="left"
+          >
+            {title}
+          </CustomText>
+          <CustomText
+            baseFont={12}
+            color={Colors.subHeading}
+            textAlign="left"
+            style={styles.sectionSubtitle}
+          >
+            {subtitle}
+          </CustomText>
         </View>
       </View>
+      {children}
+    </View>
+  );
 
-      {/* <Controller
+  const renderChoiceChip = ({
+    label,
+    selected,
+    onPress,
+    icon,
+  }: {
+    label: string;
+    selected: boolean;
+    onPress: () => void;
+    icon?: React.ReactNode;
+  }) => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={[styles.choiceChip, selected && styles.choiceChipSelected]}
+    >
+      {icon ? <View style={styles.choiceChipIcon}>{icon}</View> : null}
+      <CustomText
+        baseFont={13}
+        fontWeight={selected ? "800" : "600"}
+        color={selected ? Colors.white : Colors.primary}
+      >
+        {label}
+      </CustomText>
+    </TouchableOpacity>
+  );
+
+  const filterContent = () => (
+    <View style={styles.scrollbarContent}>
+      <View style={styles.heroCard}>
+        <View style={styles.heroBadge}>
+          <Ionicons name="sparkles-outline" size={18} color={Colors.primary} />
+          <CustomText baseFont={12} fontWeight="700" color={Colors.primary}>
+            {tBi("filtersWorkers")}
+          </CustomText>
+        </View>
+        <CustomText
+          baseFont={18}
+          fontWeight="800"
+          color={Colors.heading}
+          textAlign="left"
+          style={styles.heroTitle}
+        >
+          {tBi("searchWorkersTitle")}
+        </CustomText>
+        <CustomText baseFont={13} color={Colors.subHeading} textAlign="left">
+          {tBi("workerFilterHelp")}
+        </CustomText>
+        {activeFilterCount > 0 ? (
+          <View style={styles.activePill}>
+            <CustomText baseFont={12} fontWeight="700" color={Colors.white}>
+              {t("selected")}: {activeFilterCount}
+            </CustomText>
+          </View>
+        ) : null}
+      </View>
+
+      <Controller
+        control={control}
+        name="role"
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <MaterialCommunityIcons
+                name="account-switch-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("filterWorkerByRoleTitle"),
+            subtitle: tBi("filterWorkerByRoleHint"),
+            children: (
+              <View style={styles.choiceWrap}>
+                {ROLE_OPTIONS.map((option) =>
+                  renderChoiceChip({
+                    label: t(option.label),
+                    selected: value === option.value,
+                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    icon: (
+                      <MaterialCommunityIcons
+                        name={option.icon as any}
+                        size={16}
+                        color={value === option.value ? Colors.white : Colors.primary}
+                      />
+                    ),
+                  }),
+                )}
+              </View>
+            ),
+          })
+        }
+      />
+
+      <Controller
         control={control}
         name="distance"
-        render={({ field: { onChange, value } }) => (
-          <SelectableTags
-            label={t("distance_of_worker")}
-            options={DISTANCE}
-            selectedTag={value}
-            setSelectedTag={onChange}
-          />
-        )}
-      /> */}
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <Ionicons
+                name="location-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("distance"),
+            subtitle: tBi("filterDistanceHelp"),
+            children: (
+              <View style={styles.choiceWrap}>
+                {DISTANCE.map((option) =>
+                  renderChoiceChip({
+                    label: t(option.label),
+                    selected: value === option.value,
+                    onPress: () => onChange(value === option.value ? "" : option.value),
+                  }),
+                )}
+              </View>
+            ),
+          })
+        }
+      />
+
+      <Controller
+        control={control}
+        name="skills"
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <Ionicons
+                name="construct-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("selectSkills"),
+            subtitle: tBi("filterSkillsHelp"),
+            children: (
+              <>
+                <View style={styles.searchBox}>
+                  <Ionicons
+                    name="search-outline"
+                    size={18}
+                    color={Colors.inputPlaceholder}
+                  />
+                  <TextInput
+                    value={skillSearch}
+                    onChangeText={setSkillSearch}
+                    placeholder={t("searchAndSelectSkills")}
+                    placeholderTextColor={Colors.inputPlaceholder}
+                    style={styles.searchInput}
+                  />
+                </View>
+                <View style={styles.choiceWrap}>
+                  {filteredSkills.map((skill: string) => {
+                    const selectedSkills = value as string[];
+                    const isSelected = selectedSkills.includes(skill);
+                    return renderChoiceChip({
+                      label: getDynamicWorkerType(skill, 1),
+                      selected: isSelected,
+                      onPress: () => toggleSkill(skill, selectedSkills, onChange),
+                      icon: isSelected ? (
+                        <AntDesign name="check" size={14} color={Colors.white} />
+                      ) : undefined,
+                    });
+                  })}
+                  {filteredSkills.length === 0 ? (
+                    <CustomText
+                      baseFont={13}
+                      color={Colors.subHeading}
+                      textAlign="left"
+                    >
+                      {t("noSkillsFound")}
+                    </CustomText>
+                  ) : null}
+                </View>
+              </>
+            ),
+          })
+        }
+      />
     </View>
   );
 
@@ -202,7 +337,7 @@ const FiltersWorkers = ({
     if (filterVisible) {
       setDrawerState({
         visible: true,
-        title: "filters",
+        title: "filtersWorkers",
         content: filterContent,
         primaryButton: {
           title: "apply",
@@ -234,113 +369,111 @@ const FiltersWorkers = ({
 
 const styles = StyleSheet.create({
   scrollbarContent: {
-    paddingTop: 10,
+    paddingTop: 4,
     paddingBottom: 40,
+    gap: 16,
   },
-  section: {
-    marginBottom: 28,
+  heroCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
+    shadowColor: "#102a6b",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
   },
-  labelHeader: {
+  heroBadge: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
-    paddingHorizontal: 4,
+    alignSelf: "flex-start",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: Colors.secondaryBackground,
   },
-  pillContainer: {
+  heroTitle: {
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  activePill: {
+    alignSelf: "flex-start",
+    marginTop: 12,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  sectionCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  sectionIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: Colors.secondaryBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  sectionTextWrap: {
+    flex: 1,
+  },
+  sectionSubtitle: {
+    marginTop: 2,
+  },
+  choiceWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10, // Increased gap for better tap targets
-  },
-  pill: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 14, // Squircle-style radius
-    borderWidth: 1.5,
-  },
-  pillUnselected: {
-    backgroundColor: Colors.secondaryBackground, // Soft glass
-    borderColor: Colors.secondaryBackground,
-  },
-  pillSelected: {
-    backgroundColor: Colors.primary, // Vibrant primary color
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    // Premium Shadow
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  checkCircle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  filterScreen: {
-    backgroundColor: Colors?.fourth,
-    height: "80%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  buttonContainer: {
-    position: "absolute",
-    left: 10,
-    bottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
     gap: 10,
   },
-  clearButton: {
-    flex: 1,
-  },
-  applyButton: {
-    flex: 1,
-  },
-
-  label: {
-    marginBottom: 12,
-    paddingHorizontal: 4,
-  },
-  ratingContainer: {
+  choiceChip: {
     flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  star: {
-    padding: 8,
-    borderWidth: 1,
-    borderColor: Colors?.inputPlaceholder,
-    borderRadius: 8,
-    flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    gap: 4,
-  },
-  selectedStar: {
-    backgroundColor: "gold",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: "gold",
+    borderColor: Colors.secondaryBackground,
+    backgroundColor: "#F8FAFF",
+  },
+  choiceChipSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  choiceChipIcon: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F9FF",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: Colors.secondaryBackground,
+    marginBottom: 14,
+  },
+  searchInput: {
+    flex: 1,
+    color: Colors.text,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
 });
 

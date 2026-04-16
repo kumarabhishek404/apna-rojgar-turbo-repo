@@ -75,6 +75,12 @@ const AdminProfile = () => {
   const { refreshUser, isLoading } = REFRESH_USER.useRefreshUser();
 
   useEffect(() => {
+    const nextProfilePicture =
+      userDetails?.profilePicture || userDetails?.profileImage || "";
+    setProfilePicture(nextProfilePicture);
+  }, [userDetails?.profilePicture, userDetails?.profileImage]);
+
+  useEffect(() => {
     const backAction = () => {
       if (userDetails?.status !== "ACTIVE") {
         TOAST?.error(
@@ -117,12 +123,14 @@ const AdminProfile = () => {
         response?.data?.data?.email,
       );
       let user = response?.data?.data;
+      const nextProfilePicture = user?.profilePicture || user?.profileImage || "";
       setIsEditProfile(false);
-      setProfilePicture(user?.profilePicture);
+      setProfilePicture(nextProfilePicture);
       setUserDetails({
         ...userDetails,
         name: user?.name,
-        profilePicture: user?.profilePicture,
+        profilePicture: nextProfilePicture,
+        profileImage: nextProfilePicture,
         email: {
           value: user?.email?.value,
           isVerified: false,
@@ -140,10 +148,12 @@ const AdminProfile = () => {
     mutationFn: (payload: any) => USER?.updateUserById(payload),
     onSuccess: (response) => {
       let user = response?.data?.data;
-      setProfilePicture(user?.profilePicture);
+      const nextProfilePicture = user?.profilePicture || user?.profileImage || "";
+      setProfilePicture(nextProfilePicture);
       setUserDetails({
         ...userDetails,
-        profilePicture: user?.profilePicture,
+        profilePicture: nextProfilePicture,
+        profileImage: nextProfilePicture,
       });
     },
   });
@@ -169,6 +179,14 @@ const AdminProfile = () => {
       name: imageName || "photo.jpg",
     });
     formData?.append("_id", userDetails?._id);
+
+    // Optimistic update so avatar changes instantly without app restart.
+    setProfilePicture(profileImage);
+    setUserDetails({
+      ...userDetails,
+      profilePicture: profileImage,
+      profileImage,
+    });
 
     mutationUpdateProfilePicture.mutate(formData);
   };

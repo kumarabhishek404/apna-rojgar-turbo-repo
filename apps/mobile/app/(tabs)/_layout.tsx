@@ -46,13 +46,19 @@ type IconLibrary =
 export default function Layout() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  /** Bottom inset only; tiny fallback when inset is 0 (no double “extra” padding). */
-  const tabBarBottomPad =
-    insets.bottom > 0 ? insets.bottom : Platform.OS === "android" ? 4 : 2;
-  /** Inner row height — prototype: tighter than 64 to reduce top/bottom gap in the tab bar. */
-  const TAB_BAR_CONTENT = 64;
+  /**
+   * Keep the tab bar responsive across devices:
+   * - iOS can use the real home-indicator inset
+   * - Android should avoid large bottom gaps from gesture/nav insets
+   */
+  const safeBottomInset =
+    Platform.OS === "ios"
+      ? Math.max(insets.bottom, 6)
+      : Math.min(Math.max(insets.bottom, 0), 6);
+  const TAB_BAR_CONTENT = 58;
   const tabBarTopPad = 6;
-  const tabBarHeight = tabBarTopPad + TAB_BAR_CONTENT + tabBarBottomPad;
+  const tabBarBottomPad = Math.max(safeBottomInset, 4);
+  const tabBarHeight = TAB_BAR_CONTENT + tabBarTopPad + tabBarBottomPad;
 
   const scale = Math.min(width / 375, 1.12);
   const iconSize = Math.round(Math.max(22, Math.min(25, 23.5 * scale)));
@@ -207,7 +213,7 @@ export default function Layout() {
       ...pressableRest
     } = props;
 
-    const rowInnerH = TAB_BAR_CONTENT + tabBarBottomPad;
+    const rowInnerH = TAB_BAR_CONTENT;
 
     const labelLineHeight = Math.round(textSize * 1.32);
 
@@ -225,7 +231,7 @@ export default function Layout() {
           pressed && Platform.OS === "ios" && styles.tabPressedIos,
         ]}
       >
-        <View style={[styles.tabColumn, { paddingBottom: tabBarBottomPad }]}>
+        <View style={styles.tabColumn}>
           <View style={[styles.tabPill, isSelected && styles.tabPillActive]}>
             <Icon
               name={iconNameLiteral}
@@ -273,7 +279,7 @@ export default function Layout() {
                 styles.tabBar,
                 {
                   height: tabBarHeight,
-                  paddingBottom: 0,
+                  paddingBottom: tabBarBottomPad,
                   paddingTop: tabBarTopPad,
                   borderTopWidth: 0,
                   borderBottomWidth: 0,
@@ -399,7 +405,7 @@ const styles = StyleSheet.create({
   tabColumn: {
     flex: 1,
     width: "100%",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     alignItems: "center",
   },
   /** Inactive: light surface; active: filled pill (modern app–style tab). */
@@ -408,14 +414,16 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 4,
+    paddingVertical: 3,
     paddingHorizontal: 4,
     borderRadius: 14,
     gap: 2,
-    minHeight: 52,
+    minHeight: 48,
   },
   tabPillActive: {
     backgroundColor: Colors.primary,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
     shadowColor: Colors.primary,
     shadowOpacity: 0.35,
     shadowRadius: 10,

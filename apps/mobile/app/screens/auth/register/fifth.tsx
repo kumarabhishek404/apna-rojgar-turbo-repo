@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Platform, ScrollView, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,12 +20,14 @@ import {
   uploadPendingProfileImage,
 } from "@/utils/backgroundImageUpload";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
+import Loader from "@/components/commons/Loaders/Loader";
 
 const UploadProfilePictureScreen = () => {
   const insets = useSafeAreaInsets();
   const { userId: userIdParam, role, skills } = useLocalSearchParams();
   const userId = Array.isArray(userIdParam) ? userIdParam[0] : userIdParam;
   const setUserDetails = useSetAtom(Atoms.UserAtom);
+  const [isSavingProfileStep, setIsSavingProfileStep] = useState(false);
   const {
     control,
     watch,
@@ -59,18 +61,22 @@ const UploadProfilePictureScreen = () => {
           console.error("Push notification registration failed: ", err),
         );
       }
+      setIsSavingProfileStep(false);
     },
     onError: (error) => {
       console.error("Error finishing registration: ", error);
+      setIsSavingProfileStep(false);
     },
   });
 
   const handleProfilePictureSubmit = async (data: any) => {
     try {
+      setIsSavingProfileStep(true);
       const parsedSkills = skills ? JSON.parse(skills as string) : [];
 
       if (!userId) {
         TOAST?.error(t("somethingWentWrong"));
+        setIsSavingProfileStep(false);
         return;
       }
 
@@ -101,6 +107,7 @@ const UploadProfilePictureScreen = () => {
     } catch (error) {
       console.error("Error submitting profile picture:", error);
       TOAST?.error(t("somethingWentWrong"));
+      setIsSavingProfileStep(false);
     }
   };
 
@@ -109,6 +116,9 @@ const UploadProfilePictureScreen = () => {
 
   return (
     <View style={styles.screen}>
+      <Loader
+        loading={isSavingProfileStep || mutationFinishRegistration.isPending}
+      />
       <Stack.Screen options={{ headerShown: false }} />
       <LinearGradient
         colors={[Colors.primary, "#3558b8"]}
@@ -191,7 +201,7 @@ const UploadProfilePictureScreen = () => {
           borderColor={hasPhoto ? Colors.success : Colors.primary}
           style={styles.footerContinueBtn}
           loading={mutationFinishRegistration.isPending}
-          disabled={mutationFinishRegistration.isPending}
+          disabled={mutationFinishRegistration.isPending || isSavingProfileStep}
         />
       </View>
     </View>

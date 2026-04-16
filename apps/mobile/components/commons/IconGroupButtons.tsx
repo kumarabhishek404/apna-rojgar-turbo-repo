@@ -24,42 +24,48 @@ const HeaderAction = ({ buttons }: any) => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    marginTop: 8, // Reduced from 12
+    marginTop: 4,
   },
   compactGlassCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: "#3B5FCF",
+    borderColor: "#5A78E3",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16, // Slightly smaller radius for a tighter look
-    paddingVertical: 8, // Thinner padding
-    paddingHorizontal: 12,
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 11,
+    shadowColor: "#0f2663",
+    shadowOpacity: 0.14,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
   iconWrapper: {
-    width: 32, // Smaller icon box (was 48)
-    height: 32,
-    borderRadius: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 11,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
   iconPlaceholder: {
     color: "#1E3A8A",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 23,
+    fontWeight: "800",
   },
   titleText: {
     flex: 1,
     color: "#FFFFFF",
-    fontSize: 15, // Slightly smaller
-    fontWeight: "600",
-    marginLeft: 12,
+    fontSize: 14,
+    fontWeight: "800",
+    marginLeft: 10,
   },
   chevron: {
-    color: "rgba(255, 255, 255, 0.4)",
-    fontSize: 22,
-    fontWeight: "300",
+    color: "rgba(255, 255, 255, 0.72)",
+    fontSize: 21,
+    fontWeight: "400",
+    marginLeft: 6,
   },
 });
 

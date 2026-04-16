@@ -65,8 +65,6 @@ const AllTopWorkers = () => {
     queryFn: () => EMPLOYER?.getAllUniqueSkills(),
   });
 
-  console.log("uniqueSkills", uniqueSkills);
-
   /* ---------------- Merge + Deduplicate Workers ---------------- */
 
   React.useEffect(() => {

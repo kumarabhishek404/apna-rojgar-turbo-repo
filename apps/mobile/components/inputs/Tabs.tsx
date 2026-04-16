@@ -15,7 +15,8 @@ const TabSwitcher = ({ tabs, actvieTab, setActiveTab, textStyle }: any) => {
   const translateX = useRef(new Animated.Value(0)).current;
 
   const screenWidth = Dimensions.get("window").width;
-  const tabWidth = (screenWidth - 40) / tabs.length; // Adjust width dynamically
+  const tabWidth = (screenWidth - 40) / tabs.length;
+  const pillWidth = Math.max(84, tabWidth - 8);
 
   const handleTabPress = (index: number) => {
     setActiveTab(index);
@@ -34,7 +35,7 @@ const TabSwitcher = ({ tabs, actvieTab, setActiveTab, textStyle }: any) => {
         <Animated.View
           style={[
             styles.activeTab,
-            { width: tabWidth, transform: [{ translateX }] },
+            { width: pillWidth, transform: [{ translateX }] },
           ]}
         />
 
@@ -86,29 +87,31 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: Colors?.primary,
-    paddingVertical: 4,
-    paddingBottom: 6,
+    paddingTop: 4,
+    paddingBottom: 5,
   },
   tabContainer: {
     width: "100%",
     flexDirection: "row",
-    // backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(255,255,255,0.1)",
     borderRadius: 28,
-    paddingVertical: 5,
-    paddingHorizontal: 5,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
     position: "relative",
-    gap: 6,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.24)",
   },
   tab: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 9,
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
     zIndex: 1,
     borderWidth: 1,
-    borderColor: Colors?.white,
-    borderRadius: 100,
+    borderColor: "rgba(255,255,255,0.55)",
+    borderRadius: 1000,
   },
   tabText: {
     fontSize: 15,
@@ -121,18 +124,15 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     position: "absolute",
-    height: "100%",
+    height: 43,
     backgroundColor: Colors?.white,
-    borderRadius: 24,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
+    borderRadius: 999,
+    elevation: 3,
+    shadowColor: "#102a6b",
+    shadowOpacity: 0.14,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
-    top: 5,
-    left: 0,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    top: 4,
+    left: 4,
   },
 });

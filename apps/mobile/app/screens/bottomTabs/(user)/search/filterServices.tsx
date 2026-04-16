@@ -1,18 +1,19 @@
-import { WORKERTYPES } from "@/constants";
 import Colors from "@/constants/Colors";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import ButtonComp from "../../../../../components/inputs/Button";
-import SelectableTags from "../../../../../components/inputs/SingleSelectedTag";
-import { t } from "@/utils/translationHelper";
+import { t, tBi } from "@/utils/translationHelper";
 import { useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
-import MultiSelectDropdown from "../../../../../components/inputs/MultiSelectDropdown";
+import { WORKERTYPES } from "@/constants";
+import CustomText from "@/components/commons/CustomText";
+import { getDynamicWorkerType } from "@/utils/i18n";
 
 const DISTANCE = [
+  { label: "within_5km", value: "within_5km" },
   { label: "within_10km", value: "within_10km" },
+  { label: "within_25km", value: "within_25km" },
   { label: "within_50km", value: "within_50km" },
   { label: "within_100km", value: "within_100km" },
   { label: "more_than_100km", value: "more_than_100km" },
@@ -37,11 +38,12 @@ const SERVICE_STARTS_IN = [
 
 const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
+  const [skillSearch, setSkillSearch] = useState("");
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    watch,
   } = useForm({
     defaultValues: {
       distance: "",
@@ -62,63 +64,269 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   const handleClear = () => {
     reset();
     setFilterVisible(false);
-    setSelectedWorkers([]);
+    setSkillSearch("");
   };
+
+  const toggleSkill = (
+    skill: string,
+    currentSkills: string[],
+    onChange: (value: string[]) => void,
+  ) => {
+    if (currentSkills.includes(skill)) {
+      onChange(currentSkills.filter((item) => item !== skill));
+      return;
+    }
+
+    onChange([...currentSkills, skill]);
+  };
+
+  const skills = WORKERTYPES.map((item) => item.value);
+  const skillQuery = skillSearch.trim().toLowerCase();
+  const filteredSkills = skills.filter((skill) => {
+    if (!skillQuery) return true;
+    return getDynamicWorkerType(skill, 1).toLowerCase().includes(skillQuery);
+  });
+
+  const activeFilterCount = [
+    !!watch("distance"),
+    !!watch("duration"),
+    !!watch("serviceStartIn"),
+    Array.isArray(watch("skills")) && watch("skills").length > 0,
+  ].filter(Boolean).length;
+
+  const renderSection = ({
+    icon,
+    title,
+    subtitle,
+    children,
+  }: {
+    icon: React.ReactNode;
+    title: string;
+    subtitle: string;
+    children: React.ReactNode;
+  }) => (
+    <View style={styles.sectionCard}>
+      <View style={styles.sectionHeader}>
+        <View style={styles.sectionIconWrap}>{icon}</View>
+        <View style={styles.sectionTextWrap}>
+          <CustomText
+            baseFont={17}
+            fontWeight="800"
+            color={Colors.heading}
+            textAlign="left"
+          >
+            {title}
+          </CustomText>
+          <CustomText
+            baseFont={12}
+            color={Colors.subHeading}
+            textAlign="left"
+            style={styles.sectionSubtitle}
+          >
+            {subtitle}
+          </CustomText>
+        </View>
+      </View>
+      {children}
+    </View>
+  );
+
+  const renderChoiceChip = ({
+    label,
+    selected,
+    onPress,
+  }: {
+    label: string;
+    selected: boolean;
+    onPress: () => void;
+  }) => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={onPress}
+      style={[styles.choiceChip, selected && styles.choiceChipSelected]}
+    >
+      <CustomText
+        baseFont={13}
+        fontWeight={selected ? "800" : "600"}
+        color={selected ? Colors.white : Colors.primary}
+      >
+        {label}
+      </CustomText>
+    </TouchableOpacity>
+  );
 
   const filterContent = () => (
     <View style={styles.scrollbarContent}>
+      <View style={styles.heroCard}>
+        <View style={styles.heroBadge}>
+          <Ionicons name="sparkles-outline" size={18} color={Colors.primary} />
+          <CustomText baseFont={12} fontWeight="700" color={Colors.primary}>
+            {tBi("filtersServices")}
+          </CustomText>
+        </View>
+        <CustomText
+          baseFont={18}
+          fontWeight="800"
+          color={Colors.heading}
+          textAlign="left"
+          style={styles.heroTitle}
+        >
+          {tBi("searchServicesTitle")}
+        </CustomText>
+        <CustomText baseFont={13} color={Colors.subHeading} textAlign="left">
+          {tBi("serviceFilterHelp")}
+        </CustomText>
+        {activeFilterCount > 0 ? (
+          <View style={styles.activePill}>
+            <CustomText baseFont={12} fontWeight="700" color={Colors.white}>
+              {t("selected")}: {activeFilterCount}
+            </CustomText>
+          </View>
+        ) : null}
+      </View>
+
       <Controller
         control={control}
         name="distance"
-        render={({ field: { onChange, value } }) => (
-          <SelectableTags
-            label={t("distance_of_service")}
-            options={DISTANCE}
-            selectedTag={value}
-            setSelectedTag={onChange}
-          />
-        )}
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <Ionicons
+                name="location-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("distance_of_service"),
+            subtitle: tBi("filterDistanceHelp"),
+            children: (
+              <View style={styles.choiceWrap}>
+                {DISTANCE.map((option) =>
+                  renderChoiceChip({
+                    label: t(option.label),
+                    selected: value === option.value,
+                    onPress: () => onChange(value === option.value ? "" : option.value),
+                  }),
+                )}
+              </View>
+            ),
+          })
+        }
       />
 
       <Controller
         control={control}
         name="duration"
-        render={({ field: { onChange, value } }) => (
-          <SelectableTags
-            label={t("duration_of_service")}
-            options={DURATION}
-            selectedTag={value}
-            setSelectedTag={onChange}
-          />
-        )}
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <MaterialCommunityIcons
+                name="calendar-range"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("duration_of_service"),
+            subtitle: tBi("filterDurationHelp"),
+            children: (
+              <View style={styles.choiceWrap}>
+                {DURATION.map((option) =>
+                  renderChoiceChip({
+                    label: t(option.label),
+                    selected: value === option.value,
+                    onPress: () => onChange(value === option.value ? "" : option.value),
+                  }),
+                )}
+              </View>
+            ),
+          })
+        }
       />
 
       <Controller
         control={control}
         name="serviceStartIn"
-        render={({ field: { onChange, value } }) => (
-          <SelectableTags
-            label={t("service_will_start_in")}
-            options={SERVICE_STARTS_IN}
-            selectedTag={value}
-            setSelectedTag={onChange}
-          />
-        )}
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <Ionicons
+                name="play-circle-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("service_will_start_in"),
+            subtitle: tBi("filterStartHelp"),
+            children: (
+              <View style={styles.choiceWrap}>
+                {SERVICE_STARTS_IN.map((option) =>
+                  renderChoiceChip({
+                    label: t(option.label),
+                    selected: value === option.value,
+                    onPress: () => onChange(value === option.value ? "" : option.value),
+                  }),
+                )}
+              </View>
+            ),
+          })
+        }
       />
 
       <Controller
         control={control}
         name="skills"
-        render={({ field: { onChange, value } }) => (
-          <MultiSelectDropdown
-            label="selectSkills"
-            options={WORKERTYPES}
-            selectedOptions={value}
-            onSelect={onChange}
-            searchEnabled={true}
-            placeholder="searchAndSelectSkills"
-          />
-        )}
+        render={({ field: { onChange, value } }) =>
+          renderSection({
+            icon: (
+              <Ionicons
+                name="construct-outline"
+                size={20}
+                color={Colors.primary}
+              />
+            ),
+            title: tBi("selectSkills"),
+            subtitle: tBi("filterSkillsHelp"),
+            children: (
+              <>
+                <View style={styles.searchBox}>
+                  <Ionicons
+                    name="search-outline"
+                    size={18}
+                    color={Colors.inputPlaceholder}
+                  />
+                  <TextInput
+                    value={skillSearch}
+                    onChangeText={setSkillSearch}
+                    placeholder={t("searchAndSelectSkills")}
+                    placeholderTextColor={Colors.inputPlaceholder}
+                    style={styles.searchInput}
+                  />
+                </View>
+                <View style={styles.choiceWrap}>
+                  {filteredSkills.map((skill) => {
+                    const selectedSkills = value as string[];
+                    return (
+                    renderChoiceChip({
+                      label: getDynamicWorkerType(skill, 1),
+                      selected: selectedSkills.includes(skill),
+                      onPress: () => toggleSkill(skill, selectedSkills, onChange),
+                    })
+                  );
+                  })}
+                  {filteredSkills.length === 0 ? (
+                    <CustomText
+                      baseFont={13}
+                      color={Colors.subHeading}
+                      textAlign="left"
+                    >
+                      {t("noSkillsFound")}
+                    </CustomText>
+                  ) : null}
+                </View>
+              </>
+            ),
+          })
+        }
       />
     </View>
   );
@@ -127,7 +335,7 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
     if (filterVisible) {
       setDrawerState({
         visible: true,
-        title: "filters",
+        title: "filtersServices",
         content: filterContent,
         primaryButton: {
           title: "apply",
@@ -152,70 +360,108 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  filterScreen: {
-    backgroundColor: Colors?.fourth,
-    height: "80%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
   scrollbarContent: {
-    marginTop: 15,
-    gap: 20,
+    paddingTop: 4,
+    paddingBottom: 40,
+    gap: 16,
   },
-  header: {
+  heroCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
+    shadowColor: "#102a6b",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    elevation: 4,
+  },
+  heroBadge: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    alignSelf: "flex-start",
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: Colors.secondaryBackground,
   },
-  buttonContainer: {
-    position: "absolute",
-    left: 10,
-    bottom: 10,
+  heroTitle: {
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  activePill: {
+    alignSelf: "flex-start",
+    marginTop: 12,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  sectionCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
+  },
+  sectionHeader: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  sectionIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: Colors.secondaryBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  sectionTextWrap: {
+    flex: 1,
+  },
+  sectionSubtitle: {
+    marginTop: 2,
+  },
+  choiceWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
-  clearButton: {
-    flex: 1,
-  },
-  applyButton: {
-    flex: 1,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  ratingContainer: {
+  choiceChip: {
     flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  star: {
-    padding: 8,
-    borderWidth: 1,
-    borderColor: Colors?.primary,
-    borderRadius: 8,
-    flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    gap: 4,
-  },
-  selectedStar: {
-    backgroundColor: "gold",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 999,
     borderWidth: 1,
-    borderColor: "gold",
+    borderColor: Colors.secondaryBackground,
+    backgroundColor: "#F8FAFF",
+  },
+  choiceChipSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F9FF",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: Colors.secondaryBackground,
+    marginBottom: 14,
+  },
+  searchInput: {
+    flex: 1,
+    color: Colors.text,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
   },
 });
 

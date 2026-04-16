@@ -232,7 +232,7 @@ export const getAllServices = async (req, res) => {
           anywhere: Infinity,
         }[distance] || Infinity;
 
-      services = services.filter((s) => s.distance <= maxDistance);
+      services = services?.filter((s) => s.distance <= maxDistance);
     }
 
     // Filter by duration
@@ -246,7 +246,7 @@ export const getAllServices = async (req, res) => {
           any_duration: Infinity,
         }[duration] || Infinity;
 
-      services = services.filter((s) => s.duration <= maxDays);
+      services = services?.filter((s) => s.duration <= maxDays);
     }
 
     // Filter by service start-in
@@ -260,14 +260,14 @@ export const getAllServices = async (req, res) => {
       };
       const maxDays = maxDaysMap[serviceStartIn] ?? Infinity;
 
-      services = services.filter((s) => {
+      services = services?.filter((s) => {
         const diff = (new Date(s.startDate) - today) / (1000 * 60 * 60 * 24);
         return diff <= maxDays;
       });
     }
 
     // Sort by nearest distance
-    services.sort(
+    services?.sort(
       (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
     );
 

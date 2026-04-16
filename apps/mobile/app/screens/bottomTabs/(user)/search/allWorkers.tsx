@@ -1,5 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { View, StyleSheet, RefreshControl, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import ListingsVerticalWorkers from "@/components/commons/ListingsVerticalWorkers";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
 import { WORKERTYPES } from "@/constants";
@@ -10,6 +16,7 @@ import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
 import WorkersLoadingPlaceholder from "@/components/commons/LoadingPlaceholders/ListingVerticalWorkerPlaceholder";
 import GradientWrapper from "@/components/commons/GradientWrapper";
+import { Ionicons } from "@expo/vector-icons";
 
 const AllWorkers = ({
   isLoading,
@@ -30,6 +37,7 @@ const AllWorkers = ({
       completedServices: data?.completedServices,
       rating: data?.rating,
       skills: data?.skills,
+      role: data?.role,
     };
 
     router?.push({
@@ -49,14 +57,23 @@ const AllWorkers = ({
       ) : (
         <>
           <View style={styles.container}>
-            <View style={styles.headingContainer}>
-              <CustomText
-                baseFont={14}
-                color={Colors?.white}
-                style={styles.subHeading}
+            <View style={styles.headerRow}>
+              <View style={styles.headingContainer}>
+                <CustomText
+                  baseFont={14}
+                  color={Colors?.white}
+                  style={styles.subHeading}
+                >
+                  {t("workersListSubHeading")}
+                </CustomText>
+              </View>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => setIsAddFilters(true)}
+                style={styles.filterTrigger}
               >
-                {t("workersListSubHeading")}
-              </CustomText>
+                <Ionicons name="options-outline" size={20} color={Colors.white} />
+              </TouchableOpacity>
             </View>
             {Array.isArray(memoizedData) && memoizedData.length > 0 ? (
               <View style={styles.contentCard}>
@@ -104,12 +121,29 @@ const styles = StyleSheet.create({
   headingContainer: {
     display: "flex",
     alignItems: "flex-start",
-    marginBottom: 6,
     paddingTop: 2,
+    flex: 1,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+    gap: 12,
   },
   subHeading: {
     opacity: 0.98,
     lineHeight: 19,
+  },
+  filterTrigger: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
   },
   contentCard: {
     flex: 1,

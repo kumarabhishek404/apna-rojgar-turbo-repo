@@ -1,5 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { View, StyleSheet, RefreshControl, Dimensions } from "react-native";
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
 import ListingsVerticalServices from "@/components/commons/ListingsVerticalServices";
 import { router } from "expo-router";
@@ -11,6 +17,7 @@ import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholder
 import AnimatedGradientWrapper from "@/components/commons/AnimatedGradientWrapper";
 import APP_CONTEXT from "@/app/context/locale";
 import GradientWrapper from "@/components/commons/GradientWrapper";
+import { Ionicons } from "@expo/vector-icons";
 
 const AllServices = ({
   isLoading,
@@ -57,23 +64,38 @@ const AllServices = ({
             ]}
           >
             <View style={styles.headingContainer}>
-              {role === "WORKER" && (
-                <CustomText
-                  baseFont={28}
-                  fontWeight="800"
-                  color={Colors?.white}
-                  style={styles.heading}
+              <View style={styles.headerRow}>
+                <View style={styles.headerTextWrap}>
+                  {role === "WORKER" && (
+                    <CustomText
+                      baseFont={28}
+                      fontWeight="800"
+                      color={Colors?.white}
+                      style={styles.heading}
+                    >
+                      {t("allServices")}
+                    </CustomText>
+                  )}
+                  <CustomText
+                    baseFont={14}
+                    color={Colors?.white}
+                    style={styles.subHeading}
+                  >
+                    {t("allServicesSubHeading")}
+                  </CustomText>
+                </View>
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setIsAddFilters(true)}
+                  style={styles.filterTrigger}
                 >
-                  {t("allServices")}
-                </CustomText>
-              )}
-              <CustomText
-                baseFont={14}
-                color={Colors?.white}
-                style={styles.subHeading}
-              >
-                {t("allServicesSubHeading")}
-              </CustomText>
+                  <Ionicons
+                    name="options-outline"
+                    size={20}
+                    color={Colors.white}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {Array.isArray(memoizedData) && memoizedData.length > 0 ? (
@@ -122,11 +144,18 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   headingContainer: {
-    display: "flex",
-    alignItems: "flex-start",
     marginBottom: 8,
     paddingHorizontal: 4,
     paddingTop: 4,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  headerTextWrap: {
+    flex: 1,
   },
   heading: {
     paddingLeft: 5,
@@ -140,6 +169,16 @@ const styles = StyleSheet.create({
   },
   pullHint: {
     lineHeight: 18,
+  },
+  filterTrigger: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
   },
   contentCard: {
     flex: 1,

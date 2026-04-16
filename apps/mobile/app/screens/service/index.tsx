@@ -26,8 +26,12 @@ import OnPageLoader from "@/components/commons/Loaders/OnPageLoader";
 import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholders/ListingServicePlaceholder";
 import ListingsServices from "@/components/commons/ListingServices";
 import { debounce } from "lodash";
+import { useAtomValue } from "jotai";
+import Atoms from "@/app/AtomStore";
+import { applyServiceClientDistanceFilter } from "@/utils/searchFilters";
 
 const Services = () => {
+  const userDetails = useAtomValue(Atoms?.UserAtom);
   const [filteredData, setFilteredData]: any = useState([]);
   const [totalData, setTotalData] = useState(0);
   const [category, setCategory] = useState("HIRING");
@@ -77,7 +81,6 @@ const Services = () => {
             pageParam,
             status: "ACTIVE",
             payload: {
-              distance: appliedFilters?.distance,
               duration: appliedFilters?.duration,
               serviceStartIn: appliedFilters?.serviceStartIn,
               skills: appliedFilters?.skills,
@@ -97,9 +100,16 @@ const Services = () => {
     React.useCallback(() => {
       const totalData = response?.pages[0]?.pagination?.total;
       setTotalData(totalData);
-      setFilteredData(response?.pages.flatMap((page: any) => page.data || []));
+      const nextServices = response?.pages.flatMap((page: any) => page.data || []);
+      setFilteredData(
+        applyServiceClientDistanceFilter(
+          nextServices,
+          appliedFilters,
+          userDetails?.geoLocation ?? userDetails?.location,
+        ),
+      );
       return () => {}; // nothing to clean up
-    }, [response])
+    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
   );
 
   // ✅ Ensure refetch happens when the screen is focused
@@ -109,11 +119,16 @@ const Services = () => {
 
       if (response) {
         setTotalData(response?.pages[0]?.pagination?.total || 0);
+        const nextServices = response?.pages.flatMap((page: any) => page.data || []);
         setFilteredData(
-          response?.pages.flatMap((page: any) => page.data || [])
+          applyServiceClientDistanceFilter(
+            nextServices,
+            appliedFilters,
+            userDetails?.geoLocation ?? userDetails?.location,
+          ),
         );
       }
-    }, [response, refetch]) // Dependencies added for correct reactivity
+    }, [appliedFilters, response, refetch, userDetails?.geoLocation, userDetails?.location]) // Dependencies added for correct reactivity
   );
 
   const loadMore = () => {
@@ -150,6 +165,7 @@ const Services = () => {
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => (
             <CustomHeader
               title={title as string}

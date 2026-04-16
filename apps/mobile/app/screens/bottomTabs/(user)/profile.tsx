@@ -74,6 +74,12 @@ const UserProfile = () => {
     setRole(userDetails?.role || "");
   }, [userDetails]);
 
+  useEffect(() => {
+    const nextProfilePicture =
+      userDetails?.profilePicture || userDetails?.profileImage || "";
+    setProfilePicture(nextProfilePicture);
+  }, [userDetails?.profilePicture, userDetails?.profileImage]);
+
   // useEffect(() => {
   //   const validateUserToken = async () => {
   //     try {
@@ -145,12 +151,14 @@ const UserProfile = () => {
         response?.data?.data?.email,
       );
       let user = response?.data?.data;
+      const nextProfilePicture = user?.profilePicture || user?.profileImage || "";
       setIsEditProfile(false);
-      setProfilePicture(user?.profilePicture);
+      setProfilePicture(nextProfilePicture);
       setUserDetails({
         ...userDetails,
         name: user?.name,
-        profilePicture: user?.profilePicture,
+        profilePicture: nextProfilePicture,
+        profileImage: nextProfilePicture,
         email: {
           value: user?.email?.value,
           isVerified: false,
@@ -187,10 +195,12 @@ const UserProfile = () => {
     mutationFn: (payload: any) => USER?.updateUserById(payload),
     onSuccess: (response) => {
       let user = response?.data?.data;
-      setProfilePicture(user?.profilePicture);
+      const nextProfilePicture = user?.profilePicture || user?.profileImage || "";
+      setProfilePicture(nextProfilePicture);
       setUserDetails({
         ...userDetails,
-        profilePicture: user?.profilePicture,
+        profilePicture: nextProfilePicture,
+        profileImage: nextProfilePicture,
       });
     },
   });
@@ -216,6 +226,14 @@ const UserProfile = () => {
       name: imageName || "photo.jpg",
     });
     formData?.append("_id", userDetails?._id);
+
+    // Optimistic update so avatar changes instantly without app restart.
+    setProfilePicture(profileImage);
+    setUserDetails({
+      ...userDetails,
+      profilePicture: profileImage,
+      profileImage,
+    });
 
     mutationUpdateProfilePicture.mutate(formData);
   };

@@ -884,7 +884,8 @@
   "available_worker_types": "Available Worker Types",
   "available_worker_help": "Tap on a worker type to select them",
   "no_available_workers": "No available workers.",
-  "filters": "Filters to select services",
+  "filtersServices": "Filters to select services",
+  "filtersWorkers": "Filters to select workers",
   "clear": "Clear",
   "apply": "Apply",
   "distance_of_service": "Distance of the service place",
@@ -916,9 +917,20 @@
   "selectSkills": "Select Skills",
   "close": "Close",
   "anywhere": "Any Where",
+  "within_5km": "Within 5 km",
+  "within_25km": "Within 25 km",
   "anytime": "Any Time",
   "any_duration": "Any Duration",
   "applyFilters": "Apply Filters",
+  "role": "Role",
+  "workerFilterHelp": "Choose role, distance and skills to quickly find the right person nearby.",
+  "serviceFilterHelp": "Use simple filters to find nearby work that matches your skill and timing.",
+  "filterWorkerByRoleTitle": "Who do you want to see?",
+  "filterWorkerByRoleHint": "Choose the kind of profile you want to view.",
+  "filterDistanceHelp": "Pick a nearby distance so results stay simple and useful.",
+  "filterDurationHelp": "Choose how long the work should last.",
+  "filterStartHelp": "Choose when the work should begin.",
+  "filterSkillsHelp": "Select one or more skills. Search if the list is long.",
   "completedServices": "Completed Works",
   "serviceStartIn": "Work Start",
   "kms": "Kms",
@@ -1147,6 +1159,14 @@
     "singular": "Marketing Worker",
     "plural": "Marketing Workers"
   },
+  "customerServiceAssistant": {
+    "singular": "Customer Service Assistant",
+    "plural": "Customer Service Assistants"
+  },
+  "inventoryTaker": {
+    "singular": "Inventory Taker",
+    "plural": "Inventory Takers"
+  },
 
   "maid": { "singular": "Maid", "plural": "Maids" },
   "gardener": { "singular": "Gardener", "plural": "Gardeners" },
@@ -1164,6 +1184,7 @@
   "electrician": { "singular": "Electrician", "plural": "Electricians" },
   "painter": { "singular": "Painter", "plural": "Painters" },
   "carpenter": { "singular": "Carpenter", "plural": "Carpenters" },
+  "glassFitter": { "singular": "Glass Fitter", "plural": "Glass Fitters" },
   "mistri": { "singular": "Mason", "plural": "Masons" },
   "beldaar": {
     "singular": "Construction Helper",
@@ -1175,9 +1196,15 @@
   },
 
   "tileMistri": { "singular": "Tile Mason", "plural": "Tile Masons" },
+  "tileLayer": { "singular": "Tile Layer", "plural": "Tile Layers" },
   "brickMistri": { "singular": "Brick Mason", "plural": "Brick Masons" },
   "plasterMistri": { "singular": "Plaster Mason", "plural": "Plaster Masons" },
   "mason": { "singular": "Mason", "plural": "Masons" },
+  "masons": { "singular": "Mason", "plural": "Masons" },
+  "marbleFitter": {
+    "singular": "Marble Fitter",
+    "plural": "Marble Fitters"
+  },
   "helperLabour": { "singular": "Helper Labour", "plural": "Helper Labour" },
   "barBender": { "singular": "Bar Bender", "plural": "Bar Benders" },
   "scaffoldingMistri": {
@@ -1197,6 +1224,14 @@
   "supervisor": { "singular": "Supervisor", "plural": "Supervisors" },
   "foreman": { "singular": "Foreman", "plural": "Foremen" },
   "fitter": { "singular": "Fitter", "plural": "Fitters" },
+  "farmConsultant": {
+    "singular": "Farm Consultant",
+    "plural": "Farm Consultants"
+  },
+  "waterDistribution": {
+    "singular": "Water Distribution Worker",
+    "plural": "Water Distribution Workers"
+  },
 
   "veterinary": {
     "singular": "Veterinary Helper",
@@ -1307,6 +1342,16 @@
     "singular": "General Labour",
     "plural": "General Labourers"
   },
+  "laborers": { "singular": "Labourer", "plural": "Labourers" },
+  "manualCutting": {
+    "singular": "Manual Cutting Worker",
+    "plural": "Manual Cutting Workers"
+  },
+  "seasonalFarmLabor": {
+    "singular": "Seasonal Farm Worker",
+    "plural": "Seasonal Farm Workers"
+  },
+  "plowing": { "singular": "Plowing Worker", "plural": "Plowing Workers" },
   "palledarGeneral": { "singular": "Loader", "plural": "Loaders" },
 
   "noInternetTitle": "No internet connection",

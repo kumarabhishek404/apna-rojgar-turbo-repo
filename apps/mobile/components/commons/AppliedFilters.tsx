@@ -10,6 +10,7 @@ import { t } from "@/utils/translationHelper";
 import CustomText from "./CustomText";
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import { getDynamicWorkerType } from "@/utils/i18n";
 
 const AppliedFilters = ({
   appliedFilters,
@@ -118,7 +119,19 @@ const AppliedFilters = ({
                 <CustomText>{t(key)}: </CustomText>
                 {key === "skills" ? (
                   <CustomText>
-                    {value.map((item: string) => t(item)).join(", ")}
+                    {value
+                      .map((item: string) => getDynamicWorkerType(item, 1))
+                      .join(", ")}
+                  </CustomText>
+                ) : key === "role" ? (
+                  <CustomText>
+                    {t(
+                      value === "WORKER"
+                        ? "roleTagLabour"
+                        : value === "MEDIATOR"
+                          ? "roleTagContractor"
+                          : "roleTagEmployer",
+                    )}
                   </CustomText>
                 ) : key === "rating" ? (
                   <View style={styles.ratingContainer}>
