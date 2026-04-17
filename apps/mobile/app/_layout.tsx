@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import React from "react";
-import { StatusBar } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { PaperProvider } from "react-native-paper";
 import APP_CONTEXT from "./context/locale";
 import NOTIFICATION_CONTEXT from "./context/NotificationContext";
@@ -34,11 +34,7 @@ const AppNavigator = () => {
               <PaperProvider>
                 <ToastProvider>
                   <AnalyticsSession />
-                  <StatusBar
-                    barStyle="light-content"
-                    translucent={true}
-                    backgroundColor="transparent"
-                  />
+                  <StatusBar style="light" />
 
                   <SafeAreaView
                     style={{ flex: 1, backgroundColor: Colors.primary }}

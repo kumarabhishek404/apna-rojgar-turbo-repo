@@ -41,8 +41,12 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="hi">
+    <html lang="hi" translate="no">
       <head>
+        {/* Suppress browser-native translation (e.g. Chrome's Google Translate bar).
+            The site ships its own language switcher, so automatic translation would
+            conflict with it and produce double-translated or garbled text. */}
+        <meta name="google" content="notranslate" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -17,8 +17,7 @@
     },
 
     "androidStatusBar": {
-      "translucent": false,
-      "backgroundColor": "#22409a",
+      "translucent": true,
       "barStyle": "light-content"
     },
 
@@ -29,6 +28,13 @@
       "expo-router",
       "expo-font",
       "expo-localization",
+      [
+        "expo-system-ui",
+        {
+          "backgroundColor": "#22409a"
+        }
+      ],
+      "./plugins/withAndroidOrientationFix",
       "@react-native-firebase/app",
       "@react-native-firebase/auth",
       [
