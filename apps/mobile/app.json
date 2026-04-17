@@ -66,7 +66,6 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.kumarabhishek404.labourapp",
       "associatedDomains": [
-        "applinks:apnarojgarindia.com",
         "applinks:www.apnarojgarindia.com"
       ]
     },
@@ -98,11 +97,6 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            {
-              "scheme": "https",
-              "host": "apnarojgarindia.com",
-              "pathPrefix": "/"
-            },
             {
               "scheme": "https",
               "host": "www.apnarojgarindia.com",
