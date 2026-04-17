@@ -4,6 +4,10 @@ import ServicesPage from "@/app/webapp/services/ServicesPageClient";
 import ProfilePage from "@/app/webapp/profile/page";
 import MyWorkPage from "@/app/webapp/my-services/page";
 import SettingsPage from "@/app/webapp/settings/page";
+import AdminUsersPage from "@/app/webapp/admin/users/page";
+import AdminErrorLogsPage from "@/app/webapp/admin/error-logs/page";
+import AdminAnalyticsPage from "@/app/webapp/admin/analytics/page";
+import AdminNotificationsPage from "@/app/webapp/admin/notifications/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import Link from "next/link";
@@ -17,12 +21,17 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { clearAuth, getAuth } from "@/lib/auth";
+import { apiRequest, clearAuth, getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
+import { isAdminUser } from "@/lib/isAdminUser";
 import {
+  Bell,
   BriefcaseBusiness,
   ClipboardList,
   Download,
+  ShieldAlert,
+  ShieldCheck,
+  Users,
   Info,
   LogOut,
   Menu,
@@ -353,6 +362,15 @@ export default function ServicesDashboard() {
   const isAppliedView = pathname === "/applied-service";
   const isAboutView = pathname === "/about";
   const isSettingsView = pathname === "/settings";
+  const isAdminUsersView =
+    pathname === "/admin/users" || pathname === "/webapp/admin/users";
+  const isAdminErrorLogsView =
+    pathname === "/admin/error-logs" || pathname === "/webapp/admin/error-logs";
+  const isAdminAnalyticsView =
+    pathname === "/admin/analytics" || pathname === "/webapp/admin/analytics";
+  const isAdminNotificationsView =
+    pathname === "/admin/notifications" ||
+    pathname === "/webapp/admin/notifications";
   const isAllServicesView = pathname === "/all-services" || pathname === "/";
   const isAppliedServiceRoute = pathname === "/applied-service";
   /** Same list chrome (merged toolbar on scroll) for browse + applied jobs. */
@@ -368,11 +386,11 @@ export default function ServicesDashboard() {
   const [userName, setUserName] = useState("User");
   const [userMobile, setUserMobile] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const userInitial = userName.charAt(0).toUpperCase();
 
-  const primaryItems = useMemo(
-    () =>
-      [
+  const primaryItems = useMemo(() => {
+    const baseItems: PrimaryNavItem[] = [
         {
           label: t("allServices", "All Services"),
           href: "/all-services",
@@ -399,9 +417,16 @@ export default function ServicesDashboard() {
           external: true,
           icon: Download,
         },
-      ] satisfies PrimaryNavItem[],
-    [t],
-  );
+    ];
+    if (!isAdmin) return baseItems;
+    return [
+      ...baseItems,
+      { label: "Users", href: "/admin/users", icon: Users },
+      { label: "Error Logs", href: "/admin/error-logs", icon: ShieldAlert },
+      { label: "Analytics", href: "/admin/analytics", icon: ShieldCheck },
+      { label: "Notifications", href: "/admin/notifications", icon: Bell },
+    ];
+  }, [t, isAdmin]);
 
   const bottomItems = useMemo(
     () =>
@@ -433,8 +458,41 @@ export default function ServicesDashboard() {
       setUserName(nextName);
       setUserMobile(nextMobile);
       setUserPhoto(nextPhoto);
+      setIsAdmin(
+        isAdminUser({
+          role:
+            typeof userData.role === "string"
+              ? userData.role
+              : null,
+          mobile:
+            typeof userData.mobile === "string" ||
+            typeof userData.mobile === "number"
+              ? userData.mobile
+              : null,
+        }),
+      );
     });
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    apiRequest<{ data?: { role?: string; mobile?: string | number } }>(
+      "/user/info",
+    )
+      .then((res) => {
+        if (!mounted) return;
+        setIsAdmin(
+          isAdminUser({
+            role: res?.data?.role || null,
+            mobile: res?.data?.mobile || null,
+          }),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -581,6 +639,14 @@ export default function ServicesDashboard() {
                             ? t("aboutUs", "About us")
                             : isSettingsView
                               ? t("settings", "Settings")
+                              : isAdminUsersView
+                                ? "Users"
+                                : isAdminErrorLogsView
+                                  ? "Error Logs"
+                                  : isAdminAnalyticsView
+                                    ? "Analytics"
+                                    : isAdminNotificationsView
+                                      ? "Notifications"
                               : t("allServices")}
                   </h1>
                 </div>
@@ -713,6 +779,14 @@ export default function ServicesDashboard() {
                 </Suspense>
               ) : isSettingsView ? (
                 <SettingsPage />
+              ) : isAdminUsersView ? (
+                <AdminUsersPage />
+              ) : isAdminErrorLogsView ? (
+                <AdminErrorLogsPage />
+              ) : isAdminAnalyticsView ? (
+                <AdminAnalyticsPage />
+              ) : isAdminNotificationsView ? (
+                <AdminNotificationsPage />
               ) : (
                 <Suspense
                   fallback={
