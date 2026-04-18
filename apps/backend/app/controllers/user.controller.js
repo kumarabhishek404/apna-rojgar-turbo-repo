@@ -725,23 +725,13 @@ export const getUsersOnRole = async (req, res) => {
     // Base match filter
     let match = { status: "ACTIVE", _id: { $ne: loggedInUserId } };
 
-    // Role-based filtering
+    // Role-based filtering — filter strictly by the user's stored role field
     if (role === "WORKER") {
-      match.skills = { $elemMatch: { skill: { $ne: "" } } };
+      match.role = "WORKER";
     } else if (role === "MEDIATOR") {
-      const mediatorsWithTeams = await Team.distinct("mediator", {
-        workers: { $exists: true, $ne: [] },
-      });
-      match._id = { $in: mediatorsWithTeams, $ne: loggedInUserId };
+      match.role = "MEDIATOR";
     } else if (role === "EMPLOYER") {
-      const mediatorsWithTeams = await Team.distinct("mediator", {
-        workers: { $exists: true, $ne: [] },
-      });
-      match.$and = [
-        { skills: { $exists: false } },
-        { teamMembers: { $exists: false } },
-        { _id: { $nin: mediatorsWithTeams, $ne: loggedInUserId } },
-      ];
+      match.role = "EMPLOYER";
     }
 
     // Skills filtering
