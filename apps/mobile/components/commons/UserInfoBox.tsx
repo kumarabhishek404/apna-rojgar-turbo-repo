@@ -165,8 +165,8 @@ const UserInfoComponent = ({ user, style }: UserInfoComponentProps) => {
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.row}>
-          <CustomHeading baseFont={14} padding={12}>
+        <View style={[styles.row, { padding: 14 }]}>
+          <CustomHeading baseFont={14}>
             <CustomText>{t("mobileNumber")}</CustomText>
             {"  "}
             {user?.mobile || t("mobileNotFound")}
@@ -252,24 +252,25 @@ export default UserInfoComponent;
 
 const styles = StyleSheet.create({
   row: {
-    marginTop: 5,
     flexDirection: "row",
-    backgroundColor: Colors?.background,
+    backgroundColor: "#F4F6FA",
     alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#E0E5F0",
   },
   userInfoTextWrapper: {
-    marginBottom: 25,
-    marginHorizontal: 20,
+    marginBottom: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E8ECF4",
+    overflow: "hidden",
   },
-  firstBox: {
-    borderTopRightRadius: 8,
-    borderTopLeftRadius: 8,
-  },
+  firstBox: {},
   addressRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    padding: 12,
+    padding: 14,
   },
   addressHeading: {
     width: "100%",
@@ -292,13 +293,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   lastBox: {
-    borderBottomRightRadius: 8,
-    borderBottomLeftRadius: 8,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 0,
-    padding: 12,
+    padding: 14,
+    borderBottomWidth: 0,
   },
   verifyEmailBtnWrapper: {
     width: "100%",

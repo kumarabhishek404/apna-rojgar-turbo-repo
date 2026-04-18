@@ -138,11 +138,11 @@ const HelpScreen = () => {
             <CustomHeading textAlign="left">{t("writeUsAt")}</CustomHeading>
             <TouchableOpacity
               onPress={() =>
-                Linking.openURL("mailto:fastag.recharge@support.com")
+                Linking.openURL("mailto:info@apnarojgarindia.com")
               }
             >
               <CustomText textAlign="left" baseFont={16} color={Colors?.link}>
-                ak7192837@gmail.com
+                info@apnarojgarindia.com
               </CustomText>
             </TouchableOpacity>
           </View>

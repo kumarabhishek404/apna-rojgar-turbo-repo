@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import * as Speech from "expo-speech";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { AntDesign, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
 import { router, useNavigation } from "expo-router";
@@ -23,7 +23,7 @@ import ShowDuration from "./ShowDuration";
 import ShowFacilities from "./ShowFacilities";
 import { getServiceJobId } from "@/utils/serviceJobId";
 
-const ListingsServices = ({ item }: any) => {
+const ListingsServices = React.memo(({ item }: any) => {
   const navigation = useNavigation();
   const locale = useAtomValue(Atoms?.LocaleAtom);
   const userDetails = useAtomValue(Atoms?.UserAtom);
@@ -62,19 +62,19 @@ const ListingsServices = ({ item }: any) => {
         )),
   );
 
-  const handleSpeakAboutSerivceDetails = () => {
+  const handleSpeakAboutSerivceDetails = useCallback(() => {
     const textToSpeak = generateServiceSummary(
       item,
       locale?.language,
       userDetails?.location,
     );
     speakText(textToSpeak, locale?.language, setIsSpeaking);
-  };
+  }, [item, locale?.language, userDetails?.location]);
 
-  const handleCloseSpeakers = () => {
+  const handleCloseSpeakers = useCallback(() => {
     Speech.stop();
     setIsSpeaking(false);
-  };
+  }, []);
 
   const hasHeroPhoto =
     Array.isArray(item?.images) &&
@@ -82,7 +82,7 @@ const ListingsServices = ({ item }: any) => {
     Boolean(item.images[0]);
   const heroIcon = getServiceListHeroIcon(item?.type, item?.subType);
 
-  const goToServiceDetails = () => {
+  const goToServiceDetails = useCallback(() => {
     if (!item?._id) return;
     router?.push({
       pathname: "/screens/service/[id]",
@@ -93,7 +93,7 @@ const ListingsServices = ({ item }: any) => {
         showApplicationDetails: JSON.stringify(true),
       },
     });
-  };
+  }, [item?._id]);
 
   return (
     <>
@@ -390,7 +390,9 @@ const ListingsServices = ({ item }: any) => {
       </View>
     </>
   );
-};
+}, (prev, next) => prev.item._id === next.item._id && prev.item === next.item);
+
+ListingsServices.displayName = "ListingsServices";
 
 export default ListingsServices;
 

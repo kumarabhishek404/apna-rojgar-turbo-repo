@@ -13,6 +13,7 @@ const ListingsVerticalBookings = ({
   loadMore,
   isFetchingNextPage,
   refreshControl,
+  showEngagementStrip,
 }: any) => {
   const RenderItem = ({ item }: any) => {
     if (category === "recievedRequests") {
@@ -37,6 +38,7 @@ const ListingsVerticalBookings = ({
           title="bookingDetails"
           item={item}
           category={category}
+          showEngagementStrip={showEngagementStrip}
         />
       );
     }

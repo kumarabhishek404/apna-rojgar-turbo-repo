@@ -120,10 +120,15 @@ const enableAccount = async () => {
   }
 };
 
-const fetchAllUsers = async ({ pageParam, payload }: any) => {
+const fetchAllUsers = async ({
+  pageParam,
+  payload,
+  /** Backend supports WORKER | MEDIATOR | EMPLOYER; default preserves existing callers. */
+  role = "WORKER",
+}: any) => {
   try {
     const data = await API_CLIENT.makePostRequest(
-      `/user/all?role=WORKER&page=${pageParam}&limit=10`,
+      `/user/all?role=${role}&page=${pageParam}&limit=10`,
       payload,
     );
     return data.data;

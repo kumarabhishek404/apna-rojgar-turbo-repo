@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, RefreshControl, StatusBar } from "react-native";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
@@ -11,13 +11,12 @@ import ListingVerticalRequests from "@/components/commons/ListingVerticalRequest
 import PaginationString from "@/components/commons/Pagination/PaginationString";
 import SearchFilter from "@/components/commons/SearchFilter";
 import CustomHeader from "@/components/commons/Header";
-import { ALLREQUEST } from "@/constants";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
-import CustomSegmentedButton from "../bottomTabs/(user)/bookingsAndRequests/customTabs";
+import SegmentedControl from "@/components/commons/SegmentedControl";
 import WORKER from "@/app/api/workers";
 import EMPLOYER from "@/app/api/employer";
 import MEDIATOR from "@/app/api/mediator";
@@ -27,8 +26,25 @@ const Requests = () => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
   const [totalData, setTotalData] = useState(0);
   const [filteredData, setFilteredData]: any = useState([]);
-  const [category, setCategory] = useState("RECEIVED");
-  const { title } = useLocalSearchParams();
+  const { title, initialCategory } = useLocalSearchParams<{
+    title?: string;
+    initialCategory?: string;
+  }>();
+  const [category, setCategory] = useState<"RECEIVED" | "SENT">("RECEIVED");
+
+  useEffect(() => {
+    if (initialCategory === "SENT" || initialCategory === "RECEIVED") {
+      setCategory(initialCategory);
+    }
+  }, [initialCategory]);
+
+  const teamRequestSegments = useMemo(
+    () => [
+      { label: t("received"), accessibilityLabel: t("received") },
+      { label: t("sent"), accessibilityLabel: t("sent") },
+    ],
+    [],
+  );
 
   const fetchRequests =
     category === "RECEIVED"
@@ -98,10 +114,6 @@ const Requests = () => {
     }
   };
 
-  const onCategoryChanged = (selectedCategory: any) => {
-    setCategory(selectedCategory);
-  };
-
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(() =>
     refetch()
   );
@@ -126,10 +138,12 @@ const Requests = () => {
         ) : (
           <View style={styles.container}>
             <View style={styles?.paginationTabs}>
-              <CustomSegmentedButton
-                buttons={ALLREQUEST}
-                selectedTab={category}
-                onValueChange={onCategoryChanged}
+              <SegmentedControl
+                segments={teamRequestSegments}
+                selectedIndex={category === "RECEIVED" ? 0 : 1}
+                onChange={(i) =>
+                  setCategory(i === 0 ? "RECEIVED" : "SENT")
+                }
               />
             </View>
             {filteredData && filteredData?.length > 0 ? (

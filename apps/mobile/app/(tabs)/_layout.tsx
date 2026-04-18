@@ -21,14 +21,12 @@ import {
 import Colors from "@/constants/Colors";
 import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
-import StickButtonWithWall from "@/components/commons/StickButtonWithWall";
 import { useAtom } from "jotai";
 import Atoms from "../AtomStore";
 import NOTIFICATION from "../api/notification";
 import ExitConfirmationModal from "@/components/commons/ExitPopup";
 import UserProfile from "../screens/bottomTabs/(user)/profile";
 import API_CLIENT from "../api";
-import RippleDot from "@/components/commons/RippleDot";
 import { getToken } from "@/utils/authStorage";
 import { uploadPendingProfileImage } from "@/utils/backgroundImageUpload";
 import REFRESH_USER from "../hooks/useRefreshUser";
@@ -64,9 +62,7 @@ export default function Layout() {
   const iconSize = Math.round(Math.max(22, Math.min(25, 23.5 * scale)));
   const textSize = Math.max(10, Math.min(11, Math.round(10.5 * scale)));
 
-  const [notificationCount, setNotificationCount]: any = useAtom(
-    Atoms.notificationCount,
-  );
+  const [, setNotificationCount]: any = useAtom(Atoms.notificationCount);
   const pathname = usePathname();
   const [userDetails, setUserDetails] = useAtom(Atoms.UserAtom);
 
@@ -153,7 +149,8 @@ export default function Layout() {
       "/(tabs)/second",
       "/(tabs)/third",
       "/(tabs)/fourth",
-    ]; // Adjusted for tab routes
+      "/(tabs)/fifth",
+    ];
     const backAction = () => {
       if (exitPaths.includes(pathname)) {
         setShowExitModal(true);
@@ -182,6 +179,7 @@ export default function Layout() {
     path,
     title,
     iconName,
+    activeIconName,
     iconLibrary = "MaterialIcons",
     itemStyles,
   }: {
@@ -189,6 +187,7 @@ export default function Layout() {
     path: string;
     title: string;
     iconName: string;
+    activeIconName?: string;
     iconLibrary?: IconLibrary;
     itemStyles?: any;
   }) => {
@@ -204,7 +203,7 @@ export default function Layout() {
     };
 
     const Icon = iconMap[iconLibrary];
-    const iconNameLiteral = iconName as any;
+    const iconNameLiteral = (isSelected && activeIconName ? activeIconName : iconName) as any;
 
     const {
       style: tabBarItemStyle,
@@ -236,10 +235,10 @@ export default function Layout() {
             <Icon
               name={iconNameLiteral}
               size={isSelected ? iconSize + 1 : iconSize}
-              color={isSelected ? "#FFFFFF" : "#64748B"}
+              color={isSelected ? "#FFFFFF" : "#5F7BA8"}
             />
             <CustomText
-              color={isSelected ? "#FFFFFF" : "#64748B"}
+              color={isSelected ? "#FFFFFF" : "#5F7BA8"}
               fontWeight={isSelected ? "700" : "600"}
               baseFont={textSize}
               textAlign="center"
@@ -261,6 +260,19 @@ export default function Layout() {
   };
 
   const isAdmin = userDetails?.isAdmin;
+  const apiRole = String(userDetails?.role ?? "").toUpperCase();
+
+  /** Bottom labels match what each tab shows for non-admin users. */
+  const workTabTitleKey = isAdmin
+    ? "teams"
+    : apiRole === "WORKER"
+      ? "tabWork"
+      : "tabNavWorkLabour";
+  const peopleTabTitleKey = isAdmin
+    ? "tabPeople"
+    : apiRole === "MEDIATOR"
+      ? "tabNavPeopleActiveWork"
+      : "tabNavPeopleContractors";
 
   if (!isReady) return null;
 
@@ -294,24 +306,10 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/"
-                    title={isAdmin ? "services" : "search"}
-                    iconName={isAdmin ? "sickle" : "search"}
-                    iconLibrary={isAdmin ? "MaterialCommunityIcons" : undefined}
-                  />
-                ),
-              }}
-            />
-
-            <Tabs.Screen
-              name="third"
-              options={{
-                tabBarButton: (props: any) => (
-                  <TabButton
-                    props={props}
-                    path="/(tabs)/third"
-                    title={isAdmin ? "errors" : "myActivityTitle"}
-                    iconName={isAdmin ? "error" : "running"}
-                    iconLibrary={isAdmin ? "MaterialIcons" : "FontAwesome5"}
+                    title={isAdmin ? "services" : "tabHome"}
+                    iconName={isAdmin ? "grid-outline" : "home-outline"}
+                    activeIconName={isAdmin ? "grid" : "home"}
+                    iconLibrary="Ionicons"
                   />
                 ),
               }}
@@ -324,9 +322,26 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/second"
-                    title={isAdmin ? "teams" : "myWorkTitle"}
-                    iconName={isAdmin ? "group" : "hammer"}
-                    iconLibrary={isAdmin ? "FontAwesome" : "FontAwesome5"}
+                    title={workTabTitleKey}
+                    iconName={isAdmin ? "people-outline" : "briefcase-outline"}
+                    activeIconName={isAdmin ? "people" : "briefcase"}
+                    iconLibrary="Ionicons"
+                  />
+                ),
+              }}
+            />
+
+            <Tabs.Screen
+              name="third"
+              options={{
+                tabBarButton: (props: any) => (
+                  <TabButton
+                    props={props}
+                    path="/(tabs)/third"
+                    title={peopleTabTitleKey}
+                    iconName={apiRole === "MEDIATOR" ? "rocket-outline" : "people-outline"}
+                    activeIconName={apiRole === "MEDIATOR" ? "rocket" : "people"}
+                    iconLibrary="Ionicons"
                   />
                 ),
               }}
@@ -339,29 +354,32 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/fourth"
-                    title={isAdmin ? "myProfile" : "myProfile"}
-                    iconName={isAdmin ? "person" : "person-outline"}
+                    title="tabActivity"
+                    iconName={isAdmin ? "alert-circle-outline" : "stats-chart-outline"}
+                    activeIconName={isAdmin ? "alert-circle" : "stats-chart"}
+                    iconLibrary="Ionicons"
+                  />
+                ),
+              }}
+            />
+
+            <Tabs.Screen
+              name="fifth"
+              options={{
+                tabBarButton: (props: any) => (
+                  <TabButton
+                    props={props}
+                    path="/(tabs)/fifth"
+                    title="myProfile"
+                    iconName="person-outline"
+                    activeIconName="person"
+                    iconLibrary="Ionicons"
                   />
                 ),
               }}
             />
           </Tabs>
         )}
-
-        <StickButtonWithWall
-          content={
-            <>
-              <MaterialIcons name="notifications" size={28} color="#fff" />
-              {notificationCount > 0 && <RippleDot />}
-            </>
-          }
-          onPress={() =>
-            router.push({
-              pathname: "/screens/notifications",
-              params: { title: "notifications", type: "all" },
-            })
-          }
-        />
 
         <ExitConfirmationModal
           visible={showExitModal}
@@ -382,14 +400,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "stretch",
-    backgroundColor: "#F4F6FC",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(34, 64, 154, 0.08)",
+    borderTopColor: "rgba(14, 79, 197, 0.12)",
     elevation: 16,
-    shadowColor: "#1e3a8a",
-    shadowOpacity: 0.12,
+    shadowColor: "#0E4FC5",
+    shadowOpacity: 0.1,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: -4 },
   },
@@ -421,11 +439,11 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   tabPillActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "#0E4FC5",
     paddingVertical: 7,
     paddingHorizontal: 8,
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.35,
+    shadowColor: "#0E4FC5",
+    shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,

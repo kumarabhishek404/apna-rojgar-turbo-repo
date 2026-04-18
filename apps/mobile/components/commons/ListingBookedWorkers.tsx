@@ -11,7 +11,28 @@ import DateDisplay from "./ShowDate";
 import ShowDuration from "./ShowDuration";
 import { getDynamicWorkerType } from "@/utils/i18n";
 
-const ListingsBookedWorkers = ({ title, item, category }: any) => {
+const ListingsBookedWorkers = ({
+  title,
+  item,
+  category,
+  /** When true, show applied vs selected counts (Activity / employer hub). */
+  showEngagementStrip,
+}: any) => {
+  const appliedCount = Array.isArray(item?.appliedUsers)
+    ? item.appliedUsers.length
+    : 0;
+  let selectedCount = 0;
+  (item?.selectedUsers || []).forEach((su: any) => {
+    if (su?.status === "SELECTED" || su?.status === "SERVICE_COMPLETED") {
+      selectedCount += 1;
+    }
+    if (Array.isArray(su?.workers)) {
+      selectedCount += su.workers.filter(
+        (w: any) => w?.status === "SELECTED",
+      ).length;
+    }
+  });
+
   let workersList =
     item?.bookingType === "byService"
       ? [
@@ -44,6 +65,16 @@ const ListingsBookedWorkers = ({ title, item, category }: any) => {
         }
       >
         <View style={styles.card}>
+          {showEngagementStrip ? (
+            <View style={styles.engagementStrip}>
+              <View style={styles.engagementPill}>
+                <CustomText baseFont={12} fontWeight="700" color={Colors.primary}>
+                  {appliedCount} {t("activityBadgeApplied")} · {selectedCount}{" "}
+                  {t("activityBadgeSelected")}
+                </CustomText>
+              </View>
+            </View>
+          ) : null}
           {/* Worker Profile Section */}
           <View style={styles.workerHeader}>
             <View style={styles.workerImagesContainer}>
@@ -160,6 +191,14 @@ export default ListingsBookedWorkers;
 
 const styles = StyleSheet.create({
   container: { flex: 1, marginBottom: 15 },
+  engagementStrip: { marginBottom: 10 },
+  engagementPill: {
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(34, 64, 154, 0.08)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
   card: {
     backgroundColor: Colors.white,
     padding: 15,

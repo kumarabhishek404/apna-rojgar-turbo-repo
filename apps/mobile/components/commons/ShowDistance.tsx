@@ -11,6 +11,8 @@ const ShowDistance = ({
   loggedInUserLocation,
   targetLocation,
   align,
+  color,
+  baseFont,
 }: any) => {
   const [fallbackCoords, setFallbackCoords] = useState<any>(null);
 
@@ -73,7 +75,7 @@ const ShowDistance = ({
   }
 
   return (
-    <CustomHeading textAlign={align ?? "center"}>
+    <CustomHeading textAlign={align ?? "center"} color={color} baseFont={baseFont}>
       {distance} {t("kms")} {t("distance")}
     </CustomHeading>
   );

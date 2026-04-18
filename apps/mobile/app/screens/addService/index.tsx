@@ -108,13 +108,7 @@ const AddServiceScreen = () => {
       setStep(1);
       setAddServiceStep(1);
 
-      router?.push({
-        pathname: "/(tabs)/third",
-        params: {
-          title: "titleMyAllServicesAndBookings",
-          type: "myServices",
-        },
-      });
+      router?.replace("/(tabs)/fourth" as any);
     },
     onError: (err: any) => {
       console.error("Error details:", {

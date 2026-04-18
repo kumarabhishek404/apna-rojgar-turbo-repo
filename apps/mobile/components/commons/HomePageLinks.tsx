@@ -18,7 +18,7 @@ const HomePageLinks = () => {
       title: t("workers"),
       subtitle: t("aboutWorkers"),
       path: {
-        pathname: "/(tabs)/fourth",
+        pathname: "/(tabs)/third",
         params: {
           role: "workers",
           title: t("workers"),

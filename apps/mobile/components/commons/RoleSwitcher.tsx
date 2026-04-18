@@ -15,10 +15,23 @@ type Role = "WORKER" | "EMPLOYER" | "MEDIATOR";
 interface Props {
   currentRole: Role;
   onChangeRole: (role: Role) => void;
+  /** Controlled externally — when true the modal opens without the inline selector trigger */
+  externalVisible?: boolean;
+  onExternalClose?: () => void;
 }
 
-export default function RoleSwitcherPopup({ currentRole, onChangeRole }: Props) {
+export default function RoleSwitcherPopup({
+  currentRole,
+  onChangeRole,
+  externalVisible,
+  onExternalClose,
+}: Props) {
   const [visible, setVisible] = useState(false);
+  const isOpen = externalVisible !== undefined ? externalVisible : visible;
+  const handleClose = () => {
+    if (onExternalClose) onExternalClose();
+    else setVisible(false);
+  };
 
   const roles: { key: Role; emoji: string; title: string; subtitle: string }[] = [
     {
@@ -45,24 +58,26 @@ export default function RoleSwitcherPopup({ currentRole, onChangeRole }: Props) 
 
   return (
     <>
-      {/* ===== Role Selector ===== */}
-      <TouchableOpacity
-        style={styles.selector}
-        onPress={() => setVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.selectorLabel}>{t("yourRole")}</Text>
-        <View style={styles.roleRow}>
-          <Text style={styles.selectorValue}>
-            {selectedRole?.emoji} {selectedRole?.title}
-          </Text>
-          <AntDesign name="down" size={20} color="#333" style={{ marginLeft: 8 }} />
-        </View>
-      </TouchableOpacity>
+      {/* ===== Role Selector (only when not externally controlled) ===== */}
+      {externalVisible === undefined && (
+        <TouchableOpacity
+          style={styles.selector}
+          onPress={() => setVisible(true)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.selectorLabel}>{t("yourRole")}</Text>
+          <View style={styles.roleRow}>
+            <Text style={styles.selectorValue}>
+              {selectedRole?.emoji} {selectedRole?.title}
+            </Text>
+            <AntDesign name="down" size={20} color="#333" style={{ marginLeft: 8 }} />
+          </View>
+        </TouchableOpacity>
+      )}
 
       {/* ===== Modal ===== */}
-      <Modal visible={visible} transparent animationType="fade">
-        <TouchableWithoutFeedback onPress={() => setVisible(false)}>
+      <Modal visible={isOpen} transparent animationType="fade">
+        <TouchableWithoutFeedback onPress={handleClose}>
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modal}>
@@ -78,7 +93,7 @@ export default function RoleSwitcherPopup({ currentRole, onChangeRole }: Props) 
                       style={[styles.card, selected && styles.selectedCard]}
                       onPress={() => {
                         onChangeRole(role.key);
-                        setVisible(false);
+                        handleClose();
                       }}
                       activeOpacity={0.8}
                     >

@@ -31,18 +31,14 @@ const StatsCard = () => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: Colors?.background,
-    borderRadius: 8,
-    padding: 15,
-    marginHorizontal: 20,
+    backgroundColor: "#F4F6FA",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E8ECF4",
+    padding: 18,
     alignItems: "center",
     justifyContent: "space-around",
-    elevation: 6, // For Android shadow
-    shadowColor: "#000", // For iOS shadow
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    marginBottom: 20,
+    marginBottom: 12,
   },
 });
 
