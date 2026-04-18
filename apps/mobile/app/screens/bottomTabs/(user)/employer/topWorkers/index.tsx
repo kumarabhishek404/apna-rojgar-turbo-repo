@@ -19,7 +19,6 @@ import { WORKERTYPES } from "@/constants";
 import { t } from "@/utils/translationHelper";
 import FiltersWorkers from "../../search/filterWorkers";
 import { router, useFocusEffect } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import EMPLOYER from "@/app/api/employer";
 
 const AllTopWorkers = () => {
@@ -141,24 +140,33 @@ const AllTopWorkers = () => {
       <View style={styles.headerRow}>
         <View style={styles.headingTextWrapper}>
           <CustomText
-            baseFont={26}
+            baseFont={30}
             fontWeight="800"
             color={Colors.white}
             textAlign="left"
+            numberOfLines={1}
+            style={styles.heading}
           >
-            👷 {t("discoverWorkers")}
+            👷 {t("allWorkers")}
           </CustomText>
         </View>
 
-        {/* Modern Filter Trigger */}
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={() => setIsAddFilters(true)}
           style={styles.filterTrigger}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="options-outline" size={22} color={Colors.white} />
-          {/* Subtle indicator dot if filters are active (optional) */}
-          <View style={styles.filterDot} />
+          <CustomText
+            baseFont={17}
+            fontWeight="900"
+            color="#F2F6FF"
+            textAlign="center"
+            numberOfLines={1}
+            style={styles.filterText}
+          >
+            {t("filter")}
+          </CustomText>
         </TouchableOpacity>
       </View>
 
@@ -206,35 +214,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 10, // Reduced from 20
-    marginTop: 5, // Reduced from 10
+    marginBottom: 12,
+    marginTop: 4,
+  },
+  heading: {
+    lineHeight: 34,
+    letterSpacing: 0.2,
   },
   filterTrigger: {
-    width: 40, // Reduced from 46
-    height: 40, // Reduced from 46
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
+    minHeight: 40,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 2,
+  },
+  filterText: {
+    color: "#F2F6FF",
+    letterSpacing: 0.5,
+    lineHeight: 20,
+    textShadowColor: "rgba(8, 28, 92, 0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 
   headingTextWrapper: {
     flex: 1,
   },
 
-  filterDot: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#4ADE80", // Success green dot to show it's interactive
-    borderWidth: 1.5,
-    borderColor: "#1E3A8A", // Match background color to make it "pop"
-  },
   listContainer: {
     flexGrow: 1,
   },

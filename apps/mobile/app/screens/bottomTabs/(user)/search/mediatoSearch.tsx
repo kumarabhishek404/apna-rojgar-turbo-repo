@@ -5,18 +5,17 @@ import TabSwitcher from "@/components/inputs/Tabs";
 import HeaderAction from "@/components/commons/IconGroupButtons";
 import Colors from "@/constants/Colors";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 import * as Speech from "expo-speech";
-import React, { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 import AllServices from "./allServices";
 import AllWorkers from "./allWorkers";
 import { t } from "@/utils/translationHelper";
 
 const MediatorSearch = () => {
   const [selectedTab, setSelectedTab] = useState(0);
-  const [filteredData, setFilteredData]: any = useState([]);
-  const [totalData, setTotalData] = useState(0);
+  const tabContentOpacity = useRef(new Animated.Value(1)).current;
   const TABS = [
     {
       label: "workers",
@@ -58,43 +57,11 @@ const MediatorSearch = () => {
   });
 
   useEffect(() => {
-    // Stop any ongoing speech
     Speech.stop();
-
     return () => {
-      // Cleanup function to ensure speech stops when component unmounts or before effect re-runs
       Speech.stop();
     };
   }, [selectedTab]);
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     refetch(); // <-- Trigger API call when tab is selected
-  //   }, [selectedTab])
-  // );
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const totalData = response?.pages[0]?.pagination?.total;
-      setTotalData(totalData);
-
-      const mergedData = response?.pages.flatMap(
-        (page: any) => page.data || [],
-      );
-
-      // ✅ Deduplicate by _id
-      const uniqueData: any = Object.values(
-        mergedData?.reduce((acc: any, item: any) => {
-          acc[item._id] = item;
-          return acc;
-        }, {}) || {},
-      );
-
-      setFilteredData(uniqueData);
-
-      return () => {}; // Clean-up not needed here
-    }, [response]),
-  );
 
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -102,15 +69,44 @@ const MediatorSearch = () => {
     }
   };
 
+  const totalData = response?.pages?.[0]?.pagination?.total ?? 0;
+
+  const mergedData = useMemo(
+    () => response?.pages?.flatMap((page: any) => page.data || []) || [],
+    [response],
+  );
+
   const memoizedData = useMemo(() => {
     const unique = Object.values(
-      filteredData?.reduce((acc: any, item: any) => {
+      (mergedData || []).reduce((acc: any, item: any) => {
+        if (!item?._id) return acc;
         acc[item._id] = item;
         return acc;
       }, {}) || {},
     );
     return unique;
-  }, [filteredData]);
+  }, [mergedData]);
+
+  const handleTabSwitch = (nextTab: number) => {
+    if (nextTab === selectedTab) {
+      return;
+    }
+
+    Animated.timing(tabContentOpacity, {
+      toValue: 0.55,
+      duration: 120,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedTab(nextTab);
+      Animated.timing(tabContentOpacity, {
+        toValue: 1,
+        duration: 180,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }).start();
+    });
+  };
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
@@ -129,13 +125,13 @@ const MediatorSearch = () => {
         <HeaderAction buttons={buttons} />
       </View>
       <TabSwitcher
-          tabs={TABS}
-          actvieTab={selectedTab}
-          setActiveTab={setSelectedTab}
-        />
+        tabs={TABS}
+        actvieTab={selectedTab}
+        setActiveTab={handleTabSwitch}
+      />
 
       <View style={styles.container}>
-        <View style={{ flex: 1 }}>
+        <Animated.View style={{ flex: 1, opacity: tabContentOpacity }}>
           {selectedTab === 0 && (
             <AllWorkers
               isLoading={isLoading}
@@ -160,7 +156,7 @@ const MediatorSearch = () => {
               loadMore={loadMore}
             />
           )}
-        </View>
+        </Animated.View>
       </View>
     </View>
   );

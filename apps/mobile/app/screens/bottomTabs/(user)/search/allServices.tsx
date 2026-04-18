@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   RefreshControl,
-  Dimensions,
   TouchableOpacity,
 } from "react-native";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
@@ -14,10 +13,8 @@ import FiltersServices from "./filterServices";
 import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
 import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholders/ListingServicePlaceholder";
-import AnimatedGradientWrapper from "@/components/commons/AnimatedGradientWrapper";
 import APP_CONTEXT from "@/app/context/locale";
 import GradientWrapper from "@/components/commons/GradientWrapper";
-import { Ionicons } from "@expo/vector-icons";
 
 const AllServices = ({
   isLoading,
@@ -31,6 +28,13 @@ const AllServices = ({
 }: any) => {
   const [isAddFilters, setIsAddFilters] = useState(false);
   const { role } = APP_CONTEXT.useApp();
+  const safeServicesData = useMemo(
+    () =>
+      (Array.isArray(memoizedData) ? memoizedData : []).filter(
+        (item: any) => item && typeof item === "object" && (item.type || item.subType),
+      ),
+    [memoizedData],
+  );
 
   const onSearchService = (data: any) => {
     setIsAddFilters(false);
@@ -66,43 +70,42 @@ const AllServices = ({
             <View style={styles.headingContainer}>
               <View style={styles.headerRow}>
                 <View style={styles.headerTextWrap}>
-                  {role === "WORKER" && (
-                    <CustomText
-                      baseFont={28}
-                      fontWeight="800"
-                      color={Colors?.white}
-                      style={styles.heading}
-                    >
-                      {t("allServices")}
-                    </CustomText>
-                  )}
                   <CustomText
-                    baseFont={14}
+                    baseFont={30}
+                    fontWeight="800"
                     color={Colors?.white}
-                    style={styles.subHeading}
+                    textAlign="left"
+                    numberOfLines={1}
+                    style={styles.heading}
                   >
-                    {t("allServicesSubHeading")}
+                    🚀 {t("allServices")}
                   </CustomText>
                 </View>
                 <TouchableOpacity
                   activeOpacity={0.85}
                   onPress={() => setIsAddFilters(true)}
                   style={styles.filterTrigger}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons
-                    name="options-outline"
-                    size={20}
-                    color={Colors.white}
-                  />
+                  <CustomText
+                    baseFont={17}
+                    fontWeight="900"
+                    color="#F2F6FF"
+                    textAlign="center"
+                    numberOfLines={1}
+                    style={styles.filterText}
+                  >
+                    {t("filter")}
+                  </CustomText>
                 </TouchableOpacity>
               </View>
             </View>
 
-            {Array.isArray(memoizedData) && memoizedData.length > 0 ? (
+            {safeServicesData.length > 0 ? (
               <View style={styles.contentCard}>
                 <View style={styles.listFill}>
                   <ListingsVerticalServices
-                    listings={memoizedData || []}
+                    listings={safeServicesData}
                     loadMore={loadMore}
                     isFetchingNextPage={isFetchingNextPage}
                     refreshControl={
@@ -144,7 +147,7 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   headingContainer: {
-    marginBottom: 8,
+    marginBottom: 10,
     paddingHorizontal: 4,
     paddingTop: 4,
   },
@@ -158,11 +161,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heading: {
-    paddingLeft: 5,
-  },
-  subHeading: {
     opacity: 0.98,
-    lineHeight: 20,
+    lineHeight: 34,
+    letterSpacing: 0.2,
+    paddingLeft: 2,
   },
   countBadge: {
     lineHeight: 18,
@@ -171,14 +173,20 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   filterTrigger: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    minHeight: 40,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 2,
+  },
+  filterText: {
+    color: "#F2F6FF",
+    letterSpacing: 0.5,
+    lineHeight: 20,
+    textShadowColor: "rgba(8, 28, 92, 0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   contentCard: {
     flex: 1,

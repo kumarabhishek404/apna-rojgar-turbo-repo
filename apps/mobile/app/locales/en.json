@@ -886,6 +886,7 @@
   "no_available_workers": "No available workers.",
   "filtersServices": "Filters to select services",
   "filtersWorkers": "Filters to select workers",
+  "filter": "Filter",
   "clear": "Clear",
   "apply": "Apply",
   "distance_of_service": "Distance of the service place",

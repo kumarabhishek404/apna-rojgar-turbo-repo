@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   RefreshControl,
-  Dimensions,
   TouchableOpacity,
 } from "react-native";
 import ListingsVerticalWorkers from "@/components/commons/ListingsVerticalWorkers";
@@ -16,7 +15,6 @@ import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
 import WorkersLoadingPlaceholder from "@/components/commons/LoadingPlaceholders/ListingVerticalWorkerPlaceholder";
 import GradientWrapper from "@/components/commons/GradientWrapper";
-import { Ionicons } from "@expo/vector-icons";
 
 const AllWorkers = ({
   isLoading,
@@ -60,19 +58,32 @@ const AllWorkers = ({
             <View style={styles.headerRow}>
               <View style={styles.headingContainer}>
                 <CustomText
-                  baseFont={14}
+                  baseFont={30}
+                  fontWeight="800"
                   color={Colors?.white}
-                  style={styles.subHeading}
+                  textAlign="left"
+                  numberOfLines={1}
+                  style={styles.heading}
                 >
-                  {t("workersListSubHeading")}
+                  👷 {t("allWorkers")}
                 </CustomText>
               </View>
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => setIsAddFilters(true)}
                 style={styles.filterTrigger}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="options-outline" size={20} color={Colors.white} />
+                <CustomText
+                  baseFont={17}
+                  fontWeight="900"
+                  color="#F2F6FF"
+                  textAlign="center"
+                  numberOfLines={1}
+                  style={styles.filterText}
+                >
+                  {t("filter")}
+                </CustomText>
               </TouchableOpacity>
             </View>
             {Array.isArray(memoizedData) && memoizedData.length > 0 ? (
@@ -121,29 +132,37 @@ const styles = StyleSheet.create({
   headingContainer: {
     display: "flex",
     alignItems: "flex-start",
-    paddingTop: 2,
+    justifyContent: "center",
     flex: 1,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 12,
+    marginTop: 2,
     gap: 12,
   },
-  subHeading: {
+  heading: {
     opacity: 0.98,
-    lineHeight: 19,
+    lineHeight: 34,
+    letterSpacing: 0.2,
   },
   filterTrigger: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    minHeight: 40,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 2,
+  },
+  filterText: {
+    color: "#F2F6FF",
+    letterSpacing: 0.5,
+    lineHeight: 20,
+    textShadowColor: "rgba(8, 28, 92, 0.45)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   contentCard: {
     flex: 1,

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Apna Rojgar",
     "slug": "labour-app",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "platforms": ["android", "ios"],
     "orientation": "default",
     "scheme": "apnarojgar",
@@ -54,7 +54,8 @@
             "buildToolsVersion": "35.0.0",
             "allowBackup": true,
             "supportsTablet": true,
-            "usesCleartextTraffic": true
+            "usesCleartextTraffic": true,
+            "enableMinifyInReleaseBuilds": true
           }
         }
       ],
@@ -71,7 +72,7 @@
     },
 
     "android": {
-      "versionCode": 41,
+      "versionCode": 42,
       "package": "com.kumarabhishek404.labourapp",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {

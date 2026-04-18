@@ -15,6 +15,7 @@ interface CustomTextProps {
   lineHeight?: number;
   style?: any;
   restProps?: any;
+  numberOfLines?: number;
 }
 
 const CustomHeading = ({
@@ -27,6 +28,7 @@ const CustomHeading = ({
   padding = 0,
   lineHeight,
   style,
+  numberOfLines,
   ...restProps
 }: CustomTextProps) => {
   const { locale } = APP_CONTEXT.useApp();

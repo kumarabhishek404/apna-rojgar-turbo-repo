@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   heroWrap: {
     width: "100%",
-    height: 180,
+    height: 120,
     borderRadius: 14,
     overflow: "hidden",
     backgroundColor: Colors.secondaryBackground,

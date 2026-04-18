@@ -7,6 +7,9 @@
     "production": {
       "environment": "production",
       "node": "20.19.4",
+      "buildArtifactPaths": [
+        "android/app/build/outputs/mapping/release/mapping.txt"
+      ],
       "android": {
         "buildType": "app-bundle"
       },
@@ -30,6 +33,9 @@
     },
     "release": {
       "environment": "release",
+      "buildArtifactPaths": [
+        "android/app/build/outputs/mapping/release/mapping.txt"
+      ],
       "android": {
         "gradleCommand": ":app:bundleRelease"
       },
