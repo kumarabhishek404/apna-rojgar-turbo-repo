@@ -6,6 +6,9 @@ import WebsiteActivityTracker from "@/components/WebsiteActivityTracker";
 import { Suspense } from "react";
 
 export const metadata = {
+  verification: {
+    google: "ikFDb0OjKO1OJWinqZL1yJfOC6FFEwZ4XYeZMQtd84E",
+  },
   title: "Apna Rojgar | Find Work Opportunities",
   description:
     "Apna Rojgar connects workers and businesses across India. Discover jobs, hire workers, and grow together.",
