@@ -4,6 +4,12 @@ import { getAuth } from "@/lib/auth";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 type EventPayload = {
   name: string;
   properties?: Record<string, unknown>;
@@ -36,11 +42,30 @@ export default function WebsiteActivityTracker() {
   const queueRef = useRef<EventPayload[]>([]);
   const flushTimerRef = useRef<number | null>(null);
 
+  // 🔥 SEND TO GOOGLE ANALYTICS
+  const trackGA = (event: string, params?: Record<string, unknown>) => {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", event, params || {});
+    }
+  };
+
+  const trackPageViewGA = (path: string) => {
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("config", "G-S6TZQGWV6J", {
+        page_path: path,
+      });
+    }
+  };
+
   const flush = async () => {
     if (queueRef.current.length === 0) return;
+
     const events = queueRef.current.splice(0, queueRef.current.length);
     const token = getAuth()?.token;
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
+    const base =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      "https://api.apnarojgarindia.com/api/v1";
+
     try {
       await fetch(`${base}/analytics/events/batch`, {
         method: "POST",
@@ -54,7 +79,9 @@ export default function WebsiteActivityTracker() {
           appName: "Apna Rojgar Website",
           locale: typeof navigator !== "undefined" ? navigator.language : null,
           timezone:
-            typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
+            typeof Intl !== "undefined"
+              ? Intl.DateTimeFormat().resolvedOptions().timeZone
+              : null,
           batchSentAt: new Date().toISOString(),
           events,
         }),
@@ -65,23 +92,36 @@ export default function WebsiteActivityTracker() {
   };
 
   const enqueue = (name: string, properties?: Record<string, unknown>) => {
-    queueRef.current.push({
+    const payload = {
       name,
       properties: properties || {},
       clientTimestamp: new Date().toISOString(),
-    });
+    };
+
+    queueRef.current.push(payload);
+
+    // 🔥 ALSO SEND TO GOOGLE ANALYTICS
+    trackGA(name, properties);
+
     if (queueRef.current.length >= 10) {
       void flush();
     }
   };
 
+  // ✅ PAGE VIEW TRACKING (IMPORTANT FIX)
   useEffect(() => {
     const search = searchParams?.toString() || "";
+    const fullPath = `${pathname || "/"}${search ? `?${search}` : ""}`;
+
     enqueue("web_page_view", {
       path: pathname || "/",
       search,
       source: "website",
     });
+
+    // 🔥 Google Analytics page tracking
+    trackPageViewGA(fullPath);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams]);
 
@@ -89,12 +129,16 @@ export default function WebsiteActivityTracker() {
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
-      const clickable = target.closest("a,button,[role='button'],input[type='submit']") as
-        | HTMLElement
-        | null;
+
+      const clickable = target.closest(
+        "a,button,[role='button'],input[type='submit']",
+      ) as HTMLElement | null;
+
       if (!clickable) return;
+
       const text = normalizeText(clickable.textContent || "");
       const href = clickable instanceof HTMLAnchorElement ? clickable.href : "";
+
       enqueue("web_click", {
         path: pathname || "/",
         text: text || null,
@@ -106,6 +150,7 @@ export default function WebsiteActivityTracker() {
     const handleSubmit = (event: Event) => {
       const form = event.target as HTMLFormElement | null;
       if (!form) return;
+
       enqueue("web_form_submit", {
         path: pathname || "/",
         formId: form.id || null,
@@ -138,9 +183,11 @@ export default function WebsiteActivityTracker() {
       document.removeEventListener("submit", handleSubmit, true);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("beforeunload", handleBeforeUnload);
+
       if (flushTimerRef.current) {
         window.clearInterval(flushTimerRef.current);
       }
+
       void flush();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
