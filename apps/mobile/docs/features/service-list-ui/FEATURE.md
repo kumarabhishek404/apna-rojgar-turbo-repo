@@ -67,4 +67,4 @@ Upgrade the services list to stay **recognisable** to existing users: **large se
 | 2026-04-03 | 2 | Added full prototype spec + Stitch prompts (`2-prototype.md`) | Design can generate mocks from prompts |
 | 2026-04-03 | 3 | List header (count + hint), separators, split Listen/Details, locale keys | Other locales may need `serviceList*` keys |
 | 2026-04-03 | 2 | Added interactive HTML prototype `prototype/service-list.html` (Default / Loading / Empty) | Open in browser for reviews |
-| 2026-04-03 | 3 | Single-language `t()`; richer card (180px image, address + time row); calmer card chrome; prototype EN-only sample | `tBi` unused on service list |
+| 2026-04-03 | 3 | Single-language `t()`; richer card (180px image, address + time row); calmer card chrome; prototype EN-only sample | `t` unused on service list |

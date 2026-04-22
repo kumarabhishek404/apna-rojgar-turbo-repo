@@ -3,7 +3,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { t, tBi } from "@/utils/translationHelper";
+import { t } from "@/utils/translationHelper";
 import { useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
 import { WORKERTYPES } from "@/constants";
@@ -39,12 +39,7 @@ const SERVICE_STARTS_IN = [
 const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
   const [skillSearch, setSkillSearch] = useState("");
-  const {
-    control,
-    handleSubmit,
-    reset,
-    watch,
-  } = useForm({
+  const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       distance: "",
       duration: "",
@@ -161,7 +156,7 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
         <View style={styles.heroBadge}>
           <Ionicons name="sparkles-outline" size={18} color={Colors.primary} />
           <CustomText baseFont={12} fontWeight="700" color={Colors.primary}>
-            {tBi("filtersServices")}
+            {t("filtersServices")}
           </CustomText>
         </View>
         <CustomText
@@ -171,10 +166,10 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
           textAlign="left"
           style={styles.heroTitle}
         >
-          {tBi("searchServicesTitle")}
+          {t("searchServicesTitle")}
         </CustomText>
         <CustomText baseFont={13} color={Colors.subHeading} textAlign="left">
-          {tBi("serviceFilterHelp")}
+          {t("serviceFilterHelp")}
         </CustomText>
         {activeFilterCount > 0 ? (
           <View style={styles.activePill}>
@@ -197,15 +192,16 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
                 color={Colors.primary}
               />
             ),
-            title: tBi("distance_of_service"),
-            subtitle: tBi("filterDistanceHelp"),
+            title: t("distance_of_service"),
+            subtitle: t("filterDistanceHelp"),
             children: (
               <View style={styles.choiceWrap}>
                 {DISTANCE.map((option) =>
                   renderChoiceChip({
                     label: t(option.label),
                     selected: value === option.value,
-                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    onPress: () =>
+                      onChange(value === option.value ? "" : option.value),
                   }),
                 )}
               </View>
@@ -226,15 +222,16 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
                 color={Colors.primary}
               />
             ),
-            title: tBi("duration_of_service"),
-            subtitle: tBi("filterDurationHelp"),
+            title: t("duration_of_service"),
+            subtitle: t("filterDurationHelp"),
             children: (
               <View style={styles.choiceWrap}>
                 {DURATION.map((option) =>
                   renderChoiceChip({
                     label: t(option.label),
                     selected: value === option.value,
-                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    onPress: () =>
+                      onChange(value === option.value ? "" : option.value),
                   }),
                 )}
               </View>
@@ -255,15 +252,16 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
                 color={Colors.primary}
               />
             ),
-            title: tBi("service_will_start_in"),
-            subtitle: tBi("filterStartHelp"),
+            title: t("service_will_start_in"),
+            subtitle: t("filterStartHelp"),
             children: (
               <View style={styles.choiceWrap}>
                 {SERVICE_STARTS_IN.map((option) =>
                   renderChoiceChip({
                     label: t(option.label),
                     selected: value === option.value,
-                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    onPress: () =>
+                      onChange(value === option.value ? "" : option.value),
                   }),
                 )}
               </View>
@@ -284,8 +282,8 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
                 color={Colors.primary}
               />
             ),
-            title: tBi("selectSkills"),
-            subtitle: tBi("filterSkillsHelp"),
+            title: t("selectSkills"),
+            subtitle: t("filterSkillsHelp"),
             children: (
               <>
                 <View style={styles.searchBox}>
@@ -305,13 +303,12 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
                 <View style={styles.choiceWrap}>
                   {filteredSkills.map((skill) => {
                     const selectedSkills = value as string[];
-                    return (
-                    renderChoiceChip({
+                    return renderChoiceChip({
                       label: getDynamicWorkerType(skill, 1),
                       selected: selectedSkills.includes(skill),
-                      onPress: () => toggleSkill(skill, selectedSkills, onChange),
-                    })
-                  );
+                      onPress: () =>
+                        toggleSkill(skill, selectedSkills, onChange),
+                    });
                   })}
                   {filteredSkills.length === 0 ? (
                     <CustomText

@@ -111,7 +111,7 @@ A **clickable, in-browser** mockup mirrors this spec (blue theme, list header, *
 ### Accessibility
 
 - `accessibilityRole="button"` on main body, Listen, and Details.
-- Labels use bilingual strings where `tBi` is used (`listenAboutService`, `speakingAndClose`, `viewDetails`).
+- Labels use bilingual strings where `t` is used (`listenAboutService`, `speakingAndClose`, `viewDetails`).
 
 ---
 
@@ -133,7 +133,7 @@ A **clickable, in-browser** mockup mirrors this spec (blue theme, list header, *
 | List | `components/commons/ListingsVerticalServices.tsx` |
 | Card | `components/commons/ListingServices.tsx` |
 | Copy | `app/locales/en.json`, `app/locales/hi.json` (`serviceListPullHint`, `serviceListCountBadge`) |
-| i18n helper | `utils/translationHelper.tsx` (`tBi` + optional `count` in both locales) |
+| i18n helper | `utils/translationHelper.tsx` (`t` + optional `count` in both locales) |
 
 ### API / data
 

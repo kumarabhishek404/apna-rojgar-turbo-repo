@@ -40,7 +40,7 @@ const SOCIAL_ITEMS: SocialItem[] = [
     bg: "#FFF1F5",
     border: "#F7B8CC",
     iconBg: "#FFE0EA",
-    url: "https://instagram.com/apnarojgarindia",
+    url: "https://instagram.com/apnarojgarindia.com",
   },
   {
     id: "threads",
@@ -50,7 +50,7 @@ const SOCIAL_ITEMS: SocialItem[] = [
     bg: "#F5F5F5",
     border: "#D4D4D4",
     iconBg: "#E8E8E8",
-    url: "https://threads.net/@apnarojgarindia",
+    url: "https://threads.net/@apnarojgarindia.com",
   },
   {
     id: "linkedin",
@@ -60,7 +60,7 @@ const SOCIAL_ITEMS: SocialItem[] = [
     bg: "#EFF6FF",
     border: "#BFDBFE",
     iconBg: "#DBEAFE",
-    url: "https://linkedin.com/company/apnarojgar",
+    url: "https://linkedin.com/company/apnarojgarindia.com",
   },
   {
     id: "facebook",
@@ -70,7 +70,7 @@ const SOCIAL_ITEMS: SocialItem[] = [
     bg: "#EFF6FF",
     border: "#BFDBFE",
     iconBg: "#DBEAFE",
-    url: "https://facebook.com/apnarojgarindia",
+    url: "https://facebook.com/apnarojgarindia.com",
   },
   {
     id: "website",
@@ -80,7 +80,7 @@ const SOCIAL_ITEMS: SocialItem[] = [
     bg: "#F5F3FF",
     border: "#C4B5FD",
     iconBg: "#EDE9FE",
-    url: "https://apnarojgar.in",
+    url: "https://apnarojgarindia.com",
   },
   {
     id: "playstore",

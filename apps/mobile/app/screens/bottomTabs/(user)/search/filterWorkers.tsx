@@ -1,13 +1,17 @@
-import { AntDesign, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  AntDesign,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, TouchableOpacity, StyleSheet, TextInput } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 
 import Atoms from "@/app/AtomStore";
 import Colors from "@/constants/Colors";
 import CustomText from "../../../../../components/commons/CustomText";
-import { t, tBi } from "@/utils/translationHelper";
+import { t } from "@/utils/translationHelper";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import { WORKERTYPES } from "@/constants";
 
@@ -52,15 +56,10 @@ const FiltersWorkers = ({
   onApply,
   skills,
 }: any) => {
-  const [drawerAtom, setDrawerState]: any = useAtom(Atoms?.BottomDrawerAtom);
+  const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
   const [skillSearch, setSkillSearch] = useState("");
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    watch,
-  } = useForm({
+  const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       completedServices: "",
       rating: 0,
@@ -97,8 +96,9 @@ const FiltersWorkers = ({
 
   const filteredSkills = useMemo(() => {
     const query = skillSearch.trim().toLowerCase();
-    const allSkills = (skills?.length ? skills : WORKERTYPES.map((item) => item.value))
-      .filter(Boolean);
+    const allSkills = (
+      skills?.length ? skills : WORKERTYPES.map((item) => item.value)
+    ).filter(Boolean);
 
     return allSkills.filter((skill: string) => {
       if (!query) return true;
@@ -183,7 +183,7 @@ const FiltersWorkers = ({
         <View style={styles.heroBadge}>
           <Ionicons name="sparkles-outline" size={18} color={Colors.primary} />
           <CustomText baseFont={12} fontWeight="700" color={Colors.primary}>
-            {tBi("filtersWorkers")}
+            {t("filtersWorkers")}
           </CustomText>
         </View>
         <CustomText
@@ -193,10 +193,10 @@ const FiltersWorkers = ({
           textAlign="left"
           style={styles.heroTitle}
         >
-          {tBi("searchWorkersTitle")}
+          {t("searchWorkersTitle")}
         </CustomText>
         <CustomText baseFont={13} color={Colors.subHeading} textAlign="left">
-          {tBi("workerFilterHelp")}
+          {t("workerFilterHelp")}
         </CustomText>
         {activeFilterCount > 0 ? (
           <View style={styles.activePill}>
@@ -219,20 +219,23 @@ const FiltersWorkers = ({
                 color={Colors.primary}
               />
             ),
-            title: tBi("filterWorkerByRoleTitle"),
-            subtitle: tBi("filterWorkerByRoleHint"),
+            title: t("filterWorkerByRoleTitle"),
+            subtitle: t("filterWorkerByRoleHint"),
             children: (
               <View style={styles.choiceWrap}>
                 {ROLE_OPTIONS.map((option) =>
                   renderChoiceChip({
                     label: t(option.label),
                     selected: value === option.value,
-                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    onPress: () =>
+                      onChange(value === option.value ? "" : option.value),
                     icon: (
                       <MaterialCommunityIcons
                         name={option.icon as any}
                         size={16}
-                        color={value === option.value ? Colors.white : Colors.primary}
+                        color={
+                          value === option.value ? Colors.white : Colors.primary
+                        }
                       />
                     ),
                   }),
@@ -255,15 +258,16 @@ const FiltersWorkers = ({
                 color={Colors.primary}
               />
             ),
-            title: tBi("distance"),
-            subtitle: tBi("filterDistanceHelp"),
+            title: t("distance"),
+            subtitle: t("filterDistanceHelp"),
             children: (
               <View style={styles.choiceWrap}>
                 {DISTANCE.map((option) =>
                   renderChoiceChip({
                     label: t(option.label),
                     selected: value === option.value,
-                    onPress: () => onChange(value === option.value ? "" : option.value),
+                    onPress: () =>
+                      onChange(value === option.value ? "" : option.value),
                   }),
                 )}
               </View>
@@ -284,8 +288,8 @@ const FiltersWorkers = ({
                 color={Colors.primary}
               />
             ),
-            title: tBi("selectSkills"),
-            subtitle: tBi("filterSkillsHelp"),
+            title: t("selectSkills"),
+            subtitle: t("filterSkillsHelp"),
             children: (
               <>
                 <View style={styles.searchBox}>
@@ -309,9 +313,14 @@ const FiltersWorkers = ({
                     return renderChoiceChip({
                       label: getDynamicWorkerType(skill, 1),
                       selected: isSelected,
-                      onPress: () => toggleSkill(skill, selectedSkills, onChange),
+                      onPress: () =>
+                        toggleSkill(skill, selectedSkills, onChange),
                       icon: isSelected ? (
-                        <AntDesign name="check" size={14} color={Colors.white} />
+                        <AntDesign
+                          name="check"
+                          size={14}
+                          color={Colors.white}
+                        />
                       ) : undefined,
                     });
                   })}

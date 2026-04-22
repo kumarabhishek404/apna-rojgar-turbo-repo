@@ -1,6 +1,7 @@
 import i18n from "./i18n";
 
-export const t = (key: string, options?: object): string => i18n.t(key, options);
+export const t = (key: string, options?: object): string =>
+  i18n.t(key, options);
 
 /**
  * Bilingual label helper for rural/low-literacy UX: shows Hindi + English together.
