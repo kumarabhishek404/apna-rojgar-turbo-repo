@@ -1738,5 +1738,69 @@
   "homeBannerEyebrow": "आपकी यात्रा",
   "homeBannerTitle": "बहुत बढ़िया!",
   "homeBannerSubline": "आप अपना रोज़गार के साथ",
-  "homeBannerDays": "{{count}} दिन से जुड़े हैं"
+  "homeBannerDays": "{{count}} दिन से जुड़े हैं",
+
+  "whatsapp": "व्हाट्सऐप",
+  "instagram": "इंस्टाग्राम",
+  "completeProfileTitle": "अपनी प्रोफाइल पूरी करें",
+  "completeProfileSubtitle": "स्किल्स, पता और जानकारी जोड़ें ताकि आपको काम मिले",
+  "shareAppMessage": "Apna Rojgar ऐप से जुड़ें — काम ढूंढें या मजदूर आसानी से पाएं!",
+  "findWorkers": "मजदूर खोजें",
+  "findContractors": "ठेकेदार खोजें",
+  "myWorks": "मेरे काम",
+  "myRequirements": "मेरी आवश्यकताएं",
+  "myAppliedWorkers": "मेरे आवेदन किए गए काम",
+  "myAppliedWorks": "मेरे आवेदन किए गए कार्य",
+  "myBookedWorkers": "मेरे बुक किए गए मजदूर",
+  "myActivity": "मेरी गतिविधि",
+  "postRequirement": "आवश्यकता पोस्ट करें",
+
+  "dashboard": {
+    "worker": {
+      "heroTitle": "उपलब्ध काम",
+      "heroSubtitle": "आपके आस-पास के काम",
+      "applied": "अप्लाई किए काम",
+      "bookings": "मेरी बुकिंग",
+      "contractors": "ठेकेदार",
+      "activity": "मेरी एक्टिविटी"
+    },
+    "employer": {
+      "heroTitle": "मेरे डाले गए काम",
+      "heroSubtitle": "अपने काम को मैनेज करें",
+      "postWork": "नया काम डालें",
+      "bookedWorkers": "बुक किए गए मजदूर",
+      "contractors": "ठेकेदार",
+      "workers": "मजदूर",
+      "activity": "मेरी एक्टिविटी"
+    },
+    "mediator": {
+      "heroTitle": "एक्टिव रिक्वायरमेंट",
+      "heroSubtitle": "अपनी रिक्वायरमेंट मैनेज करें",
+      "postRequirement": "नई रिक्वायरमेंट डालें",
+      "applied": "अप्लाई किए काम",
+      "selected": "चुने गए मजदूर",
+      "team": "आपकी टीम",
+      "workers": "मजदूर",
+      "activity": "मेरी एक्टिविटी"
+    }
+  },
+  "connectTitle": "हमसे जुड़ें",
+
+  "whatsappSub": "हमारे ग्रुप से जुड़ें",
+
+  "threads": "थ्रेड्स",
+  "linkedin": "लिंक्डइन",
+  "facebook": "फेसबुक",
+  "website": "वेबसाइट",
+
+  "followUs": "हमें फॉलो करें",
+  "connect": "हमसे जुड़ें",
+  "likePage": "पेज लाइक करें",
+  "visit": "वेबसाइट देखें",
+
+  "downloadApp": "ऐप डाउनलोड करें",
+  "playStore": "Play Store से डाउनलोड करें",
+  "shareLink": "ऐप लिंक शेयर करें",
+
+  "fullDetails": "पूरा विवरण"
 }

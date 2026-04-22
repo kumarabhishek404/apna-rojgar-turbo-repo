@@ -23,6 +23,7 @@ const Members = () => {
   const [category, setCategory] = useState("");
   const { id } = useLocalSearchParams();
 
+  console.log("id----", id);
   const {
     data: response,
     isLoading,
@@ -51,7 +52,7 @@ const Members = () => {
   useFocusEffect(
     React.useCallback(() => {
       refetch();
-    }, [category])
+    }, [category]),
   );
 
   useFocusEffect(
@@ -60,10 +61,10 @@ const Members = () => {
         response?.pages.flatMap((page: any) => {
           setTotalData(page?.data[0]?.workers?.length);
           return page?.data[0]?.workers || [];
-        })
+        }),
       );
       return () => unsubscribe;
-    }, [response])
+    }, [response]),
   );
 
   const loadMore = () => {
@@ -74,7 +75,7 @@ const Members = () => {
 
   const memoizedData = useMemo(
     () => filteredData?.flatMap((data: any) => data),
-    [filteredData]
+    [filteredData],
   );
 
   const onCatChanged = (category: string) => {
@@ -85,6 +86,7 @@ const Members = () => {
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => (
             <CustomHeader title="members" left="back" right="notification" />
           ),

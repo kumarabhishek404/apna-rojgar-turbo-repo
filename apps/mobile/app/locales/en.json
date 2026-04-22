@@ -1736,5 +1736,71 @@
   "homeBannerEyebrow": "Your journey",
   "homeBannerTitle": "Great going!",
   "homeBannerSubline": "You've been with Apna Rojgar for",
-  "homeBannerDays": "{{count}} days"
+  "homeBannerDays": "{{count}} days",
+
+  "whatsapp": "WhatsApp",
+  "instagram": "Instagram",
+  "completeProfileTitle": "Complete Your Profile",
+  "completeProfileSubtitle": "Add skills, address & more to get noticed",
+  "shareAppMessage": "Join me on Apna Rojgar — find work or hire workers near you!",
+  "findWorkers": "Find Workers",
+  "findContractors": "Find Contractors",
+  "myWorks": "My Works",
+  "myRequirements": "My Requirements",
+  "myAppliedWorkers": "My Applied Jobs",
+  "myAppliedWorks": "My Applied Works",
+  "myBookedWorkers": "My Booked Workers",
+  "myActivity": "My Activity",
+  "postRequirement": "Post Requirement",
+
+  "dashboard": {
+    "worker": {
+      "heroTitle": "Available Jobs",
+      "heroSubtitle": "Jobs near your location",
+      "applied": "Applied Jobs",
+      "bookings": "My Bookings",
+      "contractors": "Contractors",
+      "activity": "My Activity"
+    },
+    "employer": {
+      "heroTitle": "My Posted Jobs",
+      "heroSubtitle": "Manage your posted work",
+      "postWork": "Post New Work",
+      "bookedWorkers": "Booked Workers",
+      "contractors": "Contractors",
+      "workers": "Workers",
+      "activity": "My Activity"
+    },
+    "mediator": {
+      "heroTitle": "Active Requirements",
+      "heroSubtitle": "Manage your requirements",
+      "postRequirement": "Post Requirement",
+      "applied": "Applied Works",
+      "selected": "Selected Workers",
+      "team": "Your Team",
+      "workers": "Workers",
+      "activity": "My Activity"
+    }
+  },
+
+  "connectTitle": "Connect with us",
+
+  "whatsappSub": "Join our group",
+
+  "threads": "Threads",
+  "linkedin": "LinkedIn",
+  "facebook": "Facebook",
+  "website": "Website",
+
+  "followUs": "Follow us",
+  "connect": "Connect with us",
+  "likePage": "Like our page",
+  "visit": "Visit us",
+
+  "downloadApp": "Download App",
+  "playStore": "Get on Play Store",
+
+  "shareLink": "Share app link",
+
+  "fullDetails": "Full Details"
 }

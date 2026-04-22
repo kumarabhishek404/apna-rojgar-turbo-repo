@@ -20,6 +20,7 @@ import { WORKERTYPES } from "@/constants";
 import { getWorkLabel } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 import homeBannerArt from "../../assets/banners/banner1.jpg";
+import APP_CONTEXT from "@/app/context/locale";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -60,7 +61,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
   const notificationCount = useAtomValue(Atoms.notificationCount) as number;
   const bannerScrollRef = useRef<ScrollView>(null);
   const [activeBanner, setActiveBanner] = useState(0);
-
+  const { locale } = APP_CONTEXT.useApp();
   const bannerImages = useMemo(() => [homeBannerArt], []);
 
   const displayName = firstName(userDetails?.name) || t("homeGreetingFallbackName");
@@ -83,7 +84,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
         return label || v.trim();
       })
       .filter(Boolean) as string[];
-  }, [userDetails?.skills]);
+  }, [userDetails?.skills, locale]);
 
   const onProfile = () => {
     router.push({ pathname: "/screens/profile" });
@@ -221,11 +222,11 @@ const HomeHeroSection = ({ userDetails }: Props) => {
                 onPress={onProfile}
                 style={styles.fullDetailsBtn}
                 accessibilityRole="button"
-                accessibilityLabel="Full Details"
+                accessibilityLabel={t("fullDetails")}
                 activeOpacity={0.9}
               >
                 <CustomText baseFont={12} fontWeight="800" color={Colors.white}>
-                  Full Details
+                  {t("fullDetails")}
                 </CustomText>
                 <Ionicons name="arrow-forward" size={14} color={Colors.white} />
               </TouchableOpacity>

@@ -1,12 +1,16 @@
 "use client";
 
 import { getAuth } from "@/lib/auth";
+import {
+  WEBSITE_TRACK_EVENT,
+  type WebsiteTrackingEventDetail,
+} from "@/lib/websiteTracking";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -33,6 +37,16 @@ function getOrCreateSessionId() {
 
 function normalizeText(value: string) {
   return value.replace(/\s+/g, " ").trim().slice(0, 120);
+}
+
+function isContactHref(href: string) {
+  const normalized = href.trim().toLowerCase();
+  return (
+    normalized.startsWith("mailto:") ||
+    normalized.startsWith("tel:") ||
+    normalized.includes("wa.me/") ||
+    normalized.includes("whatsapp.com/")
+  );
 }
 
 export default function WebsiteActivityTracker() {
@@ -145,6 +159,17 @@ export default function WebsiteActivityTracker() {
         href: href || null,
         source: "website",
       });
+
+      if (href && isContactHref(href)) {
+        const contactPayload = {
+          path: pathname || "/",
+          text: text || null,
+          href,
+          source: "website",
+        };
+        enqueue("contact_clicked", contactPayload);
+        enqueue("lead_generated", contactPayload);
+      }
     };
 
     const handleSubmit = (event: Event) => {
@@ -169,10 +194,18 @@ export default function WebsiteActivityTracker() {
       void flush();
     };
 
+    const handleExternalTrack = (event: Event) => {
+      const customEvent = event as CustomEvent<WebsiteTrackingEventDetail>;
+      const detail = customEvent.detail;
+      if (!detail?.name) return;
+      enqueue(detail.name, detail.properties || {});
+    };
+
     document.addEventListener("click", handleClick, true);
     document.addEventListener("submit", handleSubmit, true);
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener(WEBSITE_TRACK_EVENT, handleExternalTrack as EventListener);
 
     flushTimerRef.current = window.setInterval(() => {
       void flush();
@@ -183,6 +216,7 @@ export default function WebsiteActivityTracker() {
       document.removeEventListener("submit", handleSubmit, true);
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener(WEBSITE_TRACK_EVENT, handleExternalTrack as EventListener);
 
       if (flushTimerRef.current) {
         window.clearInterval(flushTimerRef.current);
@@ -192,6 +226,50 @@ export default function WebsiteActivityTracker() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+
+  useEffect(() => {
+    let fired = false;
+
+    const onScroll = () => {
+      if (fired) return;
+      const doc = document.documentElement;
+      const scrollTop = window.scrollY || doc.scrollTop;
+      const maxScrollable = Math.max(doc.scrollHeight - window.innerHeight, 0);
+      if (maxScrollable <= 0) return;
+      const percent = (scrollTop / maxScrollable) * 100;
+      if (percent >= 50) {
+        fired = true;
+        enqueue("scroll_depth", {
+          percent: 50,
+          path: pathname || "/",
+          source: "website",
+        });
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      enqueue("time_on_page", {
+        seconds: 30,
+        path: pathname || "/",
+        source: "website",
+      });
+    }, 30000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, searchParams]);
 
   return null;
 }

@@ -10,6 +10,7 @@ import type { WebServiceApplyPayload } from "@/components/webapp/ServiceDetailsV
 import ListLoader from "@/components/services/ListLoader";
 import type { BrowserGeo } from "@/lib/serviceDistance";
 import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
+import { trackWebsiteEvent } from "@/lib/websiteTracking";
 
 type UserInfo = {
   _id: string;
@@ -134,6 +135,11 @@ export default function MyServicesPage() {
           method: "POST",
           body: JSON.stringify(body),
         });
+        trackWebsiteEvent("job_applied", {
+          serviceId,
+          path: window.location.pathname,
+          source: "website",
+        });
         setMessage(t("serviceAppliedSuccessfully", "Service applied successfully"));
         closeDetailsModal();
         await load();
@@ -236,6 +242,10 @@ export default function MyServicesPage() {
         canCreate={canCreate}
         onClose={() => setShowCreateModal(false)}
         onCreated={async () => {
+          trackWebsiteEvent("job_post_created", {
+            path: window.location.pathname,
+            source: "website",
+          });
           setMessage(t("serviceCreatedSuccessfully", "Service created successfully."));
           await load();
         }}

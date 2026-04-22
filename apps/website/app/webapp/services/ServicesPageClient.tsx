@@ -23,6 +23,7 @@ import { ServiceCard, type ServiceItem } from "@/components/services/ServiceCard
 import type { WebServiceApplyPayload } from "@/components/webapp/ServiceDetailsView";
 import type { BrowserGeo } from "@/lib/serviceDistance";
 import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
+import { trackWebsiteEvent } from "@/lib/websiteTracking";
 
 type UserInfo = {
   role?: "WORKER" | "MEDIATOR" | "EMPLOYER";
@@ -293,6 +294,11 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
         method: "POST",
         body: JSON.stringify(body),
       });
+      trackWebsiteEvent("job_applied", {
+        serviceId,
+        path: window.location.pathname,
+        source: "website",
+      });
       setMessage(t("serviceAppliedSuccessfully", "Applied successfully."));
       setInitializedByTab((prev) => ({ ...prev, applied: false }));
       fetchForTab("all", 1, false);
@@ -509,6 +515,10 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
         canCreate={canCreate}
         onClose={closeCreateModal}
         onCreated={async () => {
+          trackWebsiteEvent("job_post_created", {
+            path: window.location.pathname,
+            source: "website",
+          });
           setMessage("Service created successfully.");
           await Promise.all([fetchForTab("all", 1, false), fetchForTab("my", 1, false)]);
         }}

@@ -1,7 +1,13 @@
 /**
  * Activity tab — role-based sections with icon tabs and rich empty states.
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -52,9 +58,17 @@ const dedupeById = (rows: any[]) =>
 const FadeIn = ({ children }: { children: React.ReactNode }) => {
   const o = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(o, { toValue: 1, duration: 340, useNativeDriver: true }).start();
+    Animated.timing(o, {
+      toValue: 1,
+      duration: 340,
+      useNativeDriver: true,
+    }).start();
   }, [o]);
-  return <Animated.View style={[{ opacity: o }, { flex: 1 }]}>{children}</Animated.View>;
+  return (
+    <Animated.View style={[{ opacity: o }, { flex: 1 }]}>
+      {children}
+    </Animated.View>
+  );
 };
 
 /* ─────────────────────────────────────────
@@ -177,7 +191,10 @@ const RichEmptyState = (cfg: EmptyStateConfig) => (
     </CustomText>
     {cfg.ctaLabel && cfg.onCta ? (
       <TouchableOpacity
-        style={[emptyStyles.cta, { backgroundColor: cfg.ctaColor ?? Colors.primary }]}
+        style={[
+          emptyStyles.cta,
+          { backgroundColor: cfg.ctaColor ?? Colors.primary },
+        ]}
         onPress={cfg.onCta}
         activeOpacity={0.88}
       >
@@ -264,7 +281,8 @@ const WorkerActivity = () => {
 
   const bookingsQ = useInfiniteQuery({
     queryKey: ["activityWorkerBookings", userDetails?._id],
-    queryFn: async ({ pageParam = 1 }) => WORKER.fetchAllMyBookings({ pageParam }),
+    queryFn: async ({ pageParam = 1 }) =>
+      WORKER.fetchAllMyBookings({ pageParam }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
     retry: false,
@@ -289,14 +307,20 @@ const WorkerActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) { firstRef.current = false; return; }
+      if (firstRef.current) {
+        firstRef.current = false;
+        return;
+      }
       bookingsQ.refetch();
       bookingInvitesQ.refetch();
     }, [bookingsQ.refetch, bookingInvitesQ.refetch]),
   );
 
   const services = useMemo(
-    () => dedupeById(bookingsQ.data?.pages?.flatMap((p: any) => p.data || []) || []),
+    () =>
+      dedupeById(
+        bookingsQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
+      ),
     [bookingsQ.data],
   );
   const bookingInvites = useMemo(
@@ -304,11 +328,14 @@ const WorkerActivity = () => {
     [bookingInvitesQ.data],
   );
 
-  const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(async () => {
-    await Promise.all([bookingsQ.refetch(), bookingInvitesQ.refetch()]);
-  });
+  const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
+    async () => {
+      await Promise.all([bookingsQ.refetch(), bookingInvitesQ.refetch()]);
+    },
+  );
 
-  if (bookingsQ.isLoading && !bookingsQ.data) return <ListingsServicesPlaceholder />;
+  if (bookingsQ.isLoading && !bookingsQ.data)
+    return <ListingsServicesPlaceholder />;
 
   return (
     <FadeIn>
@@ -320,7 +347,13 @@ const WorkerActivity = () => {
             services.length === 0 ? (
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
               >
                 <RichEmptyState
                   icon="briefcase-outline"
@@ -340,16 +373,33 @@ const WorkerActivity = () => {
                 data={services}
                 keyExtractor={(it: any) => String(it?._id ?? "")}
                 renderItem={({ item }) => (
-                  <View style={styles.cardWrap}><ListingsServices item={item} /></View>
+                  <View style={styles.cardWrap}>
+                    <ListingsServices item={item} />
+                  </View>
                 )}
                 contentContainerStyle={styles.listInner}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
-                onEndReached={() => bookingsQ.hasNextPage && !bookingsQ.isFetchingNextPage && bookingsQ.fetchNextPage()}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+                onEndReached={() =>
+                  bookingsQ.hasNextPage &&
+                  !bookingsQ.isFetchingNextPage &&
+                  bookingsQ.fetchNextPage()
+                }
                 onEndReachedThreshold={0.25}
                 ListFooterComponent={
-                  bookingsQ.isFetchingNextPage
-                    ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} />
-                    : <View style={{ height: 80 }} />
+                  bookingsQ.isFetchingNextPage ? (
+                    <ActivityIndicator
+                      color={Colors.primary}
+                      style={{ padding: 16 }}
+                    />
+                  ) : (
+                    <View style={{ height: 80 }} />
+                  )
                 }
               />
             )
@@ -357,11 +407,19 @@ const WorkerActivity = () => {
 
           {tab === 1 ? (
             bookingInvitesQ.isLoading && !bookingInvitesQ.data ? (
-              <View style={styles.loading}><ActivityIndicator size="large" color={Colors.primary} /></View>
+              <View style={styles.loading}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
             ) : bookingInvites.length === 0 ? (
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
               >
                 <RichEmptyState
                   icon="mail-outline"
@@ -379,9 +437,19 @@ const WorkerActivity = () => {
               <ListingsVerticalBookings
                 category="recievedRequests"
                 listings={bookingInvites}
-                loadMore={() => bookingInvitesQ.hasNextPage && !bookingInvitesQ.isFetchingNextPage && bookingInvitesQ.fetchNextPage()}
+                loadMore={() =>
+                  bookingInvitesQ.hasNextPage &&
+                  !bookingInvitesQ.isFetchingNextPage &&
+                  bookingInvitesQ.fetchNextPage()
+                }
                 isFetchingNextPage={bookingInvitesQ.isFetchingNextPage}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
               />
             )
           ) : null}
@@ -395,8 +463,8 @@ const WorkerActivity = () => {
    Employer
 ───────────────────────────────────────── */
 const EMPLOYER_TABS: TabDef[] = [
-  { labelKey: "myServices",      icon: "briefcase-outline" },
-  { labelKey: "bookedWorkers",   icon: "people-outline" },
+  { labelKey: "myServices", icon: "briefcase-outline" },
+  { labelKey: "bookedWorkers", icon: "people-outline" },
 ];
 
 const EmployerActivity = () => {
@@ -435,14 +503,20 @@ const EmployerActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) { firstRef.current = false; return; }
+      if (firstRef.current) {
+        firstRef.current = false;
+        return;
+      }
       servicesQ.refetch();
       bookedQ.refetch();
     }, [servicesQ.refetch, bookedQ.refetch]),
   );
 
   const services = useMemo(
-    () => dedupeById(servicesQ.data?.pages?.flatMap((p: any) => p.data || []) || []),
+    () =>
+      dedupeById(
+        servicesQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
+      ),
     [servicesQ.data],
   );
   const bookedListings = useMemo(
@@ -450,10 +524,13 @@ const EmployerActivity = () => {
     [bookedQ.data],
   );
 
-  const { refreshing: refreshingS, onRefresh: onRefreshS } = PULL_TO_REFRESH.usePullToRefresh(servicesQ.refetch);
-  const { refreshing: refreshingB, onRefresh: onRefreshB } = PULL_TO_REFRESH.usePullToRefresh(bookedQ.refetch);
+  const { refreshing: refreshingS, onRefresh: onRefreshS } =
+    PULL_TO_REFRESH.usePullToRefresh(servicesQ.refetch);
+  const { refreshing: refreshingB, onRefresh: onRefreshB } =
+    PULL_TO_REFRESH.usePullToRefresh(bookedQ.refetch);
 
-  if (servicesQ.isLoading && !servicesQ.data) return <ListingsServicesPlaceholder />;
+  if (servicesQ.isLoading && !servicesQ.data)
+    return <ListingsServicesPlaceholder />;
 
   return (
     <FadeIn>
@@ -466,7 +543,13 @@ const EmployerActivity = () => {
             services.length === 0 ? (
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={<RefreshControl refreshing={refreshingS} onRefresh={onRefreshS} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshingS}
+                    onRefresh={onRefreshS}
+                    tintColor={Colors.primary}
+                  />
+                }
               >
                 <RichEmptyState
                   icon="briefcase-outline"
@@ -485,9 +568,19 @@ const EmployerActivity = () => {
             ) : (
               <ListingsVerticalServices
                 listings={services as any}
-                loadMore={() => servicesQ.hasNextPage && !servicesQ.isFetchingNextPage && servicesQ.fetchNextPage()}
+                loadMore={() =>
+                  servicesQ.hasNextPage &&
+                  !servicesQ.isFetchingNextPage &&
+                  servicesQ.fetchNextPage()
+                }
                 isFetchingNextPage={servicesQ.isFetchingNextPage}
-                refreshControl={<RefreshControl refreshing={refreshingS} onRefresh={onRefreshS} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshingS}
+                    onRefresh={onRefreshS}
+                    tintColor={Colors.primary}
+                  />
+                }
               />
             )
           ) : null}
@@ -497,7 +590,13 @@ const EmployerActivity = () => {
             bookedListings.length === 0 ? (
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={<RefreshControl refreshing={refreshingB} onRefresh={onRefreshB} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshingB}
+                    onRefresh={onRefreshB}
+                    tintColor={Colors.primary}
+                  />
+                }
               >
                 <RichEmptyState
                   icon="people-outline"
@@ -514,10 +613,20 @@ const EmployerActivity = () => {
             ) : (
               <ListingsVerticalBookings
                 listings={bookedListings}
-                loadMore={() => bookedQ.hasNextPage && !bookedQ.isFetchingNextPage && bookedQ.fetchNextPage()}
+                loadMore={() =>
+                  bookedQ.hasNextPage &&
+                  !bookedQ.isFetchingNextPage &&
+                  bookedQ.fetchNextPage()
+                }
                 isFetchingNextPage={bookedQ.isFetchingNextPage}
                 isLoading={false}
-                refreshControl={<RefreshControl refreshing={refreshingB} onRefresh={onRefreshB} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshingB}
+                    onRefresh={onRefreshB}
+                    tintColor={Colors.primary}
+                  />
+                }
                 showEngagementStrip
               />
             )
@@ -533,8 +642,8 @@ const EmployerActivity = () => {
 ───────────────────────────────────────── */
 const MEDIATOR_TABS: TabDef[] = [
   { labelKey: "activityTabApplied", icon: "briefcase-outline" },
-  { labelKey: "activityTabTeam",    icon: "people-outline" },
-  { labelKey: "activityTabBooked",  icon: "calendar-outline" },
+  { labelKey: "myServices", icon: "people-outline" },
+  { labelKey: "activityTabBooked", icon: "calendar-outline" },
 ];
 
 const MediatorActivity = () => {
@@ -555,10 +664,10 @@ const MediatorActivity = () => {
         : undefined,
   });
 
-  const membersQ = useInfiniteQuery({
-    queryKey: ["activityMedMembers", userDetails?._id],
-    queryFn: ({ pageParam = 1 }) =>
-      MEDIATOR.fetchAllMembers({ mediatorId: userDetails?._id, pageParam, category: "" }),
+  const servicesQ = useInfiniteQuery({
+    queryKey: ["activityMediatorServices", userDetails?._id],
+    queryFn: async ({ pageParam = 1 }) =>
+      EMPLOYER.fetchMyServices({ pageParam, status: "HIRING" }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
     retry: false,
@@ -570,7 +679,8 @@ const MediatorActivity = () => {
 
   const bookedQ = useInfiniteQuery({
     queryKey: ["activityMedBooked", userDetails?._id],
-    queryFn: ({ pageParam = 1 }) => MEDIATOR.fetchMyBookingsAsMediator({ pageParam }),
+    queryFn: ({ pageParam = 1 }) =>
+      MEDIATOR.fetchMyBookingsAsMediator({ pageParam }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
     retry: false,
@@ -582,43 +692,61 @@ const MediatorActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) { firstRef.current = false; return; }
+      if (firstRef.current) {
+        firstRef.current = false;
+        return;
+      }
       appliedQ.refetch();
-      membersQ.refetch();
+      servicesQ.refetch();
       bookedQ.refetch();
-    }, [appliedQ.refetch, membersQ.refetch, bookedQ.refetch]),
+    }, [appliedQ.refetch, servicesQ.refetch, bookedQ.refetch]),
   );
 
   const applied = useMemo(
-    () => dedupeById(appliedQ.data?.pages?.flatMap((p: any) => p.data || []) || []),
+    () =>
+      dedupeById(appliedQ.data?.pages?.flatMap((p: any) => p.data || []) || []),
     [appliedQ.data],
   );
   const members = useMemo(() => {
     const out: any[] = [];
-    (membersQ.data?.pages || []).forEach((p: any) => {
+    (servicesQ.data?.pages || []).forEach((p: any) => {
       if (Array.isArray(p?.data))
         p.data.forEach((block: any) => {
           if (Array.isArray(block?.workers)) out.push(...block.workers);
         });
     });
     return dedupeById(out);
-  }, [membersQ.data]);
+  }, [servicesQ.data]);
   const booked = useMemo(
     () => bookedQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
     [bookedQ.data],
   );
 
-  const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(async () => {
-    await Promise.all([appliedQ.refetch(), membersQ.refetch(), bookedQ.refetch()]);
-  });
+  const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
+    async () => {
+      await Promise.all([
+        appliedQ.refetch(),
+        servicesQ.refetch(),
+        bookedQ.refetch(),
+      ]);
+    },
+  );
 
   const onEndReached = () => {
-    if (tab === 0 && appliedQ.hasNextPage && !appliedQ.isFetchingNextPage) appliedQ.fetchNextPage();
-    else if (tab === 1 && membersQ.hasNextPage && !membersQ.isFetchingNextPage) membersQ.fetchNextPage();
-    else if (tab === 2 && bookedQ.hasNextPage && !bookedQ.isFetchingNextPage) bookedQ.fetchNextPage();
+    if (tab === 0 && appliedQ.hasNextPage && !appliedQ.isFetchingNextPage)
+      appliedQ.fetchNextPage();
+    else if (
+      tab === 1 &&
+      servicesQ.hasNextPage &&
+      !servicesQ.isFetchingNextPage
+    )
+      servicesQ.fetchNextPage();
+    else if (tab === 2 && bookedQ.hasNextPage && !bookedQ.isFetchingNextPage)
+      bookedQ.fetchNextPage();
   };
 
-  if (appliedQ.isLoading && !appliedQ.data) return <ListingsServicesPlaceholder />;
+  if (appliedQ.isLoading && !appliedQ.data)
+    return <ListingsServicesPlaceholder />;
 
   return (
     <FadeIn>
@@ -628,7 +756,16 @@ const MediatorActivity = () => {
         <View style={styles.body}>
           {tab === 0 ? (
             applied.length === 0 ? (
-              <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}>
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+              >
                 <RichEmptyState
                   icon="briefcase-outline"
                   iconColor="#2563EB"
@@ -644,67 +781,143 @@ const MediatorActivity = () => {
               <FlatList
                 data={applied}
                 keyExtractor={(it: any) => it._id}
-                renderItem={({ item }) => <View style={styles.cardWrap}><ListingsServices item={item} /></View>}
+                renderItem={({ item }) => (
+                  <View style={styles.cardWrap}>
+                    <ListingsServices item={item} />
+                  </View>
+                )}
                 contentContainerStyle={styles.listInner}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.25}
-                ListFooterComponent={appliedQ.isFetchingNextPage ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : <View style={{ height: 80 }} />}
+                ListFooterComponent={
+                  appliedQ.isFetchingNextPage ? (
+                    <ActivityIndicator
+                      color={Colors.primary}
+                      style={{ padding: 16 }}
+                    />
+                  ) : (
+                    <View style={{ height: 80 }} />
+                  )
+                }
               />
             )
           ) : null}
 
           {tab === 1 ? (
             members.length === 0 ? (
-              <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}>
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+              >
                 <RichEmptyState
-                  icon="people-outline"
+                  icon="briefcase-outline"
                   iconColor="#D97706"
                   iconBg="#FEF3C7"
-                  title={t("activityTabMedTeamTitle")}
-                  message={t("activityEmptyLineTeam")}
-                  ctaLabel={t("browseWorkers")}
-                  ctaIcon="person-add-outline"
+                  title={t("myServices")}
+                  message={t("noCreatedServicesMessage")}
+                  ctaLabel={t("createNewService")}
+                  ctaIcon="add-circle-outline"
                   ctaColor="#D97706"
-                  onCta={() => router.push("/(tabs)/third")}
+                  onCta={() => router.push("/screens/addService")}
                 />
               </ScrollView>
             ) : (
               <FlatList
                 data={members}
-                keyExtractor={(it, idx) => String(it?._id || it?.worker || idx)}
-                renderItem={({ item: w }) => {
-                  const u = w?.worker && typeof w.worker === "object" ? w.worker : w;
-                  const uid = u?._id || w?.worker;
+                keyExtractor={(it: any, idx: number) =>
+                  String(it?._id || it?.service || idx)
+                }
+                renderItem={({ item: w }: any) => {
+                  const u =
+                    w?.service && typeof w.service === "object" ? w.service : w;
+                  const uid = u?._id || w?.service;
                   const pic = u?.profilePicture;
                   const name = u?.name || "—";
                   return (
                     <TouchableOpacity
                       style={styles.memberRow}
                       activeOpacity={0.85}
-                      onPress={() => router.push({ pathname: "/screens/users/[id]", params: { id: String(uid), title: "workers", type: "all" } })}
+                      onPress={() =>
+                        router.push({
+                          pathname: "/screens/service/[id]",
+                          params: {
+                            id: String(uid),
+                            title: "service",
+                          },
+                        })
+                      }
                     >
-                      <ProfilePicture uri={pic} style={{ width: 48, height: 48, borderRadius: 24 }} />
+                      <ProfilePicture
+                        uri={pic}
+                        style={{ width: 48, height: 48, borderRadius: 24 }}
+                      />
                       <View style={{ flex: 1, marginLeft: 12 }}>
-                        <CustomText fontWeight="700" baseFont={16}>{name}</CustomText>
-                        {w?.status ? <CustomText baseFont={12} color={Colors.subHeading}>{String(w.status)}</CustomText> : null}
+                        <CustomText fontWeight="700" baseFont={16}>
+                          {name}
+                        </CustomText>
+                        {w?.serviceStatus ? (
+                          <CustomText baseFont={12} color={Colors.subHeading}>
+                            {String(w.serviceStatus)}
+                          </CustomText>
+                        ) : null}
                       </View>
-                      <Ionicons name="chevron-forward" size={20} color={Colors.subHeading} />
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={Colors.subHeading}
+                      />
                     </TouchableOpacity>
                   );
                 }}
                 contentContainerStyle={styles.listInner}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.25}
-                ListFooterComponent={membersQ.isFetchingNextPage ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : <View style={{ height: 80 }} />}
+                ListFooterComponent={
+                  servicesQ.isFetchingNextPage ? (
+                    <ActivityIndicator
+                      color={Colors.primary}
+                      style={{ padding: 16 }}
+                    />
+                  ) : (
+                    <View style={{ height: 80 }} />
+                  )
+                }
               />
             )
           ) : null}
 
           {tab === 2 ? (
             booked.length === 0 ? (
-              <ScrollView contentContainerStyle={{ flexGrow: 1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}>
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+              >
                 <RichEmptyState
                   icon="calendar-outline"
                   iconColor="#7C3AED"
@@ -721,12 +934,35 @@ const MediatorActivity = () => {
               <FlatList
                 data={booked}
                 keyExtractor={(it: any) => it._id}
-                renderItem={({ item }) => <View style={styles.cardWrap}><ListingsBookedWorkers title="bookingDetails" item={item} showEngagementStrip /></View>}
+                renderItem={({ item }) => (
+                  <View style={styles.cardWrap}>
+                    <ListingsBookedWorkers
+                      title="bookingDetails"
+                      item={item}
+                      showEngagementStrip
+                    />
+                  </View>
+                )}
                 contentContainerStyle={styles.listInner}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
                 onEndReached={onEndReached}
                 onEndReachedThreshold={0.25}
-                ListFooterComponent={bookedQ.isFetchingNextPage ? <ActivityIndicator color={Colors.primary} style={{ padding: 16 }} /> : <View style={{ height: 80 }} />}
+                ListFooterComponent={
+                  bookedQ.isFetchingNextPage ? (
+                    <ActivityIndicator
+                      color={Colors.primary}
+                      style={{ padding: 16 }}
+                    />
+                  ) : (
+                    <View style={{ height: 80 }} />
+                  )
+                }
               />
             )
           ) : null}
@@ -763,8 +999,18 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EEF4FF" },
   panel: { flex: 1 },
   body: { flex: 1 },
-  loading: { flex: 1, paddingTop: 48, alignItems: "center", justifyContent: "center" },
-  listInner: { paddingHorizontal: 10, paddingBottom: 100, paddingTop: 6, flexGrow: 1 },
+  loading: {
+    flex: 1,
+    paddingTop: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listInner: {
+    paddingHorizontal: 10,
+    paddingBottom: 100,
+    paddingTop: 6,
+    flexGrow: 1,
+  },
   cardWrap: { marginBottom: 8 },
   memberRow: {
     flexDirection: "row",

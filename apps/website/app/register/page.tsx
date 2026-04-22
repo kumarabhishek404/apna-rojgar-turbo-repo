@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { registerUser, saveAuth } from "@/lib/auth";
+import { trackWebsiteEvent } from "@/lib/websiteTracking";
 
 export default function RegisterPage() {
   const [mobile, setMobile] = useState("");
@@ -31,6 +32,10 @@ export default function RegisterPage() {
       });
 
       saveAuth(response?.data || {});
+      trackWebsiteEvent("user_signup", {
+        source: "website",
+        path: "/register",
+      });
       setMessage("Registration successful. You can now continue from web.");
       window.location.href = "/my-profile";
     } catch (submitError) {

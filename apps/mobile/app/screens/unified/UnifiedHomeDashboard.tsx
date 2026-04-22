@@ -1,6 +1,3 @@
-/**
- * Unified home: same sections for everyone; order and CTA emphasis follow userDetails.role (API).
- */
 import React, { useMemo } from "react";
 import {
   View,
@@ -8,13 +5,11 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Share,
-  Linking,
 } from "react-native";
 import { useAtomValue } from "jotai";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Stack, router } from "expo-router";
-import { Ionicons, FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
 import HomeHeroSection from "@/components/unified/HomeHeroSection";
@@ -31,20 +26,15 @@ import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { t } from "@/utils/translationHelper";
 import SocialLinks from "@/components/commons/SocialLinks";
 import { isCoreProfileIncomplete } from "@/constants/functions";
-
-const APP_LINK = "https://play.google.com/store/apps/details?id=com.apnarojgar";
+import APP_CONTEXT from "@/app/context/locale";
 
 const HOME_HEADING = "#1F2E4D";
 const CTA_OUTLINE_BORDER = "rgba(14, 79, 197, 0.35)";
 const CTA_SOFT_BG = "#EAF2FF";
 
 const UnifiedHomeDashboard = () => {
+  const { role, locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const role = (userDetails?.role || "WORKER") as
-    | "WORKER"
-    | "EMPLOYER"
-    | "MEDIATOR";
-
   const {
     data: servicesRes,
     isLoading: loadingServices,
@@ -93,6 +83,116 @@ const UnifiedHomeDashboard = () => {
     },
   });
 
+  const DASHBOARD_CONFIG: Record<string, any> = {
+    WORKER: {
+      hero: {
+        title: "dashboard.worker.heroTitle",
+        subtitle: "dashboard.worker.heroSubtitle",
+        count: "24",
+        route: "/(tabs)/second",
+      },
+      stats: [
+        {
+          title: "dashboard.worker.applied",
+          icon: "document-text-outline",
+          route: "/(tabs)/fourth",
+        },
+        {
+          title: "dashboard.worker.bookings",
+          icon: "calendar-outline",
+          route: "/(tabs)/fourth",
+        },
+        {
+          title: "dashboard.worker.contractors",
+          icon: "people-outline",
+          route: "/(tabs)/third",
+        },
+        {
+          title: "dashboard.worker.activity",
+          icon: "pulse-outline",
+          route: "/(tabs)/fourth",
+        },
+      ],
+    },
+
+    EMPLOYER: {
+      hero: {
+        title: "dashboard.employer.heroTitle",
+        subtitle: "dashboard.employer.heroSubtitle",
+        count: "6",
+        route: "/(tabs)/fourth",
+      },
+      stats: [
+        {
+          title: "dashboard.employer.postWork",
+          icon: "add-circle-outline",
+          route: "/screens/addService",
+        },
+        {
+          title: "dashboard.employer.bookedWorkers",
+          icon: "calendar-outline",
+          route: "/(tabs)/fourth",
+        },
+        {
+          title: "dashboard.employer.contractors",
+          icon: "people-outline",
+          route: "/(tabs)/third",
+        },
+        {
+          title: "dashboard.employer.workers",
+          icon: "people-outline",
+          route: "/(tabs)/second",
+        },
+        {
+          title: "dashboard.employer.activity",
+          icon: "pulse-outline",
+          route: "/(tabs)/fourth",
+        },
+      ],
+    },
+
+    MEDIATOR: {
+      hero: {
+        title: "dashboard.mediator.heroTitle",
+        subtitle: "dashboard.mediator.heroSubtitle",
+        count: "6",
+        route: "/(tabs)/fourth",
+      },
+      stats: [
+        {
+          title: "dashboard.mediator.postRequirement",
+          icon: "add-circle-outline",
+          route: "/screens/addService",
+        },
+        {
+          title: "dashboard.mediator.applied",
+          icon: "calendar-outline",
+          route: "/(tabs)/fourth",
+        },
+        {
+          title: "dashboard.mediator.selected",
+          icon: "calendar-outline",
+          route: "/(tabs)/fourth",
+        },
+        {
+          title: "dashboard.mediator.team",
+          icon: "people-outline",
+          route: "/screens/team/[id]",
+        },
+        {
+          title: "dashboard.mediator.workers",
+          icon: "people-outline",
+          route: "/(tabs)/second",
+        },
+        {
+          title: "dashboard.mediator.activity",
+          icon: "pulse-outline",
+          route: "/(tabs)/fourth",
+        },
+      ],
+    },
+  };
+
   const serviceList = useMemo(
     () => servicesRes?.pages?.flatMap((p: any) => p.data || []) || [],
     [servicesRes],
@@ -116,106 +216,66 @@ const UnifiedHomeDashboard = () => {
   };
 
   const profileIncomplete = isCoreProfileIncomplete(
-    userDetails as Record<string, unknown>
+    userDetails as Record<string, unknown>,
   );
 
-  const shareAppLink = async () => {
-    try {
-      await Share.share({
-        message: `Join me on Apna Rojgar — find work or hire workers near you!\n${APP_LINK}`,
-        url: APP_LINK,
-      });
-    } catch (e) {
-      console.warn("Share failed", e);
-    }
-  };
-
-  const openUrl = async (url: string) => {
-    try {
-      if (await Linking.canOpenURL(url)) Linking.openURL(url);
-    } catch (e) {}
-  };
-
-  const findWorkCta = (
+  const DashboardHeroCard = ({ title, subtitle, count, onPress }: any) => (
     <TouchableOpacity
-      style={[styles.ctaPill, styles.ctaOutline, styles.ctaFlex]}
-      onPress={() => router.push({ pathname: "/(tabs)/second" })}
-      activeOpacity={0.88}
+      style={styles.heroCard}
+      onPress={onPress}
+      activeOpacity={0.9}
     >
-      <CustomText color={Colors.primary} fontWeight="800" baseFont={14}>
-        {t("findWork")}
-      </CustomText>
-    </TouchableOpacity>
-  );
-
-  const postWorkCta = (
-    <TouchableOpacity
-      style={[styles.ctaPill, styles.ctaSolid, styles.ctaFlex]}
-      onPress={() => router.push({ pathname: "/screens/addService" })}
-      activeOpacity={0.88}
-    >
-      <CustomText color={Colors.white} fontWeight="800" baseFont={14}>
-        {t("postWork")}
-      </CustomText>
-    </TouchableOpacity>
-  );
-
-  const searchWorkersCta = (fullWidth: boolean) => (
-    <TouchableOpacity
-      style={[
-        styles.ctaPill,
-        styles.ctaSoft,
-        fullWidth ? styles.ctaFull : styles.ctaFlex,
-      ]}
-      onPress={() => router.push({ pathname: "/(tabs)/third" })}
-      activeOpacity={0.88}
-    >
-      <CustomText color={Colors.primary} fontWeight="800" baseFont={14}>
-        {t("searchWorkersTitle")}
-      </CustomText>
-    </TouchableOpacity>
-  );
-
-  const myServicesCta = (
-    <TouchableOpacity
-      style={[styles.ctaPill, styles.ctaMyServices]}
-      onPress={() => router.push({ pathname: "/(tabs)/fourth" } as any)}
-      activeOpacity={0.88}
-    >
-      <Ionicons name="briefcase-outline" size={16} color="#059669" />
-      <CustomText color="#059669" fontWeight="800" baseFont={14}>
-        {t("myServices")}
-      </CustomText>
-    </TouchableOpacity>
-  );
-
-  /** Role priority: employer → post first; worker → find first; mediator → two-row layout. */
-  const primaryCta =
-    role === "MEDIATOR" ? (
-      <View style={styles.ctaStack}>
-        <View style={styles.ctaRowPair}>
-          {findWorkCta}
-          {postWorkCta}
-        </View>
-        <View style={styles.ctaRowPair}>
-          {searchWorkersCta(false)}
-          {myServicesCta}
-        </View>
+      <View>
+        <CustomText style={styles.heroTitle}>{title}</CustomText>
+        <CustomText style={styles.heroSubtitle}>{subtitle}</CustomText>
       </View>
-    ) : (
-      <View style={styles.ctaStack}>
-        <View style={styles.ctaRowPair}>
-          {role === "WORKER" && findWorkCta}
-          {role === "EMPLOYER" && postWorkCta}
-          {searchWorkersCta(false)}
-        </View>
-        {role === "EMPLOYER" && (
-          <View style={styles.ctaRowPair}>
-            {myServicesCta}
-          </View>
-        )}
+
+      <View style={styles.heroRight}>
+        <CustomText style={styles.heroCount}>{count}</CustomText>
+        <Ionicons name="chevron-forward" size={18} color="#fff" />
       </View>
-    );
+    </TouchableOpacity>
+  );
+
+  const StatCard = ({ title, icon, onPress }: any) => (
+    <TouchableOpacity
+      style={styles.statCard}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
+      <View style={styles.statIcon}>{icon}</View>
+
+      <CustomText style={styles.statTitle}>{title}</CustomText>
+    </TouchableOpacity>
+  );
+
+  const dashboard = useMemo(() => {
+    return DASHBOARD_CONFIG[role];
+  }, [role, locale]);
+
+  const dashboardSection = (
+    <View style={styles.dashboardContainer}>
+      <DashboardHeroCard
+        title={t(dashboard.hero.title)}
+        subtitle={t(dashboard.hero.subtitle)}
+        count={dashboard.hero.count}
+        onPress={() => router.push(dashboard.hero.route)}
+      />
+
+      <View style={styles.statGrid}>
+        {dashboard.stats.map((item: any, index: number) => (
+          <StatCard
+            key={index}
+            title={t(item.title)}
+            icon={<Ionicons name={item.icon} size={20} color="#0E4FC5" />}
+            onPress={() =>
+              router.push({ pathname: item.route, params: item.params })
+            }
+          />
+        ))}
+      </View>
+    </View>
+  );
 
   const servicesSection = (
     <View style={styles.section}>
@@ -275,17 +335,29 @@ const UnifiedHomeDashboard = () => {
           }
         >
           <View style={styles.teamCardIcon}>
-            <Ionicons name="mail-unread-outline" size={22} color={Colors.primary} />
+            <Ionicons
+              name="mail-unread-outline"
+              size={22}
+              color={Colors.primary}
+            />
           </View>
           <View style={styles.teamCardText}>
             <CustomText fontWeight="800" baseFont={15}>
               {t("homeTeamInvitesTitle")}
             </CustomText>
-            <CustomText baseFont={12} color={Colors.subHeading} style={{ marginTop: 2 }}>
+            <CustomText
+              baseFont={12}
+              color={Colors.subHeading}
+              style={{ marginTop: 2 }}
+            >
               {t("homeTeamInvitesSubtitle")}
             </CustomText>
           </View>
-          <Ionicons name="chevron-forward" size={22} color={Colors.subHeading} />
+          <Ionicons
+            name="chevron-forward"
+            size={22}
+            color={Colors.subHeading}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.teamCard, styles.teamCardMuted]}
@@ -299,11 +371,19 @@ const UnifiedHomeDashboard = () => {
             <CustomText fontWeight="800" baseFont={15}>
               {t("homeTeamBrowseTitle")}
             </CustomText>
-            <CustomText baseFont={12} color={Colors.subHeading} style={{ marginTop: 2 }}>
+            <CustomText
+              baseFont={12}
+              color={Colors.subHeading}
+              style={{ marginTop: 2 }}
+            >
               {t("homeTeamBrowseSubtitle")}
             </CustomText>
           </View>
-          <Ionicons name="chevron-forward" size={22} color={Colors.subHeading} />
+          <Ionicons
+            name="chevron-forward"
+            size={22}
+            color={Colors.subHeading}
+          />
         </TouchableOpacity>
       </View>
     ) : null;
@@ -316,9 +396,7 @@ const UnifiedHomeDashboard = () => {
           contentContainerStyle={styles.scroll}
           refreshControl={
             <RefreshControl
-              refreshing={
-                refreshing || refetchingServices || refetchingWorkers
-              }
+              refreshing={refreshing || refetchingServices || refetchingWorkers}
               onRefresh={onRefresh}
               tintColor={Colors.primary}
             />
@@ -339,11 +417,15 @@ const UnifiedHomeDashboard = () => {
                     <Ionicons name="person-outline" size={20} color="#7C3AED" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <CustomHeading baseFont={14} textAlign="left" style={{ color: "#4C1D95" }}>
-                      Complete Your Profile
+                    <CustomHeading
+                      baseFont={14}
+                      textAlign="left"
+                      style={{ color: "#4C1D95" }}
+                    >
+                      {t("completeProfileTitle")}
                     </CustomHeading>
                     <CustomText baseFont={12} color="#6D28D9">
-                      Add skills, address & more to get noticed
+                      {t("completeProfileSubtitle")}
                     </CustomText>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color="#7C3AED" />
@@ -351,52 +433,14 @@ const UnifiedHomeDashboard = () => {
               </View>
             )}
 
-            <View style={styles.sectionGap}>{primaryCta}</View>
-
-            {/* Share app + social quick-actions */}
-            <View style={[styles.sectionGap, styles.quickActionsRow]}>
-              {/* Share app link */}
-              <TouchableOpacity
-                style={[styles.quickBtn, styles.quickBtnShare]}
-                onPress={shareAppLink}
-                activeOpacity={0.82}
-              >
-                <MaterialCommunityIcons name="share-variant" size={18} color="#0E4FC5" />
-                <CustomText baseFont={12} fontWeight="700" color="#0E4FC5">
-                  Share App
-                </CustomText>
-              </TouchableOpacity>
-
-              {/* WhatsApp */}
-              <TouchableOpacity
-                style={[styles.quickBtn, styles.quickBtnWA]}
-                onPress={() => openUrl("https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD?mode=gi_t")}
-                activeOpacity={0.82}
-              >
-                <FontAwesome5 name="whatsapp" size={18} color="#25D366" />
-                <CustomText baseFont={12} fontWeight="700" color="#25D366">
-                  WhatsApp
-                </CustomText>
-              </TouchableOpacity>
-
-              {/* Instagram */}
-              <TouchableOpacity
-                style={[styles.quickBtn, styles.quickBtnIG]}
-                onPress={() => openUrl("https://instagram.com/apnarojgarindia")}
-                activeOpacity={0.82}
-              >
-                <FontAwesome5 name="instagram" size={18} color="#E1306C" />
-                <CustomText baseFont={12} fontWeight="700" color="#E1306C">
-                  Instagram
-                </CustomText>
-              </TouchableOpacity>
-            </View>
+            <View style={styles.sectionGap}>{dashboardSection}</View>
 
             {workerTeamJoinSection ? (
               <View style={styles.sectionGap}>{workerTeamJoinSection}</View>
             ) : null}
             <View style={styles.sectionGap}>{servicesSection}</View>
             <View style={styles.sectionGap}>{workersSection}</View>
+
             <View style={styles.sectionGap}>
               <SocialLinks />
             </View>
@@ -462,6 +506,13 @@ const styles = StyleSheet.create({
   ctaMyServices: {
     flex: 1,
     backgroundColor: "#ECFDF5",
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
     borderWidth: 1.5,
     borderColor: "#6EE7B7",
   },
@@ -542,6 +593,97 @@ const styles = StyleSheet.create({
   quickBtnIG: {
     backgroundColor: "#FFF1F5",
     borderColor: "#F7B8CC",
+  },
+  dashboardContainer: {
+    marginBottom: 16,
+  },
+
+  /* HERO CARD */
+  heroCard: {
+    backgroundColor: "#0E4FC5",
+    borderRadius: 20,
+    padding: 18,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+
+    shadowColor: "#0E4FC5",
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
+  },
+
+  heroTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "800",
+  },
+
+  heroSubtitle: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 12,
+    marginTop: 2,
+  },
+
+  heroRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  heroCount: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "900",
+  },
+
+  /* STAT GRID */
+  statGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 14,
+  },
+
+  statCard: {
+    width: "48%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginBottom: 12,
+
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+
+  statIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "#EAF2FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+
+  statValue: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1F2E4D",
+  },
+
+  statTitle: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 2,
   },
 });
 

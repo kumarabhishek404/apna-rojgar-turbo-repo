@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://apnarojgarindia.com/sitemap.xml

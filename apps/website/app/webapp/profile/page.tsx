@@ -5,6 +5,7 @@ import { apiRequest, getAuth, saveAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { localizeApiErrorMessage, resolveLanguage } from "@/lib/i18n";
 import { APPLINK, WORKERTYPES } from "@/constants";
+import { trackWebsiteEvent } from "@/lib/websiteTracking";
 import {
   BriefcaseBusiness,
   ChartColumnIncreasing,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 type Skill = { skill: string; pricePerDay?: number | null };
+const WORKER_PROFILE_CREATED_KEY = "apna_rojgar_worker_profile_created";
 type UserInfo = {
   _id: string;
   name?: string;
@@ -78,6 +80,33 @@ export default function ProfilePage() {
 
   const canManageSkills =
     user?.role === "WORKER" || user?.role === "MEDIATOR";
+
+  const trackWorkerProfileCreated = useCallback(
+    (nextUser?: UserInfo | null) => {
+      if (typeof window === "undefined") return;
+      if (window.localStorage.getItem(WORKER_PROFILE_CREATED_KEY) === "1") return;
+
+      const candidate = nextUser || user;
+      if (!candidate) return;
+      if (candidate.role !== "WORKER" && candidate.role !== "MEDIATOR") return;
+
+      const hasName = Boolean(candidate.name?.trim());
+      const hasAddress = Boolean(candidate.address?.trim());
+      const hasSkill = Boolean(candidate.skills?.length);
+      if (!hasName && !hasAddress && !hasSkill) return;
+
+      trackWebsiteEvent("worker_profile_created", {
+        role: candidate.role,
+        hasName,
+        hasAddress,
+        hasSkill,
+        path: window.location.pathname,
+        source: "website",
+      });
+      window.localStorage.setItem(WORKER_PROFILE_CREATED_KEY, "1");
+    },
+    [user],
+  );
 
   const openSkillsModal = useCallback(() => {
     if (!user || !canManageSkills) return;
@@ -151,6 +180,7 @@ export default function ProfilePage() {
       setMessage(
         t("skillsUpdatedSuccessfully", "Your skills were updated successfully."),
       );
+      trackWorkerProfileCreated(data?.data);
       setShowSkillsModal(false);
       await load();
     } catch (e) {
@@ -255,6 +285,7 @@ export default function ProfilePage() {
         token: currentAuth?.token || data?.token,
       });
       setMessage("Profile updated successfully.");
+      trackWorkerProfileCreated(data?.data);
       setShowEditModal(false);
       await load();
     } catch (e) {

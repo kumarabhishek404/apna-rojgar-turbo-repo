@@ -4,6 +4,7 @@ import AuthBootstrap from "@/components/AuthBootstrap";
 import SocialWall from "@/components/SocialWall";
 import WebsiteActivityTracker from "@/components/WebsiteActivityTracker";
 import { Suspense } from "react";
+import Script from "next/script";
 
 export const metadata = {
   verification: {
@@ -32,15 +33,38 @@ export default function RootLayout({
 }) {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "MobileApplication",
+    "@type": "Organization",
     name: "Apna Rojgar",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Android",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "INR",
+    url: "https://apnarojgarindia.com",
+    logo: "https://apnarojgarindia.com/logo.png",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Jalesar, Etah Uttar Predesh, India, 207302",
+      addressLocality: "Etah",
+      addressRegion: "Uttar Predesh",
+      addressCountry: "India",
+      postalCode: "207302",
     },
+    email: "info@apnarojgarindia.com",
+    phone: "+91 6397308499",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: "info@apnarojgarindia.com",
+      phone: "+91 6397308499",
+    },
+    areaServed: "India",
+    brand: {
+      "@type": "Brand",
+      name: "Apna Rojgar",
+    },
+    sameAs: [
+      "https://www.facebook.com/profile.php?id=61572228340443",
+      "https://www.instagram.com/apnarojgarindia/",
+      "https://www.linkedin.com/company/apna-rojgar-india/",
+      "https://www.youtube.com/@apnarojgarindia",
+      "https://www.threads.com/@apnarojgarindia"
+    ],
   };
 
   return (
@@ -50,6 +74,24 @@ export default function RootLayout({
             The site ships its own language switcher, so automatic translation would
             conflict with it and produce double-translated or garbled text. */}
         <meta name="google" content="notranslate" />
+
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-S6TZQGWV6J"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', 'G-S6TZQGWV6J', {
+        send_page_view: false
+      });
+    `}
+        </Script>
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
