@@ -99,6 +99,7 @@ const DeleteAccountScreen = () => {
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => <CustomHeader title="deleteProfile" left="back" />,
         }}
       />

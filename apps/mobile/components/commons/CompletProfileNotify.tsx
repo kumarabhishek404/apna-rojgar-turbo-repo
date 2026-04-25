@@ -461,7 +461,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.tertiery,
     padding: 10,
     marginVertical: 10,
-    marginHorizontal: 20,
     flexDirection: "row",
     borderRadius: 8,
   },

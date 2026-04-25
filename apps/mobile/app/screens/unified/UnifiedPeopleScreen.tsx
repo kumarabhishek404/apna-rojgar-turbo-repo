@@ -3,7 +3,7 @@
  * WORKER / EMPLOYER → contractors (users with role MEDIATOR via API).
  * MEDIATOR → active service listings (same source as “active work” elsewhere).
  */
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Stack } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -15,6 +15,10 @@ import USER from "@/app/api/user";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import AllServices from "@/app/screens/bottomTabs/(user)/search/allServices";
 import AllWorkers from "@/app/screens/bottomTabs/(user)/search/allWorkers";
+import {
+  type ContractorSortId,
+  type ServiceSortId,
+} from "@/utils/listingBrowse";
 
 type ApiRole = "WORKER" | "EMPLOYER" | "MEDIATOR";
 
@@ -35,6 +39,9 @@ const UnifiedPeopleScreen = () => {
   const showActiveWorks = role === "MEDIATOR";
   const canQuery =
     !!userDetails?._id && userDetails?.status === "ACTIVE";
+  const [serviceSort, setServiceSort] = useState<ServiceSortId>("nearest");
+  const [contractorSort, setContractorSort] =
+    useState<ContractorSortId>("nearest");
 
   const {
     data: servicesRes,
@@ -45,11 +52,14 @@ const UnifiedPeopleScreen = () => {
     hasNextPage: hasMoreServices,
     refetch: refetchServices,
   } = useInfiniteQuery({
-    queryKey: ["unifiedPeopleActiveServices", userDetails?._id],
+    queryKey: ["unifiedPeopleActiveServices", userDetails?._id, serviceSort],
     queryFn: ({ pageParam }) =>
       SERVICE.fetchAllServices({
         pageParam,
         status: "ACTIVE",
+        payload: {
+          sortBy: serviceSort,
+        },
       }),
     initialPageParam: 1,
     retry: false,
@@ -71,11 +81,14 @@ const UnifiedPeopleScreen = () => {
     hasNextPage: hasMoreContractors,
     refetch: refetchContractors,
   } = useInfiniteQuery({
-    queryKey: ["unifiedPeopleContractors", userDetails?._id],
+    queryKey: ["unifiedPeopleContractors", userDetails?._id, contractorSort],
     queryFn: ({ pageParam }) =>
       USER.fetchAllUsers({
         pageParam,
         role: "MEDIATOR",
+        payload: {
+          sortBy: contractorSort,
+        },
       }),
     initialPageParam: 1,
     retry: false,
@@ -135,6 +148,8 @@ const UnifiedPeopleScreen = () => {
             loadMore={loadMoreServices}
             totalData={totalServices}
             headingTitleKey="activeWorkHeading"
+            selectedSort={serviceSort}
+            onSelectSort={setServiceSort}
           />
         ) : (
           <AllWorkers
@@ -148,6 +163,8 @@ const UnifiedPeopleScreen = () => {
             totalData={totalContractors}
             sectionTitleKey="contractors"
             listingRoleType="mediator"
+            selectedSort={contractorSort}
+            onSelectSort={setContractorSort}
           />
         )}
       </View>

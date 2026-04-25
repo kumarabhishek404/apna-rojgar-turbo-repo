@@ -35,7 +35,7 @@ export default function SettingsPage() {
       ),
     },
     {
-      title: t("jobPreferences", "Job Preferences"),
+      title: t("jobPreferences", "Work Preferences"),
       desc: t(
         "settingsUpcomingJobPreferences",
         "Set preferred work type, distance range, salary band, and availability schedule.",

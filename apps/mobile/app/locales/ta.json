@@ -265,6 +265,7 @@
   "selectWorkSubType": "வேலை துணை வகையைத் தேர்ந்தெடுக்கவும்",
   "workSubType": "வேலை துணை வகை",
   "workRequirements": "வேலை தேவைகள்",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "இடம்",
   "currentLocation": "தற்போதைய இடம்",
   "startDate": "தொடங்கும் தேதி",

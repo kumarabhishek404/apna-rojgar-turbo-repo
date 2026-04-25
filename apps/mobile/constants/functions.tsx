@@ -531,7 +531,7 @@ export const speakText = (
 //     distance ? `दूरी ${distance} किमी पर` : ""
 //   }। यह ${t(
 //     type
-//   )} श्रेणी के अंतर्गत आता है। काम ${formattedDate} से शुरू होगा और ${duration} दिन तक चलेगा। नियोक्ता ${enabledFacilities} सुविधा देगा। ${requirementDetails}। अभी तक ${appliedUsersCount} ${
+//   )} श्रेणी के अंतर्गत आता है। काम ${formattedDate} से शुरू होगा और ${duration} दिन तक चलेगा। काम देने वाला ${enabledFacilities} सुविधा देगा। ${requirementDetails}। अभी तक ${appliedUsersCount} ${
 //     appliedUsersCount > 1 ? "लोगों" : "लोग"
 //   } ने आवेदन किया है।`;
 // }

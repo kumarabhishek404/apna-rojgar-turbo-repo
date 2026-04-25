@@ -127,7 +127,7 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-lg bg-gray-50 p-3">
-          <p className="text-sm font-semibold text-gray-700">{t("serviceStats", "Service stats")}</p>
+          <p className="text-sm font-semibold text-gray-700">{t("serviceStats", "Work stats")}</p>
           <p className="mt-1 text-xs text-gray-600">{t("total", "Total")}: {data.serviceDetails?.byService?.total || 0}</p>
           <p className="text-xs text-gray-600">{t("completed", "Completed")}: {data.serviceDetails?.byService?.completed || 0}</p>
           <p className="text-xs text-gray-600">{t("pending", "Pending")}: {data.serviceDetails?.byService?.pending || 0}</p>
@@ -142,10 +142,10 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
             {t("individualCompleted", "Individual Completed")}: {data.workDetails?.byService?.appliedIndividually?.completed || 0}
           </p>
           <p className="text-xs text-gray-600">
-            {t("mediatorTotal", "Mediator Total")}: {data.workDetails?.byService?.appliedByMediator?.total || 0}
+            {t("mediatorTotal", "Contractor Total")}: {data.workDetails?.byService?.appliedByMediator?.total || 0}
           </p>
           <p className="text-xs text-gray-600">
-            {t("mediatorCompleted", "Mediator Completed")}: {data.workDetails?.byService?.appliedByMediator?.completed || 0}
+            {t("mediatorCompleted", "Contractor Completed")}: {data.workDetails?.byService?.appliedByMediator?.completed || 0}
           </p>
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
         <div className="mt-2 space-y-2">
           {(data.workHistory || []).slice(0, 6).map((item) => (
             <div key={item._id} className="rounded-lg border border-gray-200 p-2.5">
-              <p className="text-sm font-semibold text-gray-800">{item.subType || t("service", "Service")}</p>
+              <p className="text-sm font-semibold text-gray-800">{item.subType || t("service", "Work")}</p>
               <p className="text-xs text-gray-600">{item.address || "-"}</p>
               <p className="text-xs text-gray-500">
                 {item.startDate ? new Date(item.startDate).toLocaleDateString() : "-"} | {item.duration || 0} {t("days", "day(s)")} | {item.status || "-"}

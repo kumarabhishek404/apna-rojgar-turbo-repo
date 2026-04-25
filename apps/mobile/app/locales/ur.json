@@ -266,6 +266,7 @@
   "selectWorkSubType": "کام کی ذیلی قسم منتخب کریں",
   "workSubType": "کام کی ذیلی قسم",
   "workRequirements": "کام کی ضروریات",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "مقام",
   "currentLocation": "موجودہ مقام",
   "startDate": "شروع ہونے کی تاریخ",

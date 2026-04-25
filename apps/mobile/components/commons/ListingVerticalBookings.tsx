@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import ListingsBookings from "./ListingBookings";
 import ListingsBookedWorkers from "./ListingBookedWorkers";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
@@ -49,6 +49,11 @@ const ListingsVerticalBookings = ({
   }
 
   const debouncedLoadMore = useMemo(() => debounce(loadMore, 300), [loadMore]);
+  React.useEffect(() => {
+    return () => {
+      debouncedLoadMore.cancel();
+    };
+  }, [debouncedLoadMore]);
 
   return (
     <View>
@@ -68,15 +73,10 @@ const ListingsVerticalBookings = ({
           ) : null
         }
         contentContainerStyle={{ paddingBottom: 200, paddingTop: 20 }}
-        getItemLayout={(data, index) => ({
-          length: 100,
-          offset: 100 * index,
-          index,
-        })}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
         windowSize={3}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
         refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
       />

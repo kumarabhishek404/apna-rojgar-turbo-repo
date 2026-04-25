@@ -7,7 +7,6 @@ const ADMIN_MOBILE_FALLBACK = "6397308499";
 
 export function isAdminUser(user?: CandidateUser | null): boolean {
   if (!user) return false;
-  console.log("user----", user);
   
   if (String(user.role || "").toUpperCase() === "ADMIN") return true;
 

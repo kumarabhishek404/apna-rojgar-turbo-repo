@@ -39,11 +39,11 @@ const HI = {
 
 const EN = {
   divider: "────────────────",
-  title: "Apna Rojgar — Job Details",
-  urgent: "🔥 Urgent Job Opening!",
+  title: "Apna Rojgar — Work Details",
+  urgent: "🔥 Urgent Work Opening!",
   location: "📍 Location",
   requirements: "👷 Required workers",
-  pay: "💰 Wages",
+  pay: "💰 Pay",
   startDate: "📅 Start date",
   duration: "⏳ Duration",
   details: "📝 Description",

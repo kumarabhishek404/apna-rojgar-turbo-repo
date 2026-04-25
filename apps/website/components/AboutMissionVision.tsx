@@ -126,7 +126,7 @@ const AboutMissionVision = () => {
           {/* Floating Card 1 */}
           <div className="absolute -top-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-gray-100 w-40">
             <div className="h-6 w-6 bg-[#4F9CF9] rounded-full mb-2"></div>
-            <p className="text-xs text-gray-600">{t("aboutCardFindJobs", "Find Local Jobs")}</p>
+            <p className="text-xs text-gray-600">{t("aboutCardFindJobs", "Find Local Works")}</p>
           </div>
 
           {/* Floating Card 2 */}
@@ -199,9 +199,9 @@ const AboutMissionVision = () => {
             <p className="text-sm font-bold text-[#22409a]">{totalUsersText}</p>
           </div>
 
-          {/* Floating Card - Jobs */}
+          {/* Floating Card - Works */}
           <div className="absolute -bottom-6 right-6 bg-white p-3 rounded-xl shadow-lg border border-gray-100">
-            <p className="text-xs font-medium text-gray-700">{t("jobs", "Jobs")}</p>
+            <p className="text-xs font-medium text-gray-700">{t("jobs", "Works")}</p>
             <p className="text-sm font-bold text-[#50C878]">{t("dailyUpdates", "Daily Updates")}</p>
           </div>
         </div>

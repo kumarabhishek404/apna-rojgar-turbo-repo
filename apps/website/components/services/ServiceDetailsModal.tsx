@@ -99,7 +99,7 @@ export default function ServiceDetailsModal({
             <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-[#f7f9ff] to-[#eef3ff] px-4 py-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#22409a]/80">
-                  {t("serviceDetails", "Service Details")}
+                  {t("serviceDetails", "Work Details")}
                 </p>
                 <h3 className="text-base font-bold text-[#16264f]">{t("viewDetails")}</h3>
               </div>

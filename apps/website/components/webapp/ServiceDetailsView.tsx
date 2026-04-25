@@ -396,7 +396,7 @@ export default function ServiceDetailsView({
             <img
               key={`${src}-${idx}`}
               src={src}
-              alt={t("serviceImage", "Service")}
+              alt={t("serviceImage", "Work")}
               className="h-40 w-full rounded-lg object-cover"
             />
           ))}

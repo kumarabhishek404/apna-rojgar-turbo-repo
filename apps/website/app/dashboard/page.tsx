@@ -267,7 +267,7 @@ export default function DashboardPage() {
 
         <section className="grid gap-6 md:grid-cols-2">
           <div className="rounded-xl border border-gray-200 p-4">
-            <h2 className="mb-3 text-lg font-semibold text-[#22409a]">Available Services</h2>
+            <h2 className="mb-3 text-lg font-semibold text-[#22409a]">Available Works</h2>
             <div className="space-y-3">
               {services.map((service) => (
                 <div key={service._id} className="rounded border p-3">
@@ -306,7 +306,7 @@ export default function DashboardPage() {
 
           <div className="rounded-xl border border-gray-200 p-4">
             <h2 className="mb-3 text-lg font-semibold text-[#22409a]">
-              {role === "EMPLOYER" ? "My Services" : "My Applied Services"}
+              {role === "EMPLOYER" ? "My Works" : "My Applied Works"}
             </h2>
             <div className="space-y-3">
               {(role === "EMPLOYER" ? myServices : myAppliedServices).map((service) => (

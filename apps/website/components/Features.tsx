@@ -10,10 +10,10 @@ export default function Features() {
   const features = [
     {
       icon: Briefcase,
-      title: t("featureEasyJobDiscoveryTitle", "Easy Job Discovery"),
+      title: t("featureEasyJobDiscoveryTitle", "Easy Work Discovery"),
       desc: t(
         "featureEasyJobDiscoveryDesc",
-        "Workers can quickly find nearby job opportunities that match their skills and availability.",
+        "Workers can quickly find nearby work opportunities that match their skills and availability.",
       ),
     },
     {

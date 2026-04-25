@@ -386,7 +386,7 @@ export const getServicesAppliedAsMediator = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Services applied as mediator fetched successfully",
+      message: "Works applied as mediator fetched successfully",
       data: services,
       pagination: {
         page,
@@ -399,7 +399,7 @@ export const getServicesAppliedAsMediator = async (req, res) => {
     logError(error, req, 500);
     res.status(500).json({
       success: false,
-      message: error?.message || "Something went wrong while fetching services",
+      message: error?.message || "Something went wrong while fetching works",
     });
   }
 };
@@ -453,7 +453,7 @@ export const getServicesSelectedAsMediator = async (req, res) => {
     res.status(200).json({
       success: true,
       message:
-        "Services where you are selected as mediator fetched successfully",
+        "Works where you are selected as mediator fetched successfully",
       data: services,
       pagination: {
         page,
@@ -466,7 +466,7 @@ export const getServicesSelectedAsMediator = async (req, res) => {
     logError(error, req, 500);
     res.status(500).json({
       success: false,
-      message: error?.message || "Something went wrong while fetching services",
+      message: error?.message || "Something went wrong while fetching works",
     });
   }
 };

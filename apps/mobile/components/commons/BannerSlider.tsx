@@ -9,14 +9,18 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import CustomHeading from "./CustomHeading";
-import Banner1 from "../../assets/banners/banner1.jpg";
+import Banner1 from "../../assets/banners/banner1.png";
+import Banner2 from "../../assets/banners/banner2.png";
 
 const BannerSlider = () => {
   const images = [
     {
       url: Banner1,
       type: "service",
-      id: "671eed51103cc59dfe906a8d",
+    },
+    {
+      url: Banner2,
+      type: "service",
     },
   ];
 
@@ -51,7 +55,7 @@ const BannerSlider = () => {
 
   const onScrollChange = ({ nativeEvent }: any) => {
     const slide = Math.ceil(
-      nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width
+      nativeEvent.contentOffset.x / nativeEvent.layoutMeasurement.width,
     );
     if (slide !== active) {
       setActive(slide);

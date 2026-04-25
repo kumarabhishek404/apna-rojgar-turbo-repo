@@ -259,6 +259,7 @@
   "workSubTypeIsRequired": "कार्य उप प्रकार की आवश्यकताएं",
   "selectWorkSubType": "कार्य उप प्रकार का चयन करें",
   "workRequirements": "कार्य की आवश्यकताएं",
+  "workRequirementAddPayHint": "स्पष्टता के लिए मूल्य जोड़ें (वैकल्पिक)",
   "currentLocation": "वर्तमान स्थान",
   "location": "जगह",
   "startDate": "प्रारंभ तिथि",
@@ -670,7 +671,7 @@
   "whoHaveApplied": "जिन्होंने आवेदन किया है ",
   "completeProfile": "कृपया अपना खाता पूरा भरें",
   "completeYourProfileToUnlockAllFeatures": "सभी सुविधाएँ प्राप्त करने के लिए अपनी प्रोफ़ाइल पूरी तरह भरें!",
-  "completeProfileRoleHint": "नियोक्ता, मज़दूर या ठेकेदार चुनने के लिए प्रोफ़ाइल पर रोल स्विचर का उपयोग करें।",
+  "completeProfileRoleHint": "काम देने वाला, मज़दूर या ठेकेदार चुनने के लिए प्रोफ़ाइल पर रोल स्विचर का उपयोग करें।",
   "completeProfilePhotoHint": "प्रोफ़ाइल के लिए अपनी साफ़ तस्वीर चुनें।",
   "pleaseFetchNearestWorkers": "कृपया निकटतम मज़दूरों को पाने के लिए अपना वर्तमान स्थान प्राप्त करें",
 
@@ -1376,7 +1377,7 @@
   "workersListCountBadge": "{{count}} मजदूर",
   "roleTagLabour": "मजदूर",
   "roleTagContractor": "ठेकेदार",
-  "roleTagEmployer": "नियोक्ता",
+  "roleTagEmployer": "काम देने वाला",
   "filterWorkerByRoleTitle": "आप किसे देखना चाहते हैं?",
   "filterWorkerByRoleHint": "जिस प्रकार की प्रोफाइल चाहिए, उसे चुनें।",
   "filterDistanceHelp": "पास की दूरी चुनें ताकि सही और काम की सूची जल्दी दिखे।",
@@ -1467,6 +1468,20 @@
 
   "reviewYourWorkPost": "अपना काम पोस्ट करने से पहले जाँच लें",
   "reviewBeforeSubmitHint": "काम पोस्ट करने से पहले सभी जानकारी ध्यान से देख लें।",
+  "reviewWorkPostSubtitle": "काम पोस्ट करने से पहले अंतिम जाँच कर लें।",
+  "reviewRequiredCount": "ज़रूरी: {{count}}/6",
+  "reviewOptionalCount": "वैकल्पिक: {{count}}/2",
+  "reviewLooksGood": "पब्लिश करने के लिए सब ठीक है।",
+  "reviewCompleteRequired": "आगे बढ़ने के लिए {{count}} ज़रूरी फ़ील्ड पूरी करें।",
+  "reviewRequiredMissingTitle": "ज़रूरी जानकारी अधूरी है",
+  "reviewPleaseAdd": "कृपया जोड़ें",
+  "reviewOptionalTitle": "बेहतर जवाब पाने के लिए और जानकारी जोड़ें",
+  "reviewOptionalSubtitle": "वैकल्पिक लेकिन सुझाई गई",
+  "reviewBasicDetails": "मूल जानकारी",
+  "reviewLocationSchedule": "स्थान और समय-सारणी",
+  "included": "शामिल",
+  "notIncluded": "शामिल नहीं",
+  "notAddedYet": "अभी नहीं जोड़ा गया",
   "step": "स्टेप",
 
   "food": "खाना मिलेगा",
@@ -1481,13 +1496,13 @@
   "myWorkHeaderGuide": "यहाँ देखें किसने आपको काम के लिए बुलाया है और आपने कहाँ आवेदन किया है। जल्दी काम पाने के लिए रिक्वेस्ट स्वीकार करें।",
 
   "tabReceivedWorkTitle": "काम के बुलावे",
-  "tabReceivedWorkSubtitle": "नियोक्ता ने आपको बुलाया",
+  "tabReceivedWorkSubtitle": "काम देने वाले ने आपको बुलाया",
 
   "tabAppliedWorkTitle": "मेरे आवेदन",
   "tabAppliedWorkSubtitle": "जिन कामों में आपने आवेदन किया",
 
   "noReceivedRequestsTitle": "अभी कोई काम का बुलावा नहीं आया",
-  "noReceivedRequestsSubtitle": "जब नियोक्ता को आपका प्रोफाइल पसंद आएगा, वे यहाँ रिक्वेस्ट भेजेंगे।",
+  "noReceivedRequestsSubtitle": "जब काम देने वाले को आपका प्रोफाइल पसंद आएगा, वे यहाँ रिक्वेस्ट भेजेंगे।",
   "noReceivedRequestsCTA": "प्रोफाइल पूरा करें",
 
   "noAppliedServicesTitle": "आपने अभी तक किसी काम में आवेदन नहीं किया",
@@ -1511,7 +1526,7 @@
   "findWork": "काम ढूंढें",
 
   "myEmployerDashboard": "बुक किए गए कामगार",
-  "employerActivityTitle": "मेरी गतिविधियाँ (नियोक्ता)",
+  "employerActivityTitle": "मेरी गतिविधियाँ (काम देने वाला)",
   "employerWorkHeaderGuide": "अपने कार्यों और बनाए गए सर्विसेस को यहां ट्रैक करें।",
 
   "tabSentRequestsTitle": "भेजे गए अनुरोध",
@@ -1565,8 +1580,8 @@
   "exploreServices": "उपलब्ध काम देखें",
 
   "customerServiceAssistant": {
-    "singular": "ग्राहक सेवा सहायक",
-    "plural": "ग्राहक सेवा सहायक"
+    "singular": "ग्राहक काम सहायक",
+    "plural": "ग्राहक काम सहायक"
   },
   "farmConsultant": {
     "singular": "खेती सलाहकार",
@@ -1704,7 +1719,7 @@
   "activityTabWorkerAppliedTitle": "आवेदन और चयन",
   "activityTabWorkerAppliedHint": "जिन सेवाओं के लिए आवेदन किया या चुने गए",
   "activityTabWorkerBookingTitle": "बुकिंग अनुरोध",
-  "activityTabWorkerBookingHint": "नियोक्ता जो आपको काम पर बुलाते हैं",
+  "activityTabWorkerBookingHint": "काम देने वाले जो आपको काम पर बुलाते हैं",
 
   "homeTeamSectionTitle": "टीम में शामिल होना",
   "homeTeamInvitesTitle": "मध्यस्थों के निमंत्रण",
@@ -1712,8 +1727,8 @@
   "homeTeamBrowseTitle": "मध्यस्थ खोजें",
   "homeTeamBrowseSubtitle": "लोग ब्राउज़ करें और जॉइन अनुरोध भेजें",
 
-  "activityEmptyLineApplied": "अभी कुछ नहीं। जब आप किसी सेवा के लिए आवेदन करेंगे या चुने जाएँगे, वह यहाँ दिखेगा। काम ढूँढने के लिए वर्क टैब खोलें।",
-  "activityEmptyLineBookingInvites": "अभी कोई बुकिंग अनुरोध नहीं। जब कोई नियोक्ता आपको काम के लिए बुलाएगा, वह यहाँ दिखेगा।",
+  "activityEmptyLineApplied": "अभी कुछ नहीं। जब आप किसी काम के लिए आवेदन करेंगे या चुने जाएँगे, वह यहाँ दिखेगा। काम ढूँढने के लिए वर्क टैब खोलें।",
+  "activityEmptyLineBookingInvites": "अभी कोई बुकिंग अनुरोध नहीं। जब कोई काम देने वाला आपको काम के लिए बुलाएगा, वह यहाँ दिखेगा।",
   "activityEmptyLineSent": "कोई आउटगोइंग अनुरोध नहीं।",
   "activityEmptyLineInvites": "ठेकेदारों से कोई निमंत्रण नहीं।",
   "activityEmptyLineTeam": "अभी टीम में कोई नहीं।",
@@ -1721,7 +1736,7 @@
 
   "searchListPlaceholderWorkers": "नाम, कौशल, पता से खोजें…",
   "searchListPlaceholderContractors": "ठेकेदार, टीम, पता से खोजें…",
-  "searchListPlaceholderServices": "सेवा प्रकार, पता, अवधि से खोजें…",
+  "searchListPlaceholderServices": "काम प्रकार, पता, अवधि से खोजें…",
   "sortTabNearest": "निकटतम",
   "sortTabTopRated": "टॉप रेटेड",
   "sortTabLargerTeam": "बड़ी टीम",
@@ -1759,29 +1774,54 @@
     "worker": {
       "heroTitle": "उपलब्ध काम",
       "heroSubtitle": "आपके आस-पास के काम",
+
       "applied": "अप्लाई किए काम",
       "bookings": "मेरी बुकिंग",
       "contractors": "ठेकेदार",
-      "activity": "मेरी एक्टिविटी"
+      "activity": "मेरी एक्टिविटी",
+
+      "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
+      "bookingsDesc": "आपकी कन्फर्म बुकिंग देखें",
+      "contractorsDesc": "अपने आस-पास के ठेकेदार खोजें",
+      "activityDesc": "अपनी हाल की एक्टिविटी देखें"
     },
+
     "employer": {
       "heroTitle": "मेरे डाले गए काम",
       "heroSubtitle": "अपने काम को मैनेज करें",
-      "postWork": "नया काम डालें",
+
+      "postWork": "नया काम जोड़ें",
       "bookedWorkers": "बुक किए गए मजदूर",
       "contractors": "ठेकेदार",
       "workers": "मजदूर",
-      "activity": "मेरी एक्टिविटी"
+      "activity": "मेरी एक्टिविटी",
+
+      "postWorkDesc": "नया काम पोस्ट करें",
+      "bookedWorkersDesc": "जिन मजदूरों को आपने रखा है उन्हें देखें",
+      "contractorsDesc": "उपलब्ध ठेकेदार खोजें",
+      "workersDesc": "मजदूर खोजें और काम पर रखें",
+      "activityDesc": "अपने काम की एक्टिविटी देखें"
     },
+
     "mediator": {
-      "heroTitle": "एक्टिव रिक्वायरमेंट",
-      "heroSubtitle": "अपनी रिक्वायरमेंट मैनेज करें",
-      "postRequirement": "नई रिक्वायरमेंट डालें",
+      "heroTitle": "उपलब्ध काम",
+      "heroSubtitle": "आपके आस-पास के काम",
+
+      "myPostedJobs": "मेरे पोस्ट किए गए जरूरतें",
+      "myPostedJobsDesc": "आपके पोस्ट किए गए जरूरतें देखें",
+      "postRequirement": "नई जरूरत पोस्ट करें",
       "applied": "अप्लाई किए काम",
       "selected": "चुने गए मजदूर",
       "team": "आपकी टीम",
       "workers": "मजदूर",
-      "activity": "मेरी एक्टिविटी"
+      "activity": "मेरी एक्टिविटी",
+
+      "postRequirementDesc": "नई जरूरत पोस्ट करें और मैनेज करें",
+      "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
+      "selectedDesc": "चुने गए मजदूर देखें",
+      "teamDesc": "अपनी टीम को मैनेज करें",
+      "workersDesc": "उपलब्ध मजदूर देखें",
+      "activityDesc": "पूरी एक्टिविटी ट्रैक करें"
     }
   },
   "connectTitle": "हमसे जुड़ें",
@@ -1802,5 +1842,7 @@
   "playStore": "Play Store से डाउनलोड करें",
   "shareLink": "ऐप लिंक शेयर करें",
 
-  "fullDetails": "पूरा विवरण"
+  "fullDetails": "पूरा विवरण",
+  "decidePriceWhileBooking": "बुकिंग के दौरान मूल्य निर्धारित करें",
+  "irrigation": "सिंचाई"
 }

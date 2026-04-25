@@ -15,13 +15,13 @@ export const titles = {
     WOREKR_LEFT_FROM_TEAM: "Worker Left the Team",
 
     // Worker and Mediator
-    NEW_SERVICE_LIVE: "A New Service is Now Available",
-    REJECTED_FROM_SERVICE: "Your Service Application was Rejected",
-    SELECTED_IN_SERVICE: "You Have Been Selected for the Service",
+    NEW_SERVICE_LIVE: "A New Work is Now Available",
+    REJECTED_FROM_SERVICE: "Your Work Application was Rejected",
+    SELECTED_IN_SERVICE: "You Have Been Selected for the Work",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
-      "You Were Removed from the Service",
-    SERVICE_CANCELLED_BY_EMPLOYER: "The Service Was Cancelled",
-    SERVICE_COMPLETED_BY_EMPLOYER: "The Service Was Completed",
+      "You Were Removed from the Work",
+    SERVICE_CANCELLED_BY_EMPLOYER: "The Work Was Cancelled",
+    SERVICE_COMPLETED_BY_EMPLOYER: "The Work Was Completed",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER: "You Received a Booking Invitation",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER:
       "The Booking Invitation Was Cancelled",
@@ -29,30 +29,30 @@ export const titles = {
     BOOKING_COMPLETED_BY_EMPLOYER: "The Booking Was Completed",
 
     // Employer
-    APPLIED_IN_YOUR_SERVICE: "A Worker Applied for Your Service",
+    APPLIED_IN_YOUR_SERVICE: "A Worker Applied for Your Work",
     USER_CANCELLED_HIS_SERVICE_SELECTION:
-      "The Worker Cancelled Their Service Selection",
+      "The Worker Cancelled Their Work Selection",
     BOOKING_REQUEST_REJECTED_BY_USER:
       "The Worker Rejected Your Booking Request",
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "The Worker Accepted Your Booking Request",
     BOOKING_CANCELLED_BY_USER: "The Worker Cancelled the Booking",
-    NEW_SERVICE_ARRIVED_OF_SKILL: "New service has been live",
+    NEW_SERVICE_ARRIVED_OF_SKILL: "New work has been live",
     PENDING_REQUEST_REMINDER: "Pending requests want action",
     PROFILE_COMPLETION_REMINDER: "Please completed your profile",
     SELECTED_AS_MEDIATOR: "You Have Been Selected as a Mediator",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR: "You Were Removed as a Mediator",
-    SERVICE_COMPLETED: "The Service Was Completed",
-    SERVICE_COMPLETED_AS_MEDIATOR: "The Service Was Completed (Mediator)",
+    SERVICE_COMPLETED: "The Work Was Completed",
+    SERVICE_COMPLETED_AS_MEDIATOR: "The Work Was Completed (Mediator)",
     REJECTED_AS_MEDIATOR: "You Were Rejected as a Mediator",
     YOU_HAVE_BEEN_APPLIED_BY_MEDIATOR:
-      "A Mediator Applied in a service for you",
+      "A Mediator Applied in a work for you",
     YOU_HAVE_APPLIED_AS_A_MEDIATOR: "Mediator Application Received",
     MEDIATOR_CANCELLED_APPLICATION: "The Mediator Cancelled the Application",
     WORKER_CANCELLED_APPLICATION: "The Worker Cancelled the Application",
     SERVICE_DIRECT_BOOKING_CANCELLED_BY_EMPLOYER:
-      "The Direct Service Booking Was Cancelled by the Employer",
-    SERVICE_CANCELLED: "The Service Was Cancelled",
+      "The Direct Work Booking Was Cancelled by the Employer",
+    SERVICE_CANCELLED: "The Work Was Cancelled",
     BOOKING_CANCELLED_BY_MEDIATOR: "The Booking Was Cancelled by the Mediator",
   },
 
@@ -120,19 +120,19 @@ export const titles = {
       "कामगाराने तुमचे निमंत्रण स्वीकारले",
     REJECTED_TEAM_JOINING_REQUEST_BY_WORKER: "कामगाराने तुमचे निमंत्रण नाकारले",
     WOREKR_LEFT_FROM_TEAM: "कामगाराने टीम सोडली",
-    NEW_SERVICE_LIVE: "नवीन सेवा आता उपलब्ध आहे",
-    REJECTED_FROM_SERVICE: "तुमचा सेवा अर्ज नाकारला गेला",
-    SELECTED_IN_SERVICE: "तुम्ही सेवेसाठी निवडले गेले",
+    NEW_SERVICE_LIVE: "नवीन काम आता उपलब्ध आहे",
+    REJECTED_FROM_SERVICE: "तुमचा काम अर्ज नाकारला गेला",
+    SELECTED_IN_SERVICE: "तुम्ही कामसाठी निवडले गेले",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
-      "तुम्हाला सेवेतून काढले गेले",
-    SERVICE_CANCELLED_BY_EMPLOYER: "सेवा रद्द केली गेली",
-    SERVICE_COMPLETED_BY_EMPLOYER: "सेवा पूर्ण झाली",
+      "तुम्हाला कामतून काढले गेले",
+    SERVICE_CANCELLED_BY_EMPLOYER: "काम रद्द केली गेली",
+    SERVICE_COMPLETED_BY_EMPLOYER: "काम पूर्ण झाली",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER: "तुम्हाला बुकिंग निमंत्रण आले",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER: "बुकिंग निमंत्रण रद्द केले गेले",
     BOOKING_CANCELLED_BY_EMPLOYER: "बुकिंग रद्द केली गेली",
     BOOKING_COMPLETED_BY_EMPLOYER: "बुकिंग पूर्ण झाली",
-    APPLIED_IN_YOUR_SERVICE: "कामगाराने तुमच्या सेवेसाठी अर्ज केला",
-    USER_CANCELLED_HIS_SERVICE_SELECTION: "कामगाराने सेवा निवड रद्द केली",
+    APPLIED_IN_YOUR_SERVICE: "कामगाराने तुमच्या कामसाठी अर्ज केला",
+    USER_CANCELLED_HIS_SERVICE_SELECTION: "कामगाराने काम निवड रद्द केली",
     BOOKING_REQUEST_REJECTED_BY_USER: "कामगाराने तुमची बुकिंग विनंती नाकारली",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "कामगाराने तुमची बुकिंग विनंती स्वीकारली",
     BOOKING_CANCELLED_BY_USER: "कामगाराने बुकिंग रद्द केली",
@@ -148,18 +148,18 @@ export const titles = {
       "वर्कर थारों निमंत्रण स्वीकार लियो",
     REJECTED_TEAM_JOINING_REQUEST_BY_WORKER: "वर्कर थारों निमंत्रण ठुकरायो",
     WOREKR_LEFT_FROM_TEAM: "वर्कर टीम छोड़ कै गयो",
-    NEW_SERVICE_LIVE: "नई सेवा अब चालू है",
-    REJECTED_FROM_SERVICE: "थारों सेवा आवेदन नामंजूर करियो गयो",
-    SELECTED_IN_SERVICE: "थाने सेवा मं चुनियो गयो",
-    REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER: "थांने सेवा मं सूटो गयो",
-    SERVICE_CANCELLED_BY_EMPLOYER: "सेवा रद्द कर दी गई",
-    SERVICE_COMPLETED_BY_EMPLOYER: "सेवा पूरी कर दी गई",
+    NEW_SERVICE_LIVE: "नई काम अब चालू है",
+    REJECTED_FROM_SERVICE: "थारों काम आवेदन नामंजूर करियो गयो",
+    SELECTED_IN_SERVICE: "थाने काम मं चुनियो गयो",
+    REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER: "थांने काम मं सूटो गयो",
+    SERVICE_CANCELLED_BY_EMPLOYER: "काम रद्द कर दी गई",
+    SERVICE_COMPLETED_BY_EMPLOYER: "काम पूरी कर दी गई",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER: "थांने बुकिंग निमंत्रण मिल्यो",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER: "बुकिंग बुलावो रद्द करियो गयो",
     BOOKING_CANCELLED_BY_EMPLOYER: "बुकिंग रद्द कर दी गई",
     BOOKING_COMPLETED_BY_EMPLOYER: "बुकिंग पूरी कर दी गई",
-    APPLIED_IN_YOUR_SERVICE: "वर्कर थारी सेवा मं आवेदन करियो",
-    USER_CANCELLED_HIS_SERVICE_SELECTION: "वर्कर सेवा रद्द कर दियो",
+    APPLIED_IN_YOUR_SERVICE: "वर्कर थारी काम मं आवेदन करियो",
+    USER_CANCELLED_HIS_SERVICE_SELECTION: "वर्कर काम रद्द कर दियो",
     BOOKING_REQUEST_REJECTED_BY_USER: "वर्कर थारी बुकिंग ठुकराय दी",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "वर्कर थारी बुकिंग स्वीकार लियो",
     BOOKING_CANCELLED_BY_USER: "वर्कर बुकिंग रद्द कर दी",
@@ -177,12 +177,12 @@ export const titles = {
     REJECTED_TEAM_JOINING_REQUEST_BY_WORKER:
       "వర్కర్ మీ ఆహ్వానాన్ని తిరస్కరించారు",
     WOREKR_LEFT_FROM_TEAM: "వర్కర్ టీమ్‌ను విడిచారు",
-    NEW_SERVICE_LIVE: "కొత్త సేవ అందుబాటులో ఉంది",
+    NEW_SERVICE_LIVE: "కొత్త కామ అందుబాటులో ఉంది",
     REJECTED_FROM_SERVICE: "మీ సేవ దరఖాస్తు తిరస్కరించబడింది",
     SELECTED_IN_SERVICE: "మీరు సేవ కోసం ఎంపిక చేయబడ్డారు",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
       "మీ ఎంపికను సేవ నుండి తొలగించారు",
-    SERVICE_CANCELLED_BY_EMPLOYER: "సేవ రద్దు చేయబడింది",
+    SERVICE_CANCELLED_BY_EMPLOYER: "కామ రద్దు చేయబడింది",
     SERVICE_COMPLETED_BY_EMPLOYER: "సేవ పూర్తయింది",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER: "మీరు బుకింగ్ ఆహ్వానం అందుకున్నారు",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER: "బుకింగ్ ఆహ్వానం రద్దు చేయబడింది",
@@ -527,9 +527,9 @@ const messages = {
     BOOKING_CANCELLED_BY_USER:
       "⚡️ {{workerName}} has canceled the booking. 💡 Stay tuned for more potential candidates.",
 
-    // Skill-based Service Notification
+    // Skill-based Work Notification
     NEW_SERVICE_ARRIVED_OF_SKILL:
-      "🚀 Hey {{workerName}}, a new service matching your skills is here! 💪 Apply now and get hired fast! ⚡️",
+      "🚀 Hey {{workerName}}, a new work matching your skills is here! 💪 Apply now and get hired fast! ⚡️",
     // Pending Request Reminder
     PENDING_REQUEST_REMINDER:
       "⏳ Hey {{workerName}}, you have pending requests waiting for your action! 🚀 Don’t miss out—respond now! 💬",
@@ -540,9 +540,9 @@ const messages = {
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:
       "You have been removed as a Mediator for {{serviceName}}. {{workersCount}} workers were assigned to you.",
     SERVICE_COMPLETED:
-      "🎉 Great job! The service for {{employerName}} has been completed.",
+      "🎉 Great job! The work for {{employerName}} has been completed.",
     SERVICE_COMPLETED_AS_MEDIATOR:
-      "🎉 Well done! The service for {{employerName}} is completed. You supported {{workersCount}} workers as a Mediator.",
+      "🎉 Well done! The work for {{employerName}} is completed. You supported {{workersCount}} workers as a Mediator.",
     REJECTED_AS_MEDIATOR:
       "❌ You were not selected as a Mediator for {{serviceName}}.",
     YOU_HAVE_BEEN_APPLIED_BY_MEDIATOR:
@@ -658,15 +658,15 @@ const messages = {
       "{{workerName}} ने तुमचं टीममध्ये सामील होण्याचं आमंत्रण नाकारले आहे.",
     WOREKR_LEFT_FROM_TEAM: "{{workerName}} ने तुमची टीम सोडली आहे.",
     NEW_SERVICE_LIVE:
-      "{{employerName}} कडून {{serviceName}} नवीन सेवा पोस्ट करण्यात आली आहे.",
+      "{{employerName}} कडून {{serviceName}} नवीन काम पोस्ट करण्यात आली आहे.",
     REJECTED_FROM_SERVICE:
-      "तुम्हाला {{serviceName}} सेवा पासून नाकारण्यात आले आहे.",
-    SELECTED_IN_SERVICE: "तुम्हाला {{serviceName}} सेवा साठी निवडले गेले आहे.",
+      "तुम्हाला {{serviceName}} काम पासून नाकारण्यात आले आहे.",
+    SELECTED_IN_SERVICE: "तुम्हाला {{serviceName}} काम साठी निवडले गेले आहे.",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
-      "{{serviceName}} सेवा मधून तुमची निवड काढण्यात आली आहे.",
-    SERVICE_CANCELLED_BY_EMPLOYER: "{{serviceName}} सेवा रद्द करण्यात आली आहे.",
+      "{{serviceName}} काम मधून तुमची निवड काढण्यात आली आहे.",
+    SERVICE_CANCELLED_BY_EMPLOYER: "{{serviceName}} काम रद्द करण्यात आली आहे.",
     SERVICE_COMPLETED_BY_EMPLOYER:
-      "{{serviceName}} सेवा पूर्ण करण्यात आली आहे.",
+      "{{serviceName}} काम पूर्ण करण्यात आली आहे.",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER:
       "{{employerName}} कडून {{serviceName}} कामासाठी बुकिंग आमंत्रण प्राप्त झाले आहे.",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER:
@@ -676,9 +676,9 @@ const messages = {
     BOOKING_COMPLETED_BY_EMPLOYER:
       "{{employerName}} कडून बुकिंग पूर्ण करण्यात आली आहे.",
     APPLIED_IN_YOUR_SERVICE:
-      "{{workerName}} ने {{serviceName}} सेवेसाठी अर्ज केला आहे.",
+      "{{workerName}} ने {{serviceName}} कामसाठी अर्ज केला आहे.",
     USER_CANCELLED_HIS_SERVICE_SELECTION:
-      "{{workerName}} ने {{serviceName}} सेवा रद्द केली आहे.",
+      "{{workerName}} ने {{serviceName}} काम रद्द केली आहे.",
     BOOKING_REQUEST_REJECTED_BY_USER:
       "{{workerName}} ने तुमची बुकिंग विनंती नाकारली आहे.",
     BOOKING_REQUEST_ACCEPTED_BY_USER:
@@ -703,13 +703,13 @@ const messages = {
       "{{workerName}} ने तुमारो टीम में सामिल होवण रो आमंत्रण नकार दियो है.",
     WOREKR_LEFT_FROM_TEAM: "{{workerName}} ने तुमारो टीम छोड़ दियो है.",
     NEW_SERVICE_LIVE:
-      "{{employerName}} स {{serviceName}} नई सेवा पोस्ट कर दी है.",
-    REJECTED_FROM_SERVICE: "तुम {{serviceName}} सेवा स नकार दिए गए हो.",
-    SELECTED_IN_SERVICE: "तुम {{serviceName}} सेवा खातर चयनित कर लिया गए हो.",
+      "{{employerName}} स {{serviceName}} नया काम पोस्ट कर दी है.",
+    REJECTED_FROM_SERVICE: "तुम {{serviceName}} काम स नकार दिए गए हो.",
+    SELECTED_IN_SERVICE: "तुम {{serviceName}} काम खातर चयनित कर लिया गए हो.",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
-      "{{serviceName}} सेवा स तुमारो चयन हटा दियो गयो है.",
-    SERVICE_CANCELLED_BY_EMPLOYER: "{{serviceName}} सेवा रद्द कर दी गई है.",
-    SERVICE_COMPLETED_BY_EMPLOYER: "{{serviceName}} सेवा पूर्ण कर दी गई है.",
+      "{{serviceName}} काम स तुमारो चयन हटा दियो गयो है.",
+    SERVICE_CANCELLED_BY_EMPLOYER: "{{serviceName}} काम रद्द कर दी गई है.",
+    SERVICE_COMPLETED_BY_EMPLOYER: "{{serviceName}} काम पूर्ण कर दी गई है.",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER:
       "{{employerName}} स {{serviceName}} काम खातर बुकिंग आमंत्रण प्राप्त करयो है.",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER:
@@ -719,9 +719,9 @@ const messages = {
     BOOKING_COMPLETED_BY_EMPLOYER:
       "{{employerName}} स बुकिंग पूर्ण कर दी गई है.",
     APPLIED_IN_YOUR_SERVICE:
-      "{{workerName}} ने {{serviceName}} सेवा खातर आवेदन किया है.",
+      "{{workerName}} ने {{serviceName}} काम खातर आवेदन किया है.",
     USER_CANCELLED_HIS_SERVICE_SELECTION:
-      "{{workerName}} ने {{serviceName}} सेवा रद्द कर दी है.",
+      "{{workerName}} ने {{serviceName}} काम रद्द कर दी है.",
     BOOKING_REQUEST_REJECTED_BY_USER:
       "{{workerName}} ने तुमरी बुकिंग विनंती नकार दी है.",
     BOOKING_REQUEST_ACCEPTED_BY_USER:

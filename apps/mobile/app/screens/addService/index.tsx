@@ -107,8 +107,11 @@ const AddServiceScreen = () => {
       setImages([]);
       setStep(1);
       setAddServiceStep(1);
-
-      router?.replace("/(tabs)/fourth" as any);
+      setIsFormDirty(false);
+      setIsNavigating(true);
+      requestAnimationFrame(() => {
+        router?.replace("/(tabs)/fourth?tab=0" as any);
+      });
     },
     onError: (err: any) => {
       console.error("Error details:", {
@@ -160,6 +163,9 @@ const AddServiceScreen = () => {
 
   useEffect(() => {
     const beforeRemoveListener = (e: any) => {
+      if (submitGuardRef.current || mutationAddService?.isPending) {
+        return;
+      }
       if (isFormDirty && !isNavigating) {
         e.preventDefault(); // Prevent default navigation
 
@@ -187,7 +193,13 @@ const AddServiceScreen = () => {
     return () => {
       unsubscribe(); // Correct way to remove listener
     };
-  }, [isFormDirty, isNavigating, navigation, router]);
+  }, [
+    isFormDirty,
+    isNavigating,
+    navigation,
+    router,
+    mutationAddService?.isPending,
+  ]);
 
   // Reset step count only when coming back to this screen
   useFocusEffect(
@@ -252,8 +264,6 @@ const AddServiceScreen = () => {
     formData.append("requirements", JSON.stringify(requirements));
     formData.append("facilities", JSON.stringify(facilities));
 
-    console.log("Formdare---", formData);
-
     const response: any = await EMPLOYER?.addNewService(formData);
     return response?.data;
   };
@@ -261,7 +271,7 @@ const AddServiceScreen = () => {
   const handleEditSubmit = async (id: any) => {
     try {
       if (!id) {
-        throw new Error("Service ID is required for editing");
+        throw new Error("Work ID is required for editing");
       }
 
       console.log("Submitting service update with data:", {

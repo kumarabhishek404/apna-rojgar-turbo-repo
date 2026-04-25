@@ -23,7 +23,7 @@ const BottomNavTutorial = ({ isVisible, onClose }: any) => {
 
   const steps = [
     {
-      title: "Post Service",
+      title: "Post Work",
       text: "Post your services here",
       index: 0,
       icon: "add",

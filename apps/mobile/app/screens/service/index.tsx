@@ -105,11 +105,11 @@ const Services = () => {
         applyServiceClientDistanceFilter(
           nextServices,
           appliedFilters,
-          userDetails?.geoLocation ?? userDetails?.location,
+          userDetails?.geoLocation,
         ),
       );
       return () => {}; // nothing to clean up
-    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
+    }, [appliedFilters, response, userDetails?.geoLocation])
   );
 
   // ✅ Ensure refetch happens when the screen is focused
@@ -124,11 +124,11 @@ const Services = () => {
           applyServiceClientDistanceFilter(
             nextServices,
             appliedFilters,
-            userDetails?.geoLocation ?? userDetails?.location,
+            userDetails?.geoLocation,
           ),
         );
       }
-    }, [appliedFilters, response, refetch, userDetails?.geoLocation, userDetails?.location]) // Dependencies added for correct reactivity
+    }, [appliedFilters, response, refetch, userDetails?.geoLocation]) // Dependencies added for correct reactivity
   );
 
   const loadMore = () => {

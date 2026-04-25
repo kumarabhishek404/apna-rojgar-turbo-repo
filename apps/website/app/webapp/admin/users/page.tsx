@@ -364,7 +364,7 @@ export default function AdminUsersPage() {
                 <DetailBlock title="Geo Location" data={(selectedUser as any).geoLocation} />
                 <DetailBlock title="Skills" data={(selectedUser as any).skills} />
                 <DetailBlock title="Work Details" data={(selectedUser as any).workDetails} />
-                <DetailBlock title="Service Details" data={(selectedUser as any).serviceDetails} />
+                <DetailBlock title="Work Details" data={(selectedUser as any).serviceDetails} />
                 <DetailBlock title="Mediator Details" data={(selectedUser as any).mediatorDetails} />
                 <DetailBlock title="Ratings" data={(selectedUser as any).rating} />
                 <DetailBlock title="Earnings" data={(selectedUser as any).earnings} />

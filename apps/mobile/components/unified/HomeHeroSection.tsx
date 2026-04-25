@@ -19,7 +19,8 @@ import ProfilePicture from "@/components/commons/ProfilePicture";
 import { WORKERTYPES } from "@/constants";
 import { getWorkLabel } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
-import homeBannerArt from "../../assets/banners/banner1.jpg";
+import homeBannerArt from "../../assets/banners/banner1.png";
+import homeBannerArt2 from "../../assets/banners/banner2.png";
 import APP_CONTEXT from "@/app/context/locale";
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -62,9 +63,11 @@ const HomeHeroSection = ({ userDetails }: Props) => {
   const bannerScrollRef = useRef<ScrollView>(null);
   const [activeBanner, setActiveBanner] = useState(0);
   const { locale } = APP_CONTEXT.useApp();
-  const bannerImages = useMemo(() => [homeBannerArt], []);
+  const [isPaused, setIsPaused] = useState(false);
+  const bannerImages = useMemo(() => [homeBannerArt, homeBannerArt2], []);
 
-  const displayName = firstName(userDetails?.name) || t("homeGreetingFallbackName");
+  const displayName =
+    firstName(userDetails?.name) || t("homeGreetingFallbackName");
   const memberDays = daysSinceJoin(userDetails?.createdAt);
 
   const mobileDisplay = useMemo(() => {
@@ -98,7 +101,8 @@ const HomeHeroSection = ({ userDetails }: Props) => {
   };
 
   useEffect(() => {
-    if (bannerImages.length <= 1) return;
+    if (bannerImages.length <= 1 || isPaused) return; // Don't start/continue timer if paused
+
     const id = setInterval(() => {
       setActiveBanner((prev) => {
         const next = (prev + 1) % bannerImages.length;
@@ -109,8 +113,9 @@ const HomeHeroSection = ({ userDetails }: Props) => {
         return next;
       });
     }, 3200);
+
     return () => clearInterval(id);
-  }, [bannerImages.length]);
+  }, [bannerImages.length, isPaused]); // Re-run effect when isPaused changes
 
   return (
     <View style={styles.wrap}>
@@ -118,7 +123,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
         colors={["#FFFFFF", "#FFFFFF", "#FFFFFF"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.gradientBlock, { paddingTop: 8 }]}
+        style={[styles.gradientBlock, { paddingTop: 12 }]}
       >
         <View style={styles.topRow}>
           <View style={styles.greetingBlock}>
@@ -148,11 +153,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
             accessibilityLabel={t("notifications")}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Ionicons
-              name="notifications-outline"
-              size={26}
-              color="#3F4F82"
-            />
+            <Ionicons name="notifications-outline" size={26} color="#3F4F82" />
             {notificationCount > 0 ? <View style={styles.bellDot} /> : null}
           </TouchableOpacity>
         </View>
@@ -164,9 +165,12 @@ const HomeHeroSection = ({ userDetails }: Props) => {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setIsPaused(false)}
             onMomentumScrollEnd={(e) => {
               const slide = Math.round(
-                e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width,
+                e.nativeEvent.contentOffset.x /
+                  e.nativeEvent.layoutMeasurement.width,
               );
               if (!Number.isNaN(slide)) setActiveBanner(slide);
             }}
@@ -181,17 +185,20 @@ const HomeHeroSection = ({ userDetails }: Props) => {
               />
             ))}
           </ScrollView>
-          {bannerImages.length > 1 ? (
-            <View style={styles.bannerDots}>
-              {bannerImages.map((_, idx) => (
-                <View
-                  key={idx}
-                  style={[styles.bannerDot, idx === activeBanner && styles.bannerDotActive]}
-                />
-              ))}
-            </View>
-          ) : null}
         </View>
+        {bannerImages.length > 1 ? (
+          <View style={styles.bannerDots}>
+            {bannerImages.map((_, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.bannerDot,
+                  idx === activeBanner && styles.bannerDotActive,
+                ]}
+              />
+            ))}
+          </View>
+        ) : null}
       </LinearGradient>
 
       <View style={styles.whiteCurve}>
@@ -266,7 +273,9 @@ const HomeHeroSection = ({ userDetails }: Props) => {
                       key={`${skill}-${idx}`}
                       style={[styles.skillTag, { backgroundColor: tone.bg }]}
                     >
-                      <View style={[styles.skillDot, { backgroundColor: tone.dot }]} />
+                      <View
+                        style={[styles.skillDot, { backgroundColor: tone.dot }]}
+                      />
                       <CustomText
                         baseFont={12}
                         fontWeight="700"
@@ -281,7 +290,6 @@ const HomeHeroSection = ({ userDetails }: Props) => {
                 })}
               </View>
             ) : null}
-
           </View>
         </View>
         <View style={styles.separator} />
@@ -308,7 +316,7 @@ const styles = StyleSheet.create({
   },
   gradientBlock: {
     paddingHorizontal: 22,
-    paddingBottom: 46,
+    paddingBottom: 20,
   },
   topRow: {
     flexDirection: "row",
@@ -350,7 +358,7 @@ const styles = StyleSheet.create({
     height: 172,
     overflow: "hidden",
     backgroundColor: "#2D47B3",
-    marginBottom: 16,
+    // marginBottom: 16,
     shadowColor: "#1f3f9a",
     shadowOpacity: 0.24,
     shadowRadius: 18,
@@ -360,26 +368,25 @@ const styles = StyleSheet.create({
   bannerCoverImage: {
     width: SCREEN_W - 44,
     height: "100%",
-    opacity: 0.97,
+    // opacity: 0.97,
+    overflow: "hidden",
   },
   bannerDots: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
     flexDirection: "row",
     justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
     gap: 6,
   },
   bannerDot: {
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.55)",
+    backgroundColor: "rgba(156, 150, 150, 0.55)",
   },
   bannerDotActive: {
     width: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#000",
   },
   whiteCurve: {
     marginTop: 0,
@@ -482,7 +489,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: 'rgba(14, 79, 197, 0.22)',
+    backgroundColor: "rgba(14, 79, 197, 0.22)",
     marginHorizontal: 16,
     marginTop: 6,
     marginBottom: 0,

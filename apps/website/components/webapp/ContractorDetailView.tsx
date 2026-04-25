@@ -74,7 +74,7 @@ export default function ContractorDetailView({ id: idProp }: { id?: string }) {
         <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("mobileNumber", "Mobile")}</p><p className="font-medium">{data.mobile || "-"}</p></div>
         <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("address", "Address")}</p><p className="font-medium">{data.address || "-"}</p></div>
         <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("rating", "Rating")}</p><p className="font-medium">{data.rating?.average?.toFixed?.(1) || "0.0"} ({data.rating?.count || 0})</p></div>
-        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("totalServices", "Total Services")}</p><p className="font-medium">{data.serviceDetails?.byService?.total || 0}</p></div>
+        <div className="rounded-lg bg-gray-50 p-3"><p className="text-xs text-gray-500">{t("totalServices", "Total Works")}</p><p className="font-medium">{data.serviceDetails?.byService?.total || 0}</p></div>
       </div>
     </section>
   );

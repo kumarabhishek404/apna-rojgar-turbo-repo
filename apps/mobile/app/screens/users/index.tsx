@@ -82,11 +82,11 @@ const Users = () => {
         applyWorkerClientFilters(
           nextUsers,
           appliedFilters,
-          userDetails?.geoLocation ?? userDetails?.location,
+          userDetails?.geoLocation,
         ),
       );
       return () => unsubscribe;
-    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
+    }, [appliedFilters, response, userDetails?.geoLocation])
   );
 
   const loadMore = () => {

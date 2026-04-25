@@ -8,7 +8,7 @@ import {
   type StyleProp,
   type ViewStyle,
 } from "react-native";
-import React, { useRef, type ReactElement } from "react";
+import React, { useCallback, useMemo, useRef, type ReactElement } from "react";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -24,6 +24,25 @@ import UserRoleTag from "./UserRoleTag";
 
 /** Space below last item — tab bar / scroll comfort; loader sits above this. */
 const LIST_BOTTOM_INSET = 250;
+
+const dedupeByStableId = (rows: any[]) => {
+  const seen = new Set<string>();
+  const output: any[] = [];
+
+  for (const item of Array.isArray(rows) ? rows : []) {
+    if (!item || typeof item !== "object") continue;
+    const key = String(item?._id ?? item?.id ?? item?.user ?? "");
+    if (!key) {
+      output.push(item);
+      continue;
+    }
+    if (seen.has(key)) continue;
+    seen.add(key);
+    output.push(item);
+  }
+
+  return output;
+};
 
 type ListingsVerticalWorkersProps = {
   availableInterest: any;
@@ -50,115 +69,105 @@ const ListingsVerticalWorkers = ({
   style,
 }: ListingsVerticalWorkersProps) => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
+  const stableListings = useMemo(() => dedupeByStableId(listings), [listings]);
 
   const onEndReachedCalledDuringMomentum = useRef(false);
+  const renderItem = useCallback(
+    ({ item }: any) => (
+      <View style={styles.rowWrap}>
+        <TouchableOpacity
+          activeOpacity={0.92}
+          accessibilityRole="button"
+          onPress={() =>
+            router.push({
+              pathname: "/screens/users/[id]",
+              params: {
+                id: item?._id,
+                role: type,
+                title: "workerDetails",
+              },
+            })
+          }
+          style={styles.cardTouchable}
+        >
+          <View style={styles.item}>
+            <View style={styles.itemInner}>
+              <View style={styles.mainRow}>
+                <Image
+                  source={
+                    item?.profilePicture ? { uri: item.profilePicture } : coverImage
+                  }
+                  style={styles.avatar}
+                />
+                <View style={styles.cardContent}>
+                  <CustomHeading textAlign="left" style={styles.workerName}>
+                    {item?.name}
+                  </CustomHeading>
+                  <View style={styles.roleTagLine}>
+                    <UserRoleTag user={item} variant="compact" />
+                  </View>
 
-  const RenderItem = React.memo(
-    ({ item, type, userDetails, availableInterest }: any) => {
-      return (
-        <View style={styles.rowWrap}>
-          <TouchableOpacity
-            activeOpacity={0.92}
-            accessibilityRole="button"
-            onPress={() =>
-              router.push({
-                pathname: "/screens/users/[id]",
-                params: {
-                  id: item?._id,
-                  role: type,
-                  title: "workerDetails",
-                },
-              })
-            }
-            style={styles.cardTouchable}
-          >
-            <View style={styles.item}>
-              <View style={styles.itemInner}>
-                <View style={styles.mainRow}>
-                  <Image
-                    source={
-                      item?.profilePicture
-                        ? { uri: item.profilePicture }
-                        : coverImage
-                    }
-                    style={styles.avatar}
+                  <View style={styles.addressMetaRow}>
+                    <View style={styles.metaIconBadge}>
+                      <Ionicons
+                        name="location-outline"
+                        size={18}
+                        color={Colors.primary}
+                      />
+                    </View>
+                    <View style={styles.addressTextWrap}>
+                      <ShowAddress
+                        address={item?.address}
+                        numberOfLines={2}
+                        showLeadingPin={false}
+                        baseFont={14}
+                      />
+                    </View>
+                  </View>
+
+                  <SkillSelector
+                    canAddSkills={false}
+                    isShowLabel={false}
+                    style={styles.skillsContainer}
+                    tagStyle={styles.skillTag}
+                    tagTextStyle={styles.skillTagText}
+                    userSkills={item?.skills}
+                    availableSkills={availableInterest}
+                    count={3}
                   />
-                  <View style={styles.cardContent}>
-                    <CustomHeading textAlign="left" style={styles.workerName}>
-                      {item?.name}
-                    </CustomHeading>
-                    <View style={styles.roleTagLine}>
-                      <UserRoleTag user={item} variant="compact" />
-                    </View>
+                </View>
+              </View>
 
-                    <View style={styles.addressMetaRow}>
-                      <View style={styles.metaIconBadge}>
-                        <Ionicons
-                          name="location-outline"
-                          size={18}
-                          color={Colors.primary}
-                        />
-                      </View>
-                      <View style={styles.addressTextWrap}>
-                        <ShowAddress
-                          address={item?.address}
-                          numberOfLines={2}
-                          showLeadingPin={false}
-                          baseFont={14}
-                        />
-                      </View>
-                    </View>
-
-                    <SkillSelector
-                      canAddSkills={false}
-                      isShowLabel={false}
-                      style={styles.skillsContainer}
-                      tagStyle={styles.skillTag}
-                      tagTextStyle={styles.skillTagText}
-                      userSkills={item?.skills}
-                      availableSkills={availableInterest}
-                      count={3}
+              <View style={styles.footerCard}>
+                <View style={styles.footerInner}>
+                  <View style={styles.ratingPill}>
+                    <RatingAndReviews
+                      rating={item?.rating?.average}
+                      reviews={item?.rating?.count}
                     />
                   </View>
-                </View>
-
-                <View style={styles.footerCard}>
-                  <View style={styles.footerInner}>
-                    <View style={styles.ratingPill}>
-                      <RatingAndReviews
-                        rating={item?.rating?.average}
-                        reviews={item?.rating?.count}
-                      />
-                    </View>
-                    <View style={styles.distancePill}>
-                      <ShowDistance
-                        address={item?.address}
-                        loggedInUserLocation={
-                          userDetails?.geoLocation ?? userDetails?.location
-                        }
-                        targetLocation={item?.geoLocation}
-                        align="right"
-                      />
-                    </View>
+                  <View style={styles.distancePill}>
+                    <ShowDistance
+                      address={item?.address}
+                      loggedInUserLocation={userDetails?.geoLocation}
+                      targetLocation={item?.geoLocation}
+                      align="right"
+                    />
                   </View>
                 </View>
               </View>
             </View>
-          </TouchableOpacity>
-        </View>
-      );
-    },
+          </View>
+        </TouchableOpacity>
+      </View>
+    ),
+    [availableInterest, type, userDetails?.geoLocation, userDetails?.location],
   );
 
-  RenderItem.displayName = "RenderItem";
-  const renderItem = ({ item }: any) => (
-    <RenderItem
-      item={item}
-      type={type}
-      userDetails={userDetails}
-      availableInterest={availableInterest}
-    />
-  );
+  const keyExtractor = useCallback((item: any, index: number) => {
+    const stableId = item?._id ?? item?.id ?? item?.user;
+    return stableId ? String(stableId) : `worker-row-${index}`;
+  }, []);
 
   const handleEndReached = () => {
     if (!onEndReachedCalledDuringMomentum.current) {
@@ -175,12 +184,13 @@ const ListingsVerticalWorkers = ({
     <View style={[styles.listRoot, style]}>
       <FlatList
         style={styles.flatList}
-        data={listings}
+        data={stableListings}
         renderItem={renderItem}
-        keyExtractor={(item) => item?._id?.toString()}
+        keyExtractor={keyExtractor}
         ListHeaderComponent={ListHeaderComponent ?? undefined}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         onEndReached={handleEndReached}
+        onEndReachedThreshold={0.25}
         onMomentumScrollBegin={handleMomentum}
         ListFooterComponent={
           <View style={styles.listFooter}>
@@ -192,10 +202,11 @@ const ListingsVerticalWorkers = ({
             <View style={styles.listBottomInset} />
           </View>
         }
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={5}
-        removeClippedSubviews={false}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={7}
+        updateCellsBatchingPeriod={60}
+        removeClippedSubviews={true}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         refreshControl={refreshControl}

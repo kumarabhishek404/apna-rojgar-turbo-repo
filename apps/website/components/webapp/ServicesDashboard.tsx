@@ -392,17 +392,17 @@ export default function ServicesDashboard() {
   const primaryItems = useMemo(() => {
     const baseItems: PrimaryNavItem[] = [
         {
-          label: t("allServices", "All Services"),
+          label: t("allServices", "All Works"),
           href: "/all-services",
           icon: BriefcaseBusiness,
         },
         {
-          label: t("myServices", "My Services"),
+          label: t("myServices", "My Works"),
           href: "/my-work",
           icon: ClipboardList,
         },
         {
-          label: t("appliedServices", "Applied Services"),
+          label: t("appliedServices", "Applied Works"),
           href: "/applied-service",
           icon: ClipboardList,
         },
@@ -632,9 +632,9 @@ export default function ServicesDashboard() {
                     {isProfileView
                       ? t("myProfile", "My Profile")
                       : isMyWorkView
-                        ? t("myServices", "My Services")
+                        ? t("myServices", "My Works")
                         : isAppliedView
-                          ? t("appliedServices", "Applied Services")
+                          ? t("appliedServices", "Applied Works")
                           : isAboutView
                             ? t("aboutUs", "About us")
                             : isSettingsView

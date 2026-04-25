@@ -233,7 +233,7 @@ export const getMyUploadedServices = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Services fetched successfully",
+      message: "Works fetched successfully",
       data: updatedServices,
       pagination: {
         page: page,
@@ -293,7 +293,7 @@ export const getAllSentInvitations = async (req, res) => {
     logError(error, req, 500);
     res.status(500).json({
       success: false,
-      message: "An error occurred while fetching sent invitations.",
+      message: "An error occurred while fetching sent invitations for works.",
       error: error.message,
     });
   }

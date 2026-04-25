@@ -15,13 +15,11 @@ import APP_CONTEXT from "@/app/context/locale";
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import ListingSearchToolbar from "@/components/commons/ListingSearchToolbar";
 import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
-import { useAtomValue } from "jotai";
-import Atoms from "@/app/AtomStore";
 import {
-  applyServiceBrowse,
   filterServicesBySearch,
   type ServiceSortId,
 } from "@/utils/listingBrowse";
+import i18n from "@/utils/i18n";
 
 const SERVICE_TAB_DEFS: { id: ServiceSortId; labelKey: string }[] = [
   { id: "nearest", labelKey: "sortTabNearest" },
@@ -42,14 +40,13 @@ const AllServices = ({
   loadMore,
   totalData = 0,
   headingTitleKey = "allServices",
+  selectedSort = "nearest",
+  onSelectSort,
 }: any) => {
   const [isAddFilters, setIsAddFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [serviceSort, setServiceSort] = useState<ServiceSortId>("nearest");
+  const [serviceSort, setServiceSort] = useState<ServiceSortId>(selectedSort);
   const { role } = APP_CONTEXT.useApp();
-  const userDetails = useAtomValue(Atoms.UserAtom);
-  const loggedInUserLocation =
-    userDetails?.geoLocation ?? userDetails?.location ?? null;
 
   const safeServicesData = useMemo(
     () =>
@@ -62,14 +59,25 @@ const AllServices = ({
 
   const sortTabs = useMemo(
     () => SERVICE_TAB_DEFS.map((d) => ({ id: d.id, label: t(d.labelKey) })),
-    [],
+    [i18n?.locale],
   );
 
+  React.useEffect(() => {
+    setServiceSort(selectedSort);
+  }, [selectedSort]);
+
   const displayedData = useMemo(() => {
-    let rows = [...safeServicesData];
-    rows = filterServicesBySearch(rows, searchQuery);
-    return applyServiceBrowse(rows, serviceSort, loggedInUserLocation);
-  }, [safeServicesData, searchQuery, serviceSort, loggedInUserLocation]);
+    return filterServicesBySearch([...safeServicesData], searchQuery);
+  }, [safeServicesData, searchQuery]);
+  const hasFetchedData = Array.isArray(safeServicesData) && safeServicesData.length > 0;
+  const shouldShowListLoader = isLoading && !hasFetchedData;
+
+  const handleSelectSort = (id: ServiceSortId) => {
+    setServiceSort(id);
+    if (typeof onSelectSort === "function") {
+      onSelectSort(id);
+    }
+  };
 
   const onSearchService = (data: any) => {
     setIsAddFilters(false);
@@ -92,64 +100,60 @@ const AllServices = ({
 
   return (
     <GradientWrapper>
-      {isLoading ? (
-        <ListingsServicesPlaceholder />
-      ) : (
-        <>
-          <View
-            style={[
-              styles.container,
-              role !== "WORKER" && { paddingBottom: 24 },
-            ]}
-          >
-            <ListingSearchToolbar
-              variant="onDark"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onPressFilter={() => setIsAddFilters(true)}
-              placeholderKey="searchListPlaceholderServices"
-            />
+      <View
+        style={[
+          styles.container,
+          role !== "WORKER" && { paddingBottom: 24 },
+        ]}
+      >
+        <ListingSearchToolbar
+          variant="onDark"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onPressFilter={() => setIsAddFilters(true)}
+          placeholderKey="searchListPlaceholderServices"
+        />
 
-            <ScrollableSortTabs
-              variant="onDark"
-              tabs={sortTabs}
-              selectedId={serviceSort}
-              onSelect={(id) => setServiceSort(id as ServiceSortId)}
-            />
+        <ScrollableSortTabs
+          variant="onDark"
+          tabs={sortTabs}
+          selectedId={serviceSort}
+          onSelect={(id) => handleSelectSort(id as ServiceSortId)}
+        />
 
-            {displayedData.length > 0 ? (
-              <View style={styles.contentCard}>
-                <View style={styles.listFill}>
-                  <ListingsVerticalServices
-                    listings={displayedData}
-                    loadMore={loadMore}
-                    isFetchingNextPage={isFetchingNextPage}
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={!isRefetching && refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={Colors.primary}
-                        colors={[Colors.primary]}
-                      />
-                    }
+        <View style={styles.contentCard}>
+          {shouldShowListLoader ? (
+            <ListingsServicesPlaceholder />
+          ) : displayedData.length > 0 ? (
+            <View style={styles.listFill}>
+              <ListingsVerticalServices
+                listings={displayedData}
+                loadMore={loadMore}
+                isFetchingNextPage={isFetchingNextPage}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={!isRefetching && refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                    colors={[Colors.primary]}
                   />
-                </View>
-              </View>
-            ) : (
-              <EmptyDataPlaceholder
-                title={
-                  safeServicesData.length > 0
-                    ? "noSearchMatches"
-                    : "service"
                 }
-                type="gradient"
-                buttonTitle="refresh"
-                onPress={onRefresh}
               />
-            )}
-          </View>
-        </>
-      )}
+            </View>
+          ) : (
+            <EmptyDataPlaceholder
+              title={
+                safeServicesData.length > 0
+                  ? "noSearchMatches"
+                  : "service"
+              }
+              type="gradient"
+              buttonTitle="refresh"
+              onPress={onRefresh}
+            />
+          )}
+        </View>
+      </View>
 
       <FiltersServices
         filterVisible={isAddFilters}

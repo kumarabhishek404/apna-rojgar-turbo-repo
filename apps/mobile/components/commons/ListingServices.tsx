@@ -330,9 +330,7 @@ const ListingsServices = React.memo(({ item }: any) => {
                   <View style={styles.distancePill}>
                     <ShowDistance
                       address={item?.address}
-                      loggedInUserLocation={
-                        userDetails?.geoLocation ?? userDetails?.location
-                      }
+                      loggedInUserLocation={userDetails?.geoLocation}
                       targetLocation={item?.geoLocation}
                       align="right"
                     />

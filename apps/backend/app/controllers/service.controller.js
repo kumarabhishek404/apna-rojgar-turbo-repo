@@ -101,7 +101,15 @@ export const getPublicPlatformStats = async (req, res) => {
 export const getAllServices = async (req, res) => {
   const { _id } = req.user;
   const { page = 1, limit = 10, status } = req.query;
-  const { skills, distance, duration, serviceStartIn, state, district } =
+  const {
+    skills,
+    distance,
+    duration,
+    serviceStartIn,
+    state,
+    district,
+    sortBy,
+  } =
     req.body;
 
   try {
@@ -135,17 +143,49 @@ export const getAllServices = async (req, res) => {
     // Filter by state/district in address
     if (state) query.address = { $regex: new RegExp(state, "i") };
     if (district) query.address = { $regex: new RegExp(district, "i") };
+    if (sortBy === "food_available") query["facilities.food"] = true;
+    if (sortBy === "living_available") query["facilities.living"] = true;
+    if (sortBy === "esi_pf") query["facilities.esi_pf"] = true;
 
     // Get user's geoLocation for distance calculation
     const user = await User.findById(_id).select("likedServices geoLocation");
     const userLocation = user?.geoLocation;
 
-    // Fetch services in one go
-    let services = await Service.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .lean(); // Use lean() to get plain objects and reduce memory overhead
+    // Fetch services in one go. Keep sort at DB-level before pagination.
+    let services = [];
+    if (sortBy === "more_salary") {
+      services = await Service.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            maxPayPerDay: {
+              $ifNull: [
+                {
+                  $max: {
+                    $map: {
+                      input: { $ifNull: ["$requirements", []] },
+                      as: "req",
+                      in: { $ifNull: ["$$req.payPerDay", 0] },
+                    },
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
+        { $sort: { maxPayPerDay: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: Number(limit) },
+      ]);
+    } else {
+      const dbSort = sortBy === "latest" ? { createdAt: -1 } : { createdAt: -1 };
+      services = await Service.find(query)
+        .sort(dbSort)
+        .skip(skip)
+        .limit(Number(limit))
+        .lean(); // Use lean() to get plain objects and reduce memory overhead
+    }
 
     const totalServices = await Service.countDocuments(query);
 
@@ -266,14 +306,23 @@ export const getAllServices = async (req, res) => {
       });
     }
 
-    // Sort by nearest distance
-    services?.sort(
-      (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
-    );
+    if (sortBy === "more_salary") {
+      // Already sorted at DB level (maxPayPerDay desc) before pagination.
+      // Keep this order intact.
+    } else if (sortBy === "latest") {
+      services?.sort(
+        (a, b) => new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
+      );
+    } else {
+      // Default and "nearest": sort by nearest distance.
+      services?.sort(
+        (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
+      );
+    }
 
     res.status(200).json({
       success: true,
-      message: "Services fetched successfully",
+      message: "Works fetched successfully",
       data: services,
       pagination: {
         page: Number(page),
@@ -283,7 +332,7 @@ export const getAllServices = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching works:", error);
     logError(error, req, 500);
     res.status(500).json({
       success: false,
@@ -415,7 +464,7 @@ export const getServiceDetail = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: "Service detail fetched successfully",
+        message: "Work detail fetched successfully",
         data: {
           ...filteredService,
           appliedUsers: formatUsers(service.appliedUsers),
@@ -440,14 +489,14 @@ export const getServiceDetail = async (req, res) => {
     // For non-employers → restrict info
     return res.status(200).json({
       success: true,
-      message: "Service detail fetched successfully",
+      message: "Work detail fetched successfully",
       data: {
         ...service,
         employer: service.employer, // only employer info visible
       },
     });
   } catch (error) {
-    console.error("Error fetching service details:", error);
+    console.error("Error fetching work details:", error);
     res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong while fetching service.",
@@ -461,12 +510,12 @@ export const getAllAppliedUsers = async (req, res) => {
   if (!serviceId) {
     return res.status(400).json({
       success: false,
-      message: "Service ID is missing",
+      message: "Work ID is missing",
     });
   }
 
   try {
-    // Fetch service with pending appliedUsers and all required worker details
+    // Fetch work with pending appliedUsers and all required worker details
     const service = await Service.findById(serviceId)
       .populate({
         path: "appliedUsers.user",

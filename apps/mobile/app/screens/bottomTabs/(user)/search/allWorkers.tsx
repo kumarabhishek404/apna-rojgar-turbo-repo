@@ -1,9 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  RefreshControl,
-} from "react-native";
+import { View, StyleSheet, RefreshControl } from "react-native";
 import ListingsVerticalWorkers from "@/components/commons/ListingsVerticalWorkers";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
 import { WORKERTYPES } from "@/constants";
@@ -15,16 +11,14 @@ import WorkersLoadingPlaceholder from "@/components/commons/LoadingPlaceholders/
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import ListingSearchToolbar from "@/components/commons/ListingSearchToolbar";
 import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
-import { useAtomValue } from "jotai";
-import Atoms from "@/app/AtomStore";
 import {
   filterUsersBySearch,
   filterUsersBySearchLoose,
-  sortContractorList,
-  sortWorkerList,
   type ContractorSortId,
   type WorkerSortId,
 } from "@/utils/listingBrowse";
+import i18n from "@/utils/i18n";
+import APP_CONTEXT from "@/app/context/locale";
 
 const WORKER_TAB_DEFS: { id: WorkerSortId; labelKey: string }[] = [
   { id: "nearest", labelKey: "sortTabNearest" },
@@ -48,25 +42,32 @@ const AllWorkers = ({
   totalData = 0,
   sectionTitleKey = "allWorkers",
   listingRoleType = "worker",
+  selectedSort = "nearest",
+  onSelectSort,
 }: any) => {
+  APP_CONTEXT.useApp();
   const [isAddFilters, setIsAddFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const userDetails = useAtomValue(Atoms.UserAtom);
-  const loggedInUserLocation =
-    userDetails?.geoLocation ?? userDetails?.location ?? null;
 
-  const browseKind =
-    listingRoleType === "mediator" ? "contractors" : "workers";
+  const browseKind = listingRoleType === "mediator" ? "contractors" : "workers";
 
   const [workerSort, setWorkerSort] = useState<WorkerSortId>("nearest");
   const [contractorSort, setContractorSort] =
     useState<ContractorSortId>("nearest");
 
+  React.useEffect(() => {
+    if (browseKind === "contractors") {
+      setContractorSort(selectedSort as ContractorSortId);
+    } else {
+      setWorkerSort(selectedSort as WorkerSortId);
+    }
+  }, [browseKind, selectedSort]);
+
   const sortTabs = useMemo(() => {
     const defs =
       browseKind === "contractors" ? CONTRACTOR_TAB_DEFS : WORKER_TAB_DEFS;
     return defs.map((d) => ({ id: d.id, label: t(d.labelKey) }));
-  }, [browseKind]);
+  }, [browseKind, i18n?.locale]);
 
   const selectedSortId =
     browseKind === "contractors" ? contractorSort : workerSort;
@@ -77,6 +78,9 @@ const AllWorkers = ({
     } else {
       setWorkerSort(id as WorkerSortId);
     }
+    if (typeof onSelectSort === "function") {
+      onSelectSort(id);
+    }
   };
 
   const displayedData = useMemo(() => {
@@ -86,19 +90,15 @@ const AllWorkers = ({
       browseKind === "contractors"
         ? filterUsersBySearchLoose(raw, q)
         : filterUsersBySearch(raw, q);
-
-    if (browseKind === "contractors") {
-      return sortContractorList(rows, contractorSort, loggedInUserLocation);
-    }
-    return sortWorkerList(rows, workerSort, loggedInUserLocation);
+    return rows;
   }, [
     memoizedData,
     searchQuery,
     browseKind,
-    contractorSort,
-    workerSort,
-    loggedInUserLocation,
   ]);
+  const hasFetchedData =
+    Array.isArray(memoizedData) && memoizedData.length > 0;
+  const shouldShowListLoader = isLoading && !hasFetchedData;
 
   const onSearchWorkers = (data: any) => {
     setIsAddFilters(false);
@@ -127,59 +127,55 @@ const AllWorkers = ({
 
   return (
     <GradientWrapper>
-      {isLoading ? (
-        <WorkersLoadingPlaceholder />
-      ) : (
-        <>
-          <View style={styles.container}>
-            <ListingSearchToolbar
-              variant="onDark"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onPressFilter={() => setIsAddFilters(true)}
-              placeholderKey={placeholderKey}
-            />
+      <View style={styles.container}>
+        <ListingSearchToolbar
+          variant="onDark"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onPressFilter={() => setIsAddFilters(true)}
+          placeholderKey={placeholderKey}
+        />
 
-            <ScrollableSortTabs
-              variant="onDark"
-              tabs={sortTabs}
-              selectedId={selectedSortId}
-              onSelect={setSelectedSortId}
-            />
+        <ScrollableSortTabs
+          variant="onDark"
+          tabs={sortTabs}
+          selectedId={selectedSortId}
+          onSelect={setSelectedSortId}
+        />
 
-            {displayedData.length > 0 ? (
-              <View style={styles.contentCard}>
-                <View style={styles.listFill}>
-                  <ListingsVerticalWorkers
-                    availableInterest={WORKERTYPES}
-                    listings={displayedData || []}
-                    loadMore={loadMore}
-                    type={listingRoleType}
-                    isFetchingNextPage={isFetchingNextPage}
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={!isRefetching && refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={Colors?.primary}
-                        colors={[Colors.primary]}
-                      />
-                    }
+        <View style={styles.contentCard}>
+          {shouldShowListLoader ? (
+            <WorkersLoadingPlaceholder />
+          ) : displayedData.length > 0 ? (
+            <View style={styles.listFill}>
+              <ListingsVerticalWorkers
+                availableInterest={WORKERTYPES}
+                listings={displayedData || []}
+                loadMore={loadMore}
+                type={listingRoleType}
+                isFetchingNextPage={isFetchingNextPage}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={!isRefetching && refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors?.primary}
+                    colors={[Colors.primary]}
                   />
-                </View>
-              </View>
-            ) : (
-              <EmptyDataPlaceholder
-                title={
-                  Array.isArray(memoizedData) && memoizedData.length > 0
-                    ? "noSearchMatches"
-                    : "worker"
                 }
-                type="gradient"
               />
-            )}
-          </View>
-        </>
-      )}
+            </View>
+          ) : (
+            <EmptyDataPlaceholder
+              title={
+                Array.isArray(memoizedData) && memoizedData.length > 0
+                  ? "noSearchMatches"
+                  : "worker"
+              }
+              type="gradient"
+            />
+          )}
+        </View>
+      </View>
 
       <FiltersWorkers
         filterVisible={isAddFilters}

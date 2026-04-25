@@ -267,6 +267,7 @@
   "selectWorkSubType": "ಕೆಲಸದ ಉಪ ಪ್ರಕಾರವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ",
   "workSubType": "ಕೆಲಸದ ಉಪ ಪ್ರಕಾರ",
   "workRequirements": "ಕೆಲಸದ ಅವಶ್ಯಕತೆಗಳು",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "ಸ್ಥಳ",
   "currentLocation": "ಪ್ರಸ್ತುತ ಸ್ಥಳ",
   "startDate": "ಪ್ರಾರಂಭ ದಿನಾಂಕ",

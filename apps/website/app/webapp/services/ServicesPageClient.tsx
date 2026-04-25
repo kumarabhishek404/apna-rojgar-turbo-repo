@@ -413,14 +413,14 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       ? {
           title: t("noServicesFound", "No services found"),
           subtitle: t("noPostedServicesYet", "You have not posted any service yet."),
-          ctaLabel: t("addNewService", "Add New Service"),
+          ctaLabel: t("newService"),
           ctaHref: "/my-work",
         }
       : activeTab === "applied"
         ? {
-            title: t("noAppliedServices", "No applied services"),
+            title: t("noAppliedServices", "No applied works"),
             subtitle: t("noAppliedServicesYet", "You have not applied to any service yet."),
-            ctaLabel: t("browseServices", "Browse Services"),
+            ctaLabel: t("browseServices", "Browse Works"),
             ctaHref: "/all-services",
           }
         : {
@@ -519,7 +519,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
             path: window.location.pathname,
             source: "website",
           });
-          setMessage("Service created successfully.");
+          setMessage("Work created successfully.");
           await Promise.all([fetchForTab("all", 1, false), fetchForTab("my", 1, false)]);
         }}
       />
