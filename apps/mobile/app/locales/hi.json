@@ -539,7 +539,7 @@
   "userManagement": "उपयोगकर्ता प्रबंधन",
   "manageUsers": "उपयोगकर्ता प्रबंधन",
   "roles": "भूमिकाएं",
-  "serviceCategories": "काम श्रेणियां",
+  "serviceCategories": "काम के प्रकार",
   "serviceRequests": "काम अनुरोध",
   "workerVerification": "मज़दूर सत्यापन",
   "appSettings": "एप्लिकेशन सेटिंग्स",
@@ -805,10 +805,10 @@
   "getNotifications": "आपके लिए महत्वपूर्ण चीज़ों के बारे में सूचनाएँ प्राप्त करें।",
   "notifyWhen": "हम आपको तब सूचित करेंगे जब",
   "newServiceArrived": "1. नई काम उपलब्ध होगी",
-  "mediatorCreatesRequirements": "2. जब कोई मध्यस्थ आवश्यकताएँ बनाएगा",
+  "mediatorCreatesRequirements": "2. जब कोई ठेकेदार आवश्यकताएँ बनाएगा",
   "selectedInService": "3. जब आपको काम में चुना जाएगा",
   "someoneLikesYou": "4. जब कोई आपको पसंद करेगा",
-  "mediatorRequestsYou": "5. जब कोई मध्यस्थ आपको अपनी टीम में शामिल होने का अनुरोध करेगा",
+  "mediatorRequestsYou": "5. जब कोई ठेकेदार आपको अपनी टीम में शामिल होने का अनुरोध करेगा",
   "later": "बाद में",
   "allowNotifications": "सूचनाएँ अनुमति दें",
   "noNotificationsDesc": "आपकी सूचनाएँ यहाँ दिखाई देंगी जब आप उन्हें प्राप्त करेंगे।",
@@ -875,7 +875,7 @@
   "don'tSave": "सहेजें नहीं",
   "unsavedChanges": "असहेजित परिवर्तन",
   "youHaveUnsavedChanges": "आपके पास असहेजित परिवर्तन हैं। छोड़ने से पहले क्या आप सहेजना चाहेंगे?",
-  "areYouAMediator": "यदि आप एक मध्यस्थ हैं, तो कृपया 'स्किप' बटन पर क्लिक करें और आगे बढ़ें।",
+  "areYouAMediator": "यदि आप एक ठेकेदार हैं, तो कृपया 'स्किप' बटन पर क्लिक करें और आगे बढ़ें।",
   "skip": "स्किप",
 
   "headerTitle": "ऐप साझा करें",
@@ -902,6 +902,7 @@
   "no_available_workers": "कोई उपलब्ध मज़दूर नहीं।",
   "filtersServices": "कामों के लिए फ़िल्टर",
   "filtersWorkers": "मज़दूरों के लिए फ़िल्टर",
+  "filtersContractors": "ठेकेदारों के लिए फ़िल्टर",
   "filter": "फ़िल्टर",
   "clear": "साफ करें",
   "apply": "लागू करें",
@@ -933,6 +934,8 @@
   "selectSkills": "कौशल चुनें",
   "close": "बंद करें",
   "anywhere": "कहीं भी",
+  "within_5km": "5 किलोमीटर के भीतर",
+  "within_25km": "25 किलोमीटर के भीतर",
   "anytime": "किसी भी समय",
   "any_duration": "किसी भी अवधि",
   "applyFilters": "फ़िल्टर लगाएँ",
@@ -1021,7 +1024,7 @@
   "showApplicationsDetails": "आवेदन दिखाएं",
   "remove": "हटाएं",
   "noMembersAvailableForThisSkill": "इस कौशल के लिए कोई सदस्य उपलब्ध नहीं है",
-  "applyAsMediator": "मध्यस्थ के रूप में आवेदन करें",
+  "applyAsMediator": "ठेकेदार के रूप में आवेदन करें",
 
   "verificationTitle": "सत्यापन",
   "enterMobileTitle": "मोबाइल नंबर दर्ज करें",
@@ -1385,6 +1388,8 @@
   "filterStartHelp": "काम कब शुरू होगा, वह चुनें।",
   "filterSkillsHelp": "एक या अधिक कौशल चुनें। सूची लंबी हो तो खोजें।",
   "workerFilterHelp": "भूमिका, दूरी और कौशल चुनकर अपने पास का सही व्यक्ति जल्दी ढूंढें।",
+  "contractorFilterHelp": "दूरी और कौशल चुनकर अपने पास का सही ठेकेदार जल्दी ढूंढें।",
+  "searchContractorsTitle": "ठेकेदार खोजें",
   "serviceFilterHelp": "सरल फ़िल्टर लगाकर अपने कौशल और समय के अनुसार पास का काम खोजें।",
   "refresh": "फिर से लोड करें",
   "serviceListPullHint": "सूची ताज़ा करने के लिए नीचे खींचें",
@@ -1463,6 +1468,8 @@
   "salaryTipText": "अच्छी और सही दिहाड़ी देने से जल्दी आवेदन मिलते हैं",
   "enterValidSalary": "सही दिहाड़ी दर्ज करें",
   "enterWorkerCount": "मजदूरों की संख्या दर्ज करें",
+  "numberOfWorkersInTeam": "टीम में मजदूरों की संख्या",
+  "completeMediatorProfile": "ठेकेदार प्रोफाइल पूरी करें",
 
   "selectWorkLocation": "काम कहाँ करवाना है?",
 
@@ -1515,7 +1522,7 @@
 
   "ctaFindWorkStep1": "सर्च खोलें",
   "ctaFindWorkStep2": "पास के काम चुनें",
-  "ctaFindWorkStep3": "अप्लाई बटन दबाएँ",
+  "ctaFindWorkStep3": "आवेदन करने वाला बटन दबाएँ",
 
   "myWorkDashboard": "मेरा काम (मजदूर)",
   "myWorkTitle": "मेरा काम",
@@ -1689,7 +1696,7 @@
   "activityAppliedEmpty": "अभी कोई सक्रिय आवेदन नहीं। काम ढूँढने के लिए वर्क टैब खोलें।",
   "activitySectionBookedWorkers": "बुक किए मजदूर",
   "activitySectionBookedWorkersSub": "आपकी पोस्ट पर आवेदन और चयनित मजदूर",
-  "activitySectionAppliedMedSub": "मध्यस्थ के रूप में आपके आवेदन",
+  "activitySectionAppliedMedSub": "ठेकेदार के रूप में आपके आवेदन",
   "activitySectionTeamMembers": "आपकी टीम",
   "activitySectionTeamMembersSub": "आपकी प्रोफ़ाइल से जुड़े मजदूर",
   "activitySectionBookedMedSub": "जहाँ आप बुक हैं — गिनती में आवेदन और चयन दिखेंगे",
@@ -1710,7 +1717,7 @@
   "activityTabWorkerInvitesHint": "मध्यस्थों से",
 
   "activityTabMedAppliedTitle": "आवेदित काम",
-  "activityTabMedAppliedHint": "मध्यस्थ के रूप में",
+  "activityTabMedAppliedHint": "ठेकेदार के रूप में",
   "activityTabMedTeamTitle": "मेरी टीम",
   "activityTabMedTeamHint": "सदस्य और मजदूर",
   "activityTabMedBookedTitle": "बुक किए मजदूर",
@@ -1724,7 +1731,7 @@
   "homeTeamSectionTitle": "टीम में शामिल होना",
   "homeTeamInvitesTitle": "मध्यस्थों के निमंत्रण",
   "homeTeamInvitesSubtitle": "टीम में शामिल होने के अनुरोध देखें",
-  "homeTeamBrowseTitle": "मध्यस्थ खोजें",
+  "homeTeamBrowseTitle": "ठेकेदार खोजें",
   "homeTeamBrowseSubtitle": "लोग ब्राउज़ करें और जॉइन अनुरोध भेजें",
 
   "activityEmptyLineApplied": "अभी कुछ नहीं। जब आप किसी काम के लिए आवेदन करेंगे या चुने जाएँगे, वह यहाँ दिखेगा। काम ढूँढने के लिए वर्क टैब खोलें।",
@@ -1775,15 +1782,15 @@
       "heroTitle": "उपलब्ध काम",
       "heroSubtitle": "आपके आस-पास के काम",
 
-      "applied": "अप्लाई किए काम",
+      "applied": "आवेदन किए गए काम",
       "bookings": "मेरी बुकिंग",
       "contractors": "ठेकेदार",
-      "activity": "मेरी एक्टिविटी",
+      "activity": "मेरी गतिविधि",
 
       "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
       "bookingsDesc": "आपकी कन्फर्म बुकिंग देखें",
       "contractorsDesc": "अपने आस-पास के ठेकेदार खोजें",
-      "activityDesc": "अपनी हाल की एक्टिविटी देखें"
+      "activityDesc": "अपनी हाल की गतिविधि देखें"
     },
 
     "employer": {
@@ -1794,13 +1801,13 @@
       "bookedWorkers": "बुक किए गए मजदूर",
       "contractors": "ठेकेदार",
       "workers": "मजदूर",
-      "activity": "मेरी एक्टिविटी",
+      "activity": "मेरी गतिविधि",
 
       "postWorkDesc": "नया काम पोस्ट करें",
       "bookedWorkersDesc": "जिन मजदूरों को आपने रखा है उन्हें देखें",
       "contractorsDesc": "उपलब्ध ठेकेदार खोजें",
       "workersDesc": "मजदूर खोजें और काम पर रखें",
-      "activityDesc": "अपने काम की एक्टिविटी देखें"
+      "activityDesc": "अपने काम की गतिविधि देखें"
     },
 
     "mediator": {
@@ -1810,18 +1817,18 @@
       "myPostedJobs": "मेरे पोस्ट किए गए जरूरतें",
       "myPostedJobsDesc": "आपके पोस्ट किए गए जरूरतें देखें",
       "postRequirement": "नई जरूरत पोस्ट करें",
-      "applied": "अप्लाई किए काम",
+      "applied": "आवेदन किए गए काम",
       "selected": "चुने गए मजदूर",
       "team": "आपकी टीम",
       "workers": "मजदूर",
-      "activity": "मेरी एक्टिविटी",
+      "activity": "मेरी गतिविधि",
 
       "postRequirementDesc": "नई जरूरत पोस्ट करें और मैनेज करें",
       "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
       "selectedDesc": "चुने गए मजदूर देखें",
       "teamDesc": "अपनी टीम को मैनेज करें",
       "workersDesc": "उपलब्ध मजदूर देखें",
-      "activityDesc": "पूरी एक्टिविटी ट्रैक करें"
+      "activityDesc": "पूरी गतिविधि ट्रैक करें"
     }
   },
   "connectTitle": "हमसे जुड़ें",

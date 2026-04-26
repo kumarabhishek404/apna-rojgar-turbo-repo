@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   header: {
-    padding: 15,
+    // padding: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

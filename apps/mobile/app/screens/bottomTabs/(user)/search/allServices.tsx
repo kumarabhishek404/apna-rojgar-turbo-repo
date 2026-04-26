@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import {
+  TouchableOpacity,
   View,
   StyleSheet,
   RefreshControl,
@@ -15,6 +16,8 @@ import APP_CONTEXT from "@/app/context/locale";
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import ListingSearchToolbar from "@/components/commons/ListingSearchToolbar";
 import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
+import CustomText from "@/components/commons/CustomText";
+import { Ionicons } from "@expo/vector-icons";
 import {
   filterServicesBySearch,
   type ServiceSortId,
@@ -42,6 +45,8 @@ const AllServices = ({
   headingTitleKey = "allServices",
   selectedSort = "nearest",
   onSelectSort,
+  activeCategoryType,
+  onClearCategoryFilter,
 }: any) => {
   const [isAddFilters, setIsAddFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +74,8 @@ const AllServices = ({
   const displayedData = useMemo(() => {
     return filterServicesBySearch([...safeServicesData], searchQuery);
   }, [safeServicesData, searchQuery]);
-  const hasFetchedData = Array.isArray(safeServicesData) && safeServicesData.length > 0;
+  const hasFetchedData =
+    Array.isArray(safeServicesData) && safeServicesData.length > 0;
   const shouldShowListLoader = isLoading && !hasFetchedData;
 
   const handleSelectSort = (id: ServiceSortId) => {
@@ -82,10 +88,10 @@ const AllServices = ({
   const onSearchService = (data: any) => {
     setIsAddFilters(false);
     const searchCategory = {
+      type: data?.type,
       distance: data?.distance,
       duration: data?.duration,
       serviceStartIn: data?.serviceStartIn,
-      skills: data?.skills,
     };
 
     router?.push({
@@ -101,18 +107,61 @@ const AllServices = ({
   return (
     <GradientWrapper>
       <View
-        style={[
-          styles.container,
-          role !== "WORKER" && { paddingBottom: 24 },
-        ]}
+        style={[styles.container, role !== "WORKER" && { paddingBottom: 24 }]}
       >
         <ListingSearchToolbar
           variant="onDark"
           value={searchQuery}
           onChangeText={setSearchQuery}
           onPressFilter={() => setIsAddFilters(true)}
+          showFilterButton={!activeCategoryType}
           placeholderKey="searchListPlaceholderServices"
         />
+        <View style={[styles.filterRow, activeCategoryType && { marginBottom: 10 }]}>
+          {activeCategoryType ? (
+            <View style={styles.activeCategoryContainer}>
+              <View style={styles.activeCategoryChip}>
+                <CustomText
+                  baseFont={13}
+                  color="#0E2F8C"
+                  fontWeight="700"
+                  textAlign="left"
+                  numberOfLines={1}
+                  style={{ flex: 1 }}
+                >
+                  {t(activeCategoryType) !== activeCategoryType
+                    ? t(activeCategoryType)
+                    : activeCategoryType.replace(/([a-z])([A-Z])/g, "$1 $2")}
+                </CustomText>
+                <TouchableOpacity
+                  onPress={() =>
+                    typeof onClearCategoryFilter === "function"
+                      ? onClearCategoryFilter()
+                      : null
+                  }
+                  activeOpacity={0.8}
+                  style={styles.clearChipButton}
+                >
+                  <Ionicons name="close" size={16} color="#0E4FC5" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View style={{ flex: 1 }} />
+          )}
+          {activeCategoryType ? (
+            <TouchableOpacity
+              onPress={() => setIsAddFilters(true)}
+              style={styles.filterActionBtn}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="options-outline" size={18} color={Colors.white} />
+              <CustomText baseFont={13} fontWeight="700" color={Colors.white}>
+                {t("filter")}
+              </CustomText>
+            </TouchableOpacity>
+          ) : null}
+        </View>
 
         <ScrollableSortTabs
           variant="onDark"
@@ -143,9 +192,7 @@ const AllServices = ({
           ) : (
             <EmptyDataPlaceholder
               title={
-                safeServicesData.length > 0
-                  ? "noSearchMatches"
-                  : "service"
+                safeServicesData.length > 0 ? "noSearchMatches" : "service"
               }
               type="gradient"
               buttonTitle="refresh"
@@ -172,6 +219,46 @@ const styles = StyleSheet.create({
   },
   contentCard: {
     flex: 1,
+  },
+  activeCategoryContainer: {
+    flex: 1,
+    gap: 6,
+    marginRight: 10,
+  },
+  activeCategoryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(14,79,197,0.25)",
+    paddingVertical: 8,
+    paddingLeft: 12,
+    paddingRight: 8,
+    gap: 8,
+  },
+  clearChipButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "rgba(14,79,197,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+  },
+  filterActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.16)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.28)",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
   },
   listFill: {
     flex: 1,

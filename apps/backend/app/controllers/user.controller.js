@@ -97,6 +97,7 @@ export const handleUpdateInfo = async (req, res) => {
       geoLocation,
       role,
       skills,
+      numberOfWorkersInTeam,
     } = req.body;
 
     const parseSkillsInput = (rawSkills) => {
@@ -173,6 +174,14 @@ export const handleUpdateInfo = async (req, res) => {
       } catch {
         return null;
       }
+    };
+
+    const parseTeamWorkerCount = (rawValue) => {
+      if (rawValue == null || rawValue === "") return null;
+      const parsed = Number(rawValue);
+      if (!Number.isFinite(parsed)) return null;
+      if (parsed <= 0) return null;
+      return Math.floor(parsed);
     };
 
     console.log("Fetching user from database");
@@ -263,6 +272,11 @@ export const handleUpdateInfo = async (req, res) => {
         new Map(normalizedSkills.map((item) => [String(item.skill), item])).values(),
       );
       updateData.skills = uniqueBySkill;
+    }
+
+    const normalizedWorkerCount = parseTeamWorkerCount(numberOfWorkersInTeam);
+    if (normalizedWorkerCount != null) {
+      updateData.numberOfWorkersInTeam = normalizedWorkerCount;
     }
 
     // Normalize address before saving

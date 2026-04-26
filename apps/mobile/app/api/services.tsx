@@ -44,6 +44,15 @@ const fetchAllServices = async ({ pageParam, status, payload }: any) => {
   }
 };
 
+const fetchServiceCategories = async () => {
+  try {
+    const data = await API_CLIENT.makeGetRequest("/service/categories");
+    return data.data;
+  } catch (error: any) {
+    handleServiceError(error, "fetch service categories");
+  }
+};
+
 const fetchMyAppliedWorkers = async ({ pageParam, serviceId }: any) => {
   try {
     const data = await API_CLIENT.makeGetRequest(
@@ -101,6 +110,7 @@ const fetchAllVillages = async (payload: any) => {
 
 const SERVICE = {
   fetchAllServices,
+  fetchServiceCategories,
   getServiceById,
   fetchMyAppliedWorkers,
   fetchSelectedWorkers,

@@ -19,6 +19,7 @@ type Props = {
   onPressFilter: () => void;
   placeholderKey: string;
   style?: ViewStyle;
+  showFilterButton?: boolean;
   /** Use on blue / gradient headers: high-contrast filter control and search field tuning. */
   variant?: ListingSearchToolbarVariant;
 };
@@ -29,6 +30,7 @@ const ListingSearchToolbar = ({
   onPressFilter,
   placeholderKey,
   style,
+  showFilterButton = true,
   variant = "default",
 }: Props) => {
   const dark = variant === "onDark";
@@ -58,27 +60,29 @@ const ListingSearchToolbar = ({
           returnKeyType="search"
         />
       </View>
-      <TouchableOpacity
-        onPress={onPressFilter}
-        style={[styles.filterBtn, dark && styles.filterBtnOnDark]}
-        accessibilityRole="button"
-        accessibilityLabel={t("filter")}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <Ionicons
-          name="options-outline"
-          size={20}
-          color={dark ? Colors.white : Colors.primary}
-        />
-        <CustomText
-          fontWeight="700"
-          baseFont={15}
-          color={dark ? Colors.white : Colors.primary}
-          style={dark ? styles.filterLabelOnDark : undefined}
+      {showFilterButton ? (
+        <TouchableOpacity
+          onPress={onPressFilter}
+          style={[styles.filterBtn, dark && styles.filterBtnOnDark]}
+          accessibilityRole="button"
+          accessibilityLabel={t("filter")}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          {t("filter")}
-        </CustomText>
-      </TouchableOpacity>
+          <Ionicons
+            name="options-outline"
+            size={20}
+            color={dark ? Colors.white : Colors.primary}
+          />
+          <CustomText
+            fontWeight="700"
+            baseFont={15}
+            color={dark ? Colors.white : Colors.primary}
+            style={dark ? styles.filterLabelOnDark : undefined}
+          >
+            {t("filter")}
+          </CustomText>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 };

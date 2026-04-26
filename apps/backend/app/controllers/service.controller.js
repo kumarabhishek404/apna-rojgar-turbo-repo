@@ -102,6 +102,7 @@ export const getAllServices = async (req, res) => {
   const { _id } = req.user;
   const { page = 1, limit = 10, status } = req.query;
   const {
+    type,
     skills,
     distance,
     duration,
@@ -127,6 +128,9 @@ export const getAllServices = async (req, res) => {
 
     // Filter by skills
     let skillsArray = [];
+    if (type && typeof type === "string" && type.trim()) {
+      query.type = new RegExp(`^${type.trim()}$`, "i");
+    }
     if (skills) {
       skillsArray = Array.isArray(skills) ? skills : JSON.parse(skills);
       if (skillsArray.length > 0) {
@@ -335,6 +339,58 @@ export const getAllServices = async (req, res) => {
     console.error("Error fetching works:", error);
     logError(error, req, 500);
     res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong.",
+    });
+  }
+};
+
+export const getServiceCategories = async (req, res) => {
+  try {
+    const categories = await Service.aggregate([
+      {
+        $match: {
+          bookingType: "byService",
+          status: "HIRING",
+          type: { $exists: true, $type: "string" },
+        },
+      },
+      {
+        $addFields: {
+          normalizedType: { $trim: { input: "$type" } },
+        },
+      },
+      {
+        $match: {
+          normalizedType: { $ne: "" },
+        },
+      },
+      {
+        $group: {
+          _id: { $toLower: "$normalizedType" },
+          type: { $first: "$normalizedType" },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          type: 1,
+          count: 1,
+        },
+      },
+      { $sort: { count: -1, type: 1 } },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Service categories fetched successfully",
+      data: categories,
+    });
+  } catch (error) {
+    console.error("Error fetching service categories:", error);
+    logError(error, req, 500);
+    return res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong.",
     });

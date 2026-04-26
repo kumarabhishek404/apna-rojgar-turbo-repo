@@ -14,14 +14,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { t } from "@/utils/translationHelper";
 import AddLocationAndAddress from "./AddLocationAndAddress";
 import Gender from "../inputs/Gender";
+import SkillsSelector from "../inputs/SelectSkills";
 import {
   isEmptyObject,
   getMissingCoreProfileFields,
+  getMissingMediatorProfileFields,
 } from "@/constants/functions";
 import Loader from "./Loaders/Loader";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import SelfieScreen from "../inputs/Selfie";
 import TOAST from "@/app/hooks/toast";
+import { WORKTYPES } from "@/constants";
 
 function isFormDataPayload(p: unknown): p is FormData {
   return (
@@ -56,6 +59,11 @@ const ProfileNotification: React.FC = () => {
       location: userDetails?.location || {},
       gender: userDetails?.gender || "",
       profilePicture: "",
+      numberOfWorkersInTeam:
+        userDetails?.numberOfWorkersInTeam != null
+          ? String(userDetails.numberOfWorkersInTeam)
+          : "",
+      skills: Array.isArray(userDetails?.skills) ? userDetails.skills : [],
     },
   });
 
@@ -70,6 +78,13 @@ const ProfileNotification: React.FC = () => {
     setValue("location", userDetails?.location || {});
     setValue("gender", userDetails?.gender || "");
     setValue("profilePicture", pickedProfileUri || "");
+    setValue(
+      "numberOfWorkersInTeam",
+      userDetails?.numberOfWorkersInTeam != null
+        ? String(userDetails.numberOfWorkersInTeam)
+        : "",
+    );
+    setValue("skills", Array.isArray(userDetails?.skills) ? userDetails.skills : []);
   }, [isCompleteProfileModel, userDetails, setValue]);
 
   const mutationUpdateProfileInfo = useMutation({
@@ -115,8 +130,13 @@ const ProfileNotification: React.FC = () => {
     address?: string;
     gender?: string;
     profilePicture?: string;
+    numberOfWorkersInTeam?: string;
+    skills?: Array<{ skill?: string; pricePerDay?: number | null } | string>;
   }) => {
     const missing = getMissingCoreProfileFields(
+      userDetails as Record<string, unknown>,
+    );
+    const mediatorMissing = getMissingMediatorProfileFields(
       userDetails as Record<string, unknown>,
     );
     const updates: Record<string, string> = {};
@@ -166,6 +186,27 @@ const ProfileNotification: React.FC = () => {
       if (v !== trim(userDetails?.gender)) updates.gender = v;
     }
 
+    if (mediatorMissing.has("numberOfWorkersInTeam")) {
+      const v = trim(data.numberOfWorkersInTeam);
+      const count = Number(v);
+      if (!v || !Number.isFinite(count) || count <= 0) {
+        TOAST.error(t("enterWorkerCount"));
+        return;
+      }
+      if (count !== Number(userDetails?.numberOfWorkersInTeam || 0)) {
+        updates.numberOfWorkersInTeam = String(Math.floor(count));
+      }
+    }
+
+    if (mediatorMissing.has("skills")) {
+      const selectedSkills = Array.isArray(data.skills) ? data.skills : [];
+      if (!selectedSkills.length) {
+        TOAST.error(t("pleaseSelectSkills"));
+        return;
+      }
+      updates.skills = JSON.stringify(selectedSkills);
+    }
+
     const photoUri = trim(data.profilePicture) || pickedProfileUri || "";
     const hasPhotoPick = Boolean(photoUri);
 
@@ -205,6 +246,9 @@ const ProfileNotification: React.FC = () => {
 
   const completeProfileModalContent = () => {
     const missing = getMissingCoreProfileFields(
+      userDetails as Record<string, unknown>,
+    );
+    const mediatorMissing = getMissingMediatorProfileFields(
       userDetails as Record<string, unknown>,
     );
 
@@ -350,6 +394,47 @@ const ProfileNotification: React.FC = () => {
             />
           )}
 
+          {mediatorMissing.has("numberOfWorkersInTeam") && (
+            <Controller
+              control={control}
+              name="numberOfWorkersInTeam"
+              rules={{
+                required: t("enterWorkerCount"),
+                validate: (value) =>
+                  Number(value) > 0 || t("enterWorkerCount"),
+              }}
+              render={({ field: { onChange, value } }) => (
+                <TextInputComponent
+                  label="numberOfWorkersInTeam"
+                  name="numberOfWorkersInTeam"
+                  value={String(value || "")}
+                  onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ""))}
+                  placeholder={t("enterWorkerCount")}
+                  type="number"
+                  maxLength={4}
+                  errors={errors}
+                  isRequired={true}
+                />
+              )}
+            />
+          )}
+
+          {mediatorMissing.has("skills") && (
+            <Controller
+              control={control}
+              name="skills"
+              rules={{ required: t("pleaseSelectSkills") }}
+              render={({ field: { onChange, value } }) => (
+                <SkillsSelector
+                  isPricePerDayNeeded={false}
+                  selectedInterests={Array.isArray(value) ? value : []}
+                  setSelectedInterests={onChange}
+                  availableOptions={WORKTYPES}
+                />
+              )}
+            />
+          )}
+
           {missing.has("profilePicture") && (
             <Controller
               control={control}
@@ -397,11 +482,6 @@ const ProfileNotification: React.FC = () => {
       },
     });
   };
-
-  console.log(
-    "mutationUpdateProfileInfo?.isPending----",
-    mutationUpdateProfileInfo?.isPending,
-  );
 
   useEffect(() => {
     setDrawerState((prev: any) => {

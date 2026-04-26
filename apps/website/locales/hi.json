@@ -593,7 +593,7 @@
   "userManagement": "उपयोगकर्ता प्रबंधन",
   "manageUsers": "उपयोगकर्ता प्रबंधन",
   "roles": "भूमिकाएं",
-  "serviceCategories": "काम श्रेणियां",
+  "serviceCategories": "काम के प्रकार",
   "serviceRequests": "काम अनुरोध",
   "workerVerification": "मज़दूर सत्यापन",
   "appSettings": "एप्लिकेशन सेटिंग्स",
@@ -1734,7 +1734,7 @@
 
   "ctaFindWorkStep1": "सर्च खोलें",
   "ctaFindWorkStep2": "पास के काम चुनें",
-  "ctaFindWorkStep3": "अप्लाई बटन दबाएँ",
+  "ctaFindWorkStep3": "आवेदन करने वाला बटन दबाएं",
 
   "myWorkDashboard": "मेरा काम (मजदूर)",
   "myWorkTitle": "मेरा काम",

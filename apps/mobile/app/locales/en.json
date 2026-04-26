@@ -888,6 +888,7 @@
   "no_available_workers": "No available workers.",
   "filtersServices": "Filters to select services",
   "filtersWorkers": "Filters to select workers",
+  "filtersContractors": "Filters to select contractors",
   "filter": "Filter",
   "clear": "Clear",
   "apply": "Apply",
@@ -927,6 +928,8 @@
   "applyFilters": "Apply Filters",
   "role": "Role",
   "workerFilterHelp": "Choose role, distance and skills to quickly find the right person nearby.",
+  "contractorFilterHelp": "Choose distance and skills to quickly find the right contractor nearby.",
+  "searchContractorsTitle": "Search Contractors",
   "serviceFilterHelp": "Use simple filters to find nearby work that matches your skill and timing.",
   "filterWorkerByRoleTitle": "Who do you want to see?",
   "filterWorkerByRoleHint": "Choose the kind of profile you want to view.",
@@ -1507,6 +1510,8 @@
   "salaryTipText": "Higher and fair salary attracts workers faster.",
   "enterValidSalary": "Enter valid daily salary",
   "enterWorkerCount": "Enter number of workers",
+  "numberOfWorkersInTeam": "Number of workers in team",
+  "completeMediatorProfile": "Complete mediator profile",
 
   "selectWorkLocation": "Where should the work happen?",
 

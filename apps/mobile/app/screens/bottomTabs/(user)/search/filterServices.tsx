@@ -1,14 +1,14 @@
 import Colors from "@/constants/Colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet, TextInput } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { t } from "@/utils/translationHelper";
 import { useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
-import { WORKERTYPES } from "@/constants";
 import CustomText from "@/components/commons/CustomText";
-import { getDynamicWorkerType } from "@/utils/i18n";
+import SERVICE from "@/app/api/services";
+import { useQuery } from "@tanstack/react-query";
 
 const DISTANCE = [
   { label: "within_5km", value: "within_5km" },
@@ -38,17 +38,22 @@ const SERVICE_STARTS_IN = [
 
 const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
-  const [skillSearch, setSkillSearch] = useState("");
   const { control, handleSubmit, reset, watch } = useForm({
     defaultValues: {
       distance: "",
       duration: "",
       serviceStartIn: "",
-      skills: [],
+      type: "",
     },
   });
-
-  const [selectedWorkers, setSelectedWorkers] = useState([]);
+  const { data: categoryRes } = useQuery({
+    queryKey: ["serviceCategoriesForFilter"],
+    queryFn: () => SERVICE.fetchServiceCategories(),
+    retry: false,
+  });
+  const serviceCategories = Array.isArray(categoryRes?.data)
+    ? categoryRes.data.filter((item: any) => item?.type)
+    : [];
 
   const handleApply = (data: any) => {
     reset();
@@ -59,34 +64,13 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   const handleClear = () => {
     reset();
     setFilterVisible(false);
-    setSkillSearch("");
   };
-
-  const toggleSkill = (
-    skill: string,
-    currentSkills: string[],
-    onChange: (value: string[]) => void,
-  ) => {
-    if (currentSkills.includes(skill)) {
-      onChange(currentSkills.filter((item) => item !== skill));
-      return;
-    }
-
-    onChange([...currentSkills, skill]);
-  };
-
-  const skills = WORKERTYPES.map((item) => item.value);
-  const skillQuery = skillSearch.trim().toLowerCase();
-  const filteredSkills = skills.filter((skill) => {
-    if (!skillQuery) return true;
-    return getDynamicWorkerType(skill, 1).toLowerCase().includes(skillQuery);
-  });
 
   const activeFilterCount = [
     !!watch("distance"),
     !!watch("duration"),
     !!watch("serviceStartIn"),
-    Array.isArray(watch("skills")) && watch("skills").length > 0,
+    !!watch("type"),
   ].filter(Boolean).length;
 
   const renderSection = ({
@@ -127,15 +111,18 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
   );
 
   const renderChoiceChip = ({
+    key,
     label,
     selected,
     onPress,
   }: {
+    key: string;
     label: string;
     selected: boolean;
     onPress: () => void;
   }) => (
     <TouchableOpacity
+      key={key}
       activeOpacity={0.9}
       onPress={onPress}
       style={[styles.choiceChip, selected && styles.choiceChipSelected]}
@@ -196,8 +183,9 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
             subtitle: t("filterDistanceHelp"),
             children: (
               <View style={styles.choiceWrap}>
-                {DISTANCE.map((option) =>
+                {DISTANCE.map((option, index) =>
                   renderChoiceChip({
+                    key: `distance-${index}`,
                     label: t(option.label),
                     selected: value === option.value,
                     onPress: () =>
@@ -226,8 +214,9 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
             subtitle: t("filterDurationHelp"),
             children: (
               <View style={styles.choiceWrap}>
-                {DURATION.map((option) =>
+                {DURATION.map((option, index) =>
                   renderChoiceChip({
+                    key: `duration-${index}`,
                     label: t(option.label),
                     selected: value === option.value,
                     onPress: () =>
@@ -256,8 +245,9 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
             subtitle: t("filterStartHelp"),
             children: (
               <View style={styles.choiceWrap}>
-                {SERVICE_STARTS_IN.map((option) =>
+                {SERVICE_STARTS_IN.map((option, index) =>
                   renderChoiceChip({
+                    key: `serviceStartIn-${index}`,
                     label: t(option.label),
                     selected: value === option.value,
                     onPress: () =>
@@ -272,55 +262,38 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
 
       <Controller
         control={control}
-        name="skills"
+        name="type"
         render={({ field: { onChange, value } }) =>
           renderSection({
             icon: (
-              <Ionicons
-                name="construct-outline"
-                size={20}
-                color={Colors.primary}
-              />
+              <Ionicons name="grid-outline" size={20} color={Colors.primary} />
             ),
-            title: t("selectSkills"),
-            subtitle: t("filterSkillsHelp"),
+            title: t("serviceType"),
+            subtitle: t("descriptionServices"),
             children: (
-              <>
-                <View style={styles.searchBox}>
-                  <Ionicons
-                    name="search-outline"
-                    size={18}
-                    color={Colors.inputPlaceholder}
-                  />
-                  <TextInput
-                    value={skillSearch}
-                    onChangeText={setSkillSearch}
-                    placeholder={t("searchAndSelectSkills")}
-                    placeholderTextColor={Colors.inputPlaceholder}
-                    style={styles.searchInput}
-                  />
-                </View>
-                <View style={styles.choiceWrap}>
-                  {filteredSkills.map((skill) => {
-                    const selectedSkills = value as string[];
-                    return renderChoiceChip({
-                      label: getDynamicWorkerType(skill, 1),
-                      selected: selectedSkills.includes(skill),
-                      onPress: () =>
-                        toggleSkill(skill, selectedSkills, onChange),
-                    });
-                  })}
-                  {filteredSkills.length === 0 ? (
-                    <CustomText
-                      baseFont={13}
-                      color={Colors.subHeading}
-                      textAlign="left"
-                    >
-                      {t("noSkillsFound")}
-                    </CustomText>
-                  ) : null}
-                </View>
-              </>
+              <View style={styles.choiceWrap}>
+                {serviceCategories.map((item: any, index: number) =>
+                  renderChoiceChip({
+                    key: `type-${index}`,
+                    label:
+                      t(item.type) !== item.type
+                        ? t(item.type)
+                        : item.type.replace(/([a-z])([A-Z])/g, "$1 $2"),
+                    selected: value === item.type,
+                    onPress: () =>
+                      onChange(value === item.type ? "" : item.type),
+                  }),
+                )}
+                {serviceCategories.length === 0 ? (
+                  <CustomText
+                    baseFont={13}
+                    color={Colors.subHeading}
+                    textAlign="left"
+                  >
+                    {t("noOptionsAvailable")}
+                  </CustomText>
+                ) : null}
+              </View>
             ),
           })
         }
@@ -442,23 +415,6 @@ const styles = StyleSheet.create({
   choiceChipSelected: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
-  },
-  searchBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F7F9FF",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: Colors.secondaryBackground,
-    marginBottom: 14,
-  },
-  searchInput: {
-    flex: 1,
-    color: Colors.text,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
   },
 });
 

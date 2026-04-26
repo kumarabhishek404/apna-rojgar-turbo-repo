@@ -13,6 +13,7 @@ import SkillsSelector from "@/components/inputs/SelectSkills";
 import { WORKTYPES } from "@/constants";
 import ButtonComp from "@/components/inputs/Button";
 import CustomHeading from "@/components/commons/CustomHeading";
+import TextInputComponent from "@/components/inputs/TextInputWithIcon";
 const { width } = Dimensions.get("window");
 
 const UpdateUserSkillsScreen = () => {
@@ -28,6 +29,7 @@ const UpdateUserSkillsScreen = () => {
     defaultValues: {
       role: "WORKER",
       skills: [],
+      numberOfWorkersInTeam: "",
     },
   });
   const roleValue = useWatch({
@@ -38,6 +40,10 @@ const UpdateUserSkillsScreen = () => {
   const skillsValue = useWatch({
     control,
     name: "skills",
+  });
+  const numberOfWorkersInTeamValue = useWatch({
+    control,
+    name: "numberOfWorkersInTeam",
   });
 
   const mutationUpdateProfile = useMutation({
@@ -66,12 +72,24 @@ const UpdateUserSkillsScreen = () => {
       return;
     }
 
+    if (
+      roleValue === "MEDIATOR" &&
+      (!numberOfWorkersInTeamValue || Number(numberOfWorkersInTeamValue) <= 0)
+    ) {
+      TOAST?.error(t("enterWorkerCount"));
+      return;
+    }
+
     router.push({
       pathname: "/screens/auth/register/fifth",
       params: {
         userId,
         role: roleValue,
         skills: JSON.stringify(skillsValue), // 👈 MUST stringify
+        numberOfWorkersInTeam:
+          roleValue === "MEDIATOR"
+            ? String(numberOfWorkersInTeamValue || "")
+            : "",
       },
     });
     // mutationUpdateProfile.mutate(payload);
@@ -113,6 +131,31 @@ const UpdateUserSkillsScreen = () => {
                   selectedInterests={value}
                   setSelectedInterests={onChange}
                   availableOptions={WORKTYPES}
+                />
+              )}
+            />
+          )}
+
+          {roleValue === "MEDIATOR" && (
+            <Controller
+              control={control}
+              name="numberOfWorkersInTeam"
+              rules={{
+                required: t("enterWorkerCount"),
+                validate: (value) =>
+                  Number(value) > 0 || t("enterWorkerCount"),
+              }}
+              render={({ field: { onChange, value } }) => (
+                <TextInputComponent
+                  name="numberOfWorkersInTeam"
+                  label="numberOfWorkersInTeam"
+                  value={String(value || "")}
+                  onChangeText={(text) => onChange(text.replace(/[^0-9]/g, ""))}
+                  placeholder={t("enterWorkerCount")}
+                  type="number"
+                  maxLength={4}
+                  errors={errors}
+                  isRequired={true}
                 />
               )}
             />

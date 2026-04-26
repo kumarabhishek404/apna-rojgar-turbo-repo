@@ -41,7 +41,10 @@ import USE_LOGOUT from "@/app/hooks/useLogout";
 import JoinWhatsAppGroup from "@/components/commons/JoinWhatsappGroup";
 import FollowInstagram from "@/components/commons/JoinInstagramAccount";
 import RoleSwitcher from "@/components/commons/RoleSwitcher";
-import { isCoreProfileIncomplete } from "@/constants/functions";
+import {
+  isCoreProfileIncomplete,
+  isMediatorProfileIncomplete,
+} from "@/constants/functions";
 
 type TabKey = "overview" | "settings";
 
@@ -503,7 +506,12 @@ const UserProfile = () => {
 
             {/* White rounded content sheet */}
             <View style={styles.contentSheet}>
-              {isCoreProfileIncomplete(userDetails as Record<string, unknown>) && (
+              {(isCoreProfileIncomplete(
+                userDetails as Record<string, unknown>,
+              ) ||
+                isMediatorProfileIncomplete(
+                  userDetails as Record<string, unknown>,
+                )) && (
                 <ProfileNotification />
               )}
               {(userDetails?.status === "SUSPENDED" ||

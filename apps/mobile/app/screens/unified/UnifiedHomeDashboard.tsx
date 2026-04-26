@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useAtomValue } from "jotai";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
@@ -27,13 +27,26 @@ import EMPLOYER from "@/app/api/employer";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { t } from "@/utils/translationHelper";
 import SocialLinks from "@/components/commons/SocialLinks";
-import { isCoreProfileIncomplete } from "@/constants/functions";
+import {
+  isCoreProfileIncomplete,
+  isMediatorProfileIncomplete,
+} from "@/constants/functions";
 import APP_CONTEXT from "@/app/context/locale";
 import HomePageLinks from "@/components/commons/HomePageLinks";
 
 const HOME_HEADING = "#1F2E4D";
 const CTA_OUTLINE_BORDER = "rgba(14, 79, 197, 0.35)";
 const CTA_SOFT_BG = "#EAF2FF";
+const CATEGORY_ICON_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
+  constructionWork: "construct-outline",
+  factoryJobs: "business-outline",
+  shopWork: "storefront-outline",
+  farmingWork: "leaf-outline",
+  generalLabour: "hammer-outline",
+  homeMaintenance: "home-outline",
+  driverJobs: "car-sport-outline",
+  electricalRepair: "flash-outline",
+};
 
 const UnifiedHomeDashboard = () => {
   const { role, locale } = APP_CONTEXT.useApp();
@@ -62,6 +75,16 @@ const UnifiedHomeDashboard = () => {
       }
       return undefined;
     },
+  });
+
+  const { data: categoryRes, isLoading: loadingCategories } = useQuery({
+    queryKey: ["unifiedHomeServiceCategories"],
+    queryFn: () => SERVICE.fetchServiceCategories(),
+    retry: false,
+    enabled:
+      !!userDetails?._id &&
+      userDetails?.status === "ACTIVE" &&
+      (role === "WORKER" || role === "MEDIATOR"),
   });
 
   const {
@@ -93,6 +116,15 @@ const UnifiedHomeDashboard = () => {
     () => workersRes?.pages?.flatMap((p: any) => p.data || []) || [],
     [workersRes],
   );
+  const serviceCategories = useMemo(() => {
+    const rows = Array.isArray(categoryRes?.data) ? categoryRes.data : [];
+    return rows.filter((item: any) => item?.type);
+  }, [categoryRes]);
+  const getCategoryLabel = (rawType: string) => {
+    const translated = t(rawType);
+    if (translated && translated !== rawType) return translated;
+    return rawType.replace(/([a-z])([A-Z])/g, "$1 $2");
+  };
   const availableServicesCount =
     servicesRes?.pages?.[0]?.pagination?.total ?? serviceList?.length ?? 0;
   const hasAvailableServicesCount =
@@ -190,9 +222,9 @@ const UnifiedHomeDashboard = () => {
     if (hasMoreWorkers && !fetchingMoreWorkers) fetchMoreWorkers();
   };
 
-  const profileIncomplete = isCoreProfileIncomplete(
-    userDetails as Record<string, unknown>,
-  );
+  const profileIncomplete =
+    isCoreProfileIncomplete(userDetails as Record<string, unknown>) ||
+    isMediatorProfileIncomplete(userDetails as Record<string, unknown>);
 
   const DashboardHeroCard = ({
     title,
@@ -259,20 +291,105 @@ const UnifiedHomeDashboard = () => {
     </View>
   );
 
+  const categorySection =
+    role === "WORKER" || role === "MEDIATOR" ? (
+      <View style={styles.section}>
+        <CustomHeading
+          textAlign="left"
+          baseFont={18}
+          style={styles.sectionHeader}
+          color={HOME_HEADING}
+        >
+          {t("serviceCategories")}
+        </CustomHeading>
+        {loadingCategories ? (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        ) : serviceCategories.length > 0 ? (
+          <View style={styles.categoryGrid}>
+            {serviceCategories.map((category: any) => (
+              <TouchableOpacity
+                key={category.type}
+                style={styles.categoryCard}
+                activeOpacity={0.85}
+                onPress={() =>
+                  role === "WORKER"
+                    ? router.push({
+                        pathname: "/(tabs)/second",
+                        params: {
+                          categoryType: category.type,
+                        },
+                      })
+                    : router.push({
+                        pathname: "/screens/service",
+                        params: {
+                          title: "allServices",
+                          type: "all",
+                          searchCategory: JSON.stringify({
+                            type: category.type,
+                          }),
+                        },
+                      })
+                }
+              >
+                <View style={styles.categoryIconWrap}>
+                  <Ionicons
+                    name={CATEGORY_ICON_MAP[category.type] || "grid-outline"}
+                    size={18}
+                    color="#0E4FC5"
+                  />
+                </View>
+                <CustomText
+                  fontWeight="800"
+                  baseFont={13}
+                  textAlign="left"
+                  numberOfLines={1}
+                  style={styles.categoryTitle}
+                >
+                  {getCategoryLabel(category.type)}
+                </CustomText>
+                <CustomText
+                  baseFont={11}
+                  color={Colors.subHeading}
+                  textAlign="left"
+                >
+                  {category.count || 0} {t("services")}
+                </CustomText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
+      </View>
+    ) : null;
+
+  // Helper component for a cleaner look
+  const SectionLoader = () => (
+    <View style={styles.loaderContainer}>
+      <ActivityIndicator size="small" color={Colors.primary} />
+    </View>
+  );
+
   const servicesSection = (
     <View style={styles.section}>
-      <CustomHeading textAlign="left" baseFont={18} color={HOME_HEADING}>
+      <CustomHeading
+        textAlign="left"
+        baseFont={18}
+        color={HOME_HEADING}
+        style={styles.sectionHeader}
+      >
         {t("recommendedServices")}
       </CustomHeading>
-      {loadingServices ? null : serviceList.length > 0 ? (
-        <>
+
+      {loadingServices ? (
+        <SectionLoader />
+      ) : serviceList.length > 0 ? (
+        <View style={styles.listWrapper}>
           <ListingHorizontalServices
             listings={serviceList as any}
             loadMore={loadMoreServices}
             isFetchingNextPage={fetchingMoreServices}
           />
           <ScrollHint />
-        </>
+        </View>
       ) : (
         <EmptyDataPlaceholder title="service" />
       )}
@@ -281,11 +398,19 @@ const UnifiedHomeDashboard = () => {
 
   const workersSection = (
     <View style={styles.section}>
-      <CustomHeading textAlign="left" baseFont={18} color={HOME_HEADING}>
+      <CustomHeading
+        textAlign="left"
+        baseFont={18}
+        color={HOME_HEADING}
+        style={styles.sectionHeader}
+      >
         {t("nearbyWorkers")}
       </CustomHeading>
-      {loadingWorkers ? null : workerList.length > 0 ? (
-        <>
+
+      {loadingWorkers ? (
+        <SectionLoader />
+      ) : workerList.length > 0 ? (
+        <View style={styles.listWrapper}>
           <ListingHorizontalWorkers
             availableInterest={WORKERTYPES}
             listings={workerList as any}
@@ -293,7 +418,7 @@ const UnifiedHomeDashboard = () => {
             isFetchingNextPage={fetchingMoreWorkers}
           />
           <ScrollHint />
-        </>
+        </View>
       ) : (
         <EmptyDataPlaceholder title="worker" />
       )}
@@ -405,10 +530,11 @@ const UnifiedHomeDashboard = () => {
                       baseFont={14}
                       textAlign="left"
                       style={{ color: "#4C1D95" }}
+                      fontWeight="800"
                     >
                       {t("completeProfileTitle")}
                     </CustomHeading>
-                    <CustomText baseFont={12} color="#6D28D9">
+                    <CustomText baseFont={12} color="#6D28D9" textAlign="left">
                       {t("completeProfileSubtitle")}
                     </CustomText>
                   </View>
@@ -423,6 +549,11 @@ const UnifiedHomeDashboard = () => {
             {workerTeamJoinSection ? (
               <View style={styles.sectionGap}>{workerTeamJoinSection}</View>
             ) : null}
+
+            {categorySection ? (
+              <View style={styles.sectionGap}>{categorySection}</View>
+            ) : null}
+
             {userDetails?.role !== "EMPLOYER" ? (
               <View style={styles.sectionGap}>{servicesSection}</View>
             ) : null}
@@ -452,7 +583,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  section: { gap: 8 },
+
+  section: {
+    marginVertical: 12,
+    backgroundColor: "transparent",
+  },
+  sectionHeader: {
+    marginBottom: 10,
+    letterSpacing: 0.5,
+    fontWeight: "700",
+  },
+  loaderContainer: {
+    height: 180,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8FAFF",
+    borderRadius: 16,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
+  },
+  listWrapper: {
+    marginTop: 4,
+    paddingBottom: 8,
+  },
+  scrollHintContainer: {
+    alignItems: "center",
+    marginTop: 8,
+    opacity: 0.6,
+  },
   sectionGap: { marginBottom: 16 },
   ctaStack: { gap: 12 },
   ctaRowPair: {
@@ -628,6 +787,39 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
     color: "#666",
+  },
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
+  },
+  categoryCard: {
+    width: "48%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.16)",
+    gap: 6,
+    shadowColor: "#0E4FC5",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  categoryIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "rgba(14,79,197,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
+  categoryTitle: {
+    color: "#172B57",
   },
 });
 

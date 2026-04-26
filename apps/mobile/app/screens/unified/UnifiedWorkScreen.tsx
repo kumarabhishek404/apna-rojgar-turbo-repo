@@ -4,7 +4,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import Colors from "@/constants/Colors";
@@ -35,11 +35,16 @@ const UnifiedWorkScreen = () => {
   const { locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
   const role = (userDetails?.role || "WORKER") as ApiRole;
+  const params = useLocalSearchParams<{ categoryType?: string | string[] }>();
   // Ensure translated text inside nested work lists updates when language changes.
   void locale;
 
   const isWorker = role === "WORKER";
   const isLabours = role === "EMPLOYER" || role === "MEDIATOR";
+  const categoryType = useMemo(() => {
+    const raw = params?.categoryType;
+    return Array.isArray(raw) ? raw[0] : raw;
+  }, [params?.categoryType]);
   const canQuery =
     !!userDetails?._id && userDetails?.status === "ACTIVE";
   const [serviceSort, setServiceSort] = useState<ServiceSortId>("nearest");
@@ -54,13 +59,19 @@ const UnifiedWorkScreen = () => {
     hasNextPage: hasMoreServices,
     refetch: refetchServices,
   } = useInfiniteQuery({
-    queryKey: ["unifiedWorkActiveServices", userDetails?._id, serviceSort],
+    queryKey: [
+      "unifiedWorkActiveServices",
+      userDetails?._id,
+      serviceSort,
+      categoryType || "",
+    ],
     queryFn: ({ pageParam }) =>
       SERVICE.fetchAllServices({
         pageParam,
         status: "ACTIVE",
         payload: {
           sortBy: serviceSort,
+          ...(categoryType ? { type: categoryType } : {}),
         },
       }),
     initialPageParam: 1,
@@ -131,6 +142,9 @@ const UnifiedWorkScreen = () => {
       else await refetchLabours();
     },
   );
+  const clearCategoryFilter = () => {
+    router.setParams({ categoryType: undefined });
+  };
 
   return (
     <>
@@ -149,6 +163,8 @@ const UnifiedWorkScreen = () => {
             headingTitleKey="activeWorkHeading"
             selectedSort={serviceSort}
             onSelectSort={setServiceSort}
+            activeCategoryType={categoryType}
+            onClearCategoryFilter={clearCategoryFilter}
           />
         ) : (
           <AllWorkers

@@ -86,6 +86,12 @@ export const CORE_PROFILE_FIELDS = [
 
 export type CoreProfileField = (typeof CORE_PROFILE_FIELDS)[number];
 
+export const MEDIATOR_PROFILE_FIELDS = [
+  "numberOfWorkersInTeam",
+  "skills",
+] as const;
+export type MediatorProfileField = (typeof MEDIATOR_PROFILE_FIELDS)[number];
+
 /** Which core profile fields are empty on the user record. */
 export function getMissingCoreProfileFields(
   user: Record<string, unknown> | null | undefined,
@@ -109,6 +115,30 @@ export function isCoreProfileIncomplete(
   user: Record<string, unknown> | null | undefined,
 ): boolean {
   return getMissingCoreProfileFields(user).size > 0;
+}
+
+export function getMissingMediatorProfileFields(
+  user: Record<string, unknown> | null | undefined,
+): Set<MediatorProfileField> {
+  const missing = new Set<MediatorProfileField>();
+  if (!user || String(user?.role || "").toUpperCase() !== "MEDIATOR") {
+    return missing;
+  }
+  const teamSize = Number(user?.numberOfWorkersInTeam);
+  if (!Number.isFinite(teamSize) || teamSize <= 0) {
+    missing.add("numberOfWorkersInTeam");
+  }
+  const skills = user?.skills;
+  if (!Array.isArray(skills) || skills.length === 0) {
+    missing.add("skills");
+  }
+  return missing;
+}
+
+export function isMediatorProfileIncomplete(
+  user: Record<string, unknown> | null | undefined,
+): boolean {
+  return getMissingMediatorProfileFields(user).size > 0;
 }
 
 export const removeEmptyStrings = (arr: any) => {
@@ -158,47 +188,68 @@ export const calculateDistance = (
 
 export const fetchCurrentLocation = async () => {
   try {
-    // Check if location services are enabled
-    await Location.hasServicesEnabledAsync();
-
-    // Request permission to access location
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      return { location: {} };
+    const servicesEnabled = await Location.hasServicesEnabledAsync();
+    if (!servicesEnabled) {
+      return { location: {}, address: "", addressObject: null };
     }
 
-    // Fetch the current location
-    let currentLocation = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.BestForNavigation,
+    let permission = await Location.getForegroundPermissionsAsync();
+    if (permission.status !== "granted") {
+      permission = await Location.requestForegroundPermissionsAsync();
+    }
+    if (permission.status !== "granted") {
+      return { location: {}, address: "", addressObject: null };
+    }
+
+    let currentLocation = await Location.getLastKnownPositionAsync({
+      maxAge: 60_000,
+      requiredAccuracy: 150,
     });
-    let tempLocation = {
+
+    if (!currentLocation) {
+      currentLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+    }
+
+    if (
+      !currentLocation?.coords ||
+      !Number.isFinite(currentLocation.coords.longitude) ||
+      !Number.isFinite(currentLocation.coords.latitude)
+    ) {
+      return { location: {}, address: "", addressObject: null };
+    }
+
+    const tempLocation = {
       type: "Point",
       coordinates: [
-        currentLocation?.coords?.longitude,
-        currentLocation?.coords?.latitude,
+        currentLocation.coords.longitude,
+        currentLocation.coords.latitude,
       ],
     };
 
-    // Reverse geocode to get the address
-    let response = await Location.reverseGeocodeAsync({
-      longitude: currentLocation?.coords?.longitude,
-      latitude: currentLocation?.coords?.latitude,
-    });
-
-    console.log("tempLocation--", tempLocation);
+    let response: Location.LocationGeocodedAddress[] = [];
+    try {
+      response = await Location.reverseGeocodeAsync({
+        longitude: currentLocation.coords.longitude,
+        latitude: currentLocation.coords.latitude,
+      });
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 350));
+      response = await Location.reverseGeocodeAsync({
+        longitude: currentLocation.coords.longitude,
+        latitude: currentLocation.coords.latitude,
+      });
+    }
 
     return {
       location: tempLocation,
-      address: response[0]?.formattedAddress || "",
-      addressObject: response[0],
+      address: response?.[0]?.formattedAddress || "",
+      addressObject: response?.[0] || null,
     };
   } catch (err) {
-    TOAST?.error(
-      `Error while fetching current location ${JSON?.stringify(err)}`,
-    );
     console.log("Error while fetching location:", err);
-
-    return { location: {} };
+    return { location: {}, address: "", addressObject: null };
   }
 };
 

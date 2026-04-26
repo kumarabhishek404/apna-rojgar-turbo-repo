@@ -76,6 +76,11 @@ const UserSchema = new mongoose.Schema(
       type: [Object],
       default: [],
     },
+    numberOfWorkersInTeam: {
+      type: Number,
+      default: null,
+      min: 1,
+    },
     profilePicture: {
       type: String,
       default: "",

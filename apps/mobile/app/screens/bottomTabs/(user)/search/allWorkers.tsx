@@ -50,6 +50,7 @@ const AllWorkers = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const browseKind = listingRoleType === "mediator" ? "contractors" : "workers";
+  const enforcedRole = browseKind === "contractors" ? "MEDIATOR" : "WORKER";
 
   const [workerSort, setWorkerSort] = useState<WorkerSortId>("nearest");
   const [contractorSort, setContractorSort] =
@@ -107,13 +108,13 @@ const AllWorkers = ({
       completedServices: data?.completedServices,
       rating: data?.rating,
       skills: data?.skills,
-      role: data?.role,
+      role: enforcedRole,
     };
 
     router?.push({
       pathname: "/screens/users",
       params: {
-        title: "allWorkers",
+        title: browseKind === "contractors" ? "contractors" : "allWorkers",
         type: "all",
         searchCategory: JSON.stringify(searchCategory),
       },
@@ -181,6 +182,7 @@ const AllWorkers = ({
         filterVisible={isAddFilters}
         setFilterVisible={setIsAddFilters}
         onApply={onSearchWorkers}
+        forcedRole={enforcedRole}
       />
     </GradientWrapper>
   );

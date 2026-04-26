@@ -17,7 +17,10 @@ import Atoms from "@/app/AtomStore";
 import CustomText from "@/components/commons/CustomText";
 import ProfilePicture from "@/components/commons/ProfilePicture";
 import { WORKERTYPES } from "@/constants";
-import { getWorkLabel } from "@/constants/functions";
+import {
+  getWorkLabel,
+  isMediatorProfileIncomplete,
+} from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 import homeBannerArt from "../../assets/banners/banner1.png";
 import homeBannerArt2 from "../../assets/banners/banner2.png";
@@ -88,6 +91,9 @@ const HomeHeroSection = ({ userDetails }: Props) => {
       })
       .filter(Boolean) as string[];
   }, [userDetails?.skills, locale]);
+  const showMediatorCompleteProfile =
+    String(userDetails?.role || "").toUpperCase() === "MEDIATOR" &&
+    isMediatorProfileIncomplete(userDetails as Record<string, unknown>);
 
   const onProfile = () => {
     router.push({ pathname: "/screens/profile" });
@@ -205,7 +211,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
         <View style={styles.profileRow}>
           <View style={styles.heroAvatarWrap}>
             <ProfilePicture
-              uri={userDetails?.profilePicture}
+              uri={userDetails?.profilePicture || ""}
               style={styles.heroAvatar}
             />
           </View>
@@ -289,6 +295,18 @@ const HomeHeroSection = ({ userDetails }: Props) => {
                   );
                 })}
               </View>
+            ) : null}
+            {showMediatorCompleteProfile ? (
+              <TouchableOpacity
+                onPress={onProfile}
+                style={styles.completeProfileBtn}
+                activeOpacity={0.9}
+              >
+                <Ionicons name="warning-outline" size={14} color={Colors.white} />
+                <CustomText baseFont={12} fontWeight="800" textAlign="left" color={Colors.white}>
+                  {t("completeMediatorProfile")}
+                </CustomText>
+              </TouchableOpacity>
             ) : null}
           </View>
         </View>
@@ -423,9 +441,6 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingRight: 4,
   },
-  profileName: {
-    marginBottom: 0,
-  },
   metaCompactRow: {
     flexDirection: "row",
     gap: 10,
@@ -468,8 +483,12 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: 8,
+  },
+
+  profileName: {
+    flex: 1, // ✅ take available space
+    minWidth: 0, // ✅ REQUIRED for truncation to work in RN
   },
   fullDetailsBtn: {
     flexDirection: "row",
@@ -493,6 +512,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 6,
     marginBottom: 0,
+  },
+  completeProfileBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+    backgroundColor: "#7C3AED",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
   },
 });
 

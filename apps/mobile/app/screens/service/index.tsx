@@ -81,6 +81,7 @@ const Services = () => {
             pageParam,
             status: "ACTIVE",
             payload: {
+              type: appliedFilters?.type,
               duration: appliedFilters?.duration,
               serviceStartIn: appliedFilters?.serviceStartIn,
               skills: appliedFilters?.skills,
