@@ -3,8 +3,9 @@
  * Do **not** block the root layout or call `router.replace` before the Stack mounts — that breaks navigation.
  *
  * Supported URLs → routes:
- * - `https://apnarojgar.com/job/<id>` → `app/job/[id].tsx` → redirects to service details
- * - `https://apnarojgar.com/screens/service/<id>` → `app/screens/service/[id].tsx`
+ * - `https://apnarojgarindia.com/job/<id>` → `app/job/[id].tsx` → redirects to service details
+ * - `https://www.apnarojgarindia.com/job/<id>` → same route resolution
+ * - `https://apnarojgarindia.com/screens/service/<id>` → `app/screens/service/[id].tsx`
  * - `apnarojgar://job/<id>` → same path resolution inside Expo Router
  *
  * Re-exports for share / notifications:
