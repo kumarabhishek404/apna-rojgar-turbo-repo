@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, type ReactElement } from "react";
 import debounce from "lodash/debounce";
 import Colors from "@/constants/Colors";
 import ListingsServices from "./ListingServices";
+import APP_CONTEXT from "@/app/context/locale";
 
 type Props = {
   listings: any[];
@@ -13,8 +14,8 @@ type Props = {
 };
 
 const RenderItem = React.memo(
-  ({ item }: any) => <ListingsServices item={item} />,
-  (prev, next) => prev.item._id === next.item._id && prev.item === next.item,
+  ({ item, locale }: any) => <ListingsServices item={item} />,
+  (prev, next) => prev.item === next.item && prev.locale === next.locale,
 );
 RenderItem.displayName = "RenderItem";
 
@@ -22,7 +23,7 @@ const Separator = React.memo(() => <View style={styles.separator} />);
 Separator.displayName = "Separator";
 
 /** Space below last item — tab bar / scroll comfort; loader sits above this. */
-const LIST_BOTTOM_INSET = 250;
+const LIST_BOTTOM_INSET = 110;
 
 const ListingsVerticalServices = ({
   listings,
@@ -31,15 +32,18 @@ const ListingsVerticalServices = ({
   refreshControl,
   ListHeaderComponent,
 }: Props) => {
+  const { locale } = APP_CONTEXT.useApp();
   const debouncedLoadMore = useMemo(() => debounce(loadMore, 300), [loadMore]);
 
   React.useEffect(() => {
-    return () => { debouncedLoadMore.cancel(); };
+    return () => {
+      debouncedLoadMore.cancel();
+    };
   }, [debouncedLoadMore]);
 
   const renderItem = useCallback(
-    ({ item }: any) => <RenderItem item={item} />,
-    [],
+    ({ item }: any) => <RenderItem item={item} locale={locale} />,
+    [locale],
   );
 
   const keyExtractor = useCallback((item: any) => item._id, []);
@@ -71,12 +75,13 @@ const ListingsVerticalServices = ({
         onEndReached={debouncedLoadMore}
         onEndReachedThreshold={0.4}
         ListFooterComponent={ListFooter}
+        extraData={locale}
         contentContainerStyle={styles.listContent}
         initialNumToRender={5}
         maxToRenderPerBatch={5}
         windowSize={9}
         updateCellsBatchingPeriod={80}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
         refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
       />

@@ -18,11 +18,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Stack, router } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useFocusEffect } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
@@ -32,6 +32,7 @@ import MEDIATOR from "@/app/api/mediator";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { getToken } from "@/utils/authStorage";
 import { t } from "@/utils/translationHelper";
+import APP_CONTEXT from "@/app/context/locale";
 import ListingsServices from "@/components/commons/ListingServices";
 import ListingsVerticalServices from "@/components/commons/ListingsVerticalServices";
 import ListingsBookedWorkers from "@/components/commons/ListingBookedWorkers";
@@ -122,7 +123,7 @@ const tabStyles = StyleSheet.create({
   bar: {
     flexDirection: "row",
     backgroundColor: Colors.white,
-    marginHorizontal: 14,
+    marginHorizontal: 10,
     marginTop: 14,
     marginBottom: 10,
     borderRadius: 16,
@@ -266,6 +267,35 @@ const emptyStyles = StyleSheet.create({
   },
 });
 
+const useTabWithParams = (DEFAULT_TAB: number) => {
+  const params = useLocalSearchParams();
+  const [tab, setTab] = useState(DEFAULT_TAB);
+
+  console.log("params", params);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (params?.tab !== undefined) {
+        const nextTab = Number(params.tab);
+        if (!isNaN(nextTab)) {
+          setTab(nextTab);
+        } else {
+          setTab(DEFAULT_TAB);
+        }
+      } else {
+        setTab(DEFAULT_TAB);
+      }
+
+      // 👉 On blur (leaving screen)
+      return () => {
+        setTab(DEFAULT_TAB);
+      };
+    }, [params?.tab]),
+  );
+
+  return { tab, setTab };
+};
+
 /* ─────────────────────────────────────────
    Worker
 ───────────────────────────────────────── */
@@ -277,8 +307,7 @@ const WORKER_TABS: TabDef[] = [
 const WorkerActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
   const firstRef = useRef(true);
-  const [tab, setTab] = useState(0);
-
+  const { tab, setTab } = useTabWithParams(0);
   const bookingsQ = useInfiniteQuery({
     queryKey: ["activityWorkerBookings", userDetails?._id],
     queryFn: async ({ pageParam = 1 }) =>
@@ -364,8 +393,6 @@ const WorkerActivity = () => {
                   ctaLabel={t("browseJobs")}
                   ctaIcon="search-outline"
                   onCta={() => router.push("/(tabs)/second")}
-                  secondaryCtaLabel={t("completeProfile")}
-                  onSecondaryCta={() => router.push("/screens/profile")}
                 />
               </ScrollView>
             ) : (
@@ -422,15 +449,14 @@ const WorkerActivity = () => {
                 }
               >
                 <RichEmptyState
-                  icon="mail-outline"
+                  icon="briefcase-outline"
                   iconColor="#7C3AED"
                   iconBg="#F5F3FF"
                   title={t("activityTabWorkerBookingTitle")}
                   message={t("activityEmptyLineBookingInvites")}
-                  ctaLabel={t("completeProfile")}
-                  ctaIcon="person-outline"
-                  ctaColor="#7C3AED"
-                  onCta={() => router.push("/screens/profile")}
+                  ctaLabel={t("browseJobs")}
+                  ctaIcon="search-outline"
+                  onCta={() => router.push("/(tabs)/second")}
                 />
               </ScrollView>
             ) : (
@@ -470,8 +496,7 @@ const EMPLOYER_TABS: TabDef[] = [
 const EmployerActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
   const firstRef = useRef(true);
-  const [tab, setTab] = useState(0);
-
+  const { tab, setTab } = useTabWithParams(0);
   const servicesQ = useInfiniteQuery({
     queryKey: ["activityEmployerServices", userDetails?._id],
     queryFn: async ({ pageParam = 1 }) =>
@@ -562,7 +587,7 @@ const EmployerActivity = () => {
                   ctaColor="#059669"
                   onCta={() => router.push("/screens/addService")}
                   secondaryCtaLabel={t("browseWorkers")}
-                  onSecondaryCta={() => router.push("/(tabs)/third")}
+                  onSecondaryCta={() => router.push("/(tabs)/second")}
                 />
               </ScrollView>
             ) : (
@@ -607,7 +632,7 @@ const EmployerActivity = () => {
                   ctaLabel={t("browseWorkers")}
                   ctaIcon="search-outline"
                   ctaColor="#2563EB"
-                  onCta={() => router.push("/(tabs)/third")}
+                  onCta={() => router.push("/(tabs)/second")}
                 />
               </ScrollView>
             ) : (
@@ -641,15 +666,15 @@ const EmployerActivity = () => {
    Mediator
 ───────────────────────────────────────── */
 const MEDIATOR_TABS: TabDef[] = [
-  { labelKey: "activityTabApplied", icon: "briefcase-outline" },
   { labelKey: "myServices", icon: "people-outline" },
+  { labelKey: "activityTabApplied", icon: "briefcase-outline" },
   { labelKey: "activityTabBooked", icon: "calendar-outline" },
 ];
 
 const MediatorActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
   const firstRef = useRef(true);
-  const [tab, setTab] = useState(0);
+  const { tab, setTab } = useTabWithParams(0);
 
   const appliedQ = useInfiniteQuery({
     queryKey: ["activityMedApplied", userDetails?._id],
@@ -770,11 +795,11 @@ const MediatorActivity = () => {
                   icon="briefcase-outline"
                   iconColor="#2563EB"
                   iconBg="#EEF4FF"
-                  title={t("activityTabMedAppliedTitle")}
-                  message={t("activityEmptyLineApplied")}
-                  ctaLabel={t("browseJobs")}
+                  title={t("myServices")}
+                  message={t("noCreatedServicesMessage")}
+                  ctaLabel={t("addNewWork")}
                   ctaIcon="search-outline"
-                  onCta={() => router.push("/(tabs)/second")}
+                  onCta={() => router.push("/screens/addService")}
                 />
               </ScrollView>
             ) : (
@@ -826,12 +851,12 @@ const MediatorActivity = () => {
                   icon="briefcase-outline"
                   iconColor="#D97706"
                   iconBg="#FEF3C7"
-                  title={t("myServices")}
-                  message={t("noCreatedServicesMessage")}
-                  ctaLabel={t("createNewService")}
-                  ctaIcon="add-circle-outline"
+                  title={t("activityTabMedAppliedTitle")}
+                  message={t("activityEmptyLineApplied")}
+                  ctaLabel={t("browseJobs")}
+                  ctaIcon="search-outline"
                   ctaColor="#D97706"
-                  onCta={() => router.push("/screens/addService")}
+                  onCta={() => router.push("/(tabs)/third")}
                 />
               </ScrollView>
             ) : (
@@ -924,7 +949,7 @@ const MediatorActivity = () => {
                   iconBg="#F5F3FF"
                   title={t("activityTabMedBookedTitle")}
                   message={t("activityEmptyLineBooked")}
-                  ctaLabel={t("browseJobs")}
+                  ctaLabel={t("browseWorkers")}
                   ctaIcon="search-outline"
                   ctaColor="#7C3AED"
                   onCta={() => router.push("/(tabs)/second")}
@@ -976,8 +1001,11 @@ const MediatorActivity = () => {
    Root
 ───────────────────────────────────────── */
 const UnifiedActivityScreen = () => {
+  const { locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
   const role = (userDetails?.role || "WORKER") as ApiRole;
+  // Ensure all translated labels in this screen refresh on locale change.
+  void locale;
 
   return (
     <>
@@ -998,7 +1026,7 @@ const UnifiedActivityScreen = () => {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EEF4FF" },
   panel: { flex: 1 },
-  body: { flex: 1 },
+  body: { flex: 1, paddingHorizontal: 10 },
   loading: {
     flex: 1,
     paddingTop: 48,

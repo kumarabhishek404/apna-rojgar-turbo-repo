@@ -113,7 +113,7 @@ const HeroSection = () => {
             ) : null}
           </div>
           <h1 className="mb-5 text-4xl font-bold leading-tight md:text-5xl lg:mb-6 lg:text-6xl">
-            {t("heroTitle", "India’s Digital Platform for Jobs & Workers")}
+            {t("heroTitle", "India’s Digital Platform for Works & Workers")}
           </h1>
 
           <p className="mb-8 max-w-xl text-lg text-blue-100 md:mb-10 md:text-xl">
@@ -152,7 +152,7 @@ const HeroSection = () => {
             </div>
             <div>
               <p className="text-3xl font-bold text-white sm:text-4xl">{formattedStats.totalServices}</p>
-              <p className="text-sm">{t("totalServices", "Total Services")}</p>
+              <p className="text-sm">{t("totalServices", "Total Works")}</p>
             </div>
             <div>
               <p className="text-3xl font-bold text-white sm:text-4xl">{formattedStats.totalCities}</p>

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import {
+  ActivityIndicator,
   View,
   StyleSheet,
   ScrollView,
@@ -7,7 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { useAtomValue } from "jotai";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
@@ -22,15 +23,30 @@ import ScrollHint from "@/components/commons/ScrollToRight";
 import { WORKERTYPES } from "@/constants";
 import SERVICE from "@/app/api/services";
 import USER from "@/app/api/user";
+import EMPLOYER from "@/app/api/employer";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { t } from "@/utils/translationHelper";
 import SocialLinks from "@/components/commons/SocialLinks";
-import { isCoreProfileIncomplete } from "@/constants/functions";
+import {
+  isCoreProfileIncomplete,
+  isMediatorProfileIncomplete,
+} from "@/constants/functions";
 import APP_CONTEXT from "@/app/context/locale";
+import HomePageLinks from "@/components/commons/HomePageLinks";
 
 const HOME_HEADING = "#1F2E4D";
 const CTA_OUTLINE_BORDER = "rgba(14, 79, 197, 0.35)";
 const CTA_SOFT_BG = "#EAF2FF";
+const CATEGORY_ICON_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
+  constructionWork: "construct-outline",
+  factoryJobs: "business-outline",
+  shopWork: "storefront-outline",
+  farmingWork: "leaf-outline",
+  generalLabour: "hammer-outline",
+  homeMaintenance: "home-outline",
+  driverJobs: "car-sport-outline",
+  electricalRepair: "flash-outline",
+};
 
 const UnifiedHomeDashboard = () => {
   const { role, locale } = APP_CONTEXT.useApp();
@@ -61,14 +77,22 @@ const UnifiedHomeDashboard = () => {
     },
   });
 
+  const { data: categoryRes, isLoading: loadingCategories } = useQuery({
+    queryKey: ["unifiedHomeServiceCategories"],
+    queryFn: () => SERVICE.fetchServiceCategories(),
+    retry: false,
+    enabled:
+      !!userDetails?._id &&
+      userDetails?.status === "ACTIVE" &&
+      (role === "WORKER" || role === "MEDIATOR"),
+  });
+
   const {
     data: workersRes,
     isLoading: loadingWorkers,
-    isRefetching: refetchingWorkers,
     isFetchingNextPage: fetchingMoreWorkers,
     fetchNextPage: fetchMoreWorkers,
     hasNextPage: hasMoreWorkers,
-    refetch: refetchWorkers,
   } = useInfiniteQuery({
     queryKey: ["unifiedHomeWorkers"],
     queryFn: ({ pageParam }) => USER.fetchAllUsers({ pageParam }),
@@ -83,128 +107,111 @@ const UnifiedHomeDashboard = () => {
     },
   });
 
-  const DASHBOARD_CONFIG: Record<string, any> = {
-    WORKER: {
-      hero: {
-        title: "dashboard.worker.heroTitle",
-        subtitle: "dashboard.worker.heroSubtitle",
-        count: "24",
-        route: "/(tabs)/second",
-      },
-      stats: [
-        {
-          title: "dashboard.worker.applied",
-          icon: "document-text-outline",
-          route: "/(tabs)/fourth",
-        },
-        {
-          title: "dashboard.worker.bookings",
-          icon: "calendar-outline",
-          route: "/(tabs)/fourth",
-        },
-        {
-          title: "dashboard.worker.contractors",
-          icon: "people-outline",
-          route: "/(tabs)/third",
-        },
-        {
-          title: "dashboard.worker.activity",
-          icon: "pulse-outline",
-          route: "/(tabs)/fourth",
-        },
-      ],
-    },
-
-    EMPLOYER: {
-      hero: {
-        title: "dashboard.employer.heroTitle",
-        subtitle: "dashboard.employer.heroSubtitle",
-        count: "6",
-        route: "/(tabs)/fourth",
-      },
-      stats: [
-        {
-          title: "dashboard.employer.postWork",
-          icon: "add-circle-outline",
-          route: "/screens/addService",
-        },
-        {
-          title: "dashboard.employer.bookedWorkers",
-          icon: "calendar-outline",
-          route: "/(tabs)/fourth",
-        },
-        {
-          title: "dashboard.employer.contractors",
-          icon: "people-outline",
-          route: "/(tabs)/third",
-        },
-        {
-          title: "dashboard.employer.workers",
-          icon: "people-outline",
-          route: "/(tabs)/second",
-        },
-        {
-          title: "dashboard.employer.activity",
-          icon: "pulse-outline",
-          route: "/(tabs)/fourth",
-        },
-      ],
-    },
-
-    MEDIATOR: {
-      hero: {
-        title: "dashboard.mediator.heroTitle",
-        subtitle: "dashboard.mediator.heroSubtitle",
-        count: "6",
-        route: "/(tabs)/fourth",
-      },
-      stats: [
-        {
-          title: "dashboard.mediator.postRequirement",
-          icon: "add-circle-outline",
-          route: "/screens/addService",
-        },
-        {
-          title: "dashboard.mediator.applied",
-          icon: "calendar-outline",
-          route: "/(tabs)/fourth",
-        },
-        {
-          title: "dashboard.mediator.selected",
-          icon: "calendar-outline",
-          route: "/(tabs)/fourth",
-        },
-        {
-          title: "dashboard.mediator.team",
-          icon: "people-outline",
-          route: "/screens/team/[id]",
-        },
-        {
-          title: "dashboard.mediator.workers",
-          icon: "people-outline",
-          route: "/(tabs)/second",
-        },
-        {
-          title: "dashboard.mediator.activity",
-          icon: "pulse-outline",
-          route: "/(tabs)/fourth",
-        },
-      ],
-    },
-  };
-
   const serviceList = useMemo(
     () => servicesRes?.pages?.flatMap((p: any) => p.data || []) || [],
     [servicesRes],
   );
+
   const workerList = useMemo(
     () => workersRes?.pages?.flatMap((p: any) => p.data || []) || [],
     [workersRes],
   );
+  const serviceCategories = useMemo(() => {
+    const rows = Array.isArray(categoryRes?.data) ? categoryRes.data : [];
+    return rows.filter((item: any) => item?.type);
+  }, [categoryRes]);
+  const getCategoryLabel = (rawType: string) => {
+    const translated = t(rawType);
+    if (translated && translated !== rawType) return translated;
+    return rawType.replace(/([a-z])([A-Z])/g, "$1 $2");
+  };
+  const availableServicesCount =
+    servicesRes?.pages?.[0]?.pagination?.total ?? serviceList?.length ?? 0;
+  const hasAvailableServicesCount =
+    typeof servicesRes?.pages?.[0]?.pagination?.total === "number";
+
+  const {
+    data: myPostedRes,
+    isLoading: loadingMyPosted,
+    isRefetching: refetchingMyPosted,
+    refetch: refetchMyPosted,
+  } = useInfiniteQuery({
+    queryKey: ["unifiedHomeMyPostedServices", userDetails?._id],
+    queryFn: ({ pageParam }) =>
+      EMPLOYER.fetchMyServices({ pageParam, status: "HIRING" }),
+    initialPageParam: 1,
+    retry: false,
+    enabled:
+      !!userDetails?._id &&
+      userDetails?.status === "ACTIVE" &&
+      role === "EMPLOYER",
+    getNextPageParam: (lastPage: any) => {
+      if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
+        return lastPage.pagination.page + 1;
+      }
+      return undefined;
+    },
+  });
+  const myPostedCount = myPostedRes?.pages?.[0]?.pagination?.total ?? 0;
+  const hasMyPostedCount =
+    typeof myPostedRes?.pages?.[0]?.pagination?.total === "number";
+
+  const DASHBOARD_CONFIG: Record<string, any> = useMemo(() => {
+    return {
+      WORKER: {
+        hero: {
+          title: "dashboard.worker.heroTitle",
+          subtitle: "dashboard.worker.heroSubtitle",
+          count: availableServicesCount,
+          countLoading:
+            !hasAvailableServicesCount &&
+            (loadingServices || refetchingServices),
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/second", params: { tab: 0 } }),
+        },
+      },
+
+      EMPLOYER: {
+        hero: {
+          title: "dashboard.employer.heroTitle",
+          subtitle: "dashboard.employer.heroSubtitle",
+          count: myPostedCount,
+          countLoading:
+            !hasMyPostedCount && (loadingMyPosted || refetchingMyPosted),
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
+        },
+      },
+
+      MEDIATOR: {
+        hero: {
+          title: "dashboard.mediator.heroTitle",
+          subtitle: "dashboard.mediator.heroSubtitle",
+          count: availableServicesCount,
+          countLoading:
+            !hasAvailableServicesCount &&
+            (loadingServices || refetchingServices),
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/third", params: { tab: 1 } }),
+        },
+      },
+    };
+  }, [
+    role,
+    availableServicesCount,
+    myPostedCount,
+    loadingServices,
+    refetchingServices,
+    loadingMyPosted,
+    refetchingMyPosted,
+    hasAvailableServicesCount,
+    hasMyPostedCount,
+  ]);
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
-      await Promise.all([refetchServices(), refetchWorkers()]);
+      await Promise.all([refetchServices()]);
+      if (role === "EMPLOYER") await refetchMyPosted();
     },
   );
 
@@ -215,43 +222,62 @@ const UnifiedHomeDashboard = () => {
     if (hasMoreWorkers && !fetchingMoreWorkers) fetchMoreWorkers();
   };
 
-  const profileIncomplete = isCoreProfileIncomplete(
-    userDetails as Record<string, unknown>,
-  );
+  const profileIncomplete =
+    isCoreProfileIncomplete(userDetails as Record<string, unknown>) ||
+    isMediatorProfileIncomplete(userDetails as Record<string, unknown>);
 
-  const DashboardHeroCard = ({ title, subtitle, count, onPress }: any) => (
+  const DashboardHeroCard = ({
+    title,
+    subtitle,
+    count,
+    countLoading,
+    onPress,
+  }: any) => (
     <TouchableOpacity
       style={styles.heroCard}
       onPress={onPress}
       activeOpacity={0.9}
     >
       <View>
-        <CustomText style={styles.heroTitle}>{title}</CustomText>
-        <CustomText style={styles.heroSubtitle}>{subtitle}</CustomText>
+        <CustomText
+          baseFont={16}
+          fontWeight="800"
+          textAlign="left"
+          style={styles.heroTitle}
+        >
+          {title}
+        </CustomText>
+        <CustomText baseFont={12} textAlign="left" style={styles.heroSubtitle}>
+          {subtitle}
+        </CustomText>
       </View>
 
       <View style={styles.heroRight}>
-        <CustomText style={styles.heroCount}>{count}</CustomText>
-        <Ionicons name="chevron-forward" size={18} color="#fff" />
+        {countLoading ? (
+          <ActivityIndicator size="small" color={Colors.white} />
+        ) : (
+          <CustomText baseFont={22} fontWeight="900" style={styles.heroCount}>
+            {count}
+          </CustomText>
+        )}
+        <Ionicons name="chevron-forward" size={22} color="#fff" />
       </View>
-    </TouchableOpacity>
-  );
-
-  const StatCard = ({ title, icon, onPress }: any) => (
-    <TouchableOpacity
-      style={styles.statCard}
-      onPress={onPress}
-      activeOpacity={0.9}
-    >
-      <View style={styles.statIcon}>{icon}</View>
-
-      <CustomText style={styles.statTitle}>{title}</CustomText>
     </TouchableOpacity>
   );
 
   const dashboard = useMemo(() => {
-    return DASHBOARD_CONFIG[role];
-  }, [role, locale]);
+    return DASHBOARD_CONFIG[role] || DASHBOARD_CONFIG["WORKER"];
+  }, [
+    role,
+    availableServicesCount,
+    myPostedCount,
+    loadingServices,
+    refetchingServices,
+    loadingMyPosted,
+    refetchingMyPosted,
+    hasAvailableServicesCount,
+    hasMyPostedCount,
+  ]);
 
   const dashboardSection = (
     <View style={styles.dashboardContainer}>
@@ -259,35 +285,111 @@ const UnifiedHomeDashboard = () => {
         title={t(dashboard.hero.title)}
         subtitle={t(dashboard.hero.subtitle)}
         count={dashboard.hero.count}
-        onPress={() => router.push(dashboard.hero.route)}
+        countLoading={dashboard.hero.countLoading}
+        onPress={dashboard.hero.onPress}
       />
+    </View>
+  );
 
-      <View style={styles.statGrid}>
-        {dashboard.stats.map((item: any, index: number) => (
-          <StatCard
-            key={index}
-            title={t(item.title)}
-            icon={<Ionicons name={item.icon} size={20} color="#0E4FC5" />}
-            onPress={() =>
-              router.push({ pathname: item.route, params: item.params })
-            }
-          />
-        ))}
+  const categorySection =
+    role === "WORKER" || role === "MEDIATOR" ? (
+      <View style={styles.section}>
+        <CustomHeading
+          textAlign="left"
+          baseFont={18}
+          style={styles.sectionHeader}
+          color={HOME_HEADING}
+        >
+          {t("serviceCategories")}
+        </CustomHeading>
+        {loadingCategories ? (
+          <ActivityIndicator size="small" color={Colors.primary} />
+        ) : serviceCategories.length > 0 ? (
+          <View style={styles.categoryGrid}>
+            {serviceCategories.map((category: any) => (
+              <TouchableOpacity
+                key={category.type}
+                style={styles.categoryCard}
+                activeOpacity={0.85}
+                onPress={() =>
+                  role === "WORKER"
+                    ? router.push({
+                        pathname: "/(tabs)/second",
+                        params: {
+                          categoryType: category.type,
+                        },
+                      })
+                    : router.push({
+                        pathname: "/screens/service",
+                        params: {
+                          title: "allServices",
+                          type: "all",
+                          searchCategory: JSON.stringify({
+                            type: category.type,
+                          }),
+                        },
+                      })
+                }
+              >
+                <View style={styles.categoryIconWrap}>
+                  <Ionicons
+                    name={CATEGORY_ICON_MAP[category.type] || "grid-outline"}
+                    size={18}
+                    color="#0E4FC5"
+                  />
+                </View>
+                <CustomText
+                  fontWeight="800"
+                  baseFont={13}
+                  textAlign="left"
+                  numberOfLines={1}
+                  style={styles.categoryTitle}
+                >
+                  {getCategoryLabel(category.type)}
+                </CustomText>
+                <CustomText
+                  baseFont={11}
+                  color={Colors.subHeading}
+                  textAlign="left"
+                >
+                  {category.count || 0} {t("services")}
+                </CustomText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
       </View>
+    ) : null;
+
+  // Helper component for a cleaner look
+  const SectionLoader = () => (
+    <View style={styles.loaderContainer}>
+      <ActivityIndicator size="small" color={Colors.primary} />
     </View>
   );
 
   const servicesSection = (
     <View style={styles.section}>
-      <CustomHeading textAlign="left" baseFont={18} color={HOME_HEADING}>
+      <CustomHeading
+        textAlign="left"
+        baseFont={18}
+        color={HOME_HEADING}
+        style={styles.sectionHeader}
+      >
         {t("recommendedServices")}
       </CustomHeading>
-      {loadingServices ? null : serviceList.length > 0 ? (
-        <ListingHorizontalServices
-          listings={serviceList as any}
-          loadMore={loadMoreServices}
-          isFetchingNextPage={fetchingMoreServices}
-        />
+
+      {loadingServices ? (
+        <SectionLoader />
+      ) : serviceList.length > 0 ? (
+        <View style={styles.listWrapper}>
+          <ListingHorizontalServices
+            listings={serviceList as any}
+            loadMore={loadMoreServices}
+            isFetchingNextPage={fetchingMoreServices}
+          />
+          <ScrollHint />
+        </View>
       ) : (
         <EmptyDataPlaceholder title="service" />
       )}
@@ -296,11 +398,19 @@ const UnifiedHomeDashboard = () => {
 
   const workersSection = (
     <View style={styles.section}>
-      <CustomHeading textAlign="left" baseFont={18} color={HOME_HEADING}>
+      <CustomHeading
+        textAlign="left"
+        baseFont={18}
+        color={HOME_HEADING}
+        style={styles.sectionHeader}
+      >
         {t("nearbyWorkers")}
       </CustomHeading>
-      {loadingWorkers ? null : workerList.length > 0 ? (
-        <>
+
+      {loadingWorkers ? (
+        <SectionLoader />
+      ) : workerList.length > 0 ? (
+        <View style={styles.listWrapper}>
           <ListingHorizontalWorkers
             availableInterest={WORKERTYPES}
             listings={workerList as any}
@@ -308,7 +418,7 @@ const UnifiedHomeDashboard = () => {
             isFetchingNextPage={fetchingMoreWorkers}
           />
           <ScrollHint />
-        </>
+        </View>
       ) : (
         <EmptyDataPlaceholder title="worker" />
       )}
@@ -396,7 +506,7 @@ const UnifiedHomeDashboard = () => {
           contentContainerStyle={styles.scroll}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing || refetchingServices || refetchingWorkers}
+              refreshing={refreshing || refetchingServices}
               onRefresh={onRefresh}
               tintColor={Colors.primary}
             />
@@ -405,7 +515,6 @@ const UnifiedHomeDashboard = () => {
         >
           <HomeHeroSection userDetails={userDetails as any} />
           <View style={styles.contentSurface}>
-            {/* Complete profile banner — only when profile incomplete */}
             {profileIncomplete && (
               <View style={styles.sectionGap}>
                 <TouchableOpacity
@@ -421,10 +530,11 @@ const UnifiedHomeDashboard = () => {
                       baseFont={14}
                       textAlign="left"
                       style={{ color: "#4C1D95" }}
+                      fontWeight="800"
                     >
                       {t("completeProfileTitle")}
                     </CustomHeading>
-                    <CustomText baseFont={12} color="#6D28D9">
+                    <CustomText baseFont={12} color="#6D28D9" textAlign="left">
                       {t("completeProfileSubtitle")}
                     </CustomText>
                   </View>
@@ -434,17 +544,28 @@ const UnifiedHomeDashboard = () => {
             )}
 
             <View style={styles.sectionGap}>{dashboardSection}</View>
+            <HomePageLinks />
 
             {workerTeamJoinSection ? (
               <View style={styles.sectionGap}>{workerTeamJoinSection}</View>
             ) : null}
-            <View style={styles.sectionGap}>{servicesSection}</View>
+
+            {categorySection ? (
+              <View style={styles.sectionGap}>{categorySection}</View>
+            ) : null}
+
+            {userDetails?.role !== "EMPLOYER" ? (
+              <View style={styles.sectionGap}>{servicesSection}</View>
+            ) : null}
             <View style={styles.sectionGap}>{workersSection}</View>
 
             <View style={styles.sectionGap}>
               <SocialLinks />
             </View>
-            <View style={{ height: 100 }} />
+            <View style={{ height: 50 }} />
+            <CustomText style={styles.copyright}>
+              © 2024 Apna Rojgar. All rights reserved.
+            </CustomText>
           </View>
         </ScrollView>
       </View>
@@ -454,7 +575,7 @@ const UnifiedHomeDashboard = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EEF4FF" },
-  scroll: { paddingBottom: 24, paddingHorizontal: 16, paddingTop: 8 },
+  scroll: { paddingBottom: 24, paddingHorizontal: 16, paddingTop: 0 },
   contentSurface: {
     backgroundColor: "#EEF4FF",
     marginHorizontal: -16,
@@ -462,7 +583,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
   },
-  section: { gap: 8 },
+
+  section: {
+    marginVertical: 12,
+    backgroundColor: "transparent",
+  },
+  sectionHeader: {
+    marginBottom: 10,
+    letterSpacing: 0.5,
+    fontWeight: "700",
+  },
+  loaderContainer: {
+    height: 180,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8FAFF",
+    borderRadius: 16,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: "#E0E7FF",
+  },
+  listWrapper: {
+    marginTop: 4,
+    paddingBottom: 8,
+  },
+  scrollHintContainer: {
+    alignItems: "center",
+    marginTop: 8,
+    opacity: 0.6,
+  },
   sectionGap: { marginBottom: 16 },
   ctaStack: { gap: 12 },
   ctaRowPair: {
@@ -616,13 +765,10 @@ const styles = StyleSheet.create({
 
   heroTitle: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
   },
 
   heroSubtitle: {
     color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
     marginTop: 2,
   },
 
@@ -637,53 +783,43 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "900",
   },
-
-  /* STAT GRID */
-  statGrid: {
+  copyright: {
+    textAlign: "center",
+    marginBottom: 16,
+    color: "#666",
+  },
+  categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginTop: 14,
+    rowGap: 12,
   },
-
-  statCard: {
+  categoryCard: {
     width: "48%",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginBottom: 12,
-
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    borderColor: "rgba(14, 79, 197, 0.16)",
+    gap: 6,
+    shadowColor: "#0E4FC5",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-
-  statIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "#EAF2FF",
+  categoryIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "rgba(14,79,197,0.08)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 6,
+    marginBottom: 2,
   },
-
-  statValue: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1F2E4D",
-  },
-
-  statTitle: {
-    fontSize: 12,
-    color: "#6B7280",
-    marginTop: 2,
+  categoryTitle: {
+    color: "#172B57",
   },
 });
 

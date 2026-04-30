@@ -267,6 +267,7 @@
   "selectWorkSubType": "ജോലിയുടെ ഉപതരം തിരഞ്ഞെടുക്കുക",
   "workSubType": "ജോലിയുടെ ഉപതരം",
   "workRequirements": "ജോലിയുടെ ആവശ്യകതകൾ",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "സ്ഥലം",
   "currentLocation": "നിലവിലെ സ്ഥലം",
   "startDate": "ആരംഭ തീയതി",

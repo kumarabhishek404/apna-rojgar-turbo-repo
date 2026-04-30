@@ -1,7 +1,10 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useMemo } from "react";
 import { router } from "expo-router";
+import Farmer1 from "../../assets/farmer1.png";
+import Farmer2 from "../../assets/farmer2.png";
 import Farmer3 from "../../assets/farmer3.png";
+import Farmer4 from "../../assets/farmer4.png";
 import Farmer6 from "../../assets/farmer6.png";
 import Farmer8 from "../../assets/farmer8.png";
 import { useAtomValue } from "jotai";
@@ -9,74 +12,187 @@ import Atoms from "@/app/AtomStore";
 import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import { t } from "@/utils/translationHelper";
+import APP_CONTEXT from "@/app/context/locale";
+
+type LinkItem = {
+  title: string;
+  subtitle: string;
+  onPress: any;
+  image: any;
+  big?: boolean;
+  style: any;
+};
+
+const FARMER_IMAGES = [Farmer1, Farmer2, Farmer3, Farmer4, Farmer6, Farmer8];
 
 const HomePageLinks = () => {
   const userDetails: any = useAtomValue(Atoms?.UserAtom);
+  const { role } = APP_CONTEXT.useApp();
 
-  const links = [
-    {
-      title: t("workers"),
-      subtitle: t("aboutWorkers"),
-      path: {
-        pathname: "/(tabs)/third",
-        params: {
-          role: "workers",
-          title: t("workers"),
-          type: "all",
+  /**
+   * 🔥 SAME DASHBOARD CONFIG (but we only use stats)
+   */
+  const ROLE_CONFIG: Record<string, any> = {
+    WORKER: {
+      stats: [
+        {
+          title: "dashboard.worker.applied",
+          subtitle: "dashboard.worker.appliedDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
         },
-      },
-      image: Farmer3,
-      style: [styles.largeBox, styles.serviceBox],
-      big: true,
-    },
-    {
-      title: t("mediators"),
-      subtitle: t("aboutMediators"),
-      path: {
-        pathname: "/screens/users",
-        params: {
-          role: "mediators",
-          title: "mediators",
-          type: "all",
+        {
+          title: "dashboard.worker.bookings",
+          subtitle: "dashboard.worker.bookingsDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 1 } }),
         },
-      },
-      image: Farmer8,
-      style: [styles.largeBox, styles.employerBox],
-      big: true,
+        {
+          title: "dashboard.worker.contractors",
+          subtitle: "dashboard.worker.contractorsDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/third", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.worker.activity",
+          subtitle: "dashboard.worker.activityDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
+        },
+      ],
     },
-    {
-      title: t("myBookings"),
-      subtitle: t("aboutMyBookings"),
-      path: "/(tabs)/second",
-      image: Farmer8,
-      style: [styles.smallBox, styles.bookingBox],
+
+    EMPLOYER: {
+      stats: [
+        {
+          title: "dashboard.employer.postWork",
+          subtitle: "dashboard.employer.postWorkDesc",
+          onPress: () =>
+            router.push({
+              pathname: "/screens/addService",
+              params: { tab: 0 },
+            }),
+        },
+        {
+          title: "dashboard.employer.bookedWorkers",
+          subtitle: "dashboard.employer.bookedWorkersDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.employer.contractors",
+          subtitle: "dashboard.employer.contractorsDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/third", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.employer.workers",
+          subtitle: "dashboard.employer.workersDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/second", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.employer.activity",
+          subtitle: "dashboard.employer.activityDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
+        },
+      ],
     },
-    {
-      title: t("guidesHelps"),
-      subtitle: t("aboutGuidesHelps"),
-      path: "/screens/helps",
-      image: Farmer6,
-      style: [styles.smallBox, styles.helpBox],
+
+    MEDIATOR: {
+      stats: [
+        {
+          title: "dashboard.mediator.postRequirement",
+          subtitle: "dashboard.mediator.postRequirementDesc",
+          onPress: () =>
+            router.push({
+              pathname: "/screens/addService",
+              params: { tab: 1 },
+            }),
+        },
+        {
+          title: "dashboard.mediator.myPostedJobs",
+          subtitle: "dashboard.mediator.myPostedJobsDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
+        },
+        {
+          title: "dashboard.mediator.applied",
+          subtitle: "dashboard.mediator.appliedDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.mediator.team",
+          subtitle: "dashboard.mediator.teamDesc",
+          onPress: () =>
+            router.push({
+              pathname: "/screens/team/[id]",
+              params: { id: userDetails?._id },
+            }),
+        },
+        {
+          title: "dashboard.mediator.workers",
+          subtitle: "dashboard.mediator.workersDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/second", params: { tab: 1 } }),
+        },
+        {
+          title: "dashboard.mediator.activity",
+          subtitle: "dashboard.mediator.activityDesc",
+          onPress: () =>
+            router.push({ pathname: "/(tabs)/fourth", params: { tab: 0 } }),
+        },
+      ],
     },
-  ];
+  };
+
+  /**
+   * 🔥 Transform stats → UI cards
+   */
+  const links: LinkItem[] = useMemo(() => {
+    const config = ROLE_CONFIG[role] || ROLE_CONFIG["WORKER"];
+
+    return config.stats.map((item: any, index: number) => ({
+      title: t(item.title),
+      subtitle: t(item.subtitle) || "", // fallback generic subtitle
+      onPress: item.onPress,
+      image: FARMER_IMAGES[index % FARMER_IMAGES.length],
+      big: index < 2, // first 2 big, rest small
+      style: [
+        index < 2 ? styles.largeBox : styles.smallBox,
+        index === 0
+          ? styles.serviceBox
+          : index === 1
+            ? styles.employerBox
+            : index === 2
+              ? styles.bookingBox
+              : styles.helpBox,
+      ],
+    }));
+  }, [role]);
 
   return (
     <View style={styles.linksContainer}>
       <View style={styles.gridContainer}>
-        {links.map((link: any, index) => (
+        {links.map((link: LinkItem, index: number) => (
           <TouchableOpacity
             key={index}
             style={link.style}
-            onPress={() => router.push(link?.path)}
+            activeOpacity={0.9}
+            onPress={link?.onPress}
           >
             <View style={styles.textContainer}>
               <CustomHeading textAlign="left" baseFont={16}>
                 {link.title}
               </CustomHeading>
+
               <CustomText textAlign="left" baseFont={12}>
                 {link.subtitle}
               </CustomText>
             </View>
+
             <View style={styles.imageContainer}>
               <Image
                 source={link.image}
@@ -106,7 +222,8 @@ const styles = StyleSheet.create({
   },
   largeBox: {
     width: "48%",
-    height: 176,
+    // height: 176,
+    minHeight: 160,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 0,
@@ -120,7 +237,8 @@ const styles = StyleSheet.create({
   },
   smallBox: {
     width: "48%",
-    height: 80,
+    // height: 80,
+    minHeight: 90,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
     padding: 0,
@@ -148,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFDE7",
   },
   textContainer: {
-    width: "70%",
+    width: "75%",
     paddingHorizontal: 10,
     paddingVertical: 5,
     justifyContent: "flex-start",
@@ -158,17 +276,18 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     right: 0,
-    opacity: 0.9,
-    zIndex: -1,
+    // overflow: "hidden",
   },
   largeImage: {
-    width: 115,
-    height: 125,
-    borderBottomRightRadius: 8,
+    width: 110,
+    height: 140,
+    resizeMode: "cover",
+    borderBottomRightRadius: 12,
   },
   smallImage: {
-    width: 80,
-    height: 90,
+    width: 85,
+    height: 100,
+    resizeMode: "cover",
     borderBottomRightRadius: 8,
   },
 });

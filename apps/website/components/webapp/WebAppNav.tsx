@@ -7,9 +7,9 @@ import { apiRequest, clearAuth } from "@/lib/auth";
 import { isAdminUser } from "@/lib/isAdminUser";
 
 const baseLinks = [
-  { href: "/webapp/services", label: "All Services" },
+  { href: "/webapp/services", label: "All Works" },
   { href: "/webapp/profile", label: "My Profile" },
-  { href: "/webapp/applied-services", label: "Applied Service" },
+  { href: "/webapp/applied-services", label: "Applied Work" },
   { href: "/webapp/my-services", label: "My Work" },
 ];
 
@@ -22,8 +22,6 @@ export default function WebAppNav() {
     apiRequest<{ data?: { role?: string; mobile?: string } }>("/user/info")
       .then((res) => {
         if (!mounted) return;
-        console.log("res?.data----", res?.data);
-        
         setIsAdmin(isAdminUser(res?.data));
       })
       .catch(() => {

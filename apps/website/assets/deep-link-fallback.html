@@ -20,10 +20,10 @@
       var path = location.pathname || "";
       var m = path.match(/\/job\/([^/?#]+)/);
       var id = m ? m[1] : new URLSearchParams(location.search).get("id");
-      var appHttps = id ? "https://apnarojgar.com/job/" + decodeURIComponent(id) : "";
+      var appHttps = id ? "https://apnarojgarindia.com/job/" + decodeURIComponent(id) : "";
       var intent =
         id &&
-        "intent://apnarojgar.com/job/" +
+        "intent://apnarojgarindia.com/job/" +
           id +
           "#Intent;scheme=https;package=com.kumarabhishek404.labourapp;S.browser_fallback_url=" +
           encodeURIComponent(PLAY) +

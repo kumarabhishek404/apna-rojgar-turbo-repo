@@ -42,6 +42,7 @@ type IconLibrary =
   | "FontAwesome5";
 
 export default function Layout() {
+  const { locale, setRole } = APP_CONTEXT.useApp();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   /**
@@ -70,7 +71,6 @@ export default function Layout() {
   const history = useRef<string[]>([]);
   const [isReady, setIsReady] = useState(false);
   const { refreshUser } = REFRESH_USER.useRefreshUser();
-  const { setRole } = APP_CONTEXT.useApp();
 
   useEffect(() => {
     // wait one render cycle
@@ -273,6 +273,8 @@ export default function Layout() {
     : apiRole === "MEDIATOR"
       ? "tabNavPeopleActiveWork"
       : "tabNavPeopleContractors";
+  // Keep bottom-tab labels/icons reactive to language changes.
+  void locale;
 
   if (!isReady) return null;
 
@@ -285,6 +287,7 @@ export default function Layout() {
           <UserProfile />
         ) : (
           <Tabs
+            key={`tabs-${locale}`}
             screenOptions={{
               headerShown: false,
               tabBarStyle: [

@@ -103,15 +103,16 @@ const NotificationScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       const unsubscribe = setNotifications(
-        response?.pages?.flatMap((page: any) => page?.notifications || []) || []
+        response?.pages?.flatMap((page: any) => page?.notifications || []) ||
+          [],
       );
       return () => unsubscribe;
-    }, [response])
+    }, [response]),
   );
 
   const memoizedData = useMemo(
     () => notifications?.flatMap((data: any) => data),
-    [notifications]
+    [notifications],
   );
 
   const checkPermission = async () => {
@@ -139,7 +140,7 @@ const NotificationScreen = () => {
         }
         return prevIds;
       });
-    }
+    },
   ).current;
 
   const viewabilityConfig = {
@@ -166,7 +167,10 @@ const NotificationScreen = () => {
       >
         <View style={{ flexDirection: "row" }}>
           <View style={{ width: "17%", marginRight: 10 }}>
-            <ProfilePicture uri={item?.data?.actionBy?.profilePicture} source={APP_LOGO} />
+            <ProfilePicture
+              uri={item?.data?.actionBy?.profilePicture}
+              source={APP_LOGO}
+            />
           </View>
           <View style={{ position: "absolute", top: 10, left: 55 }}>
             {!item?.read && <RippleDot />}
@@ -190,42 +194,37 @@ const NotificationScreen = () => {
   const RequestPermission = () => (
     <View style={styles?.container}>
       <CustomHeading textAlign="left">{t("getNotifications")}</CustomHeading>
-      <CustomText textAlign="left" style={{ marginBottom: 10 }}>
+      <CustomText
+        textAlign="left"
+        baseFont={18}
+        fontWeight="600"
+        color={Colors?.white}
+        style={{ marginBottom: 10 }}
+      >
         {t("notifyWhen")}
       </CustomText>
       <View style={styles?.permissionItems}>
-        <CustomText baseFont={14} textAlign="left">
+        <CustomText baseFont={16} textAlign="left">
           {t("newServiceArrived")}
         </CustomText>
-        <CustomText baseFont={14} textAlign="left">
+        <CustomText baseFont={16} textAlign="left">
           {t("mediatorCreatesRequirements")}
         </CustomText>
-        <CustomText baseFont={14} textAlign="left">
+        <CustomText baseFont={16} textAlign="left">
           {t("selectedInService")}
         </CustomText>
-        <CustomText baseFont={14} textAlign="left">
+        <CustomText baseFont={16} textAlign="left">
           {t("someoneLikesYou")}
         </CustomText>
-        <CustomText baseFont={14} textAlign="left">
+        <CustomText baseFont={16} textAlign="left">
           {t("mediatorRequestsYou")}
         </CustomText>
       </View>
-      <View style={styles?.buttonContainer}>
-        <Button
-          isPrimary={false}
-          title={t("later")}
-          onPress={() => router?.back()}
-          style={styles?.button}
-          textStyle={styles?.buttonText}
-        />
-        <Button
-          isPrimary={true}
-          title={t("allowNotifications")}
-          onPress={requestPermission}
-          style={styles?.button}
-          textStyle={styles?.buttonText}
-        />
-      </View>
+      <Button
+        isPrimary={true}
+        title={t("allowNotifications")}
+        onPress={requestPermission}
+      />
     </View>
   );
 
@@ -236,7 +235,9 @@ const NotificationScreen = () => {
         size={100}
         style={styles?.notificationIcon}
       />
-      <CustomHeading color={Colors?.highlight}>{t("noNotificationsYet")}</CustomHeading>
+      <CustomHeading color={Colors?.highlight}>
+        {t("noNotificationsYet")}
+      </CustomHeading>
       <CustomText color={Colors?.white}>{t("noNotificationsDesc")}</CustomText>
       <TouchableOpacity>
         <CustomText color={Colors?.link}>
@@ -249,13 +250,14 @@ const NotificationScreen = () => {
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
       await refetch();
-    }
+    },
   );
 
   return (
     <>
       <Stack.Screen
         options={{
+          headerShown: true,
           header: () => <CustomHeader title="notifications" left="back" />,
         }}
       />
@@ -328,17 +330,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: Colors?.background,
     marginBottom: 20,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  button: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  buttonText: {
-    fontSize: 14,
   },
   notificationIcon: {
     width: 100,

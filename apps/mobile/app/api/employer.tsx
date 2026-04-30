@@ -58,7 +58,7 @@ const editService = async (payload: any) => {
   }
 };
 
-// My Services
+// My Works
 const fetchMyServices = async ({ pageParam, status }: any) => {
   try {
     const data = await API_CLIENT.makeGetRequest(
@@ -67,20 +67,18 @@ const fetchMyServices = async ({ pageParam, status }: any) => {
     return data?.data;
   } catch (error: any) {
     console.error(
-      `[userService] An error occurred while fetching my services : `,
+      `[employer] An error occurred while fetching my works : `,
       error?.response?.data?.message,
     );
     TOAST?.error(
       error?.response?.data?.message ||
-        "An error occurred while fetching services",
+        "An error occurred while fetching my works",
     );
-    throw error;
+    throw error?.response?.data?.message;
   }
 };
 
 const selectWorker = async (payload: any) => {
-  console.log("Paylo---", payload);
-
   try {
     const data = await API_CLIENT.makePostRequest(
       "/employer/application/select",

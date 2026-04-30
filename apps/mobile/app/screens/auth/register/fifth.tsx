@@ -24,7 +24,8 @@ import Loader from "@/components/commons/Loaders/Loader";
 
 const UploadProfilePictureScreen = () => {
   const insets = useSafeAreaInsets();
-  const { userId: userIdParam, role, skills } = useLocalSearchParams();
+  const { userId: userIdParam, role, skills, numberOfWorkersInTeam } =
+    useLocalSearchParams();
   const userId = Array.isArray(userIdParam) ? userIdParam[0] : userIdParam;
   const setUserDetails = useSetAtom(Atoms.UserAtom);
   const [isSavingProfileStep, setIsSavingProfileStep] = useState(false);
@@ -103,6 +104,9 @@ const UploadProfilePictureScreen = () => {
         _id: userId,
         role,
         skills: parsedSkills,
+        ...(role === "MEDIATOR" && numberOfWorkersInTeam
+          ? { numberOfWorkersInTeam: Number(numberOfWorkersInTeam) }
+          : {}),
       });
     } catch (error) {
       console.error("Error submitting profile picture:", error);

@@ -233,7 +233,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         throw new Error(
           data?.message?.trim()
             ? localizeApiErrorMessage(String(data.message))
-            : t("serviceCreateFailed", "Service create failed"),
+            : t("serviceCreateFailed", "Work create failed"),
         );
       }
 
@@ -252,7 +252,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       onClose();
       await onCreated?.();
     } catch (e) {
-      setCreateIssue(e instanceof Error ? e.message : "Service create failed");
+      setCreateIssue(e instanceof Error ? e.message : "Work create failed");
     } finally {
       setCreatingService(false);
     }
@@ -277,7 +277,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
               </p>
             </div>
             <h3 className="text-[2rem] font-black tracking-tight text-[#172554]">
-              {t("addNewService", "Add New Service")}
+              {t("newService", "Add New Work")}
             </h3>
             <p className="text-sm font-medium text-slate-500">
               {t("createServiceFlowHint", "Complete all steps to publish your service professionally.")}

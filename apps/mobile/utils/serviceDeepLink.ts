@@ -5,8 +5,13 @@ import * as Linking from "expo-linking";
  */
 export const APP_LINK_SCHEME = "apnarojgar" as const;
 
-/** Host used for HTTPS App Links / Universal Links (`app.json` intent filters). */
-export const UNIVERSAL_LINK_HOST = "apnarojgar.com" as const;
+/** Canonical host used when generating HTTPS App Links / Universal Links. */
+export const UNIVERSAL_LINK_HOST = "apnarojgarindia.com" as const;
+/** Allowed app-link hosts to parse (both non-www and www variants). */
+const ALLOWED_UNIVERSAL_LINK_HOSTS = new Set([
+  UNIVERSAL_LINK_HOST,
+  `www.${UNIVERSAL_LINK_HOST}`,
+]);
 
 /** Android package — must match `app.json` → `android.package`. */
 export const ANDROID_PACKAGE = "com.kumarabhishek404.labourapp" as const;
@@ -55,7 +60,7 @@ export function getAndroidJobIntentUrl(serviceId: string): string {
   const id = String(serviceId ?? "").trim();
   if (!id) return PLAY_STORE_LISTING_URL;
   const fallback = encodeURIComponent(PLAY_STORE_LISTING_URL);
-  return `intent://apnarojgar.com/job/${id}#Intent;scheme=https;package=${ANDROID_PACKAGE};S.browser_fallback_url=${fallback};end`;
+  return `intent://${UNIVERSAL_LINK_HOST}/job/${id}#Intent;scheme=https;package=${ANDROID_PACKAGE};S.browser_fallback_url=${fallback};end`;
 }
 
 /**
@@ -69,8 +74,8 @@ export function parseServiceIdFromUrl(url: string): string | undefined {
 
   // --- https / http (App Links) ---
   if (scheme === "https" || scheme === "http") {
-    const host = (parsed.hostname || "").replace(/^www\./i, "").toLowerCase();
-    if (host !== UNIVERSAL_LINK_HOST) return undefined;
+    const host = (parsed.hostname || "").toLowerCase();
+    if (!ALLOWED_UNIVERSAL_LINK_HOSTS.has(host)) return undefined;
 
     let path = (parsed.path || "").replace(/^\/+|\/+$/g, "");
 

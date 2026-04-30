@@ -109,7 +109,7 @@ const GlobalSideDrawer = () => {
                 marginLeft: 10,
                 opacity: drawerState?.isLoading ? 0.5 : 1,
               }}
-              disabled={drawerState?.isLoading || true}
+              disabled={Boolean(drawerState?.isLoading)}
             >
               <Feather name="arrow-left" size={28} color={Colors.white} />
             </TouchableOpacity>
@@ -128,6 +128,7 @@ const GlobalSideDrawer = () => {
             contentContainerStyle={styles.contentContainer}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
           >
             {drawerState.content && drawerState.content()}
           </ScrollView>

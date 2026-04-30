@@ -140,7 +140,7 @@ export default function MyServicesPage() {
           path: window.location.pathname,
           source: "website",
         });
-        setMessage(t("serviceAppliedSuccessfully", "Service applied successfully"));
+        setMessage(t("serviceAppliedSuccessfully", "Work applied successfully"));
         closeDetailsModal();
         await load();
       } catch (e) {
@@ -168,9 +168,9 @@ export default function MyServicesPage() {
   return (
     <section className="space-y-4">
       <div className="rounded-2xl bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 text-white shadow-lg">
-        <h1 className="text-2xl font-bold">{t("myServices", "My Services")}</h1>
+        <h1 className="text-2xl font-bold">{t("myServices", "My Works")}</h1>
         <p className="mt-1 text-sm text-fuchsia-100">
-          {t("myServicesSubtitle", "Track services created or associated with your account.")}
+          {t("myServicesSubtitle", "Track works created or associated with your account.")}
         </p>
       </div>
 
@@ -181,7 +181,7 @@ export default function MyServicesPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("searchServices", "Search Services")}
+            placeholder={t("searchServices", "Search Works")}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
           />
           {canCreate ? (
@@ -190,7 +190,7 @@ export default function MyServicesPage() {
               onClick={() => setShowCreateModal(true)}
               className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#22409a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1b357f]"
             >
-              {t("addNewService", "Add New Service")}
+              {t("newService")}
             </button>
           ) : null}
         </div>
@@ -215,11 +215,11 @@ export default function MyServicesPage() {
 
       {!loading && filteredItems.length === 0 ? (
         <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">
-          {t("noServicesFound", "No services found")}
+          {t("noServicesFound", "No works found")}
         </div>
       ) : null}
       <div className="text-center text-xs text-gray-500">
-        {t("totalServices", "Total Services")}: {filteredItems.length}
+        {t("totalServices", "Total Works")}: {filteredItems.length}
       </div>
 
       <ServiceDetailsModal
@@ -246,7 +246,7 @@ export default function MyServicesPage() {
             path: window.location.pathname,
             source: "website",
           });
-          setMessage(t("serviceCreatedSuccessfully", "Service created successfully."));
+          setMessage(t("serviceCreatedSuccessfully", "Work created successfully."));
           await load();
         }}
       />

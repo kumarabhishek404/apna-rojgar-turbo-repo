@@ -266,6 +266,7 @@
   "selectWorkSubType": "કામનો પેટા પ્રકાર પસંદ કરો",
   "workSubType": "કામનો પેટા પ્રકાર",
   "workRequirements": "કામની જરૂરિયાતો",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "સ્થાન",
   "currentLocation": "વર્તમાન સ્થાન",
   "startDate": "શરૂઆતની તારીખ",

@@ -57,10 +57,10 @@ const Services = () => {
       type === "saved"
         ? "savedServices"
         : type === "myServices"
-        ? "myServices"
-        : type === "booked"
-        ? "booked"
-        : "services",
+          ? "myServices"
+          : type === "booked"
+            ? "booked"
+            : "services",
       category,
       appliedFilters,
     ],
@@ -68,24 +68,25 @@ const Services = () => {
       type === "saved"
         ? USER?.fetchAllLikedServices({ pageParam })
         : type === "myServices"
-        ? EMPLOYER?.fetchMyServices({
-            pageParam,
-            status: category,
-          })
-        : type === "booked"
-        ? EMPLOYER?.fetchAllBookedWorkers({
-            pageParam,
-            skill: appliedFilters?.skill,
-          })
-        : SERVICE?.fetchAllServices({
-            pageParam,
-            status: "ACTIVE",
-            payload: {
-              duration: appliedFilters?.duration,
-              serviceStartIn: appliedFilters?.serviceStartIn,
-              skills: appliedFilters?.skills,
-            },
-          }),
+          ? EMPLOYER?.fetchMyServices({
+              pageParam,
+              status: category,
+            })
+          : type === "booked"
+            ? EMPLOYER?.fetchAllBookedWorkers({
+                pageParam,
+                skill: appliedFilters?.skill,
+              })
+            : SERVICE?.fetchAllServices({
+                pageParam,
+                status: "ACTIVE",
+                payload: {
+                  type: appliedFilters?.type,
+                  duration: appliedFilters?.duration,
+                  serviceStartIn: appliedFilters?.serviceStartIn,
+                  skills: appliedFilters?.skills,
+                },
+              }),
     initialPageParam: 1,
     retry: false,
     getNextPageParam: (lastPage: any, pages) => {
@@ -100,16 +101,18 @@ const Services = () => {
     React.useCallback(() => {
       const totalData = response?.pages[0]?.pagination?.total;
       setTotalData(totalData);
-      const nextServices = response?.pages.flatMap((page: any) => page.data || []);
+      const nextServices = response?.pages.flatMap(
+        (page: any) => page.data || [],
+      );
       setFilteredData(
         applyServiceClientDistanceFilter(
-          nextServices,
+          nextServices || [],
           appliedFilters,
-          userDetails?.geoLocation ?? userDetails?.location,
+          userDetails?.geoLocation,
         ),
       );
       return () => {}; // nothing to clean up
-    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
+    }, [appliedFilters, response, userDetails?.geoLocation]),
   );
 
   // ✅ Ensure refetch happens when the screen is focused
@@ -119,16 +122,18 @@ const Services = () => {
 
       if (response) {
         setTotalData(response?.pages[0]?.pagination?.total || 0);
-        const nextServices = response?.pages.flatMap((page: any) => page.data || []);
+        const nextServices = response?.pages.flatMap(
+          (page: any) => page.data || [],
+        );
         setFilteredData(
           applyServiceClientDistanceFilter(
-            nextServices,
+            nextServices || [],
             appliedFilters,
-            userDetails?.geoLocation ?? userDetails?.location,
+            userDetails?.geoLocation,
           ),
         );
       }
-    }, [appliedFilters, response, refetch, userDetails?.geoLocation, userDetails?.location]) // Dependencies added for correct reactivity
+    }, [appliedFilters, response, refetch, userDetails?.geoLocation]), // Dependencies added for correct reactivity
   );
 
   const loadMore = () => {
@@ -139,7 +144,7 @@ const Services = () => {
 
   const memoizedData = useMemo(
     () => filteredData?.flatMap((data: any) => data),
-    [filteredData]
+    [filteredData],
   );
 
   const onCatChanged = (category: any) => {
@@ -149,7 +154,7 @@ const Services = () => {
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
       await refetch();
-    }
+    },
   );
 
   const RenderItem = React?.memo(({ item }: any) => {
@@ -160,7 +165,7 @@ const Services = () => {
   const renderItem = ({ item }: any) => <RenderItem item={item} />;
 
   const debouncedLoadMore = useMemo(() => debounce(loadMore, 300), [loadMore]);
-  
+
   return (
     <>
       <Stack.Screen

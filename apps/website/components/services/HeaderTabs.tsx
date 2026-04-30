@@ -25,7 +25,7 @@ export default function HeaderTabs({ onAddNewService, scrolled }: Props) {
           }}
           className="text-sm font-semibold text-[#22409a] transition hover:text-[#1a347f] hover:underline"
         >
-          Add New Service
+          Add New Work
         </Link>
       </div>
     </div>

@@ -97,6 +97,7 @@ export const handleUpdateInfo = async (req, res) => {
       geoLocation,
       role,
       skills,
+      numberOfWorkersInTeam,
     } = req.body;
 
     const parseSkillsInput = (rawSkills) => {
@@ -173,6 +174,14 @@ export const handleUpdateInfo = async (req, res) => {
       } catch {
         return null;
       }
+    };
+
+    const parseTeamWorkerCount = (rawValue) => {
+      if (rawValue == null || rawValue === "") return null;
+      const parsed = Number(rawValue);
+      if (!Number.isFinite(parsed)) return null;
+      if (parsed <= 0) return null;
+      return Math.floor(parsed);
     };
 
     console.log("Fetching user from database");
@@ -263,6 +272,11 @@ export const handleUpdateInfo = async (req, res) => {
         new Map(normalizedSkills.map((item) => [String(item.skill), item])).values(),
       );
       updateData.skills = uniqueBySkill;
+    }
+
+    const normalizedWorkerCount = parseTeamWorkerCount(numberOfWorkersInTeam);
+    if (normalizedWorkerCount != null) {
+      updateData.numberOfWorkersInTeam = normalizedWorkerCount;
     }
 
     // Normalize address before saving
@@ -719,7 +733,7 @@ export const checkMobileNumberExistance = async (req, res) => {
 export const getUsersOnRole = async (req, res) => {
   try {
     const { role, page = 1, limit = 10 } = req.query;
-    const { skills, name, distance, completedServices, rating } = req.body;
+    const { skills, name, distance, completedServices, rating, sortBy } = req.body;
     const loggedInUserId = req.user?._id;
 
     // Base match filter
@@ -799,31 +813,72 @@ export const getUsersOnRole = async (req, res) => {
       }
     }
 
-    // Aggregation pipeline
-    const pipeline = [
-      { $match: match },
-      // Exclude admin users
-      { $match: { mobile: { $nin: [process.env.ADMIN_MOBILE] } } },
-    ];
-
-    // Distance filtering (if logged in user has geoLocation)
     const loggedInUser =
       await User.findById(loggedInUserId).select("geoLocation");
-    if (loggedInUser?.geoLocation && distance) {
+
+    // Aggregation pipeline
+    const pipeline = [];
+    const shouldSortNearest = sortBy === "nearest";
+    const shouldUseGeoNear =
+      loggedInUser?.geoLocation && (distance || shouldSortNearest);
+
+    if (shouldUseGeoNear) {
       const maxDistanceKm =
         {
           within_10km: 10,
           within_50km: 50,
           within_100km: 100,
-        }[distance] || 20000; // default max distance
+        }[distance] || 20000;
+
       pipeline.push({
         $geoNear: {
+          key: "geoLocation",
           near: loggedInUser.geoLocation,
           distanceField: "distance",
           maxDistance: maxDistanceKm * 1000,
           spherical: true,
+          query: { ...match, mobile: { $nin: [process.env.ADMIN_MOBILE] } },
         },
       });
+    } else {
+      pipeline.push(
+        { $match: match },
+        // Exclude admin users
+        { $match: { mobile: { $nin: [process.env.ADMIN_MOBILE] } } },
+      );
+    }
+
+    // For mediator listings, enrich team size and allow larger-team sorting.
+    pipeline.push({
+      $lookup: {
+        from: "teams",
+        localField: "_id",
+        foreignField: "mediator",
+        as: "teamDocs",
+      },
+    });
+    pipeline.push({
+      $addFields: {
+        teamDetails: {
+          memberCount: {
+            $size: {
+              $ifNull: [{ $arrayElemAt: ["$teamDocs.workers", 0] }, []],
+            },
+          },
+          status: {
+            $ifNull: [{ $arrayElemAt: ["$teamDocs.status", 0] }, "noTeam"],
+          },
+        },
+      },
+    });
+    pipeline.push({ $project: { teamDocs: 0 } });
+
+    if (sortBy === "top_rated") {
+      pipeline.push({ $sort: { "rating.average": -1, createdAt: -1 } });
+    } else if (sortBy === "larger_team") {
+      pipeline.push({ $sort: { "teamDetails.memberCount": -1, createdAt: -1 } });
+    } else if (!shouldSortNearest) {
+      pipeline.push({ $sort: { createdAt: -1 } });
     }
 
     // Pagination

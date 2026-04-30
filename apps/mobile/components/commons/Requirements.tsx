@@ -31,9 +31,11 @@ const Requirements = ({ type, requirements }: RequirementsProps) => {
                   requirement?.count
                 )}`}
               </CustomHeading>
-              <CustomText color={Colors?.white} baseFont={12}>
+              {requirement?.payPerDay ? <CustomText color={Colors?.white} baseFont={12}>
                 ₹ {requirement?.payPerDay} {t("perDay")}
-              </CustomText>
+              </CustomText> : <CustomText color={Colors?.white} baseFont={12}>
+                {t("decidePriceWhileBooking")}
+              </CustomText>}
             </View>
           ))}
         </View>

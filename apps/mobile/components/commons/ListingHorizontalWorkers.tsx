@@ -35,7 +35,8 @@ type Props = {
 
 const getSkillLabel = (skill: any): string => {
   if (typeof skill === "string") return skill;
-  if (skill && typeof skill === "object") return skill.skill ?? skill.name ?? "";
+  if (skill && typeof skill === "object")
+    return skill.skill ?? skill.name ?? "";
   return "";
 };
 
@@ -61,7 +62,9 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
       {/* ── Hero photo ── */}
       <View style={styles.photoWrap}>
         <Image
-          source={item?.profilePicture ? { uri: item.profilePicture } : coverImage}
+          source={
+            item?.profilePicture ? { uri: item.profilePicture } : coverImage
+          }
           style={styles.photo}
           resizeMode="cover"
         />
@@ -78,9 +81,7 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
           <Ionicons name="navigate-outline" size={11} color={Colors.white} />
           <ShowDistance
             address={item?.address}
-            loggedInUserLocation={
-              userDetails?.geoLocation ?? userDetails?.location
-            }
+            loggedInUserLocation={userDetails?.geoLocation}
             targetLocation={item?.geoLocation}
             align="left"
             color={Colors.white}
@@ -97,6 +98,7 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
           baseFont={15}
           numberOfLines={1}
           style={styles.name}
+          ellipsizeMode="tail"
         >
           {item?.name}
         </CustomHeading>
@@ -108,7 +110,11 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
         {/* Address */}
         <View style={styles.addressRow}>
           <View style={styles.locationIconWrap}>
-            <Ionicons name="location-outline" size={14} color={Colors.primary} />
+            <Ionicons
+              name="location-outline"
+              size={14}
+              color={Colors.primary}
+            />
           </View>
           <View style={styles.addressText}>
             <ShowAddress
@@ -143,7 +149,11 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
             ))}
             {extraSkills > 0 ? (
               <View style={styles.morePill}>
-                <CustomText baseFont={11} fontWeight="700" color={Colors.primary}>
+                <CustomText
+                  baseFont={11}
+                  fontWeight="700"
+                  color={Colors.primary}
+                >
                   +{extraSkills}
                 </CustomText>
               </View>
@@ -226,7 +236,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_W,
-    height: CARD_H,
     backgroundColor: Colors.white,
     borderRadius: 18,
     overflow: "hidden",
@@ -308,12 +317,14 @@ const styles = StyleSheet.create({
   addressText: {
     flex: 1,
     minWidth: 0,
+    flexShrink: 1, // ✅ prevents overflow break
   },
   skillsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 5,
     marginTop: 2,
+    minHeight: 24, // ✅ ensures row doesn't collapse
   },
   skillPill: {
     flexDirection: "row",
@@ -354,7 +365,6 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     width: 50,
-    height: CARD_H,
     alignItems: "center",
     justifyContent: "center",
   },

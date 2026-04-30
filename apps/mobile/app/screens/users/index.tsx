@@ -50,18 +50,19 @@ const Users = () => {
             skill: appliedFilters?.skill,
           })
         : type === "saved"
-        ? USER?.fetchAllLikedUsers({
-            pageParam,
-            skill: appliedFilters?.skill,
-          })
-        : USER?.fetchAllUsers({
-            pageParam,
-            payload: {
-              completedServices: appliedFilters?.completedServices,
-              rating: appliedFilters?.rating,
-              skills: appliedFilters?.skills,
-            },
-          }),
+          ? USER?.fetchAllLikedUsers({
+              pageParam,
+              skill: appliedFilters?.skill,
+            })
+          : USER?.fetchAllUsers({
+              pageParam,
+              role: appliedFilters?.role || "WORKER",
+              payload: {
+                completedServices: appliedFilters?.completedServices,
+                rating: appliedFilters?.rating,
+                skills: appliedFilters?.skills,
+              },
+            }),
     retry: false,
     initialPageParam: 1,
     enabled: !!userDetails?._id && userDetails?.status === "ACTIVE",
@@ -77,16 +78,17 @@ const Users = () => {
     React.useCallback(() => {
       const totalData = (response?.pages[0] as any)?.pagination?.total;
       setTotalData(totalData);
-      const nextUsers = response?.pages.flatMap((page: any) => page?.data || []);
+      const nextUsers =
+        response?.pages?.flatMap((page: any) => page?.data || []) || [];
       const unsubscribe = setFilteredData(
         applyWorkerClientFilters(
           nextUsers,
           appliedFilters,
-          userDetails?.geoLocation ?? userDetails?.location,
+          userDetails?.geoLocation,
         ),
       );
       return () => unsubscribe;
-    }, [appliedFilters, response, userDetails?.geoLocation, userDetails?.location])
+    }, [appliedFilters, response, userDetails?.geoLocation]),
   );
 
   const loadMore = () => {
@@ -97,14 +99,19 @@ const Users = () => {
 
   const memoizedData = useMemo(
     () => filteredData?.flatMap((data: any) => data),
-    [filteredData]
+    [filteredData],
   );
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
       await refetch();
-    }
+    },
   );
+
+  const visibleFilters = useMemo(() => {
+    const { role, ...rest } = appliedFilters || {};
+    return rest;
+  }, [appliedFilters]);
 
   return (
     <>
@@ -127,25 +134,24 @@ const Users = () => {
           {appliedFilters &&
             (appliedFilters?.completedServices ||
               appliedFilters?.distance ||
-              appliedFilters?.role ||
               appliedFilters?.rating > 0 ||
               appliedFilters?.skills?.length > 0) && (
-              <View style={{ marginTop: 6 }}>
+              <View style={{ marginVertical: 6 }}>
                 <AppliedFilters
-                  appliedFilters={appliedFilters}
-                  setAppliedFilters={setAppliedFilters}
+                  appliedFilters={visibleFilters}
+                  setAppliedFilters={(updatedFilters: any) => {
+                    // merge back role so it persists
+                    setAppliedFilters((prev: any) => {
+                      return {
+                        ...updatedFilters,
+                        role: prev?.role,
+                      };
+                    });
+                  }}
                   fetchUsers={() => {}}
                 />
               </View>
             )}
-          <View style={{ marginVertical: 6 }}>
-            <PaginationString
-              type="workers"
-              isLoading={isLoading || isRefetching}
-              totalFetchedData={memoizedData?.length}
-              totalData={totalData}
-            />
-          </View>
 
           {memoizedData && memoizedData?.length > 0 ? (
             <ListingsVerticalWorkers
@@ -180,6 +186,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flexGrow: 1,
+    marginTop: 6,
   },
 });
 

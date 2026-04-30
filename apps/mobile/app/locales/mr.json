@@ -266,6 +266,7 @@
   "selectWorkSubType": "कामाचा उपप्रकार निवडा",
   "workSubType": "कामाचा उपप्रकार",
   "workRequirements": "कामाच्या आवश्यकता",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "ठिकाण",
   "currentLocation": "सध्याचे ठिकाण",
   "startDate": "सुरुवातची तारीख",

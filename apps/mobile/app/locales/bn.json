@@ -256,6 +256,7 @@
   "selectWorkSubType": "কাজের উপ-ধরন নির্বাচন করুন",
   "workSubType": "কাজের উপ-ধরন",
   "workRequirements": "কাজের প্রয়োজনীয়তা",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "অবস্থান",
   "currentLocation": "বর্তমান অবস্থান",
   "startDate": "শুরুর তারিখ",

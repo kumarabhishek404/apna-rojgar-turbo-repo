@@ -21,9 +21,10 @@ const Members = () => {
   const [totalData, setTotalData] = useState(0);
   const [filteredData, setFilteredData]: any = useState([]);
   const [category, setCategory] = useState("");
+  const userDetails = useAtomValue(Atoms?.UserAtom);
   const { id } = useLocalSearchParams();
 
-  console.log("id----", id);
+  console.log("userDetails----", userDetails?._id);
   const {
     data: response,
     isLoading,
@@ -32,10 +33,10 @@ const Members = () => {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["members", category, id],
+    queryKey: ["members", category, id || userDetails?._id],
     queryFn: ({ pageParam }) =>
       MEDIATOR?.fetchAllMembers({
-        mediatorId: id,
+        mediatorId: id || userDetails?._id,
         pageParam,
         category,
       }),

@@ -226,6 +226,7 @@
   "selectWorkSubType": "ਕੰਮ ਦੀ ਉਪ ਕਿਸਮ ਚੁਣੋ",
   "workSubType": "ਕੰਮ ਦੀ ਉਪ ਕਿਸਮ",
   "workRequirements": "ਕੰਮ ਦੀਆਂ ਲੋੜਾਂ",
+  "workRequirementAddPayHint": "Add pay (optional, for clarity)",
   "location": "ਸਥਾਨ",
   "currentLocation": "ਮੌਜੂਦਾ ਸਥਾਨ",
   "startDate": "ਸ਼ੁਰੂਆਤੀ ਤਾਰੀਖ",

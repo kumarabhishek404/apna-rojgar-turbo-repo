@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   Pressable,
   ScrollView,
@@ -54,12 +54,34 @@ const ScrollableSortTabs = ({
   style,
   variant = "default",
 }: Props) => {
+  const scrollRef = useRef<ScrollView>(null);
+  const tabLayouts = useRef<Record<string, { x: number; width: number }>>({});
+  const containerWidth = useRef(0);
   const dark = variant === "onDark";
   const fill = useShouldFillWidth(tabs.length);
 
   const trackStyle = [styles.track, dark && styles.trackOnDark, style];
 
-  const renderChip = (tab: SortTabItem, idx: number, layout: "scroll" | "fill") => {
+  useEffect(() => {
+    if (!scrollRef.current || !tabLayouts.current[selectedId]) return;
+
+    const { x, width } = tabLayouts.current[selectedId];
+    const containerW = containerWidth.current;
+
+    // Center the selected tab
+    const scrollTo = x + width / 2 - containerW / 2;
+
+    scrollRef.current.scrollTo({
+      x: Math.max(0, scrollTo),
+      animated: true,
+    });
+  }, [selectedId]);
+
+  const renderChip = (
+    tab: SortTabItem,
+    idx: number,
+    layout: "scroll" | "fill",
+  ) => {
     const active = tab.id === selectedId;
     const isFill = layout === "fill";
 
@@ -69,6 +91,9 @@ const ScrollableSortTabs = ({
         onPress={() => onSelect(tab.id)}
         accessibilityRole="tab"
         accessibilityState={{ selected: active }}
+        onLayout={(e) => {
+          tabLayouts.current[tab.id] = e.nativeEvent.layout;
+        }}
         style={[
           styles.chip,
           dark && styles.chipOnDark,
@@ -77,9 +102,7 @@ const ScrollableSortTabs = ({
           isFill && idx > 0 && styles.chipFillGap,
           active && (dark ? styles.chipActiveOnDark : styles.chipActive),
           active && isFill && styles.chipActiveWide,
-          layout === "scroll" &&
-            idx < tabs.length - 1 &&
-            styles.chipSpacing,
+          layout === "scroll" && idx < tabs.length - 1 && styles.chipSpacing,
         ]}
       >
         <CustomText
@@ -104,15 +127,28 @@ const ScrollableSortTabs = ({
 
   if (fill) {
     return (
-      <View style={trackStyle}>
-        <View style={styles.fillRow}>{tabs.map((t, i) => renderChip(t, i, "fill"))}</View>
+      <View
+        style={trackStyle}
+        onLayout={(e) => {
+          containerWidth.current = e.nativeEvent.layout.width;
+        }}
+      >
+        <View style={styles.fillRow}>
+          {tabs.map((t, i) => renderChip(t, i, "fill"))}
+        </View>
       </View>
     );
   }
 
   return (
-    <View style={trackStyle}>
+    <View
+      style={trackStyle}
+      onLayout={(e) => {
+        containerWidth.current = e.nativeEvent.layout.width;
+      }}
+    >
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollInner}

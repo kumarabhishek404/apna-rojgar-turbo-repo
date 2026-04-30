@@ -165,10 +165,12 @@ const SkillsSelector = ({
       <ScrollView
         style={{
           ...styles.scrollContainer,
-          height: height * 0.62 - selectedContainerHeight, // Dynamic height calculation
+          maxHeight: Math.max(height * 0.62 - selectedContainerHeight, 220),
         }}
         contentContainerStyle={styles.skillContainer}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
       >
         {flattenedOptions.map((item, idx) => (
           <View style={styles.skillBox} key={idx}>

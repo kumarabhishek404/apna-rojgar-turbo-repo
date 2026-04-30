@@ -392,17 +392,17 @@ export default function ServicesDashboard() {
   const primaryItems = useMemo(() => {
     const baseItems: PrimaryNavItem[] = [
         {
-          label: t("allServices", "All Services"),
+          label: t("allServices", "All Works"),
           href: "/all-services",
           icon: BriefcaseBusiness,
         },
         {
-          label: t("myServices", "My Services"),
+          label: t("myServices", "My Works"),
           href: "/my-work",
           icon: ClipboardList,
         },
         {
-          label: t("appliedServices", "Applied Services"),
+          label: t("appliedServices", "Applied Works"),
           href: "/applied-service",
           icon: ClipboardList,
         },
@@ -606,7 +606,7 @@ export default function ServicesDashboard() {
         </div>
       </div>
 
-      <div className="mx-auto flex h-full w-full max-w-[1400px] gap-4">
+      <div className="mx-auto flex h-full w-full gap-4">
         <aside className="hidden w-72 shrink-0 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-[#152a64] via-[#1e3f8a] to-[#22409a] p-4 shadow-[0_16px_40px_rgba(15,23,42,0.14)] lg:sticky lg:top-0 lg:block lg:h-[calc(100vh-2.5rem)] lg:max-h-[calc(100vh-2.5rem)]">
           <DashboardSidebarContent {...sidebarProps} />
         </aside>
@@ -632,9 +632,9 @@ export default function ServicesDashboard() {
                     {isProfileView
                       ? t("myProfile", "My Profile")
                       : isMyWorkView
-                        ? t("myServices", "My Services")
+                        ? t("myServices", "My Works")
                         : isAppliedView
-                          ? t("appliedServices", "Applied Services")
+                          ? t("appliedServices", "Applied Works")
                           : isAboutView
                             ? t("aboutUs", "About us")
                             : isSettingsView

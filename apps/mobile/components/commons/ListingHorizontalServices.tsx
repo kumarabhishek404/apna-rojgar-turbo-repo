@@ -30,11 +30,21 @@ const IMG_H_MIN = 120;
 
 type IonName = ComponentProps<typeof Ionicons>["name"];
 
-const FACILITY_CONFIG: { key: string; icon: IonName; color: string; bg: string }[] = [
-  { key: "food",       icon: "restaurant-outline",       color: "#EA580C", bg: "#FFF1E6" },
-  { key: "living",     icon: "bed-outline",              color: "#2563EB", bg: "#EEF4FF" },
-  { key: "travelling", icon: "car-outline",              color: "#059669", bg: "#ECFDF5" },
-  { key: "esi_pf",     icon: "shield-checkmark-outline", color: "#7C3AED", bg: "#F5F3FF" },
+const FACILITY_CONFIG: {
+  key: string;
+  icon: IonName;
+  color: string;
+  bg: string;
+}[] = [
+  { key: "food", icon: "restaurant-outline", color: "#EA580C", bg: "#FFF1E6" },
+  { key: "living", icon: "bed-outline", color: "#2563EB", bg: "#EEF4FF" },
+  { key: "travelling", icon: "car-outline", color: "#059669", bg: "#ECFDF5" },
+  {
+    key: "esi_pf",
+    icon: "shield-checkmark-outline",
+    color: "#7C3AED",
+    bg: "#F5F3FF",
+  },
 ];
 
 type Props = {
@@ -52,15 +62,20 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
     : 0;
 
   const hasPhoto =
-    Array.isArray(item?.images) && item.images.length > 0 && Boolean(item.images[0]);
+    Array.isArray(item?.images) &&
+    item.images.length > 0 &&
+    Boolean(item.images[0]);
   const heroIcon = getServiceListHeroIcon(item?.type, item?.subType);
-  const rawDuration = item?.duration || dateDifference(item?.startDate, item?.endDate);
+  const rawDuration =
+    item?.duration || dateDifference(item?.startDate, item?.endDate);
   const duration = rawDuration
     ? /^\d+$/.test(String(rawDuration).trim())
       ? `${rawDuration} ${Number(rawDuration) === 1 ? t("day") : t("days")}`
       : String(rawDuration)
     : null;
-  const activeFacilities = FACILITY_CONFIG.filter((f) => item?.facilities?.[f.key]);
+  const activeFacilities = FACILITY_CONFIG.filter(
+    (f) => item?.facilities?.[f.key],
+  );
   const serviceTitle = t(item?.subType) || t(item?.type) || t("service");
 
   const goToDetails = () => {
@@ -80,15 +95,31 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
       {/* ── Hero image / icon ── */}
       <View style={styles.imageWrap}>
         {hasPhoto ? (
-          <Image source={{ uri: item.images[0] }} style={styles.image} resizeMode="cover" />
+          <Image
+            source={{ uri: item.images[0] }}
+            style={styles.image}
+            resizeMode="cover"
+          />
         ) : item?.coverImage ? (
-          <Image source={{ uri: item.coverImage }} style={styles.image} resizeMode="cover" />
+          <Image
+            source={{ uri: item.coverImage }}
+            style={styles.image}
+            resizeMode="cover"
+          />
         ) : (
           <View style={styles.iconFallback}>
             {heroIcon.family === "fa5" ? (
-              <FontAwesome5 name={heroIcon.name as any} size={44} color={Colors.primary} />
+              <FontAwesome5
+                name={heroIcon.name as any}
+                size={44}
+                color={Colors.primary}
+              />
             ) : (
-              <Ionicons name={heroIcon.name as any} size={50} color={Colors.primary} />
+              <Ionicons
+                name={heroIcon.name as any}
+                size={50}
+                color={Colors.primary}
+              />
             )}
           </View>
         )}
@@ -107,7 +138,7 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
           <Ionicons name="navigate-outline" size={11} color={Colors.white} />
           <ShowDistance
             address={item?.address}
-            loggedInUserLocation={userDetails?.geoLocation ?? userDetails?.location}
+            loggedInUserLocation={userDetails?.geoLocation}
             targetLocation={item?.geoLocation}
             align="left"
             color={Colors.white}
@@ -118,17 +149,25 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
 
       {/* ── Body ── */}
       <View style={styles.body}>
-
         {/* Top meta: title + address + duration */}
         <View style={styles.metaBlock}>
-          <CustomHeading textAlign="left" baseFont={15} numberOfLines={1} style={styles.title}>
+          <CustomHeading
+            textAlign="left"
+            baseFont={15}
+            numberOfLines={1}
+            style={styles.title}
+          >
             {serviceTitle}
           </CustomHeading>
 
           {item?.address ? (
             <View style={styles.addressRow}>
               <View style={styles.locationDot}>
-                <Ionicons name="location-outline" size={13} color={Colors.primary} />
+                <Ionicons
+                  name="location-outline"
+                  size={13}
+                  color={Colors.primary}
+                />
               </View>
               <View style={styles.addressFlex}>
                 <ShowAddress
@@ -143,8 +182,17 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
 
           {duration ? (
             <View style={styles.durationRow}>
-              <Ionicons name="time-outline" size={12} color={Colors.subHeading} />
-              <CustomText baseFont={11} color={Colors.subHeading} textAlign="left" numberOfLines={1}>
+              <Ionicons
+                name="time-outline"
+                size={12}
+                color={Colors.subHeading}
+              />
+              <CustomText
+                baseFont={11}
+                color={Colors.subHeading}
+                textAlign="left"
+                numberOfLines={1}
+              >
                 {duration}
               </CustomText>
             </View>
@@ -167,14 +215,32 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
                   >
                     {req?.count} {getDynamicWorkerType(req?.name, req?.count)}
                   </CustomText>
-                  <CustomText baseFont={10} color="rgba(255,255,255,0.85)" textAlign="left">
-                    ₹{req?.payPerDay}/{t("day")}
-                  </CustomText>
+                  {req?.payPerDay ? (
+                    <CustomText
+                      baseFont={10}
+                      color="rgba(255,255,255,0.85)"
+                      textAlign="left"
+                    >
+                      ₹{req?.payPerDay}/{t("day")}
+                    </CustomText>
+                  ) : (
+                    <CustomText
+                      baseFont={10}
+                      color="rgba(255,255,255,0.85)"
+                      textAlign="left"
+                    >
+                      {t("decidePriceWhileBooking")}
+                    </CustomText>
+                  )}
                 </View>
               ))}
               {extraReqs > 0 ? (
                 <View style={styles.moreTag}>
-                  <CustomText baseFont={11} fontWeight="700" color={Colors.primary}>
+                  <CustomText
+                    baseFont={11}
+                    fontWeight="700"
+                    color={Colors.primary}
+                  >
                     +{extraReqs} {t("more")}
                   </CustomText>
                 </View>
@@ -187,17 +253,23 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
         {activeFacilities.length > 0 ? (
           <View style={styles.facilitiesRow}>
             <Ionicons name="gift-outline" size={11} color={Colors.subHeading} />
-            <CustomText baseFont={10} color={Colors.subHeading} fontWeight="700">
+            <CustomText
+              baseFont={10}
+              color={Colors.subHeading}
+              fontWeight="700"
+            >
               {t("facilities")}:
             </CustomText>
             {activeFacilities.map(({ key, icon, color, bg }) => (
-              <View key={key} style={[styles.facilityBadge, { backgroundColor: bg }]}>
+              <View
+                key={key}
+                style={[styles.facilityBadge, { backgroundColor: bg }]}
+              >
                 <Ionicons name={icon} size={13} color={color} />
               </View>
             ))}
           </View>
         ) : null}
-
       </View>
     </TouchableOpacity>
   );
@@ -264,7 +336,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_W,
-    height: CARD_H,
+    // height: CARD_H,
     flexDirection: "column",
     backgroundColor: Colors.white,
     borderRadius: 18,
@@ -408,7 +480,7 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     width: 50,
-    height: CARD_H,
+    // height: CARD_H,
     alignItems: "center",
     justifyContent: "center",
   },

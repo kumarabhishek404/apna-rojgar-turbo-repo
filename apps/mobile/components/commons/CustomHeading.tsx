@@ -16,6 +16,7 @@ interface CustomTextProps {
   style?: any;
   restProps?: any;
   numberOfLines?: number;
+  ellipsizeMode?: "head" | "middle" | "tail";
 }
 
 const CustomHeading = ({
@@ -29,6 +30,7 @@ const CustomHeading = ({
   lineHeight,
   style,
   numberOfLines,
+  ellipsizeMode = "tail",
   ...restProps
 }: CustomTextProps) => {
   const { locale } = APP_CONTEXT.useApp();
@@ -46,6 +48,8 @@ const CustomHeading = ({
         style,
         { fontSize: getFontSize(locale, baseFont) },
       ]}
+      numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
       {...restProps}
     >
       {children}

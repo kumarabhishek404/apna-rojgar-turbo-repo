@@ -209,6 +209,17 @@ const UserInfoComponent = ({ user, style }: UserInfoComponentProps) => {
               </TouchableOpacity>
             )}
         </View>
+        {String(user?.role || "").toUpperCase() === "MEDIATOR" && (
+          <View style={[styles.row, styles.lastBox]}>
+            <CustomHeading baseFont={14} textAlign="left">
+              <CustomText>{t("numberOfWorkersInTeam")}</CustomText>
+              {"  "}
+              {Number(user?.numberOfWorkersInTeam) > 0
+                ? String(user?.numberOfWorkersInTeam)
+                : t("notAdded")}
+            </CustomHeading>
+          </View>
+        )}
       </View>
 
       <ModalComponent

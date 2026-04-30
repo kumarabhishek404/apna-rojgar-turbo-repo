@@ -20,7 +20,7 @@ const Highlights = ({ service, compact }: { service: any; compact?: boolean }) =
     const fetchDistance = async () => {
       const dist = await getDistanceFromLocation(
         service?.geoLocation,
-        userDetails?.geoLocation ?? userDetails?.location,
+        userDetails?.geoLocation,
         service?.address,
       );
       setDistance(dist);

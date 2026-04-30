@@ -92,8 +92,8 @@ export function translateKnownApiMessage(language: AppLanguage, rawMessage: stri
     "You cannot apply as a worker after applying as a mediator.":
       "apiErrorApplyWorkerAfterMediator",
     "You have already applied.": "apiErrorApplyAlreadyApplied",
-    "Service not found.": "apiErrorServiceNotFound",
-    "Service has no employer assigned.": "apiErrorServiceNoEmployer",
+    "Work not found.": "apiErrorServiceNotFound",
+    "Work has no employer assigned.": "apiErrorServiceNoEmployer",
     "You cannot apply to a service you created.": "apiErrorApplyOwnService",
     "You cannot apply in the service which is created by your selected team member.":
       "apiErrorApplyTeamIncludesEmployerCreator",

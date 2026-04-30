@@ -15,14 +15,6 @@ import { t } from "@/utils/translationHelper";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import { WORKERTYPES } from "@/constants";
 
-const SERVICE_COMPLETED = [
-  { label: "more_than_10", value: "more_than_10" },
-  { label: "more_than_50", value: "more_than_50" },
-  { label: "more_than_100", value: "more_than_100" },
-  { label: "more_than_500", value: "more_than_500" },
-  { label: "zero", value: "zero" },
-];
-
 const DISTANCE = [
   { label: "within_5km", value: "within_5km" },
   { label: "within_10km", value: "within_10km" },
@@ -32,29 +24,12 @@ const DISTANCE = [
   { label: "anywhere", value: "anywhere" },
 ];
 
-const ROLE_OPTIONS = [
-  {
-    label: "roleTagLabour",
-    value: "WORKER",
-    icon: "account-hard-hat-outline",
-  },
-  {
-    label: "roleTagContractor",
-    value: "MEDIATOR",
-    icon: "account-group-outline",
-  },
-  {
-    label: "roleTagEmployer",
-    value: "EMPLOYER",
-    icon: "briefcase-outline",
-  },
-];
-
 const FiltersWorkers = ({
   filterVisible,
   setFilterVisible,
   onApply,
   skills,
+  forcedRole = "",
 }: any) => {
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
   const [skillSearch, setSkillSearch] = useState("");
@@ -65,17 +40,23 @@ const FiltersWorkers = ({
       rating: 0,
       distance: "",
       skills: [],
-      role: "",
     },
   });
 
   const handleApply = (data: any) => {
     setFilterVisible(false);
-    onApply(data);
+    onApply({
+      ...data,
+    });
   };
 
   const handleClear = () => {
-    reset();
+    reset({
+      completedServices: "",
+      rating: 0,
+      distance: "",
+      skills: [],
+    });
     setFilterVisible(false);
     setSkillSearch("");
   };
@@ -109,9 +90,18 @@ const FiltersWorkers = ({
 
   const activeFilterCount = [
     !!watch("distance"),
-    !!watch("role"),
     Array.isArray(selectedSkills) && selectedSkills.length > 0,
   ].filter(Boolean).length;
+  const isContractorFilter = forcedRole === "MEDIATOR";
+  const drawerTitleKey = isContractorFilter
+    ? "filtersContractors"
+    : "filtersWorkers";
+  const heroTitleKey = isContractorFilter
+    ? "searchContractorsTitle"
+    : "searchWorkersTitle";
+  const heroSubtitleKey = isContractorFilter
+    ? "contractorFilterHelp"
+    : "workerFilterHelp";
 
   const renderSection = ({
     icon,
@@ -151,17 +141,20 @@ const FiltersWorkers = ({
   );
 
   const renderChoiceChip = ({
+    key,
     label,
     selected,
     onPress,
     icon,
   }: {
+    key: string;
     label: string;
     selected: boolean;
     onPress: () => void;
     icon?: React.ReactNode;
   }) => (
     <TouchableOpacity
+      key={key}
       activeOpacity={0.9}
       onPress={onPress}
       style={[styles.choiceChip, selected && styles.choiceChipSelected]}
@@ -193,10 +186,10 @@ const FiltersWorkers = ({
           textAlign="left"
           style={styles.heroTitle}
         >
-          {t("searchWorkersTitle")}
+          {t(heroTitleKey)}
         </CustomText>
         <CustomText baseFont={13} color={Colors.subHeading} textAlign="left">
-          {t("workerFilterHelp")}
+          {t(heroSubtitleKey)}
         </CustomText>
         {activeFilterCount > 0 ? (
           <View style={styles.activePill}>
@@ -206,45 +199,6 @@ const FiltersWorkers = ({
           </View>
         ) : null}
       </View>
-
-      <Controller
-        control={control}
-        name="role"
-        render={({ field: { onChange, value } }) =>
-          renderSection({
-            icon: (
-              <MaterialCommunityIcons
-                name="account-switch-outline"
-                size={20}
-                color={Colors.primary}
-              />
-            ),
-            title: t("filterWorkerByRoleTitle"),
-            subtitle: t("filterWorkerByRoleHint"),
-            children: (
-              <View style={styles.choiceWrap}>
-                {ROLE_OPTIONS.map((option) =>
-                  renderChoiceChip({
-                    label: t(option.label),
-                    selected: value === option.value,
-                    onPress: () =>
-                      onChange(value === option.value ? "" : option.value),
-                    icon: (
-                      <MaterialCommunityIcons
-                        name={option.icon as any}
-                        size={16}
-                        color={
-                          value === option.value ? Colors.white : Colors.primary
-                        }
-                      />
-                    ),
-                  }),
-                )}
-              </View>
-            ),
-          })
-        }
-      />
 
       <Controller
         control={control}
@@ -262,8 +216,9 @@ const FiltersWorkers = ({
             subtitle: t("filterDistanceHelp"),
             children: (
               <View style={styles.choiceWrap}>
-                {DISTANCE.map((option) =>
+                {DISTANCE.map((option, index) =>
                   renderChoiceChip({
+                    key: `distance-${index}`,
                     label: t(option.label),
                     selected: value === option.value,
                     onPress: () =>
@@ -292,25 +247,12 @@ const FiltersWorkers = ({
             subtitle: t("filterSkillsHelp"),
             children: (
               <>
-                <View style={styles.searchBox}>
-                  <Ionicons
-                    name="search-outline"
-                    size={18}
-                    color={Colors.inputPlaceholder}
-                  />
-                  <TextInput
-                    value={skillSearch}
-                    onChangeText={setSkillSearch}
-                    placeholder={t("searchAndSelectSkills")}
-                    placeholderTextColor={Colors.inputPlaceholder}
-                    style={styles.searchInput}
-                  />
-                </View>
                 <View style={styles.choiceWrap}>
-                  {filteredSkills.map((skill: string) => {
+                  {filteredSkills.map((skill: string, index: number) => {
                     const selectedSkills = value as string[];
                     const isSelected = selectedSkills.includes(skill);
                     return renderChoiceChip({
+                      key: `skill-${index}`,
                       label: getDynamicWorkerType(skill, 1),
                       selected: isSelected,
                       onPress: () =>
@@ -343,10 +285,20 @@ const FiltersWorkers = ({
   );
 
   useEffect(() => {
+    reset({
+      completedServices: "",
+      rating: 0,
+      distance: "",
+      skills: [],
+      role: forcedRole || "",
+    });
+  }, [forcedRole, reset]);
+
+  useEffect(() => {
     if (filterVisible) {
       setDrawerState({
         visible: true,
-        title: "filtersWorkers",
+        title: drawerTitleKey,
         content: filterContent,
         primaryButton: {
           title: "apply",
@@ -371,7 +323,7 @@ const FiltersWorkers = ({
     return () => {
       setDrawerState((prev: any) => ({ ...prev, visible: false }));
     };
-  }, [filterVisible]); // Only depend on visibility
+  }, [filterVisible, forcedRole]); // Keep forced role synced
 
   return null;
 };

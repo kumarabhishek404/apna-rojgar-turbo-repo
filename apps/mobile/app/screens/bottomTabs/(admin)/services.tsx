@@ -88,8 +88,6 @@ const AdminServices = () => {
   };
 
   const loadMore = () => {
-    console.log("Load more--", hasNextPage, isFetchingNextPage);
-
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }

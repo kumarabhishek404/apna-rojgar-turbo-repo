@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useLayoutEffect } from "react";
 
 /**
- * `https://apnarojgar.com/job/<id>` and `apnarojgar://job/<id>` resolve here,
+ * `https://apnarojgarindia.com/job/<id>` and `apnarojgar://job/<id>` resolve here,
  * then we immediately open service details (same as manual navigation).
  */
 export default function JobDeepLinkBridge() {

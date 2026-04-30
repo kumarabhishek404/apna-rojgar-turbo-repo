@@ -29,7 +29,7 @@ const SkeletonPlaceholder = ({ style }: { style: any }) => {
 
 const ListingsWorkersPlaceholder = () => {
   return (
-    <View style={{ gap: 10, paddingHorizontal: 10, paddingVertical: 10 }}>
+    <View style={{ gap: 10}}>
       {Array.from({ length: 7 }).map((_, index) => (
         <View
           key={index}
@@ -37,7 +37,7 @@ const ListingsWorkersPlaceholder = () => {
             flexDirection: "row",
             gap: 10,
             backgroundColor: Colors.white,
-            borderRadius: 8,
+            borderRadius: 16,
           }}
         >
           <SkeletonPlaceholder
