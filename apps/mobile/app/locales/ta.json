@@ -73,8 +73,8 @@
   "workerDetails": "தொழிலாளி விவரங்கள்",
   "employerDetails": "வேலை வழங்குநர் விவரங்கள்",
   "mediatorDetails": "நடுவர் விவரங்கள்",
-  "topRatedWorkers": "சிறந்த மதிப்பீடு பெற்ற தொழிலாளர்கள்",
-  "topRatedEmployers": "சிறந்த மதிப்பீடு பெற்ற வேலை வழங்குநர்கள்",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "வலதுபுறமாக உருட்டவும்",
   "workInformation": "வேலை தகவல்",
   "publications": "வெளியீடுகள்",
@@ -677,5 +677,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "உங்கள் பணம் எங்கே செல்கிறது என்று சரியாகப் பார்க்கவும்",
   "district": "மாவட்டம்",
   "subDistrict": "உபமாவட்டம்",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "தயவுசெய்து உங்கள் தற்போதைய இடத்தைப் பெறுங்கள் அருகிலுள்ள {{entity}} பெற"
 }

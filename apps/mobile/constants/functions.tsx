@@ -9,6 +9,7 @@ import { Linking } from "react-native";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents, type AnalyticsCallMeta } from "@/utils/analyticsEvents";
 import { AppState } from "react-native";
+import { getDynamicWorkerType } from "@/utils/i18n";
 
 export const dateDifference = (date1: Date, date2: Date): string => {
   const startDate = moment(date1);
@@ -145,9 +146,23 @@ export const removeEmptyStrings = (arr: any) => {
   return arr?.filter((item: any) => item !== "");
 };
 
+/** Skill id from API row (`{ skill }`) or plain string. */
+export const getSkillKeyFromItem = (skill: unknown): string => {
+  if (typeof skill === "string") return skill.trim();
+  if (skill && typeof skill === "object") {
+    const row = skill as { skill?: string; name?: string };
+    return String(row.skill ?? row.name ?? "").trim();
+  }
+  return "";
+};
+
+/** Localized skill label for current `i18n.locale` (hi, en, etc.). */
 export const getWorkLabel = (availableSkills: any, skill: string) => {
-  let object = availableSkills?.filter((type: any) => type?.value === skill)[0];
-  return object?.label && getDynamicWorkerType(object?.label, 1);
+  const key = String(skill ?? "").trim();
+  if (!key) return "";
+  const object = availableSkills?.filter((type: any) => type?.value === key)[0];
+  const labelKey = object?.label ?? key;
+  return getDynamicWorkerType(labelKey, 1);
 };
 
 export const calculateDistance = (
@@ -391,7 +406,6 @@ export const getFontSize = (locale: string, baseSize = BASE_FONT_SIZE) => {
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import USER from "@/app/api/user";
-import { getDynamicWorkerType } from "@/utils/i18n";
 
 export const logoutUser = async (setUserDetails: any, router: any) => {
   await AsyncStorage.removeItem("user"); // Remove from AsyncStorage

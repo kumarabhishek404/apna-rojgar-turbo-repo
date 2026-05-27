@@ -6,7 +6,7 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Stack } from "expo-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
@@ -64,6 +64,7 @@ const UnifiedPeopleScreen = () => {
     initialPageParam: 1,
     retry: false,
     enabled: showActiveWorks && canQuery,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage: any) => {
       if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
         return lastPage.pagination.page + 1;
@@ -93,6 +94,7 @@ const UnifiedPeopleScreen = () => {
     initialPageParam: 1,
     retry: false,
     enabled: showContractors && canQuery,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage: any) => {
       if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
         return lastPage.pagination.page + 1;
