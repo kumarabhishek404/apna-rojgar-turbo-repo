@@ -74,7 +74,7 @@ export default function Footer() {
 
               <li className="flex items-center gap-2">
                 <MapPin size={16} />
-                Jalesar, Etah Uttar Predesh, India, 207302
+                Jalesar, Etah Uttar Pradesh, India, 207302
               </li>
             </ul>
           </div>
