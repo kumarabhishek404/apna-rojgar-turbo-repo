@@ -80,9 +80,10 @@ app.use("/api/v1/analytics", analyticsRoutes);
 app.use((err, req, res, next) => {
   console.error("⚠️ Global Error:", err);
 
-  // Only log real errors
-  if (err && err.stack && req.route) {
-    logError(err, req, err.status || 500, req.originalUrl);
+  if (err) {
+    logError(err, req, err.status || 500, req.originalUrl || "global-handler", {
+      source: "backend",
+    });
   }
 
   res.status(err?.status || 500).json({
