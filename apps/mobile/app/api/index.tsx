@@ -111,7 +111,6 @@ const makePostRequestFormData = async (
   return api.post(url, body, {
     headers: {
       ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
       ...headers,
     },
   });
@@ -135,7 +134,6 @@ const makePutRequestFormData = async (
   return api.put(url, body, {
     headers: {
       ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
       ...headers,
     },
   });
@@ -159,7 +157,6 @@ const makePatchRequestFormData = async (
   return api.patch(url, body, {
     headers: {
       ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
       ...headers,
     },
   });

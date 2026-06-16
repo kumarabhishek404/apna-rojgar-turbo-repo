@@ -31,6 +31,7 @@ import SelectDurationAndDescriptionStep from "./SetDuration&Description";
 import FormProgressBar from "@/components/commons/FormProgress";
 import UploadWorkImagesStep from "./UploadImagesStep";
 import { getLatLongFromAddress } from "@/constants/functions";
+import { buildServiceImageUploadParts } from "@/utils/serviceImageUpload";
 
 const AddServiceScreen = () => {
   const queryClient = useQueryClient();
@@ -123,7 +124,7 @@ const AddServiceScreen = () => {
 
       TOAST?.error(
         err?.response?.data?.message ||
-          "Failed to update service. Please try again.",
+          (addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed")),
       );
     },
     onSettled: () => {
@@ -241,15 +242,9 @@ const AddServiceScreen = () => {
 
     const formData: any = new FormData();
 
-    images.forEach((imageUri: string, index: number) => {
-      if (imageUri.startsWith("http")) return;
-
-      const imageName = imageUri.split("/").pop();
-      formData.append("images", {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: imageName || `image_${index}.jpg`,
-      });
+    const imageParts = await buildServiceImageUploadParts(images);
+    imageParts.forEach((part) => {
+      formData.append("images", part);
     });
 
     const finalLocation = await ensureLocation(location, address);
@@ -260,7 +255,8 @@ const AddServiceScreen = () => {
     formData.append("address", address);
     formData.append("geoLocation", JSON.stringify(finalLocation));
     formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-    formData.append("duration", duration);
+    formData.append("duration", String(duration));
+    formData.append("bookingType", "byService");
     formData.append("requirements", JSON.stringify(requirements));
     formData.append("facilities", JSON.stringify(facilities));
 
@@ -285,15 +281,9 @@ const AddServiceScreen = () => {
 
       const formData: any = new FormData();
 
-      images.forEach((imageUri: string, index: number) => {
-        if (imageUri.startsWith("http")) return;
-
-        const imageName = imageUri.split("/").pop();
-        formData.append("images", {
-          uri: imageUri,
-          type: "image/jpeg",
-          name: imageName || `image_${index}.jpg`,
-        });
+      const imageParts = await buildServiceImageUploadParts(images);
+      imageParts.forEach((part) => {
+        formData.append("images", part);
       });
 
       const existingImages = images.filter((img: string) =>
@@ -308,9 +298,10 @@ const AddServiceScreen = () => {
       formData.append("subType", subType);
       formData.append("description", description);
       formData.append("address", address);
-      formData.append("location", JSON.stringify(location || {}));
+      formData.append("geoLocation", JSON.stringify(location || {}));
       formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-      formData.append("duration", duration);
+      formData.append("duration", String(duration));
+      formData.append("bookingType", "byService");
       formData.append("requirements", JSON.stringify(requirements));
       formData.append("facilities", JSON.stringify(facilities));
 
