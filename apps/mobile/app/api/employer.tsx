@@ -1,6 +1,7 @@
 import { t } from "@/utils/translationHelper";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
+import { normalizePaginatedPage } from "@/utils/paginatedApi";
 
 // Helper function for consistent error handling (toast shown by caller)
 const handleServiceError = (error: any, operation: string) => {
@@ -58,20 +59,20 @@ const editService = async (payload: any) => {
 // My Works
 const fetchMyServices = async ({ pageParam, status }: any) => {
   try {
-    const data = await API_CLIENT.makeGetRequest(
+    const response = await API_CLIENT.makeGetRequest(
       `/employer/my-services?status=${status}&page=${pageParam}&limit=10`,
     );
-    return data?.data;
+    return normalizePaginatedPage(response?.data);
   } catch (error: any) {
     console.error(
       `[employer] An error occurred while fetching my works : `,
-      error?.response?.data?.message,
+      error?.response?.data?.message || error,
     );
     TOAST?.error(
       error?.response?.data?.message ||
         "An error occurred while fetching my works",
     );
-    throw error?.response?.data?.message;
+    throw error;
   }
 };
 

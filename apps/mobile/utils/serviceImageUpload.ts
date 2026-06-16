@@ -1,4 +1,12 @@
 import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
+import { Platform } from "react-native";
+
+const toMultipartUri = (uri: string): string => {
+  if (Platform.OS === "ios") {
+    return uri.replace("file://", "");
+  }
+  return uri;
+};
 
 export type ServiceImageUploadPart = {
   uri: string;
@@ -41,7 +49,7 @@ export async function buildServiceImageUploadParts(
     const normalizedUri = await normalizePickedImageUriForUpload(raw);
     const { extension, mime } = getImageFileMeta(normalizedUri);
     parts.push({
-      uri: normalizedUri,
+      uri: toMultipartUri(normalizedUri),
       name: `service_${Date.now()}_${index}.${extension}`,
       type: mime,
     });

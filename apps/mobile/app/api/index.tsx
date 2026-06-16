@@ -34,10 +34,72 @@ const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_BASE_URL,
 });
 
-const makeFormDataRequest = async (
+const toFormData = (body: unknown): FormData => {
+  if (typeof FormData !== "undefined" && body instanceof FormData) {
+    return body;
+  }
+
+  const formData = new FormData();
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return formData;
+  }
+
+  for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    if (value === undefined || value === null) continue;
+    if (
+      typeof value === "object" &&
+      "uri" in value &&
+      typeof (value as { uri?: unknown }).uri === "string"
+    ) {
+      formData.append(key, value as any);
+      continue;
+    }
+    if (typeof value === "object") {
+      formData.append(key, JSON.stringify(value));
+      continue;
+    }
+    formData.append(key, String(value));
+  }
+
+  return formData;
+};
+
+const formDataHasFileParts = (formData: FormData): boolean => {
+  const parts = (formData as { _parts?: [string, unknown][] })._parts;
+  if (!Array.isArray(parts)) return false;
+  return parts.some(([, value]) => {
+    return (
+      value != null &&
+      typeof value === "object" &&
+      "uri" in value &&
+      typeof (value as { uri?: unknown }).uri === "string"
+    );
+  });
+};
+
+const parseFetchResponseData = async (response: Response) => {
+  const contentType = response.headers.get("content-type") || "";
+  return contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+};
+
+const toAxiosLikeResponse = (
+  responseData: unknown,
+  response: Response,
+): AxiosResponse => ({
+  data: responseData,
+  status: response.status,
+  statusText: response.statusText,
+  headers: Object.fromEntries(response.headers.entries()),
+  config: {} as AxiosResponse["config"],
+  request: null as AxiosResponse["request"],
+});
+
+const makeFetchFormDataRequest = async (
   method: "POST" | "PUT" | "PATCH",
   url: string,
-  body: any,
+  formData: FormData,
   headers?: object,
 ): Promise<AxiosResponse> => {
   const authHeaders = await getHeaders();
@@ -48,24 +110,22 @@ const makeFormDataRequest = async (
     ...((headers as Record<string, string>) || {}),
   };
 
-  // Let fetch/XHR set multipart boundary automatically.
+  // fetch + RN FormData: native layer must set multipart boundary for file parts.
   delete mergedHeaders["Content-Type"];
   delete mergedHeaders["content-type"];
 
   const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
     method,
     headers: mergedHeaders,
-    body: body as BodyInit,
+    body: formData,
   });
 
-  const contentType = response.headers.get("content-type") || "";
-  const responseData = contentType.includes("application/json")
-    ? await response.json()
-    : await response.text();
+  const responseData = await parseFetchResponseData(response);
 
   if (!response.ok) {
     const error: any = new Error(
-      (responseData as any)?.message || `Request failed with ${response.status}`,
+      (responseData as { message?: string })?.message ||
+        `Request failed with ${response.status}`,
     );
     error.response = {
       status: response.status,
@@ -75,14 +135,38 @@ const makeFormDataRequest = async (
     throw error;
   }
 
-  return {
-    data: responseData,
-    status: response.status,
-    statusText: response.statusText,
-    headers: Object.fromEntries(response.headers.entries()),
-    config: {} as any,
-    request: null as any,
-  };
+  return toAxiosLikeResponse(responseData, response);
+};
+
+const makeFormDataRequest = async (
+  method: "POST" | "PUT" | "PATCH",
+  url: string,
+  body: any,
+  headers?: object,
+): Promise<AxiosResponse> => {
+  const formData = toFormData(body);
+  const hasFiles = formDataHasFileParts(formData);
+
+  // Axios on RN still serializes FormData with files as x-www-form-urlencoded.
+  if (hasFiles) {
+    return makeFetchFormDataRequest(method, url, formData, headers);
+  }
+
+  return api.request({
+    method: method.toLowerCase() as "post" | "put" | "patch",
+    url,
+    data: formData,
+    headers: {
+      ...getClientDeviceHeaders(),
+      ...((await getHeaders()) as Record<string, string>),
+      "Content-Type": "multipart/form-data",
+      ...((headers as Record<string, string>) || {}),
+    },
+    transformRequest: (data) => data,
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    timeout: 60000,
+  });
 };
 
 api.interceptors.request.use((config) => {

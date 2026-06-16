@@ -33,6 +33,8 @@ import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { getToken } from "@/utils/authStorage";
 import { t } from "@/utils/translationHelper";
 import APP_CONTEXT from "@/app/context/locale";
+import { flattenPaginatedPages } from "@/utils/paginatedApi";
+import { canUserActAsMediator, resolveDisplayUserRole } from "@/utils/resolveDisplayUserRole";
 import ListingsServices from "@/components/commons/ListingServices";
 import ListingsVerticalServices from "@/components/commons/ListingsVerticalServices";
 import ListingsBookedWorkers from "@/components/commons/ListingBookedWorkers";
@@ -40,7 +42,6 @@ import ListingsVerticalBookings from "@/components/commons/ListingVerticalBookin
 import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholders/ListingServicePlaceholder";
 import CustomText from "@/components/commons/CustomText";
 import CustomHeading from "@/components/commons/CustomHeading";
-import ProfilePicture from "@/components/commons/ProfilePicture";
 
 type ApiRole = "WORKER" | "EMPLOYER" | "MEDIATOR";
 
@@ -271,26 +272,17 @@ const useTabWithParams = (DEFAULT_TAB: number) => {
   const params = useLocalSearchParams();
   const [tab, setTab] = useState(DEFAULT_TAB);
 
-  console.log("params", params);
-
   useFocusEffect(
     useCallback(() => {
       if (params?.tab !== undefined) {
         const nextTab = Number(params.tab);
         if (!isNaN(nextTab)) {
           setTab(nextTab);
-        } else {
-          setTab(DEFAULT_TAB);
+          return;
         }
-      } else {
-        setTab(DEFAULT_TAB);
       }
-
-      // 👉 On blur (leaving screen)
-      return () => {
-        setTab(DEFAULT_TAB);
-      };
-    }, [params?.tab]),
+      setTab(DEFAULT_TAB);
+    }, [params?.tab, DEFAULT_TAB]),
   );
 
   return { tab, setTab };
@@ -306,7 +298,6 @@ const WORKER_TABS: TabDef[] = [
 
 const WorkerActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const firstRef = useRef(true);
   const { tab, setTab } = useTabWithParams(0);
   const bookingsQ = useInfiniteQuery({
     queryKey: ["activityWorkerBookings", userDetails?._id],
@@ -336,20 +327,13 @@ const WorkerActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) {
-        firstRef.current = false;
-        return;
-      }
       bookingsQ.refetch();
       bookingInvitesQ.refetch();
     }, [bookingsQ.refetch, bookingInvitesQ.refetch]),
   );
 
   const services = useMemo(
-    () =>
-      dedupeById(
-        bookingsQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
-      ),
+    () => dedupeById(flattenPaginatedPages(bookingsQ.data?.pages)),
     [bookingsQ.data],
   );
   const bookingInvites = useMemo(
@@ -495,7 +479,6 @@ const EMPLOYER_TABS: TabDef[] = [
 
 const EmployerActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const firstRef = useRef(true);
   const { tab, setTab } = useTabWithParams(0);
   const servicesQ = useInfiniteQuery({
     queryKey: ["activityEmployerServices", userDetails?._id],
@@ -503,7 +486,9 @@ const EmployerActivity = () => {
       EMPLOYER.fetchMyServices({ pageParam, status: "HIRING" }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
-    retry: false,
+    retry: 1,
+    staleTime: 0,
+    refetchOnMount: "always",
     getNextPageParam: (lastPage: any) =>
       lastPage?.pagination?.page < lastPage?.pagination?.pages
         ? lastPage.pagination.page + 1
@@ -528,24 +513,17 @@ const EmployerActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) {
-        firstRef.current = false;
-        return;
-      }
       servicesQ.refetch();
       bookedQ.refetch();
     }, [servicesQ.refetch, bookedQ.refetch]),
   );
 
   const services = useMemo(
-    () =>
-      dedupeById(
-        servicesQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
-      ),
+    () => dedupeById(flattenPaginatedPages(servicesQ.data?.pages)),
     [servicesQ.data],
   );
   const bookedListings = useMemo(
-    () => bookedQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
+    () => flattenPaginatedPages(bookedQ.data?.pages),
     [bookedQ.data],
   );
 
@@ -556,6 +534,29 @@ const EmployerActivity = () => {
 
   if (servicesQ.isLoading && !servicesQ.data)
     return <ListingsServicesPlaceholder />;
+
+  if (servicesQ.isError && !services.length) {
+    return (
+      <FadeIn>
+        <View style={styles.panel}>
+          <IconTabBar tabs={EMPLOYER_TABS} selected={tab} onChange={setTab} />
+          <View style={styles.body}>
+            <RichEmptyState
+              icon="cloud-offline-outline"
+              iconColor="#DC2626"
+              iconBg="#FEE2E2"
+              title={t("serviceCreateFailed")}
+              message={t("noCreatedServicesMessage")}
+              ctaLabel={t("refresh")}
+              ctaIcon="refresh-outline"
+              ctaColor="#DC2626"
+              onCta={() => servicesQ.refetch()}
+            />
+          </View>
+        </View>
+      </FadeIn>
+    );
+  }
 
   return (
     <FadeIn>
@@ -673,7 +674,6 @@ const MEDIATOR_TABS: TabDef[] = [
 
 const MediatorActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const firstRef = useRef(true);
   const { tab, setTab } = useTabWithParams(0);
 
   const appliedQ = useInfiniteQuery({
@@ -695,7 +695,9 @@ const MediatorActivity = () => {
       EMPLOYER.fetchMyServices({ pageParam, status: "HIRING" }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
-    retry: false,
+    retry: 1,
+    staleTime: 0,
+    refetchOnMount: "always",
     getNextPageParam: (lastPage: any) =>
       lastPage?.pagination?.page < lastPage?.pagination?.pages
         ? lastPage.pagination.page + 1
@@ -717,10 +719,6 @@ const MediatorActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (firstRef.current) {
-        firstRef.current = false;
-        return;
-      }
       appliedQ.refetch();
       servicesQ.refetch();
       bookedQ.refetch();
@@ -728,22 +726,15 @@ const MediatorActivity = () => {
   );
 
   const applied = useMemo(
-    () =>
-      dedupeById(appliedQ.data?.pages?.flatMap((p: any) => p.data || []) || []),
+    () => dedupeById(flattenPaginatedPages(appliedQ.data?.pages)),
     [appliedQ.data],
   );
-  const members = useMemo(() => {
-    const out: any[] = [];
-    (servicesQ.data?.pages || []).forEach((p: any) => {
-      if (Array.isArray(p?.data))
-        p.data.forEach((block: any) => {
-          if (Array.isArray(block?.workers)) out.push(...block.workers);
-        });
-    });
-    return dedupeById(out);
-  }, [servicesQ.data]);
+  const postedServices = useMemo(
+    () => dedupeById(flattenPaginatedPages(servicesQ.data?.pages)),
+    [servicesQ.data],
+  );
   const booked = useMemo(
-    () => bookedQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
+    () => flattenPaginatedPages(bookedQ.data?.pages),
     [bookedQ.data],
   );
 
@@ -758,19 +749,18 @@ const MediatorActivity = () => {
   );
 
   const onEndReached = () => {
-    if (tab === 0 && appliedQ.hasNextPage && !appliedQ.isFetchingNextPage)
-      appliedQ.fetchNextPage();
-    else if (
-      tab === 1 &&
-      servicesQ.hasNextPage &&
-      !servicesQ.isFetchingNextPage
-    )
+    if (tab === 0 && servicesQ.hasNextPage && !servicesQ.isFetchingNextPage)
       servicesQ.fetchNextPage();
+    else if (tab === 1 && appliedQ.hasNextPage && !appliedQ.isFetchingNextPage)
+      appliedQ.fetchNextPage();
     else if (tab === 2 && bookedQ.hasNextPage && !bookedQ.isFetchingNextPage)
       bookedQ.fetchNextPage();
   };
 
-  if (appliedQ.isLoading && !appliedQ.data)
+  if (
+    (servicesQ.isLoading && !servicesQ.data) ||
+    (appliedQ.isLoading && !appliedQ.data)
+  )
     return <ListingsServicesPlaceholder />;
 
   return (
@@ -779,7 +769,53 @@ const MediatorActivity = () => {
         <IconTabBar tabs={MEDIATOR_TABS} selected={tab} onChange={setTab} />
 
         <View style={styles.body}>
+          {/* Tab 0 — works posted by this mediator */}
           {tab === 0 ? (
+            postedServices.length === 0 ? (
+              <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+              >
+                <RichEmptyState
+                  icon="briefcase-outline"
+                  iconColor="#059669"
+                  iconBg="#ECFDF5"
+                  title={t("myServices")}
+                  message={t("noCreatedServicesMessage")}
+                  ctaLabel={t("createNewService")}
+                  ctaIcon="add-circle-outline"
+                  ctaColor="#059669"
+                  onCta={() => router.push("/screens/addService")}
+                />
+              </ScrollView>
+            ) : (
+              <ListingsVerticalServices
+                listings={postedServices as any}
+                loadMore={() =>
+                  servicesQ.hasNextPage &&
+                  !servicesQ.isFetchingNextPage &&
+                  servicesQ.fetchNextPage()
+                }
+                isFetchingNextPage={servicesQ.isFetchingNextPage}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor={Colors.primary}
+                  />
+                }
+              />
+            )
+          ) : null}
+
+          {/* Tab 1 — works applied for as a mediator */}
+          {tab === 1 ? (
             applied.length === 0 ? (
               <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
@@ -795,11 +831,12 @@ const MediatorActivity = () => {
                   icon="briefcase-outline"
                   iconColor="#2563EB"
                   iconBg="#EEF4FF"
-                  title={t("myServices")}
-                  message={t("noCreatedServicesMessage")}
-                  ctaLabel={t("addNewWork")}
+                  title={t("activityTabMedAppliedTitle")}
+                  message={t("activityEmptyLineApplied")}
+                  ctaLabel={t("browseJobs")}
                   ctaIcon="search-outline"
-                  onCta={() => router.push("/screens/addService")}
+                  ctaColor="#2563EB"
+                  onCta={() => router.push("/(tabs)/third")}
                 />
               </ScrollView>
             ) : (
@@ -823,102 +860,6 @@ const MediatorActivity = () => {
                 onEndReachedThreshold={0.25}
                 ListFooterComponent={
                   appliedQ.isFetchingNextPage ? (
-                    <ActivityIndicator
-                      color={Colors.primary}
-                      style={{ padding: 16 }}
-                    />
-                  ) : (
-                    <View style={{ height: 80 }} />
-                  )
-                }
-              />
-            )
-          ) : null}
-
-          {tab === 1 ? (
-            members.length === 0 ? (
-              <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-              >
-                <RichEmptyState
-                  icon="briefcase-outline"
-                  iconColor="#D97706"
-                  iconBg="#FEF3C7"
-                  title={t("activityTabMedAppliedTitle")}
-                  message={t("activityEmptyLineApplied")}
-                  ctaLabel={t("browseJobs")}
-                  ctaIcon="search-outline"
-                  ctaColor="#D97706"
-                  onCta={() => router.push("/(tabs)/third")}
-                />
-              </ScrollView>
-            ) : (
-              <FlatList
-                data={members}
-                keyExtractor={(it: any, idx: number) =>
-                  String(it?._id || it?.service || idx)
-                }
-                renderItem={({ item: w }: any) => {
-                  const u =
-                    w?.service && typeof w.service === "object" ? w.service : w;
-                  const uid = u?._id || w?.service;
-                  const pic = u?.profilePicture;
-                  const name = u?.name || "—";
-                  return (
-                    <TouchableOpacity
-                      style={styles.memberRow}
-                      activeOpacity={0.85}
-                      onPress={() =>
-                        router.push({
-                          pathname: "/screens/service/[id]",
-                          params: {
-                            id: String(uid),
-                            title: "service",
-                          },
-                        })
-                      }
-                    >
-                      <ProfilePicture
-                        uri={pic}
-                        style={{ width: 48, height: 48, borderRadius: 24 }}
-                      />
-                      <View style={{ flex: 1, marginLeft: 12 }}>
-                        <CustomText fontWeight="700" baseFont={16}>
-                          {name}
-                        </CustomText>
-                        {w?.serviceStatus ? (
-                          <CustomText baseFont={12} color={Colors.subHeading}>
-                            {String(w.serviceStatus)}
-                          </CustomText>
-                        ) : null}
-                      </View>
-                      <Ionicons
-                        name="chevron-forward"
-                        size={20}
-                        color={Colors.subHeading}
-                      />
-                    </TouchableOpacity>
-                  );
-                }}
-                contentContainerStyle={styles.listInner}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.25}
-                ListFooterComponent={
-                  servicesQ.isFetchingNextPage ? (
                     <ActivityIndicator
                       color={Colors.primary}
                       style={{ padding: 16 }}
@@ -1000,10 +941,35 @@ const MediatorActivity = () => {
 /* ─────────────────────────────────────────
    Root
 ───────────────────────────────────────── */
+const resolveActivityRole = (
+  userDetails: Record<string, unknown> | null | undefined,
+  appRole: string,
+): ApiRole => {
+  const profile = {
+    role: userDetails?.role || appRole,
+    skills: userDetails?.skills,
+  };
+  const inferredRole = resolveDisplayUserRole(profile);
+  const hasPostedServices =
+    Number(
+      (userDetails?.serviceDetails as { byService?: { total?: number } })
+        ?.byService?.total,
+    ) > 0;
+
+  // Contractors/mediators keep the 3-tab view (posted + applied + booked).
+  if (canUserActAsMediator(profile)) {
+    return "MEDIATOR";
+  }
+  if (inferredRole === "EMPLOYER" || hasPostedServices) {
+    return "EMPLOYER";
+  }
+  return inferredRole;
+};
+
 const UnifiedActivityScreen = () => {
-  const { locale } = APP_CONTEXT.useApp();
+  const { locale, role: appRole } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const role = (userDetails?.role || "WORKER") as ApiRole;
+  const role = resolveActivityRole(userDetails, appRole);
   // Ensure all translated labels in this screen refresh on locale change.
   void locale;
 

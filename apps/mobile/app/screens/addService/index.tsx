@@ -80,13 +80,23 @@ const AddServiceScreen = () => {
     mutationKey: [addService?._id ? "editService" : "addService"],
     mutationFn: () =>
       addService?._id ? handleEditSubmit(addService?._id) : handleSubmit(),
-    onSuccess: (data: any) => {
-      const serviceId = data?.data?._id || data?._id;
+    onSuccess: async (data: any) => {
+      const serviceId = data?._id;
 
       // ✅ Start polling BEFORE reset
       if (serviceId) {
         startPolling(serviceId);
       }
+
+      queryClient.invalidateQueries({ queryKey: ["activityEmployerServices"] });
+      queryClient.invalidateQueries({ queryKey: ["activityMediatorServices"] });
+      queryClient.invalidateQueries({ queryKey: ["myServices"] });
+      queryClient.invalidateQueries({
+        queryKey: ["unifiedHomeMyPostedServices"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employerWorkRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["myWorkRequests"] });
+      await queryClient.refetchQueries({ queryKey: ["activityEmployerServices"] });
 
       refreshUser();
 
@@ -244,7 +254,11 @@ const AddServiceScreen = () => {
 
     const imageParts = await buildServiceImageUploadParts(images);
     imageParts.forEach((part) => {
-      formData.append("images", part);
+      formData.append("images", {
+        uri: part.uri,
+        name: part.name,
+        type: part.type,
+      } as any);
     });
 
     const finalLocation = await ensureLocation(location, address);
@@ -283,7 +297,11 @@ const AddServiceScreen = () => {
 
       const imageParts = await buildServiceImageUploadParts(images);
       imageParts.forEach((part) => {
-        formData.append("images", part);
+        formData.append("images", {
+          uri: part.uri,
+          name: part.name,
+          type: part.type,
+        } as any);
       });
 
       const existingImages = images.filter((img: string) =>
@@ -356,17 +374,14 @@ const AddServiceScreen = () => {
           clearInterval(pollingRef.current);
           pollingRef.current = null;
 
-          // 🔥 Silent refresh (NO loader)
+          queryClient.invalidateQueries({ queryKey: ["activityEmployerServices"] });
+          queryClient.invalidateQueries({ queryKey: ["activityMediatorServices"] });
+          queryClient.invalidateQueries({ queryKey: ["myServices"] });
           queryClient.invalidateQueries({
-            queryKey: ["myWorkRequests"],
-            refetchType: "inactive", // prevents aggressive refetch
+            queryKey: ["unifiedHomeMyPostedServices"],
           });
-
-          // OR (even smoother)
-          queryClient.refetchQueries({
-            queryKey: ["myWorkRequests"],
-            type: "inactive", // no UI flicker
-          });
+          queryClient.invalidateQueries({ queryKey: ["employerWorkRequests"] });
+          queryClient.invalidateQueries({ queryKey: ["myWorkRequests"] });
         }
 
         if (status === "FAILED") {
