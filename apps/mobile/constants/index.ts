@@ -237,6 +237,13 @@ export const ADMINREQUEST = [
   },
 ];
 
+export const ADMIN_PROMOTION_PAYMENTS = [
+  { label: "all", value: "ALL", iconName: "apps" },
+  { label: "paid", value: "PAID", iconName: "checkmark-circle" },
+  { label: "pending", value: "CREATED", iconName: "time" },
+  { label: "failed", value: "FAILED", iconName: "close-circle" },
+];
+
 export const ALLREQUEST = [
   {
     label: "received",

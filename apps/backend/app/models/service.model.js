@@ -113,6 +113,17 @@ const serviceSchema = new mongoose.Schema(
       type: Number,
       default: 0, // 0 to 100
     },
+    socialMediaPromotion: {
+      enabled: { type: Boolean, default: false },
+      orderId: { type: String, default: "" },
+      amount: { type: Number, default: 0 },
+      status: {
+        type: String,
+        enum: ["NONE", "PENDING", "PAID", "FAILED"],
+        default: "NONE",
+      },
+      paidAt: { type: Date },
+    },
     facilities: {
       food: { type: Boolean, default: false },
       living: { type: Boolean, default: false },

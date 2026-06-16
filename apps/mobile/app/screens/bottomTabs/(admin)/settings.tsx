@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useAtomValue } from "jotai";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import Atoms from "@/app/AtomStore";
 import CustomHeader from "@/components/commons/Header";
 import { t } from "@/utils/translationHelper";
@@ -37,7 +37,7 @@ const AdminSettings = () => {
   };
 
   const handlePaymentSettings = () => {
-    // Navigate to payment settings
+    router.push("/screens/admin/promotionPayments");
   };
 
   const handleSystemSettings = () => {
@@ -103,7 +103,7 @@ const AdminSettings = () => {
         <View style={styles.section}>
           <SectionHeader title={t("systemSettings")} />
           <SettingItem
-            title={t("payments")}
+            title={t("adminPromotionPayments")}
             icon="card"
             onPress={handlePaymentSettings}
           />

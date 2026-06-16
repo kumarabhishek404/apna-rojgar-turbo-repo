@@ -3,6 +3,8 @@ import Request from "../models/request.model.js";
 import ErrorLog from "../models/errors.model.js";
 import AppEvent from "../models/appEvent.model.js";
 import Notification from "../models/notification.model.js";
+import Payment from "../models/payment.model.js";
+import { getPromotionPaymentStats } from "../utils/payment.service.js";
 import { handleSendNotificationController } from "./notification.controller.js";
 import logError from "../utils/addErrorLog.js";
 import { getEnglishTitles } from "../utils/translations.js";
@@ -443,6 +445,71 @@ export const getAdminNotifications = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to fetch notifications",
+    });
+  }
+};
+
+export const getAdminPromotionPayments = async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+  const skip = (page - 1) * limit;
+  const status = String(req.query.status || "ALL").trim().toUpperCase();
+  const search = String(req.query.search || "").trim();
+
+  const query = { purpose: "SERVICE_SOCIAL_PROMOTION" };
+  if (status && status !== "ALL") {
+    query.status = status;
+  }
+
+  try {
+    if (search) {
+      const matchingUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { mobile: { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+
+      query.$or = [
+        { orderId: { $regex: search, $options: "i" } },
+        { user: { $in: matchingUsers.map((user) => user._id) } },
+      ];
+    }
+
+    const [total, payments, stats] = await Promise.all([
+      Payment.countDocuments(query),
+      Payment.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate("user", "name mobile role profilePicture address")
+        .populate(
+          "service",
+          "jobID type subType address status socialMediaPromotion startDate createdAt",
+        )
+        .select(
+          "user service serviceJobId orderId paymentSessionId amount currency status purpose paidAt cashfreeOrderStatus cfPaymentId paymentMethod paymentMethodDetail webhookEventId metadata createdAt updatedAt",
+        ),
+      getPromotionPaymentStats(),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Promotion payments fetched successfully",
+      data: payments,
+      stats,
+      pagination: {
+        page,
+        pages: Math.ceil(total / limit),
+        total,
+        limit,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to fetch promotion payments",
     });
   }
 };

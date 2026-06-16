@@ -5,17 +5,25 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest, clearAuth } from "@/lib/auth";
 import { isAdminUser } from "@/lib/isAdminUser";
-
-const baseLinks = [
-  { href: "/webapp/services", label: "All Works" },
-  { href: "/webapp/profile", label: "My Profile" },
-  { href: "/webapp/applied-services", label: "Applied Work" },
-  { href: "/webapp/my-services", label: "My Work" },
-];
+import { useLanguage } from "@/components/LanguageProvider";
 
 export default function WebAppNav() {
   const pathname = usePathname();
+  const { t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const baseLinks = useMemo(
+    () => [
+      { href: "/webapp/services", label: t("allServices", "All Works") },
+      { href: "/webapp/profile", label: t("myProfile", "My Profile") },
+      { href: "/webapp/my-services", label: t("myServices", "My Works") },
+      ...(isAdmin
+        ? [{ href: "/webapp/admin/paid-services", label: t("paidServices", "Paid Services") }]
+        : []),
+      { href: "/webapp/applied-services", label: t("appliedServices", "Applied Works") },
+    ],
+    [isAdmin, t],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -37,12 +45,12 @@ export default function WebAppNav() {
     if (!isAdmin) return baseLinks;
     return [
       ...baseLinks,
-      { href: "/webapp/admin/users", label: "Users" },
-      { href: "/webapp/admin/error-logs", label: "Error Logs" },
-      { href: "/webapp/admin/analytics", label: "Analytics" },
-      { href: "/webapp/admin/notifications", label: "Notifications" },
+      { href: "/webapp/admin/users", label: t("users", "Users") },
+      { href: "/webapp/admin/error-logs", label: t("errorLogs", "Error Logs") },
+      { href: "/webapp/admin/analytics", label: t("analytics", "Analytics") },
+      { href: "/webapp/admin/notifications", label: t("notifications", "Notifications") },
     ];
-  }, [isAdmin]);
+  }, [baseLinks, isAdmin, t]);
 
   return (
     <nav className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
