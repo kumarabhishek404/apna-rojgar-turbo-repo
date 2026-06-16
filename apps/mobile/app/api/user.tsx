@@ -1,6 +1,7 @@
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
+import { getUserIdFromToken } from "@/utils/authStorage";
 
 const getUserInfo = async () => {
   try {
@@ -19,13 +20,65 @@ const getUserInfo = async () => {
   }
 };
 
+const formDataHasField = (formData: FormData, key: string): boolean => {
+  const parts = (formData as { _parts?: [string, unknown][] })._parts;
+  if (!Array.isArray(parts)) return false;
+  return parts.some(([fieldKey]) => fieldKey === key);
+};
+
+const formDataHasProfileImage = (formData: FormData): boolean => {
+  const parts = (formData as { _parts?: [string, unknown][] })._parts;
+  if (!Array.isArray(parts)) return false;
+  return parts.some(([key, value]) => {
+    if (key !== "profileImage") return false;
+    return (
+      value != null &&
+      typeof value === "object" &&
+      "uri" in value &&
+      typeof (value as { uri?: unknown }).uri === "string"
+    );
+  });
+};
+
+const withAuthenticatedUserId = async (payload: Record<string, unknown>) => {
+  if (payload._id) return payload;
+  const userId = await getUserIdFromToken();
+  return userId ? { ...payload, _id: userId } : payload;
+};
+
+const formDataToPlainObject = (formData: FormData): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  const parts = (formData as { _parts?: [string, unknown][] })._parts;
+  if (!Array.isArray(parts)) return result;
+
+  for (const [key, value] of parts) {
+    if (value == null) continue;
+    if (typeof value === "string") {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+
 const updateUserById = async (payload: any) => {
   try {
-    const response = await API_CLIENT.makePatchRequestFormData(
-      `/user/info`,
-      payload,
+    const isFormData =
+      typeof FormData !== "undefined" && payload instanceof FormData;
+
+    // Role/locale/name updates: JSON PATCH (backend skips multer for non-multipart).
+    // Profile photo: multipart FormData with a file part.
+    if (isFormData && formDataHasProfileImage(payload)) {
+      const userId = await getUserIdFromToken();
+      if (userId && !formDataHasField(payload, "_id")) {
+        payload.append("_id", userId);
+      }
+      return await API_CLIENT.makePatchRequestFormData(`/user/info`, payload);
+    }
+
+    const body = await withAuthenticatedUserId(
+      isFormData ? formDataToPlainObject(payload) : (payload ?? {}),
     );
-    return response;
+    return await API_CLIENT.makePatchRequest(`/user/info`, body);
   } catch (error: any) {
     console.error(
       `[userService] An error occurred while updating user : `,

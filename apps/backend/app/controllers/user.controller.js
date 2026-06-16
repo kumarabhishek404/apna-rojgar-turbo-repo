@@ -84,8 +84,8 @@ export const getMyInfo = async (req, res) => {
 
 export const handleUpdateInfo = async (req, res) => {
   try {
+    const userId = req.user?._id ?? req.body?._id;
     const {
-      _id,
       name,
       email,
       address,
@@ -185,7 +185,14 @@ export const handleUpdateInfo = async (req, res) => {
     };
 
     console.log("Fetching user from database");
-    const user = await User.findById(_id);
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -336,7 +343,7 @@ export const handleUpdateInfo = async (req, res) => {
     // }
 
     // Perform update
-    const updatedUser = await User.findByIdAndUpdate(_id, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     });
 
