@@ -2,15 +2,12 @@ import { t } from "@/utils/translationHelper";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 
-// Helper function for consistent error handling
+// Helper function for consistent error handling (toast shown by caller)
 const handleServiceError = (error: any, operation: string) => {
-  const errorMessage =
-    error?.response?.data?.message || `Failed to ${operation}`;
   console.error(`[ServiceAPI] ${operation} failed:`, {
     error: error?.response?.data || error,
     operation,
   });
-  TOAST?.error(errorMessage);
   throw error;
 };
 

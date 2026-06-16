@@ -1,14 +1,19 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import logError from "../utils/addErrorLog.js"; // Import error logging utility
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const uploadPath = path.join(__dirname, "../public/images");
+
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     try {
-      const uploadPath = path.join(__dirname, "../public/images");
       cb(null, uploadPath);
     } catch (error) {
       logError(error, req, 500, "middleware - multerStorage");
@@ -19,9 +24,10 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     try {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      const fileExt = file.originalname.split(".").pop();
-      const newFileName = `${file.originalname}-${uniqueSuffix}.${fileExt}`;
-      cb(null, newFileName);
+      const baseName = path.basename(file.originalname || "image").replace(/\s+/g, "_");
+      const ext = path.extname(baseName).replace(".", "") || "jpg";
+      const stem = path.basename(baseName, path.extname(baseName)) || "image";
+      cb(null, `${stem}-${uniqueSuffix}.${ext}`);
     } catch (error) {
       logError(error, req, 500, "middleware - multerFilename");
       console.error("⚠️ [File Upload] Error generating file name:", error);
@@ -35,7 +41,15 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: async (req, file, cb) => {
     try {
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+      const allowedTypes = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "image/heic",
+        "image/heif",
+      ];
 
       if (!allowedTypes.includes(file.mimetype)) {
         const error = new Error(
