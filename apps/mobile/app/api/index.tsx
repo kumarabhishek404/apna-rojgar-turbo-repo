@@ -34,6 +34,57 @@ const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_BASE_URL,
 });
 
+const makeFormDataRequest = async (
+  method: "POST" | "PUT" | "PATCH",
+  url: string,
+  body: any,
+  headers?: object,
+): Promise<AxiosResponse> => {
+  const authHeaders = await getHeaders();
+  const deviceHeaders = getClientDeviceHeaders();
+  const mergedHeaders: Record<string, string> = {
+    ...deviceHeaders,
+    ...(authHeaders as Record<string, string>),
+    ...((headers as Record<string, string>) || {}),
+  };
+
+  // Let fetch/XHR set multipart boundary automatically.
+  delete mergedHeaders["Content-Type"];
+  delete mergedHeaders["content-type"];
+
+  const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
+    method,
+    headers: mergedHeaders,
+    body: body as BodyInit,
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const responseData = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    const error: any = new Error(
+      (responseData as any)?.message || `Request failed with ${response.status}`,
+    );
+    error.response = {
+      status: response.status,
+      data: responseData,
+      headers: Object.fromEntries(response.headers.entries()),
+    };
+    throw error;
+  }
+
+  return {
+    data: responseData,
+    status: response.status,
+    statusText: response.statusText,
+    headers: Object.fromEntries(response.headers.entries()),
+    config: {} as any,
+    request: null as any,
+  };
+};
+
 api.interceptors.request.use((config) => {
   const deviceHeaders = getClientDeviceHeaders();
   Object.assign(config.headers, deviceHeaders);
@@ -108,12 +159,7 @@ const makePostRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.post(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("POST", url, body, headers);
 };
 
 const makePutRequest = async (
@@ -131,12 +177,7 @@ const makePutRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.put(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("PUT", url, body, headers);
 };
 
 const makePatchRequest = async (
@@ -154,12 +195,7 @@ const makePatchRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.patch(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("PATCH", url, body, headers);
 };
 
 const makeDeleteRequest = async (

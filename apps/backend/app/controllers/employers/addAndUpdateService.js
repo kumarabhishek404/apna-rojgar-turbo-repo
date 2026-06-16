@@ -155,19 +155,33 @@ const parseAndValidateRequest = async (req) => {
         ? safeParseJSON(geoLocation)
         : geoLocation;
 
-    // ✅ Fallback to employer geoLocation
+    // ✅ Fallback to employer geoLocation when request doesn't include valid coordinates
     if (
       !finalGeoLocation ||
-      !finalGeoLocation.coordinates ||
+      !Array.isArray(finalGeoLocation.coordinates) ||
       finalGeoLocation.coordinates.length !== 2
     ) {
       const employer = await User.findById(req.user._id);
 
-      if (!employer || !employer.geoLocation?.coordinates?.length) {
-        throw new Error("Geo Location not found");
+      if (
+        employer &&
+        Array.isArray(employer.geoLocation?.coordinates) &&
+        employer.geoLocation.coordinates.length === 2
+      ) {
+        finalGeoLocation = employer.geoLocation;
       }
+    }
 
-      finalGeoLocation = employer.geoLocation;
+    // ✅ Keep service posting non-blocking even when geocoding/profile location is unavailable.
+    if (
+      !finalGeoLocation ||
+      !Array.isArray(finalGeoLocation.coordinates) ||
+      finalGeoLocation.coordinates.length !== 2
+    ) {
+      finalGeoLocation = {
+        type: "Point",
+        coordinates: [0, 0],
+      };
     }
 
     const result = {
