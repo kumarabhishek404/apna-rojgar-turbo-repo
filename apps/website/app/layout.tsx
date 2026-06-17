@@ -40,9 +40,9 @@ export default function RootLayout({
     logo: "https://apnarojgarindia.com/logo.png",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Jalesar, Etah Uttar Predesh, India, 207302",
+      streetAddress: "Jalesar, Etah Uttar Pradesh, India, 207302",
       addressLocality: "Etah",
-      addressRegion: "Uttar Predesh",
+      addressRegion: "Uttar Pradesh",
       addressCountry: "India",
       postalCode: "207302",
     },

@@ -78,7 +78,7 @@ export default function Contact() {
 
             <h3 className="font-semibold mb-2 text-gray-900">{t("location", "Location")}</h3>
             <p className="text-gray-600 text-sm">
-              Jalesar, Etah Uttar Predesh India, 207302
+              Jalesar, Etah Uttar Pradesh India, 207302
             </p>
           </motion.div>
         </div>
