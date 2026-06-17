@@ -7,6 +7,7 @@ import {
   Modal,
 } from "react-native";
 import React, { useState, useEffect, useRef, ReactNode } from "react";
+import { shouldSuppressAuthErrorToast } from "@/utils/apiError";
 
 type ToastType = "success" | "error" | "info" | "default";
 
@@ -145,8 +146,14 @@ const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
   toastRef = {
     show: (message: string, type: ToastType = "info") => {
-      const id = new Date().getTime(); // Unique ID for each toast
-      setToasts((prev) => [{ id, message, type }, ...prev]); // Add new toast at the top
+      const id = new Date().getTime();
+
+      // Token/session failures: one global toast only (see API interceptor).
+      if (type === "error" && shouldSuppressAuthErrorToast(message)) {
+        return;
+      }
+
+      setToasts((prev) => [{ id, message, type }, ...prev]);
     },
   };
 

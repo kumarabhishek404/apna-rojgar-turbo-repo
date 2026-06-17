@@ -73,8 +73,8 @@
   "workerDetails": "തൊഴിലാളി വിശദാംശങ്ങൾ",
   "employerDetails": "തൊഴിലുടമ വിശദാംശങ്ങൾ",
   "mediatorDetails": "മീഡിയേറ്റർ വിശദാംശങ്ങൾ",
-  "topRatedWorkers": "ഉയർന്ന റേറ്റിംഗുള്ള തൊഴിലാളികൾ",
-  "topRatedEmployers": "ഉയർന്ന റേറ്റിംഗുള്ള തൊഴിലുടമകൾ",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "വലത്തേക്ക് സ്ക്രോൾ ചെയ്യുക",
   "workInformation": "ജോലി വിവരങ്ങൾ",
   "publications": "പ്രസിദ്ധീകരണങ്ങൾ",
@@ -679,5 +679,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "നിങ്ങളുടെ പണം എവിടെ പോകുന്നു എന്ന് കൃത്യമായി കാണുക",
   "district": "ജില്ല",
   "subDistrict": "ഉപജില്ല",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "ദയവായി നിങ്ങളുടെ നിലവിലെ സ്ഥാനം നേടുക അടുത്ത {{entity}} ലഭിക്കാനായി"
 }

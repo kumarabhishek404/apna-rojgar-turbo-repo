@@ -24,9 +24,16 @@ import {
 import { t } from "@/utils/translationHelper";
 import homeBannerArt from "../../assets/banners/banner1.png";
 import homeBannerArt2 from "../../assets/banners/banner2.png";
+import homeBannerArt3 from "../../assets/banners/banner3.png";
+import homeBannerArt4 from "../../assets/banners/banner4.png";
+import homeBannerArt5 from "../../assets/banners/banner5.png";
+import homeBannerArt6 from "../../assets/banners/banner6.png";
 import APP_CONTEXT from "@/app/context/locale";
 
 const { width: SCREEN_W } = Dimensions.get("window");
+const BANNER_SLIDE_W = SCREEN_W - 44;
+const BANNER_IMAGE_H = 190;
+const BANNER_BOTTOM_MARGIN = 12;
 
 type Props = {
   userDetails: {
@@ -67,7 +74,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
   const [activeBanner, setActiveBanner] = useState(0);
   const { locale } = APP_CONTEXT.useApp();
   const [isPaused, setIsPaused] = useState(false);
-  const bannerImages = useMemo(() => [homeBannerArt, homeBannerArt2], []);
+  const bannerImages = useMemo(() => [homeBannerArt, homeBannerArt2, homeBannerArt3, homeBannerArt4, homeBannerArt5, homeBannerArt6], []);
 
   const displayName =
     firstName(userDetails?.name) || t("homeGreetingFallbackName");
@@ -86,8 +93,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
       .map((s) => {
         const v = typeof s === "string" ? s : s?.skill;
         if (!v || typeof v !== "string") return "";
-        const label = getWorkLabel(WORKERTYPES, v.trim());
-        return label || v.trim();
+        return getWorkLabel(WORKERTYPES, v.trim());
       })
       .filter(Boolean) as string[];
   }, [userDetails?.skills, locale]);
@@ -167,6 +173,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
         <View style={styles.bannerCard}>
           <ScrollView
             ref={bannerScrollRef}
+            style={styles.bannerScroll}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -373,27 +380,29 @@ const styles = StyleSheet.create({
   },
   bannerCard: {
     borderRadius: 26,
-    height: 172,
+    height: BANNER_IMAGE_H,
+    marginBottom: BANNER_BOTTOM_MARGIN,
     overflow: "hidden",
     backgroundColor: "#2D47B3",
-    // marginBottom: 16,
     shadowColor: "#1f3f9a",
     shadowOpacity: 0.24,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
+  bannerScroll: {
+    flex: 1,
+  },
   bannerCoverImage: {
-    width: SCREEN_W - 44,
-    height: "100%",
-    // opacity: 0.97,
+    width: BANNER_SLIDE_W,
+    height: BANNER_IMAGE_H,
     overflow: "hidden",
   },
   bannerDots: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 8,
     gap: 6,
   },
   bannerDot: {

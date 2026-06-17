@@ -73,8 +73,8 @@
   "workerDetails": "مزدور کی تفصیلات",
   "employerDetails": "آجر کی تفصیلات",
   "mediatorDetails": "میڈی ایٹر کی تفصیلات",
-  "topRatedWorkers": "اعلی درجہ بندی والے مزدور",
-  "topRatedEmployers": "اعلی درجہ بندی والے آجر",
+  "topRatedWorkers": "قابلِ اعتماد پروفائلز",
+  "topRatedEmployers": "قابلِ اعتماد پروفائلز",
   "scrollToRight": "دائیں طرف سکرول کریں",
   "workInformation": "کام کی معلومات",
   "publications": "اشاعتیں",
@@ -678,5 +678,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "بالکل دیکھیں کہ آپ کا پیسہ کہاں جا رہا ہے",
   "district": "ضلع",
   "subDistrict": "سب ضلع",
+  "completeYourProfileToUnlockAllFeatures": "قابلِ اعتماد بننے اور تمام فیچرز حاصل کرنے کے لیے اپنی پروفائل مکمل کریں!",
+  "sortTabTopRated": "قابلِ اعتماد",
   "fetchLocation": "براہ کرم اپنا موجودہ مقام حاصل کریں تاکہ قریبی {{entity}} حاصل کریں"
 }

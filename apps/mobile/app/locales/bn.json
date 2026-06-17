@@ -73,8 +73,8 @@
   "workerDetails": "কর্মীর বিবরণ",
   "employerDetails": "নিয়োগকর্তার বিবরণ",
   "mediatorDetails": "মধ্যস্থতাকারীর বিবরণ",
-  "topRatedWorkers": "শীর্ষ রেটযুক্ত কর্মী",
-  "topRatedEmployers": "শীর্ষ রেটযুক্ত নিয়োগকর্তা",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "ডানদিকে স্ক্রোল করুন",
   "workInformation": "কাজের তথ্য",
   "publications": "প্রকাশনা",
@@ -681,7 +681,7 @@
   "newService": "নতুন পরিষেবা যোগ করুন",
   "addingNewService": "নতুন পরিষেবা যোগ করা হচ্ছে",
   "completeProfileButton": "প্রোফাইল সম্পূর্ণ করুন",
-  "completeYourProfileToUnlockAllFeatures": "সমস্ত বৈশিষ্ট্য আনলক করতে আপনার প্রোফাইল সম্পূর্ণ করুন!",
+  "completeYourProfileToUnlockAllFeatures": "Trusted হতে এবং সমস্ত বৈশিষ্ট্য আনলক করতে আপনার প্রোফাইল সম্পূর্ণ করুন!",
   "pleaseFetchNearestWorkers": "নিকটস্থ কর্মীদের পেতে অনুগ্রহ করে আপনার বর্তমান অবস্থান সংগ্রহ করুন",
   "callWorker": "কর্মীকে কল করুন",
   "callTeamAdmin": "টিম অ্যাডমিনকে কল করুন",
@@ -769,5 +769,6 @@
   "typeAndSubType": "কাজের ধরন ও উপধরন",
   "checkDetails": "বিবরণ যাচাই করুন",
   "facilities": "সুবিধা",
-  "pleaseSelectAProfilePicture": "অনুগ্রহ করে একটি প্রোফাইল ছবি নির্বাচন করুন"
+  "pleaseSelectAProfilePicture": "অনুগ্রহ করে একটি প্রোফাইল ছবি নির্বাচন করুন",
+  "sortTabTopRated": "Trusted"
 }

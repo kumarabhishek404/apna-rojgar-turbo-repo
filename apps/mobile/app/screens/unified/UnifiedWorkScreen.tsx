@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
@@ -54,6 +54,7 @@ const UnifiedWorkScreen = () => {
     data: servicesRes,
     isLoading: loadingServices,
     isRefetching: refetchingServices,
+    isFetching: isFetchingServices,
     isFetchingNextPage: fetchingMoreServices,
     fetchNextPage: fetchMoreServices,
     hasNextPage: hasMoreServices,
@@ -77,6 +78,7 @@ const UnifiedWorkScreen = () => {
     initialPageParam: 1,
     retry: false,
     enabled: isWorker && canQuery,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage: any) => {
       if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
         return lastPage.pagination.page + 1;
@@ -106,6 +108,7 @@ const UnifiedWorkScreen = () => {
     initialPageParam: 1,
     retry: false,
     enabled: isLabours && canQuery,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage: any) => {
       if (lastPage?.pagination?.page < lastPage?.pagination?.pages) {
         return lastPage.pagination.page + 1;
@@ -154,6 +157,7 @@ const UnifiedWorkScreen = () => {
           <AllServices
             isLoading={loadingServices}
             isRefetching={refetchingServices}
+            isFetching={isFetchingServices}
             isFetchingNextPage={fetchingMoreServices}
             refreshing={refreshing}
             memoizedData={serviceList}

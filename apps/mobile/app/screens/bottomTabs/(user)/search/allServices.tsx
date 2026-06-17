@@ -36,6 +36,7 @@ const SERVICE_TAB_DEFS: { id: ServiceSortId; labelKey: string }[] = [
 const AllServices = ({
   isLoading,
   isRefetching,
+  isFetching = false,
   isFetchingNextPage,
   refreshing,
   memoizedData,
@@ -74,9 +75,11 @@ const AllServices = ({
   const displayedData = useMemo(() => {
     return filterServicesBySearch([...safeServicesData], searchQuery);
   }, [safeServicesData, searchQuery]);
-  const hasFetchedData =
-    Array.isArray(safeServicesData) && safeServicesData.length > 0;
-  const shouldShowListLoader = isLoading && !hasFetchedData;
+  const hasListContent =
+    displayedData.length > 0 ||
+    (Array.isArray(safeServicesData) && safeServicesData.length > 0);
+  const shouldShowListLoader = isLoading && !hasListContent;
+  const showJobList = hasListContent;
 
   const handleSelectSort = (id: ServiceSortId) => {
     setServiceSort(id);
@@ -173,8 +176,13 @@ const AllServices = ({
         <View style={styles.contentCard}>
           {shouldShowListLoader ? (
             <ListingsServicesPlaceholder />
-          ) : displayedData.length > 0 ? (
-            <View style={styles.listFill}>
+          ) : showJobList ? (
+            <View
+              style={[
+                styles.listFill,
+                isFetching && !isFetchingNextPage && styles.listRefreshing,
+              ]}
+            >
               <ListingsVerticalServices
                 listings={displayedData}
                 loadMore={loadMore}
@@ -263,6 +271,9 @@ const styles = StyleSheet.create({
   listFill: {
     flex: 1,
     minHeight: 0,
+  },
+  listRefreshing: {
+    opacity: 0.92,
   },
 });
 

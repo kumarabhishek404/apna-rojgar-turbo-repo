@@ -143,7 +143,7 @@ const SkillSelector = ({
         {skillsToShow?.length > 0 ? (
           skillsToShow?.map((item: any, index: number) => (
             <View key={index}>
-              {getWorkLabel(availableSkills, item?.skill) && (
+              {getWorkLabel(availableSkills, item?.skill) ? (
                 <View style={[styles.skillBox, tagStyle]}>
                   {item?.pricePerDay ? (
                     <CustomText textAlign="left" style={tagTextStyle}>
@@ -157,7 +157,7 @@ const SkillSelector = ({
                     </CustomText>
                   )}
                 </View>
-              )}
+              ) : null}
             </View>
           ))
         ) : (

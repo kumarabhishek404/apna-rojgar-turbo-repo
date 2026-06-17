@@ -14,26 +14,31 @@ import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
 import {
   filterUsersBySearch,
   filterUsersBySearchLoose,
+  sortContractorList,
+  sortWorkerList,
   type ContractorSortId,
   type WorkerSortId,
 } from "@/utils/listingBrowse";
 import i18n from "@/utils/i18n";
 import APP_CONTEXT from "@/app/context/locale";
+import Atoms from "@/app/AtomStore";
+import { useAtomValue } from "jotai";
 
 const WORKER_TAB_DEFS: { id: WorkerSortId; labelKey: string }[] = [
   { id: "nearest", labelKey: "sortTabNearest" },
-  { id: "top_rated", labelKey: "sortTabTopRated" },
+  { id: "trusted_profiles", labelKey: "sortTabTopRated" },
 ];
 
 const CONTRACTOR_TAB_DEFS: { id: ContractorSortId; labelKey: string }[] = [
   { id: "nearest", labelKey: "sortTabNearest" },
   { id: "larger_team", labelKey: "sortTabLargerTeam" },
-  { id: "top_rated", labelKey: "sortTabTopRated" },
+  { id: "trusted_profiles", labelKey: "sortTabTopRated" },
 ];
 
 const AllWorkers = ({
   isLoading,
   isRefetching,
+  isFetching = false,
   isFetchingNextPage,
   refreshing,
   memoizedData,
@@ -46,6 +51,7 @@ const AllWorkers = ({
   onSelectSort,
 }: any) => {
   APP_CONTEXT.useApp();
+  const userDetails = useAtomValue(Atoms?.UserAtom);
   const [isAddFilters, setIsAddFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -91,15 +97,25 @@ const AllWorkers = ({
       browseKind === "contractors"
         ? filterUsersBySearchLoose(raw, q)
         : filterUsersBySearch(raw, q);
+    const userLoc = userDetails?.geoLocation ?? userDetails?.location ?? null;
+    rows =
+      browseKind === "contractors"
+        ? sortContractorList(rows, selectedSortId as ContractorSortId, userLoc)
+        : sortWorkerList(rows, selectedSortId as WorkerSortId, userLoc);
     return rows;
   }, [
     memoizedData,
     searchQuery,
     browseKind,
+    selectedSortId,
+    userDetails?.geoLocation,
+    userDetails?.location,
   ]);
-  const hasFetchedData =
-    Array.isArray(memoizedData) && memoizedData.length > 0;
-  const shouldShowListLoader = isLoading && !hasFetchedData;
+  const hasListContent =
+    displayedData.length > 0 ||
+    (Array.isArray(memoizedData) && memoizedData.length > 0);
+  const shouldShowListLoader = isLoading && !hasListContent;
+  const showPeopleList = hasListContent;
 
   const onSearchWorkers = (data: any) => {
     setIsAddFilters(false);
@@ -147,8 +163,13 @@ const AllWorkers = ({
         <View style={styles.contentCard}>
           {shouldShowListLoader ? (
             <WorkersLoadingPlaceholder />
-          ) : displayedData.length > 0 ? (
-            <View style={styles.listFill}>
+          ) : showPeopleList ? (
+            <View
+              style={[
+                styles.listFill,
+                isFetching && !isFetchingNextPage && styles.listRefreshing,
+              ]}
+            >
               <ListingsVerticalWorkers
                 availableInterest={WORKERTYPES}
                 listings={displayedData || []}
@@ -168,9 +189,13 @@ const AllWorkers = ({
           ) : (
             <EmptyDataPlaceholder
               title={
-                Array.isArray(memoizedData) && memoizedData.length > 0
-                  ? "noSearchMatches"
-                  : "worker"
+                selectedSortId === "trusted_profiles"
+                  ? "noTrustedProfiles"
+                  : Array.isArray(memoizedData) && memoizedData.length > 0
+                    ? "noSearchMatches"
+                    : browseKind === "contractors"
+                      ? "contractor"
+                      : "worker"
               }
               type="gradient"
             />
@@ -201,6 +226,9 @@ const styles = StyleSheet.create({
   listFill: {
     flex: 1,
     minHeight: 0,
+  },
+  listRefreshing: {
+    opacity: 0.92,
   },
 });
 

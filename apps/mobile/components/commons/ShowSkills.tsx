@@ -4,6 +4,8 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import CustomText from "./CustomText";
 import { t } from "@/utils/translationHelper";
+import { getDynamicWorkerType } from "@/utils/i18n";
+import { getSkillKeyFromItem } from "@/constants/functions";
 
 interface SkillSelectorProps {
   style?: any;
@@ -31,7 +33,7 @@ const ShowSkills = ({
           {userSkills?.map((skill, index) => (
             <View key={index}>
               <CustomText color={Colors.tertieryButton} fontWeight="bold">
-                {t(skill.skill)}{" "}
+                {getDynamicWorkerType(getSkillKeyFromItem(skill), 1)}{" "}
                 {skill.pricePerDay ? `- ₹${skill.pricePerDay}` : ""}
                 {userSkills?.length - 1 !== index ? ", " : ""}
               </CustomText>
@@ -43,7 +45,7 @@ const ShowSkills = ({
           {userSkills?.map((skill, index) => (
             <View key={index} style={[styles.skillTag, tagStyle]}>
               <CustomText color={Colors.white} fontWeight="medium">
-                {t(skill.skill)}{" "}
+                {getDynamicWorkerType(getSkillKeyFromItem(skill), 1)}{" "}
                 {skill.pricePerDay ? `- ₹${skill.pricePerDay}` : ""}
               </CustomText>
             </View>

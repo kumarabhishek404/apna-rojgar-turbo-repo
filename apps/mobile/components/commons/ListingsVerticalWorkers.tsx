@@ -20,7 +20,12 @@ import ShowDistance from "./ShowDistance";
 import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 import ShowAddress from "./ShowAddress";
-import UserRoleTag from "./UserRoleTag";
+import CustomText from "./CustomText";
+import { handleCall } from "@/constants/functions";
+import { t } from "@/utils/translationHelper";
+
+const getListingPhone = (item: any): string =>
+  String(item?.mobile ?? item?.phone ?? item?.phoneNumber ?? "").trim();
 
 /** Space below last item — tab bar / scroll comfort; loader sits above this. */
 const LIST_BOTTOM_INSET = 250;
@@ -73,7 +78,12 @@ const ListingsVerticalWorkers = ({
 
   const onEndReachedCalledDuringMomentum = useRef(false);
   const renderItem = useCallback(
-    ({ item }: any) => (
+    ({ item }: any) => {
+      const phone = getListingPhone(item);
+      const callLabel =
+        type === "mediator" ? t("callMediator") : t("callWorker");
+
+      return (
       <View style={styles.rowWrap}>
         <TouchableOpacity
           activeOpacity={0.92}
@@ -93,19 +103,52 @@ const ListingsVerticalWorkers = ({
           <View style={styles.item}>
             <View style={styles.itemInner}>
               <View style={styles.mainRow}>
-                <Image
-                  source={
-                    item?.profilePicture ? { uri: item.profilePicture } : coverImage
-                  }
-                  style={styles.avatar}
-                />
+                <View style={styles.avatarColumn}>
+                  <Image
+                    source={
+                      item?.profilePicture
+                        ? { uri: item.profilePicture }
+                        : coverImage
+                    }
+                    style={styles.avatar}
+                  />
+                  {phone ? (
+                    <TouchableOpacity
+                      style={styles.callButton}
+                      activeOpacity={0.72}
+                      accessibilityRole="button"
+                      accessibilityLabel={callLabel}
+                      onPress={() =>
+                        handleCall(phone, {
+                          source: "listing_vertical",
+                          viewedUserId: String(item?._id ?? ""),
+                        })
+                      }
+                    >
+                      <View style={styles.callButtonInner}>
+                        <View style={styles.callIconBadge}>
+                          <Ionicons
+                            name="call-outline"
+                            size={15}
+                            color={Colors.primary}
+                          />
+                        </View>
+                        <CustomText
+                          baseFont={14}
+                          color={Colors.primary}
+                          numberOfLines={1}
+                          style={styles.callButtonLabel}
+                        >
+                          {t("listingCall")}
+                        </CustomText>
+                      </View>
+                    </TouchableOpacity>
+                  ) : null}
+                </View>
                 <View style={styles.cardContent}>
                   <CustomHeading textAlign="left" style={styles.workerName}>
                     {item?.name}
                   </CustomHeading>
-                  <View style={styles.roleTagLine}>
-                    <UserRoleTag user={item} variant="compact" />
-                  </View>
 
                   <View style={styles.addressMetaRow}>
                     <View style={styles.metaIconBadge}>
@@ -160,7 +203,8 @@ const ListingsVerticalWorkers = ({
           </View>
         </TouchableOpacity>
       </View>
-    ),
+      );
+    },
     [availableInterest, type, userDetails?.geoLocation, userDetails?.location],
   );
 
@@ -257,11 +301,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
   },
+  avatarColumn: {
+    width: 80,
+    marginRight: 12,
+    alignItems: "center",
+  },
   avatar: {
     width: 80,
     height: 100,
     borderRadius: 14,
-    marginRight: 12,
     borderWidth: 2,
     borderColor: Colors.white,
     backgroundColor: Colors.secondaryBackground,
@@ -271,16 +319,42 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+  callButton: {
+    marginTop: 8,
+    width: "100%",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.2)",
+    backgroundColor: "rgba(234, 240, 255, 0.55)",
+    overflow: "hidden",
+  },
+  callButtonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 5,
+  },
+  callIconBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.12)",
+  },
+  callButtonLabel: {
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
   cardContent: {
     flex: 1,
     minWidth: 0,
   },
   workerName: {
-    marginBottom: 2,
-  },
-  roleTagLine: {
-    alignSelf: "flex-start",
-    marginTop: 2,
     marginBottom: 8,
   },
   addressMetaRow: {

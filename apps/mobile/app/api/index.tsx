@@ -1,9 +1,12 @@
 import EventEmitter from "eventemitter3";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
-import { getToken } from "@/utils/authStorage";
+import { getToken, removeToken } from "@/utils/authStorage";
 import { getClientDeviceHeaders } from "@/utils/clientDeviceInfo";
 import { router } from "expo-router";
+import TOAST from "@/app/hooks/toast";
+import { t } from "@/utils/translationHelper";
+import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
 
 const eventEmitter = new EventEmitter();
 
@@ -194,14 +197,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+let authLogoutInProgress = false;
+
 const logout = async () => {
+  if (authLogoutInProgress) return;
+  authLogoutInProgress = true;
+
   try {
     console.log("🔒 Logout triggered from API client");
     await AsyncStorage.removeItem("user");
-    // eventEmitter.emit("logout");
-    router.replace('/screens/auth/login')
+    await removeToken();
+    router.replace("/screens/auth/login");
   } catch (error) {
     console.error("Error during logout:", error);
+  } finally {
+    setTimeout(() => {
+      authLogoutInProgress = false;
+    }, 3000);
   }
 };
 
@@ -214,16 +226,13 @@ api.interceptors.response.use(
 
       console.log("API Error:", error.response?.data);
 
-      if (
-        errorMessage === "jwt expired" ||
-        errorMessage === "jwt malformed" ||
-        errorMessage === "Invalid Token" ||
-        statusText === "TokenExpiredError" ||
-        errorMessage === "Unauthorized Request" ||
-        statusText === "Unauthorized Request"
-      ) {
-        console.warn("Token expired. Logging out...");
-        logout();
+      if (isAuthApiError(error)) {
+        console.warn("Auth error from API. Logging out...");
+        if (!authLogoutInProgress) {
+          markGlobalAuthErrorHandled();
+          TOAST.error(t("sessionExpiredPleaseLoginAgain"));
+        }
+        await logout();
       }
 
       if (

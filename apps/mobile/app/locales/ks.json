@@ -73,8 +73,8 @@
   "workerDetails": "कर्मचारी विवरण",
   "employerDetails": "काम देने वाले का विवरण",
   "mediatorDetails": "ठेकेदार विवरण",
-  "topRatedWorkers": "उच्च रेटिंग वाले कर्मचारी",
-  "topRatedEmployers": "उच्च रेटिंग वाले काम देने वाला",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "दाईं ओर स्क्रॉल करें",
   "workInformation": "कार्य जानकारी",
   "publications": "प्रकाशन",
@@ -506,5 +506,7 @@
   "bookingCompletedSuccessfully": "بُکِنگ کامیابی سان مُکَمَل گَئ",
   "district": "ضلعہ",
   "subDistrict": "سب ضلعہ",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "कृपया अपना वर्तमान स्थान प्राप्त करें ताकि निकटतम {{entity}} मिल सकें"
 }

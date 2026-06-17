@@ -16,10 +16,11 @@ import RatingAndReviews from "./RatingAndReviews";
 import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import ShowAddress from "./ShowAddress";
-import UserRoleTag from "./UserRoleTag";
 import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 import ShowDistance from "./ShowDistance";
+import { getSkillKeyFromItem, getWorkLabel } from "@/constants/functions";
+import APP_CONTEXT from "@/app/context/locale";
 
 const CARD_W = 220;
 const CARD_H = 310;
@@ -33,14 +34,9 @@ type Props = {
   loadMore: any;
 };
 
-const getSkillLabel = (skill: any): string => {
-  if (typeof skill === "string") return skill;
-  if (skill && typeof skill === "object")
-    return skill.skill ?? skill.name ?? "";
-  return "";
-};
-
-const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
+const WorkerCard = React.memo(
+  ({ item, isLast, userDetails, availableInterest }: any) => {
+  APP_CONTEXT.useApp();
   const rawSkills: any[] = Array.isArray(item?.skills) ? item.skills : [];
   const visibleSkills = rawSkills.slice(0, MAX_SKILLS);
   const extraSkills = Math.max(0, rawSkills.length - MAX_SKILLS);
@@ -103,10 +99,6 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
           {item?.name}
         </CustomHeading>
 
-        <View style={styles.roleRow}>
-          <UserRoleTag user={item} variant="compact" />
-        </View>
-
         {/* Address */}
         <View style={styles.addressRow}>
           <View style={styles.locationIconWrap}>
@@ -143,7 +135,10 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
                   textAlign="left"
                   numberOfLines={1}
                 >
-                  {getSkillLabel(skill)}
+                  {getWorkLabel(
+                    availableInterest,
+                    getSkillKeyFromItem(skill),
+                  )}
                 </CustomText>
               </View>
             ))}
@@ -173,7 +168,8 @@ const WorkerCard = React.memo(({ item, isLast, userDetails }: any) => {
       </View>
     </TouchableOpacity>
   );
-});
+  },
+);
 
 WorkerCard.displayName = "WorkerCard";
 
@@ -294,9 +290,6 @@ const styles = StyleSheet.create({
   },
   name: {
     letterSpacing: 0.1,
-  },
-  roleRow: {
-    alignSelf: "flex-start",
   },
   addressRow: {
     flexDirection: "row",

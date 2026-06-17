@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import CustomHeading from "./CustomHeading";
 import Banner1 from "../../assets/banners/banner1.png";
 import Banner2 from "../../assets/banners/banner2.png";
+import Banner3 from "../../assets/banners/banner3.png";
 
 const BannerSlider = () => {
   const images = [
@@ -20,6 +21,10 @@ const BannerSlider = () => {
     },
     {
       url: Banner2,
+      type: "service",
+    },
+    {
+      url: Banner3,
       type: "service",
     },
   ];

@@ -73,8 +73,8 @@
   "workerDetails": "कामगार तपशील",
   "employerDetails": "मालक तपशील",
   "mediatorDetails": "ठेकेदार तपशील",
-  "topRatedWorkers": "उच्च रेटिंग असलेले कामगार",
-  "topRatedEmployers": "उच्च रेटिंग असलेले मालक",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "उजवीकडे स्क्रोल करा",
   "workInformation": "काम माहिती",
   "publications": "प्रकाशने",
@@ -678,5 +678,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "तुमचे पैसे नेमके कुठे जात आहेत ते पहा",
   "district": "जिल्हा",
   "subDistrict": "उपजिल्हा",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "कृपया आपले वर्तमान स्थान मिळवा जवळचे {{entity}} मिळवण्यासाठी"
 }
