@@ -17,7 +17,15 @@ app.set("trust proxy", 1);
 // ✅ CORS Setup
 const corsOptions = { origin: "*" };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      if (req.originalUrl === "/api/v1/payments/webhook/cashfree") {
+        req.rawBody = buf.toString("utf8");
+      }
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Connect to the correct DB
@@ -46,6 +54,7 @@ import errorRoutes from "./app/routes/error.route.js";
 import bookingRoutes from "./app/routes/booking.route.js";
 import appVersionRoutes from "./app/routes/appVersion.route.js";
 import analyticsRoutes from "./app/routes/analytics.route.js";
+import paymentRoutes from "./app/routes/payment.route.js";
 
 // ✅ Import cron jobs
 import scheduleNotifiyLiveServiceOfUserSkills from "./app/cron/activeServicesNotification.js";
@@ -75,6 +84,7 @@ app.use("/api/v1/errors", errorRoutes);
 app.use("/api/v1/booking", bookingRoutes);
 app.use("/api/v1/appVersion", appVersionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 // ✅ Global Error Handling Middleware
 app.use((err, req, res, next) => {

@@ -8,6 +8,8 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { formatRelativePosted } from "@/lib/formatRelativePosted";
 import type { GeoPoint } from "@/lib/serviceDistance";
 import { formatDistanceLabel } from "@/lib/serviceDistance";
+import { isServicePromoted, type SocialMediaPromotion } from "@/lib/servicePromotion";
+import { Loader2, Megaphone } from "lucide-react";
 
 export type ServiceItem = {
   _id: string;
@@ -27,6 +29,8 @@ export type ServiceItem = {
   facilities?: Record<string, boolean>;
   requirements?: Array<{ name: string; count: number; payPerDay?: number }>;
   geoLocation?: GeoPoint | null;
+  employer?: string | { _id?: string };
+  socialMediaPromotion?: SocialMediaPromotion | null;
 };
 
 const KNOWN_FACILITY_KEYS = new Set(["food", "living", "travelling", "esi_pf"]);
@@ -47,6 +51,12 @@ type Props = {
   distanceKm?: number | null;
   onViewDetails: (serviceId: string) => void;
   t: (key: string, fallback?: string) => string;
+  /** Show promoted / not promoted badges for employer-owned HIRING services */
+  showPromotionStatus?: boolean;
+  canPromoteLater?: boolean;
+  promotionAmount?: number;
+  isPromoting?: boolean;
+  onPromoteLater?: () => void;
 } & (
   | {
       showApply: true;
@@ -164,6 +174,11 @@ function ServiceCardComponent({
   onOpenApplyInDetails,
   onViewDetails,
   t,
+  showPromotionStatus = false,
+  canPromoteLater = false,
+  promotionAmount = 100,
+  isPromoting = false,
+  onPromoteLater,
 }: Props) {
   const { language } = useLanguage();
   const title = service.title || service.subType;
@@ -186,6 +201,7 @@ function ServiceCardComponent({
         : null;
   const distanceLabel =
     resolvedDistanceKm != null ? formatDistanceLabel(resolvedDistanceKm) : "";
+  const promoted = isServicePromoted(service);
 
   const openDetails = () => onViewDetails(service._id);
 
@@ -253,6 +269,20 @@ function ServiceCardComponent({
             <span className="font-semibold text-[#16264f]">{t("status", "Status")}: </span>
             {t(service.status?.toLowerCase?.() || "unknown", service.status || "-")}
           </p>
+          {showPromotionStatus && service.status === "HIRING" ? (
+            <div className="mt-2">
+              {promoted ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800">
+                  <Megaphone className="h-3 w-3" aria-hidden />
+                  {t("servicePromotedBadge", "Promoted")}
+                </span>
+              ) : (
+                <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+                  {t("serviceNotPromotedBadge", "Not promoted")}
+                </span>
+              )}
+            </div>
+          ) : null}
           {distanceLabel ? (
             <div className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-emerald-200/80 bg-gradient-to-r from-emerald-50 to-teal-50 px-2.5 py-1 text-xs font-semibold text-emerald-950 shadow-sm">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-emerald-700" aria-hidden />
@@ -327,6 +357,33 @@ function ServiceCardComponent({
               ))}
             </div>
           </>
+        ) : null}
+
+        {canPromoteLater ? (
+          <div
+            className="mt-4 rounded-xl border border-[#22409a]/15 bg-[#f8faff] p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-xs leading-relaxed text-slate-600">
+              {t(
+                "promotionModalBenefit",
+                "We will promote your work requirement on our official social media pages, Facebook groups, WhatsApp communities, and other platforms to help you find workers quickly.",
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={onPromoteLater}
+              disabled={isPromoting}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#22409a] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1a347f] disabled:opacity-70"
+            >
+              {isPromoting ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Megaphone className="h-4 w-4" aria-hidden />
+              )}
+              {t("servicePromoteNow", "Promote now")} · ₹{promotionAmount}
+            </button>
+          </div>
         ) : null}
 
         <div className="mt-4 flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>

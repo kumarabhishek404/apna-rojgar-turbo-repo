@@ -5,6 +5,10 @@ import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import { generateJobID } from "../../constants/functions.js";
 import { updateUserStats } from "../../utils/updateState.js";
 import logError from "../../utils/addErrorLog.js";
+import { getEnglishTitles } from "../../utils/translations.js";
+import { handleSendNotificationController } from "../notification.controller.js";
+import Payment from "../../models/payment.model.js";
+import { syncPromotionPaymentByOrderId, linkPaymentToService } from "../../utils/payment.service.js";
 import { notifyMatchedUsersInBackground } from "../../utils/serviceNotificationHelpers.js";
 
 const asyncHandler = (fn) => (req, res, next) =>
@@ -27,6 +31,8 @@ export const handleAddService = asyncHandler(async (req, res) => {
 
     const serviceData = await parseAndValidateRequest(req, employer);
 
+    const promotionMeta = await resolveSocialMediaPromotion(req, _id);
+
     if (validateOnly) {
       return res.status(200).json({
         success: true,
@@ -39,11 +45,21 @@ export const handleAddService = asyncHandler(async (req, res) => {
 
     const service = await createServiceEntry({
       ...serviceData,
+      ...promotionMeta,
       employer: _id,
       jobID,
       images: [],
       uploadStatus: "PENDING",
     });
+
+    if (promotionMeta?.socialMediaPromotion?.orderId) {
+      await linkPaymentToService({
+        orderId: promotionMeta.socialMediaPromotion.orderId,
+        userId: _id,
+        serviceId: service._id,
+        serviceJobId: service.jobID,
+      });
+    }
 
     await updateUserStats(employer._id, "SERVICE_CREATED");
 
@@ -224,6 +240,64 @@ const parseFacilities = (facilities) => {
     console.error("Error parsing facilities:", error);
     throw new Error("Invalid facilities format");
   }
+};
+
+const parseBooleanField = (value) =>
+  value === true || value === "true" || value === 1 || value === "1";
+
+const resolveSocialMediaPromotion = async (req, employerId) => {
+  const wantsPromotion = parseBooleanField(req.body?.promoteSocialMedia);
+  const promotionOrderId = String(req.body?.promotionOrderId || "").trim();
+
+  if (!wantsPromotion) {
+    return {
+      socialMediaPromotion: {
+        enabled: false,
+        orderId: "",
+        amount: 0,
+        status: "NONE",
+      },
+    };
+  }
+
+  if (!promotionOrderId) {
+    throw new Error("Promotion payment order ID is required");
+  }
+
+  const payment = await Payment.findOne({
+    orderId: promotionOrderId,
+    user: employerId,
+    purpose: "SERVICE_SOCIAL_PROMOTION",
+  });
+
+  if (!payment) {
+    throw new Error("Promotion payment order not found");
+  }
+
+  if (payment.service) {
+    throw new Error("This promotion payment is already linked to another service");
+  }
+
+  if (payment.status !== "PAID") {
+    const syncedPayment = await syncPromotionPaymentByOrderId(promotionOrderId);
+    if (!syncedPayment || syncedPayment.status !== "PAID") {
+      throw new Error("Promotion payment is not completed");
+    }
+    payment.status = syncedPayment.status;
+    payment.paidAt = syncedPayment.paidAt;
+    payment.amount = syncedPayment.amount;
+  }
+
+  return {
+    socialMediaPromotion: {
+      enabled: true,
+      orderId: payment.orderId,
+      amount: payment.amount,
+      status: "PAID",
+      paidAt: payment.paidAt || new Date(),
+    },
+    promotionOrderId: payment.orderId,
+  };
 };
 
 const processImages = async (images) => {

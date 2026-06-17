@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import ConfirmDialog from "@/components/ConfirmDialog";
-import { CheckCircle2, Clock, MapPin, Share2, ShieldCheck, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, Loader2, MapPin, Megaphone, Share2, ShieldCheck, XCircle } from "lucide-react";
 import { apiRequest } from "@/lib/auth";
+import { getPromotionConfig } from "@/lib/payment";
+import { isServicePromoted, type SocialMediaPromotion } from "@/lib/servicePromotion";
+import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 import {
   STATIC_EXPORT_DYNAMIC_LITERAL_ID,
   STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID,
@@ -38,6 +41,7 @@ type ServiceDetail = {
   createdAt?: string;
   distance?: number;
   geoLocation?: GeoPoint | null;
+  socialMediaPromotion?: SocialMediaPromotion | null;
   requirements?: Array<{ name: string; count: number; payPerDay?: number }>;
   employer?: { _id?: string; name?: string; mobile?: string } | string;
   appliedUsers?: AppliedUserEntry[];
@@ -102,6 +106,18 @@ export default function ServiceDetailsView({
   const [applySubmitError, setApplySubmitError] = useState("");
   const [showCancelApplyConfirm, setShowCancelApplyConfirm] = useState(false);
   const [cancelApplyError, setCancelApplyError] = useState("");
+  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const [promotionError, setPromotionError] = useState("");
+  const { runPromotionPayment } = useCashfreePromotionPayment();
+
+  useEffect(() => {
+    void getPromotionConfig()
+      .then((config) => {
+        if (config?.amount) setPromotionAmount(config.amount);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const requirementNames = useMemo(
     () =>
@@ -216,6 +232,16 @@ export default function ServiceDetailsView({
     [service, currentUserId],
   );
 
+  const promoted = isServicePromoted(service);
+  const showPromotionStatus = Boolean(
+    isViewerEmployer &&
+      service?.status === "HIRING" &&
+      service?.bookingType === "byService",
+  );
+  const canPromoteLater = showPromotionStatus && !promoted;
+  const promotionPaidAmount =
+    service?.socialMediaPromotion?.amount ?? promotionAmount;
+
   const reloadService = async () => {
     if (
       !serviceId ||
@@ -226,6 +252,25 @@ export default function ServiceDetailsView({
     }
     const data = await apiRequest<{ data: ServiceDetail }>(`/service/service-info/${serviceId}`);
     setService(data.data);
+  };
+
+  const handlePromoteLater = async () => {
+    if (!service?._id || isPromoting || !canPromoteLater) return;
+    setPromotionError("");
+    setIsPromoting(true);
+    try {
+      await runPromotionPayment(service._id);
+      await reloadService();
+      onAppliedMutation?.();
+    } catch (e) {
+      setPromotionError(
+        e instanceof Error
+          ? e.message
+          : t("promotionPaymentFailed", "Promotion payment failed. Please try again."),
+      );
+    } finally {
+      setIsPromoting(false);
+    }
   };
 
   const executeCancelApply = async () => {
@@ -378,6 +423,24 @@ export default function ServiceDetailsView({
             <span className="rounded-full border border-emerald-300/70 bg-emerald-500/35 px-2.5 py-1 font-semibold text-white shadow-sm">
               {t("appliedServiceTag", "Applied")}
             </span>
+          ) : null}
+          {showPromotionStatus ? (
+            promoted ? (
+              <>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/70 bg-emerald-500/35 px-2.5 py-1 font-semibold text-white shadow-sm">
+                  <Megaphone className="h-3.5 w-3.5" aria-hidden />
+                  {t("servicePromotedBadge", "Promoted")}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/70 bg-emerald-500/35 px-2.5 py-1 font-semibold text-white shadow-sm">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  {t("promotionPaymentDone", "Payment done")} · ₹{promotionPaidAmount}
+                </span>
+              </>
+            ) : (
+              <span className="rounded-full border border-amber-300/70 bg-amber-500/35 px-2.5 py-1 font-semibold text-white shadow-sm">
+                {t("serviceNotPromotedBadge", "Not promoted")}
+              </span>
+            )
           ) : null}
           <button
             type="button"
@@ -535,6 +598,47 @@ export default function ServiceDetailsView({
               </div>
             ))}
           </div>
+        </div>
+      ) : null}
+      {showPromotionStatus && promoted ? (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-3.5 py-3">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
+          <p className="text-sm leading-relaxed text-emerald-900">
+            {t(
+              "servicePromotedHint",
+              "Featured on Apna Rojgar social media & groups",
+            )}
+          </p>
+        </div>
+      ) : null}
+      {canPromoteLater ? (
+        <div className="mt-4 rounded-xl border border-[#22409a]/15 bg-[#f8faff] p-4">
+          <p className="text-xs leading-relaxed text-slate-600">
+            {t(
+              "promotionModalBenefit",
+              "We will promote your work requirement on our official social media pages, Facebook groups, WhatsApp communities, and other platforms to help you find workers quickly.",
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              void handlePromoteLater();
+            }}
+            disabled={isPromoting}
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#22409a] px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1a347f] disabled:opacity-70"
+          >
+            {isPromoting ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Megaphone className="h-4 w-4" aria-hidden />
+            )}
+            {t("servicePromoteNow", "Promote now")} · ₹{promotionAmount}
+          </button>
+          {promotionError ? (
+            <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {promotionError}
+            </p>
+          ) : null}
         </div>
       ) : null}
       {!isViewerEmployer ? (

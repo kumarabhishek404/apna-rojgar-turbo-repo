@@ -4,6 +4,7 @@ import {
   getAdminAnalyticsEvents,
   getAdminErrorLogs,
   getAdminNotifications,
+  getAdminPromotionPayments,
   getAllUsers,
   handleActivateUser,
   handleSuspendUser,
@@ -40,6 +41,14 @@ router.get(
   userStatus,
   checkAdmin,
   getAllRequests
+);
+
+router.get(
+  "/promotion-payments",
+  verifyToken,
+  userStatus,
+  checkAdmin,
+  getAdminPromotionPayments
 );
 
 export default router;

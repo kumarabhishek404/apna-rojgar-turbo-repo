@@ -24,6 +24,9 @@ import type { WebServiceApplyPayload } from "@/components/webapp/ServiceDetailsV
 import type { BrowserGeo } from "@/lib/serviceDistance";
 import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
 import { trackWebsiteEvent } from "@/lib/websiteTracking";
+import { getPromotionConfig } from "@/lib/payment";
+import { isServicePromoted } from "@/lib/servicePromotion";
+import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 
 type UserInfo = {
   role?: "WORKER" | "MEDIATOR" | "EMPLOYER";
@@ -105,6 +108,9 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [scrollModalToApply, setScrollModalToApply] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotingServiceId, setPromotingServiceId] = useState<string | null>(null);
+  const { runPromotionPayment } = useCashfreePromotionPayment();
 
   const inFlightRef = useRef<Record<ServicesTabKey, boolean>>({
     all: false,
@@ -158,6 +164,14 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   useEffect(() => {
     apiRequest<{ data: UserInfo }>("/user/info")
       .then((response) => setUser(response.data))
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    void getPromotionConfig()
+      .then((config) => {
+        if (config?.amount) setPromotionAmount(config.amount);
+      })
       .catch(() => undefined);
   }, []);
 
@@ -390,6 +404,31 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     setShowCreateModal(false);
   }, []);
 
+  const handlePromoteLater = useCallback(
+    async (serviceId: string) => {
+      setError("");
+      setMessage("");
+      setPromotingServiceId(serviceId);
+      try {
+        await runPromotionPayment(serviceId);
+        setMessage(
+          t("servicePromotedSuccess", "Your work is now promoted on our social channels."),
+        );
+        setInitializedByTab((prev) => ({ ...prev, my: false }));
+        await fetchForTab("my", 1, false);
+      } catch (e) {
+        setError(
+          e instanceof Error
+            ? e.message
+            : t("promotionPaymentFailed", "Promotion payment failed. Please try again."),
+        );
+      } finally {
+        setPromotingServiceId(null);
+      }
+    },
+    [fetchForTab, runPromotionPayment, t],
+  );
+
   const openDetailsModal = useCallback(
     (serviceId: string, options?: { scrollToApply?: boolean }) => {
       setSelectedServiceId(serviceId);
@@ -468,6 +507,17 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
                   key={service._id}
                   service={service}
                   distanceKm={distanceKmForService(service)}
+                  showPromotionStatus={activeTab === "my" && user?.role === "EMPLOYER"}
+                  canPromoteLater={
+                    activeTab === "my" &&
+                    user?.role === "EMPLOYER" &&
+                    service.status === "HIRING" &&
+                    service.bookingType === "byService" &&
+                    !isServicePromoted(service)
+                  }
+                  promotionAmount={promotionAmount}
+                  isPromoting={promotingServiceId === service._id}
+                  onPromoteLater={() => void handlePromoteLater(service._id)}
                   {...(activeTab === "all" && canApply
                     ? {
                         showApply: true as const,
@@ -504,9 +554,10 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
           await applyToService(selectedServiceId, payload);
         }}
         onAppliedMutation={() => {
-          setInitializedByTab((prev) => ({ ...prev, applied: false }));
+          setInitializedByTab((prev) => ({ ...prev, applied: false, my: false }));
           void fetchForTab("all", 1, false);
           void fetchForTab("applied", 1, false);
+          void fetchForTab("my", 1, false);
         }}
       />
 
