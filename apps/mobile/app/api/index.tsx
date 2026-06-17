@@ -96,6 +96,8 @@ const toAxiosLikeResponse = (
   request: null as AxiosResponse["request"],
 });
 
+const FORM_DATA_TIMEOUT_MS = 120_000;
+
 const makeFetchFormDataRequest = async (
   method: "POST" | "PUT" | "PATCH",
   url: string,
@@ -114,28 +116,45 @@ const makeFetchFormDataRequest = async (
   delete mergedHeaders["Content-Type"];
   delete mergedHeaders["content-type"];
 
-  const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
-    method,
-    headers: mergedHeaders,
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
 
-  const responseData = await parseFetchResponseData(response);
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
+      method,
+      headers: mergedHeaders,
+      body: formData,
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const error: any = new Error(
-      (responseData as { message?: string })?.message ||
-        `Request failed with ${response.status}`,
-    );
-    error.response = {
-      status: response.status,
-      data: responseData,
-      headers: Object.fromEntries(response.headers.entries()),
-    };
+    const responseData = await parseFetchResponseData(response);
+
+    if (!response.ok) {
+      const error: any = new Error(
+        (responseData as { message?: string })?.message ||
+          `Request failed with ${response.status}`,
+      );
+      error.response = {
+        status: response.status,
+        data: responseData,
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+      throw error;
+    }
+
+    return toAxiosLikeResponse(responseData, response);
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      const timeoutError: any = new Error(
+        "Upload timed out. Please check your internet and try again.",
+      );
+      timeoutError.response = { status: 408, data: { message: timeoutError.message } };
+      throw timeoutError;
+    }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return toAxiosLikeResponse(responseData, response);
 };
 
 const makeFormDataRequest = async (
@@ -165,7 +184,7 @@ const makeFormDataRequest = async (
     transformRequest: (data) => data,
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
-    timeout: 60000,
+    timeout: 120000,
   });
 };
 

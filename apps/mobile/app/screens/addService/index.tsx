@@ -250,32 +250,41 @@ const AddServiceScreen = () => {
       throw new Error("Required fields are missing");
     }
 
-    const formData: any = new FormData();
-
     const imageParts = await buildServiceImageUploadParts(images);
-    imageParts.forEach((part) => {
-      formData.append("images", {
-        uri: part.uri,
-        name: part.name,
-        type: part.type,
-      } as any);
-    });
-
     const finalLocation = await ensureLocation(location, address);
 
-    formData.append("type", type);
-    formData.append("subType", subType);
-    formData.append("description", description);
-    formData.append("address", address);
-    formData.append("geoLocation", JSON.stringify(finalLocation));
-    formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-    formData.append("duration", String(duration));
-    formData.append("bookingType", "byService");
-    formData.append("requirements", JSON.stringify(requirements));
-    formData.append("facilities", JSON.stringify(facilities));
+    const metadata = {
+      type,
+      subType,
+      description,
+      address,
+      geoLocation: JSON.stringify(finalLocation),
+      startDate: moment(startDate).format("YYYY-MM-DD"),
+      duration: String(duration),
+      bookingType: "byService",
+      requirements: JSON.stringify(requirements),
+      facilities: JSON.stringify(facilities),
+    };
 
-    const response: any = await EMPLOYER?.addNewService(formData);
-    return response?.data;
+    // Phase 1: small JSON request — succeeds quickly even on slow networks
+    const response: any = await EMPLOYER?.addNewServiceMetadata(metadata);
+    const service = response?.data;
+    const serviceId = service?._id;
+
+    // Phase 2: upload images one at a time (smaller payloads, easier to retry)
+    if (serviceId && imageParts.length > 0) {
+      for (const part of imageParts) {
+        const imageForm = new FormData();
+        imageForm.append("images", {
+          uri: part.uri,
+          name: part.name,
+          type: part.type,
+        } as any);
+        await EMPLOYER?.uploadServiceImages(serviceId, imageForm);
+      }
+    }
+
+    return service;
   };
 
   const handleEditSubmit = async (id: any) => {
@@ -396,20 +405,22 @@ const AddServiceScreen = () => {
 
   const ensureLocation = async (location: any, address: string) => {
     try {
-      // ✅ Case 1: Already has coordinates
       if (location?.coordinates?.length === 2) {
         return location;
       }
 
-      // ❌ No address → can't proceed
       if (!address) return null;
 
-      // ✅ Fetch from address
-      const coords = await getLatLongFromAddress(address);
+      const GEOCODE_TIMEOUT_MS = 8000;
+      const coords = await Promise.race([
+        getLatLongFromAddress(address),
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), GEOCODE_TIMEOUT_MS),
+        ),
+      ]);
 
       if (!coords) return null;
 
-      // ✅ Convert to GeoJSON (IMPORTANT)
       return {
         type: "Point",
         coordinates: [coords.longitude, coords.latitude],

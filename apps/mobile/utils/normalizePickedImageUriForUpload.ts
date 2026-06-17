@@ -6,10 +6,14 @@ import * as ImageManipulator from "expo-image-manipulator";
  */
 export async function normalizePickedImageUriForUpload(uri: string): Promise<string> {
   try {
-    const normalized = await ImageManipulator.manipulateAsync(uri, [], {
-      compress: 0.85,
-      format: ImageManipulator.SaveFormat.JPEG,
-    });
+    const normalized = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }],
+      {
+        compress: 0.7,
+        format: ImageManipulator.SaveFormat.JPEG,
+      },
+    );
     return normalized.uri;
   } catch (e) {
     console.warn(

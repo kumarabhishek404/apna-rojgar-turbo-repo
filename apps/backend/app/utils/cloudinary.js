@@ -19,7 +19,11 @@ export const uploadOnCloudinary = async (localFilePath) => {
 
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
-      secure: true, // ✅ Ensures HTTPS URL
+      secure: true,
+      transformation: [
+        { width: 1200, height: 1200, crop: "limit" },
+        { quality: "auto:good", fetch_format: "auto" },
+      ],
     });
 
     // Ensure we use the secure URL
