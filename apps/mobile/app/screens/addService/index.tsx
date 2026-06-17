@@ -31,6 +31,7 @@ import SelectDurationAndDescriptionStep from "./SetDuration&Description";
 import FormProgressBar from "@/components/commons/FormProgress";
 import UploadWorkImagesStep from "./UploadImagesStep";
 import { getLatLongFromAddress } from "@/constants/functions";
+import { buildServiceImageUploadParts } from "@/utils/serviceImageUpload";
 
 const AddServiceScreen = () => {
   const queryClient = useQueryClient();
@@ -79,13 +80,23 @@ const AddServiceScreen = () => {
     mutationKey: [addService?._id ? "editService" : "addService"],
     mutationFn: () =>
       addService?._id ? handleEditSubmit(addService?._id) : handleSubmit(),
-    onSuccess: (data: any) => {
-      const serviceId = data?.data?._id || data?._id;
+    onSuccess: async (data: any) => {
+      const serviceId = data?._id;
 
       // ✅ Start polling BEFORE reset
       if (serviceId) {
         startPolling(serviceId);
       }
+
+      queryClient.invalidateQueries({ queryKey: ["activityEmployerServices"] });
+      queryClient.invalidateQueries({ queryKey: ["activityMediatorServices"] });
+      queryClient.invalidateQueries({ queryKey: ["myServices"] });
+      queryClient.invalidateQueries({
+        queryKey: ["unifiedHomeMyPostedServices"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["employerWorkRequests"] });
+      queryClient.invalidateQueries({ queryKey: ["myWorkRequests"] });
+      await queryClient.refetchQueries({ queryKey: ["activityEmployerServices"] });
 
       refreshUser();
 
@@ -123,7 +134,7 @@ const AddServiceScreen = () => {
 
       TOAST?.error(
         err?.response?.data?.message ||
-          "Failed to update service. Please try again.",
+          (addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed")),
       );
     },
     onSettled: () => {
@@ -239,33 +250,41 @@ const AddServiceScreen = () => {
       throw new Error("Required fields are missing");
     }
 
-    const formData: any = new FormData();
-
-    images.forEach((imageUri: string, index: number) => {
-      if (imageUri.startsWith("http")) return;
-
-      const imageName = imageUri.split("/").pop();
-      formData.append("images", {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: imageName || `image_${index}.jpg`,
-      });
-    });
-
+    const imageParts = await buildServiceImageUploadParts(images);
     const finalLocation = await ensureLocation(location, address);
 
-    formData.append("type", type);
-    formData.append("subType", subType);
-    formData.append("description", description);
-    formData.append("address", address);
-    formData.append("geoLocation", JSON.stringify(finalLocation));
-    formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-    formData.append("duration", duration);
-    formData.append("requirements", JSON.stringify(requirements));
-    formData.append("facilities", JSON.stringify(facilities));
+    const metadata = {
+      type,
+      subType,
+      description,
+      address,
+      geoLocation: JSON.stringify(finalLocation),
+      startDate: moment(startDate).format("YYYY-MM-DD"),
+      duration: String(duration),
+      bookingType: "byService",
+      requirements: JSON.stringify(requirements),
+      facilities: JSON.stringify(facilities),
+    };
 
-    const response: any = await EMPLOYER?.addNewService(formData);
-    return response?.data;
+    // Phase 1: small JSON request — succeeds quickly even on slow networks
+    const response: any = await EMPLOYER?.addNewServiceMetadata(metadata);
+    const service = response?.data;
+    const serviceId = service?._id;
+
+    // Phase 2: upload images one at a time (smaller payloads, easier to retry)
+    if (serviceId && imageParts.length > 0) {
+      for (const part of imageParts) {
+        const imageForm = new FormData();
+        imageForm.append("images", {
+          uri: part.uri,
+          name: part.name,
+          type: part.type,
+        } as any);
+        await EMPLOYER?.uploadServiceImages(serviceId, imageForm);
+      }
+    }
+
+    return service;
   };
 
   const handleEditSubmit = async (id: any) => {
@@ -285,15 +304,13 @@ const AddServiceScreen = () => {
 
       const formData: any = new FormData();
 
-      images.forEach((imageUri: string, index: number) => {
-        if (imageUri.startsWith("http")) return;
-
-        const imageName = imageUri.split("/").pop();
+      const imageParts = await buildServiceImageUploadParts(images);
+      imageParts.forEach((part) => {
         formData.append("images", {
-          uri: imageUri,
-          type: "image/jpeg",
-          name: imageName || `image_${index}.jpg`,
-        });
+          uri: part.uri,
+          name: part.name,
+          type: part.type,
+        } as any);
       });
 
       const existingImages = images.filter((img: string) =>
@@ -308,9 +325,10 @@ const AddServiceScreen = () => {
       formData.append("subType", subType);
       formData.append("description", description);
       formData.append("address", address);
-      formData.append("location", JSON.stringify(location || {}));
+      formData.append("geoLocation", JSON.stringify(location || {}));
       formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-      formData.append("duration", duration);
+      formData.append("duration", String(duration));
+      formData.append("bookingType", "byService");
       formData.append("requirements", JSON.stringify(requirements));
       formData.append("facilities", JSON.stringify(facilities));
 
@@ -365,17 +383,14 @@ const AddServiceScreen = () => {
           clearInterval(pollingRef.current);
           pollingRef.current = null;
 
-          // 🔥 Silent refresh (NO loader)
+          queryClient.invalidateQueries({ queryKey: ["activityEmployerServices"] });
+          queryClient.invalidateQueries({ queryKey: ["activityMediatorServices"] });
+          queryClient.invalidateQueries({ queryKey: ["myServices"] });
           queryClient.invalidateQueries({
-            queryKey: ["myWorkRequests"],
-            refetchType: "inactive", // prevents aggressive refetch
+            queryKey: ["unifiedHomeMyPostedServices"],
           });
-
-          // OR (even smoother)
-          queryClient.refetchQueries({
-            queryKey: ["myWorkRequests"],
-            type: "inactive", // no UI flicker
-          });
+          queryClient.invalidateQueries({ queryKey: ["employerWorkRequests"] });
+          queryClient.invalidateQueries({ queryKey: ["myWorkRequests"] });
         }
 
         if (status === "FAILED") {
@@ -390,20 +405,22 @@ const AddServiceScreen = () => {
 
   const ensureLocation = async (location: any, address: string) => {
     try {
-      // ✅ Case 1: Already has coordinates
       if (location?.coordinates?.length === 2) {
         return location;
       }
 
-      // ❌ No address → can't proceed
       if (!address) return null;
 
-      // ✅ Fetch from address
-      const coords = await getLatLongFromAddress(address);
+      const GEOCODE_TIMEOUT_MS = 8000;
+      const coords = await Promise.race([
+        getLatLongFromAddress(address),
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), GEOCODE_TIMEOUT_MS),
+        ),
+      ]);
 
       if (!coords) return null;
 
-      // ✅ Convert to GeoJSON (IMPORTANT)
       return {
         type: "Point",
         coordinates: [coords.longitude, coords.latitude],

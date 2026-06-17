@@ -37,6 +37,17 @@ function hasPositivePricePerDayOnAnySkill(skills: unknown): boolean {
   });
 }
 
+export function canUserActAsMediator(user: {
+  role?: unknown;
+  skills?: unknown;
+}): boolean {
+  const explicit = normalizeExplicitRole(user?.role);
+  if (explicit === "MEDIATOR") return true;
+  if (explicit === "WORKER") return false;
+  if (!hasAtLeastOneSkill(user?.skills)) return false;
+  return !hasPositivePricePerDayOnAnySkill(user?.skills);
+}
+
 export function resolveDisplayUserRole(user: {
   role?: unknown;
   skills?: unknown;

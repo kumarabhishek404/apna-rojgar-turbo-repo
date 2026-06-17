@@ -610,6 +610,8 @@
   "serviceDeletedSuccessfully": "Work deleted successfully",
   "serviceRestoredSuccessfully": "Work restored successfully",
   "servicePostedSuccessfully": "Work posted successfully",
+  "serviceCreateFailed": "Failed to add new service",
+  "serviceUpdateFailed": "Failed to update service. Please try again.",
   "mobileNumberVerifiedSuccessfully": "Mobile number verified successfully",
   "mobileNumberVerificationFailed": "Mobile number verification failed",
   "yesProceed": "Yes, Proceed",

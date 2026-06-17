@@ -190,8 +190,7 @@ const UserProfile = () => {
 
   const mutationUpdateRole = useMutation({
     mutationKey: ["updateRole"],
-    mutationFn: (newRole: string) =>
-      USER.updateUserById({ _id: userDetails._id, role: newRole }),
+    mutationFn: (newRole: string) => USER.updateUserById({ role: newRole }),
     onSuccess: (response) => {
       const updatedUser = response?.data?.data;
       if (updatedUser) {

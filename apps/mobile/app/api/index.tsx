@@ -37,6 +37,160 @@ const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_BASE_URL,
 });
 
+const toFormData = (body: unknown): FormData => {
+  if (typeof FormData !== "undefined" && body instanceof FormData) {
+    return body;
+  }
+
+  const formData = new FormData();
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return formData;
+  }
+
+  for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    if (value === undefined || value === null) continue;
+    if (
+      typeof value === "object" &&
+      "uri" in value &&
+      typeof (value as { uri?: unknown }).uri === "string"
+    ) {
+      formData.append(key, value as any);
+      continue;
+    }
+    if (typeof value === "object") {
+      formData.append(key, JSON.stringify(value));
+      continue;
+    }
+    formData.append(key, String(value));
+  }
+
+  return formData;
+};
+
+const formDataHasFileParts = (formData: FormData): boolean => {
+  const parts = (formData as { _parts?: [string, unknown][] })._parts;
+  if (!Array.isArray(parts)) return false;
+  return parts.some(([, value]) => {
+    return (
+      value != null &&
+      typeof value === "object" &&
+      "uri" in value &&
+      typeof (value as { uri?: unknown }).uri === "string"
+    );
+  });
+};
+
+const parseFetchResponseData = async (response: Response) => {
+  const contentType = response.headers.get("content-type") || "";
+  return contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+};
+
+const toAxiosLikeResponse = (
+  responseData: unknown,
+  response: Response,
+): AxiosResponse => ({
+  data: responseData,
+  status: response.status,
+  statusText: response.statusText,
+  headers: Object.fromEntries(response.headers.entries()),
+  config: {} as AxiosResponse["config"],
+  request: null as AxiosResponse["request"],
+});
+
+const FORM_DATA_TIMEOUT_MS = 120_000;
+
+const makeFetchFormDataRequest = async (
+  method: "POST" | "PUT" | "PATCH",
+  url: string,
+  formData: FormData,
+  headers?: object,
+): Promise<AxiosResponse> => {
+  const authHeaders = await getHeaders();
+  const deviceHeaders = getClientDeviceHeaders();
+  const mergedHeaders: Record<string, string> = {
+    ...deviceHeaders,
+    ...(authHeaders as Record<string, string>),
+    ...((headers as Record<string, string>) || {}),
+  };
+
+  // fetch + RN FormData: native layer must set multipart boundary for file parts.
+  delete mergedHeaders["Content-Type"];
+  delete mergedHeaders["content-type"];
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
+      method,
+      headers: mergedHeaders,
+      body: formData,
+      signal: controller.signal,
+    });
+
+    const responseData = await parseFetchResponseData(response);
+
+    if (!response.ok) {
+      const error: any = new Error(
+        (responseData as { message?: string })?.message ||
+          `Request failed with ${response.status}`,
+      );
+      error.response = {
+        status: response.status,
+        data: responseData,
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+      throw error;
+    }
+
+    return toAxiosLikeResponse(responseData, response);
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      const timeoutError: any = new Error(
+        "Upload timed out. Please check your internet and try again.",
+      );
+      timeoutError.response = { status: 408, data: { message: timeoutError.message } };
+      throw timeoutError;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+const makeFormDataRequest = async (
+  method: "POST" | "PUT" | "PATCH",
+  url: string,
+  body: any,
+  headers?: object,
+): Promise<AxiosResponse> => {
+  const formData = toFormData(body);
+  const hasFiles = formDataHasFileParts(formData);
+
+  // Axios on RN still serializes FormData with files as x-www-form-urlencoded.
+  if (hasFiles) {
+    return makeFetchFormDataRequest(method, url, formData, headers);
+  }
+
+  return api.request({
+    method: method.toLowerCase() as "post" | "put" | "patch",
+    url,
+    data: formData,
+    headers: {
+      ...getClientDeviceHeaders(),
+      ...((await getHeaders()) as Record<string, string>),
+      "Content-Type": "multipart/form-data",
+      ...((headers as Record<string, string>) || {}),
+    },
+    transformRequest: (data) => data,
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+    timeout: 120000,
+  });
+};
+
 api.interceptors.request.use((config) => {
   const deviceHeaders = getClientDeviceHeaders();
   Object.assign(config.headers, deviceHeaders);
@@ -117,13 +271,7 @@ const makePostRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.post(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("POST", url, body, headers);
 };
 
 const makePutRequest = async (
@@ -141,13 +289,7 @@ const makePutRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.put(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("PUT", url, body, headers);
 };
 
 const makePatchRequest = async (
@@ -165,13 +307,7 @@ const makePatchRequestFormData = async (
   body: object,
   headers?: object
 ): Promise<AxiosResponse> => {
-  return api.patch(url, body, {
-    headers: {
-      ...(await getHeaders()),
-      "Content-Type": "multipart/form-data",
-      ...headers,
-    },
-  });
+  return makeFormDataRequest("PATCH", url, body, headers);
 };
 
 const makeDeleteRequest = async (

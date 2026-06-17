@@ -612,6 +612,8 @@
   "serviceDeletedSuccessfully": "काम सफलतापूर्वक हटा दी गई",
   "serviceRestoredSuccessfully": "काम सफलतापूर्वक पुनर्स्थापित हो गई",
   "servicePostedSuccessfully": "काम सफलतापूर्वक पोस्ट की गई",
+  "serviceCreateFailed": "नया काम जोड़ने में विफल",
+  "serviceUpdateFailed": "काम अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
   "mobileNumberVerifiedSuccessfully": "मोबाइल नंबर सफलतापूर्वक सत्यापित हो गया",
   "mobileNumberVerificationFailed": "मोबाइल नंबर सत्यापन विफल",
   "yesProceed": "हां, आगे बढ़ें",
