@@ -33,11 +33,19 @@ import userStatus from "../middlewares/userStatus.middleware.js";
 
 const router = express.Router();
 
+const maybeUploadProfileImage = (req, res, next) => {
+  const contentType = String(req.headers["content-type"] || "").toLowerCase();
+  if (!contentType.includes("multipart/form-data")) {
+    return next();
+  }
+  return upload.fields([{ name: "profileImage", maxCount: 1 }])(req, res, next);
+};
+
 router.get("/info", verifyToken, getMyInfo);
 router.patch(
   "/info",
   verifyToken,
-  upload.fields([{ name: "profileImage", maxCount: 1 }]),
+  maybeUploadProfileImage,
   handleUpdateInfo
 );
 router.post("/add-skill", verifyToken, userStatus, handleAddSkill);

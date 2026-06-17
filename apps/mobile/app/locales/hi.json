@@ -638,6 +638,8 @@
   "jobId": "जॉब ID",
   "viewService": "काम देखें",
   "unknownUser": "अज्ञात उपयोगकर्ता",
+  "serviceCreateFailed": "नया काम जोड़ने में विफल",
+  "serviceUpdateFailed": "काम अपडेट करने में विफल। कृपया पुनः प्रयास करें।",
   "mobileNumberVerifiedSuccessfully": "मोबाइल नंबर सफलतापूर्वक सत्यापित हो गया",
   "mobileNumberVerificationFailed": "मोबाइल नंबर सत्यापन विफल",
   "yesProceed": "हां, आगे बढ़ें",

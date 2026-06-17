@@ -29,6 +29,7 @@ import { debounce } from "lodash";
 import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 import { applyServiceClientDistanceFilter } from "@/utils/searchFilters";
+import { flattenPaginatedPages } from "@/utils/paginatedApi";
 
 const Services = () => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
@@ -61,6 +62,7 @@ const Services = () => {
           : type === "booked"
             ? "booked"
             : "services",
+      userDetails?._id,
       category,
       appliedFilters,
     ],
@@ -101,9 +103,7 @@ const Services = () => {
     React.useCallback(() => {
       const totalData = response?.pages[0]?.pagination?.total;
       setTotalData(totalData);
-      const nextServices = response?.pages.flatMap(
-        (page: any) => page.data || [],
-      );
+      const nextServices = flattenPaginatedPages(response?.pages);
       setFilteredData(
         applyServiceClientDistanceFilter(
           nextServices || [],

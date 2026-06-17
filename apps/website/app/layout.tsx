@@ -3,6 +3,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
 import SocialWall from "@/components/SocialWall";
 import WebsiteActivityTracker from "@/components/WebsiteActivityTracker";
+import WebsiteErrorReporter from "@/components/WebsiteErrorReporter";
 import { Suspense } from "react";
 import Script from "next/script";
 
@@ -39,9 +40,9 @@ export default function RootLayout({
     logo: "https://apnarojgarindia.com/logo.png",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Jalesar, Etah Uttar Predesh, India, 207302",
+      streetAddress: "Jalesar, Etah Uttar Pradesh, India, 207302",
       addressLocality: "Etah",
-      addressRegion: "Uttar Predesh",
+      addressRegion: "Uttar Pradesh",
       addressCountry: "India",
       postalCode: "207302",
     },
@@ -107,7 +108,7 @@ export default function RootLayout({
             <WebsiteActivityTracker />
           </Suspense>
           <SocialWall />
-          {children}
+          <WebsiteErrorReporter>{children}</WebsiteErrorReporter>
         </LanguageProvider>
       </body>
     </html>

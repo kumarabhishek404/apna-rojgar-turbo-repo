@@ -639,6 +639,8 @@
   "jobId": "Job ID",
   "viewService": "View Work",
   "unknownUser": "Unknown user",
+  "serviceCreateFailed": "Failed to add new service",
+  "serviceUpdateFailed": "Failed to update service. Please try again.",
   "mobileNumberVerifiedSuccessfully": "Mobile number verified successfully",
   "mobileNumberVerificationFailed": "Mobile number verification failed",
   "yesProceed": "Yes, Proceed",
