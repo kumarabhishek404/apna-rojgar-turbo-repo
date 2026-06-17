@@ -40,6 +40,7 @@ export const titles = {
     NEW_SERVICE_ARRIVED_OF_SKILL: "New work has been live",
     PENDING_REQUEST_REMINDER: "Pending requests want action",
     PROFILE_COMPLETION_REMINDER: "Please completed your profile",
+    SYSTEM_ERROR_ALERT: "System Error Alert",
     SELECTED_AS_MEDIATOR: "You Have Been Selected as a Mediator",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR: "You Were Removed as a Mediator",
     SERVICE_COMPLETED: "The Work Was Completed",
@@ -91,6 +92,7 @@ export const titles = {
       "आपके कौशल से संबंधित नया काम उपलब्ध हो गया है",
     PENDING_REQUEST_REMINDER: "लंबित अनुरोधों पर कार्रवाई आवश्यक है",
     PROFILE_COMPLETION_REMINDER: "कृपया अपनी प्रोफ़ाइल पूरी करें",
+    SYSTEM_ERROR_ALERT: "सिस्टम त्रुटि चेतावनी",
     SELECTED_AS_MEDIATOR: "आपको ठेकेदार के रूप में चुना गया है",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:
       "आपको ठेकेदार की भूमिका से हटा दिया गया है",
@@ -535,6 +537,8 @@ const messages = {
       "⏳ Hey {{workerName}}, you have pending requests waiting for your action! 🚀 Don’t miss out—respond now! 💬",
     PROFILE_COMPLETION_REMINDER:
       "🚀 Hey {{workerName}}! Your profile is missing these important details: {{missingDetails}} ⚡ Complete them now to unlock the full power of our platform! ✨",
+    SYSTEM_ERROR_ALERT:
+      "⚠️ {{source}} error at {{route}}: {{errorMessage}}",
     SELECTED_AS_MEDIATOR:
       "🎉 You have been selected as a Mediator for {{serviceName}}! 👥 {{workersCount}} workers are connected with you. 🤝 Please stay active to support them effectively.",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:
@@ -617,6 +621,8 @@ const messages = {
       "⏳ Hey {{workerName}}, आपके पास कुछ लंबित अनुरोध हैं जिन पर आपकी कार्रवाई ज़रूरी है! 🚀 मौका न गंवाएं—अभी जवाब दें! 💬",
     PROFILE_COMPLETION_REMINDER:
       "🚀 Hey {{workerName}}! आपकी प्रोफ़ाइल में ये ज़रूरी जानकारियाँ गायब हैं: {{missingDetails}} ⚡ इन्हें अभी पूरा करें और हमारे प्लेटफ़ॉर्म की पूरी ताक़त अनलॉक करें! ✨",
+    SYSTEM_ERROR_ALERT:
+      "⚠️ {{source}} पर {{route}} में त्रुटि: {{errorMessage}}",
     SELECTED_AS_MEDIATOR:
       "🎉 आपको {{serviceName}} के लिए ठेकेदार चुना गया है। 👥 {{workersCount}} मजदूर आपके साथ जुड़े हैं। 🤝 कृपया उनकी मदद के लिए सक्रिय रहें।",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:

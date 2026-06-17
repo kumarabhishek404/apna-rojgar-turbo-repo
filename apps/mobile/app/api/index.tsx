@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
+import reportError from "@/utils/reportError";
 
 const eventEmitter = new EventEmitter();
 
@@ -233,6 +234,16 @@ api.interceptors.response.use(
           TOAST.error(t("sessionExpiredPleaseLoginAgain"));
         }
         await logout();
+      } else if (error.response.status >= 500) {
+        const apiMessage =
+          typeof errorMessage === "string" && errorMessage.trim()
+            ? errorMessage
+            : "API server error";
+        void reportError({
+          message: apiMessage,
+          route: error.config?.url || "mobile-api",
+          statusCode: error.response.status,
+        });
       }
 
       if (

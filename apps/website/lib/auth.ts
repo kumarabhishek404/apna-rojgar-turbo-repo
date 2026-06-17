@@ -1,5 +1,6 @@
 import { AUTH_STORAGE_KEY, authAtom, authStore, StoredAuth } from "@/lib/authAtom";
 import { getClientAppLanguage, localizeApiErrorMessage, translate } from "@/lib/i18n";
+import { reportError } from "@/lib/reportError";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
@@ -191,6 +192,15 @@ export async function apiRequest<T = unknown>(
       typeof raw === "string" && raw.trim()
         ? localizeApiErrorMessage(raw)
         : translate(lang, "requestFailed", "Request failed");
+
+    if (response.status >= 500) {
+      void reportError({
+        message: msg,
+        route: path,
+        statusCode: response.status,
+      });
+    }
+
     throw new Error(msg);
   }
 
