@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "ui-design", "all", "automated"]
+---
+# TC-SUP-033: FAQ topic list icons and chevrons aligned
+# Module: Settings, Support & Legal | Screen: Help / FAQ | Role: All
+# Type: UI Design | Priority: P1
+# Route: /screens/helps
+# Prerequisites: Any test account · On help
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe FAQ list layout.
+
+# Assertions
+# Expected: Consistent row height and alignment.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

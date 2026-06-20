@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "functionality", "worker", "automated"]
+---
+# TC-USR-009: Send team join request to mediator
+# Module: User Browse & Profile Actions | Screen: User Profile | Role: Worker
+# Type: Functionality | Priority: P1
+# Route: /screens/users/[id]
+# Prerequisites: Worker account · Worker viewing mediator
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "join team/request"
+# Confirm.
+
+# Assertions
+# Expected: Team request sent.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

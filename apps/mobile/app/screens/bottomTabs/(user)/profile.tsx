@@ -423,6 +423,7 @@ const UserProfile = () => {
             return (
               <TouchableOpacity
                 key={tab.key}
+                testID={`profile-tab-${tab.key}`}
                 style={[styles.tabItem, active && styles.tabItemActive]}
                 onPress={() => setSelectedTab(tab.key)}
                 activeOpacity={0.8}

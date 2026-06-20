@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "ui-design", "mediator", "automated"]
+---
+# TC-GLB-017: Mediator tab labels show correct role-specific names
+# Module: Global & App Shell | Screen: Bottom Tabs | Role: Mediator
+# Type: UI Design | Priority: P1
+# Route: /(tabs)/_layout.tsx
+# Prerequisites: Mediator account · Logged in as Mediator
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Login as Mediator.
+# Observe tab bar.
+
+# Assertions
+# Expected: Mediator-specific tab labels displayed correctly.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

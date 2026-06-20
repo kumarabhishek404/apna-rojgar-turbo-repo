@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["deep-links-sharing", "functionality", "all", "automated"]
+---
+# TC-DLNK-005: Share service to WhatsApp
+# Module: Deep Links & Sharing | Screen: Share Service | Role: All
+# Type: Functionality | Priority: P1
+# Route: shareService.ts
+# Prerequisites: Any test account · WhatsApp installed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Share → WhatsApp.
+# Select contact.
+
+# Assertions
+# Expected: WhatsApp opens with pre-filled Hindi message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

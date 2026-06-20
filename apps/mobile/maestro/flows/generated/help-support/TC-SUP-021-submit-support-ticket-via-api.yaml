@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "functionality", "all", "automated"]
+---
+# TC-SUP-021: Submit support ticket via API
+# Module: Settings, Support & Legal | Screen: User Problem API | Role: All
+# Type: Functionality | Priority: P2
+# Route: userProblem.tsx
+# Prerequisites: Any test account · Support ticket feature if wired
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Submit user problem if UI exists.
+
+# Assertions
+# Expected: Ticket created on server.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

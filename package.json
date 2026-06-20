@@ -12,7 +12,11 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "deploy": "bash scripts/deploy.sh",
     "push-deploy": "bash scripts/push-deploy.sh",
-    "generate:mobile-test-cases": "node scripts/generate-mobile-test-cases.mjs"
+    "generate:mobile-test-cases": "node scripts/generate-mobile-test-cases.mjs",
+    "generate:mobile-test-cases-csv": "node scripts/generate-mobile-test-cases-csv.mjs",
+    "generate:maestro-flows": "node scripts/generate-maestro-flows.mjs",
+    "test:maestro:check": "pnpm --filter labour-app test:maestro:check",
+    "test:maestro:smoke": "pnpm --filter labour-app test:maestro:smoke"
   },
   "devDependencies": {
     "exceljs": "^4.4.0",

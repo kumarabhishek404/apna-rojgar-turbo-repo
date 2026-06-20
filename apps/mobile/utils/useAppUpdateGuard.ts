@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Constants from "expo-constants";
 import { isVersionLess } from "@/utils/version";
 import { checkForUpdates } from "@/components/commons/InAppUpdates";
-import UPDATESERVICE from "../api/updateService";
+import UPDATESERVICE from "@/app/api/updateService";
 
 export function useAppUpdateGuard() {
   const [forceUpdate, setForceUpdate] = useState(false);
@@ -26,7 +26,6 @@ export function useAppUpdateGuard() {
           return;
         }
 
-        // Only check OTA if native version is valid
         await checkForUpdates();
       } catch (err) {
         console.log("Update guard failed", err);

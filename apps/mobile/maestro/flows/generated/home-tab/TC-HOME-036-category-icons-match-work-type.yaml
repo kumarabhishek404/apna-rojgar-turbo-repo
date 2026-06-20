@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "ui-design", "all", "manual-review"]
+---
+# TC-HOME-036: Category icons match work type
+# Module: Tab: Home | Screen: Work Categories | Role: All
+# Type: UI Design | Priority: P2
+# Route: UnifiedHomeDashboard
+# Prerequisites: Any test account · Categories visible
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Compare icon to category name.
+
+# Assertions
+# Expected: Icons visually represent category.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

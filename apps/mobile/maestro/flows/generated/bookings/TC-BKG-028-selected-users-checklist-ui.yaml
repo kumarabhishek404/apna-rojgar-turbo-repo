@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "ui-design", "employer", "automated"]
+---
+# TC-BKG-028: Selected users checklist UI
+# Module: Bookings & Invitations | Screen: Selected Users | Role: Employer
+# Type: UI Design | Priority: P2
+# Route: /screens/bookings/selectedUsers
+# Prerequisites: Employer account · Multiple selected workers
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe worker selection UI.
+
+# Assertions
+# Expected: Checkboxes/selection state clear.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

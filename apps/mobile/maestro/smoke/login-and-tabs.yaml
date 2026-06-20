@@ -1,0 +1,32 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+tags:
+  - smoke
+  - auth
+---
+# Smoke: login with staging OTP + verify all bottom tabs + logout
+- runFlow: ../flows/helpers/ensure-logged-out.yaml
+- assertVisible:
+    id: login-mobile-input
+- assertVisible:
+    id: login-submit-button
+- runFlow:
+    file: ../flows/helpers/login.yaml
+    env:
+      MOBILE: ${WORKER_MOBILE}
+      OTP: ${STAGING_OTP}
+- assertVisible:
+    id: tab-home
+- assertVisible:
+    id: tab-work
+- assertVisible:
+    id: tab-people
+- assertVisible:
+    id: tab-activity
+- assertVisible:
+    id: tab-profile
+- runFlow: ../flows/helpers/logout.yaml
+- assertVisible:
+    id: login-mobile-input

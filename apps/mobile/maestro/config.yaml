@@ -1,0 +1,4 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  APP_ID: com.kumarabhishek404.labourapp
+  STAGING_OTP: "000000"

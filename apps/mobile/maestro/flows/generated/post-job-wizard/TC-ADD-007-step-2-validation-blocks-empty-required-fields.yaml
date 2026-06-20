@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "functionality", "employer", "automated"]
+---
+# TC-ADD-007: Step 2: validation blocks empty required fields
+# Module: Post a Job Wizard | Screen: Select Sub-Category | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: /screens/addService (SelectWorkSubCategory.tsx)
+# Prerequisites: Employer account · On step 2
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Leave required fields empty.
+- tapOn: "Next"
+
+# Assertions
+# Expected: Validation error.
+# Expected: cannot proceed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

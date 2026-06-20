@@ -1,0 +1,31 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "ui-design", "worker", "automated"]
+---
+# TC-GLB-015: Worker tab labels show Home, Work, People, Activity, My Profile
+# Module: Global & App Shell | Screen: Bottom Tabs | Role: Worker
+# Type: UI Design | Priority: P1
+# Route: /(tabs)/_layout.tsx
+# Prerequisites: Worker account · Logged in as Worker
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Login as Worker.
+# Observe bottom tab bar labels and icons.
+
+# Assertions
+- assertVisible:
+    id: "tab-home"
+- assertVisible:
+    id: "tab-profile"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

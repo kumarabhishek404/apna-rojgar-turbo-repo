@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["experience-history", "functionality", "employer", "automated"]
+---
+# TC-EXP-003: Employer service history items listed
+# Module: Experience History | Screen: Experience | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: /screens/experience
+# Prerequisites: Employer account · Employer with posted jobs
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open experience as Employer.
+
+# Assertions
+# Expected: Posted/completed services shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

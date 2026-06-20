@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "functionality", "all", "automated"]
+---
+# TC-NOT-009: Tap JOB notification opens service detail
+# Module: Notifications & Push | Screen: Job Notification | Role: All
+# Type: Functionality | Priority: P0
+# Route: NotificationContext.tsx
+# Prerequisites: Any test account · Push type JOB with job id
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Send JOB type push.
+- tapOn: "notification"
+
+# Assertions
+# Expected: Navigates to /screens/service/[id].
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

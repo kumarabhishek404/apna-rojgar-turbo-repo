@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-025: Tab re-tap scrolls to top if implemented
+# Module: Cross-cutting UI Design | Screen: Scroll to Top | Role: All
+# Type: UI Design | Priority: P2
+# Route: Long lists
+# Prerequisites: Any test account · Long scrolled list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll down on tab.
+- tapOn: "Re-tap same tab"
+
+# Assertions
+# Expected: List scrolls to top or stays — document behavior.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

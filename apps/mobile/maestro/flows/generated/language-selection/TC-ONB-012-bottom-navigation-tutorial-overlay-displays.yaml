@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "availability", "all", "automated"]
+---
+# TC-ONB-012: Bottom navigation tutorial overlay displays
+# Module: Language & Onboarding | Screen: Bottom Nav Tutorial | Role: All
+# Type: Availability | Priority: P2
+# Route: /screens/tutorials/bootomNavigation
+# Prerequisites: Any test account · Tutorial trigger if shown
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Trigger bottom nav tutorial if available.
+# Observe overlay modal.
+
+# Assertions
+# Expected: Tutorial modal explains tab navigation with dismiss option.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

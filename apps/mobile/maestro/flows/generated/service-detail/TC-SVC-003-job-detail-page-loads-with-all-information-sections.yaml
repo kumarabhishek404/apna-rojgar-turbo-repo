@@ -1,0 +1,37 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["service-listing-detail", "availability", "all", "automated"]
+---
+# TC-SVC-003: Job detail page loads with all information sections
+# Module: Service Listing & Detail | Screen: Service Detail | Role: All
+# Type: Availability | Priority: P0
+# Route: /screens/service/[id]
+# Prerequisites: Any test account · At least one active job exists on staging. Log in as any role. Know a valid job ID (tap any job card from Home or Work tab)
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn:
+    id: "tab-work"
+# Wait for the page to fully load (spinner disappears).
+# Slowly scroll from top to bottom and look for each section listed in Expected Result.
+# Take note if any section is missing or shows an error.
+
+# Assertions
+# Expected: Job photo carousel/gallery is visible at the top.
+# Expected: Job title, category, and daily pay rate are shown.
+# Expected: Requirements section shows workers needed per skill.
+# Expected: Facilities section shows food/living/travel/ESI-PF if employer added them.
+# Expected: Employer info box shows employer name and photo.
+# Expected: Map or location section is visible.
+# Expected: Action buttons at bottom match your role (Apply for Worker, Manage for Employer).
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,14 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags:
+  - admin
+  - smoke
+---
+- runFlow: ../flows/helpers/login-admin.yaml
+- assertVisible:
+    id: tab-home
+- runFlow: ../flows/helpers/tap-tab-work.yaml
+- runFlow: ../flows/helpers/tap-tab-activity.yaml
+- runFlow: ../flows/helpers/logout.yaml

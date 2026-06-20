@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "functionality", "all", "automated"]
+---
+# TC-USR-019: Back navigation from user profile
+# Module: User Browse & Profile Actions | Screen: User Profile | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/users/[id]
+# Prerequisites: Any test account · On profile
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "back"
+
+# Assertions
+# Expected: Returns to previous list.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

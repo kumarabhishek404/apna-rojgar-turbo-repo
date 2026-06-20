@@ -1,0 +1,6 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  MOBILE: ${WORKER_MOBILE}
+  OTP: ${STAGING_OTP}
+---
+- runFlow: login.yaml

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "employer", "automated"]
+---
+# TC-WORK-019: FAB tap opens add service wizard
+# Module: Tab: Work | Screen: FAB Add Job | Role: Employer
+# Type: Functionality | Priority: P0
+# Route: UnifiedTabFab
+# Prerequisites: Employer account · Employer on work tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "FAB"
+# Observe navigation.
+
+# Assertions
+# Expected: Navigates to /screens/addService.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

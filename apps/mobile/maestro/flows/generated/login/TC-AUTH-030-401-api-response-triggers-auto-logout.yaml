@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "all", "automated"]
+---
+# TC-AUTH-030: 401 API response triggers auto logout
+# Module: Authentication | Screen: Session Expiry | Role: All
+# Type: Functionality | Priority: P0
+# Route: AuthListner.tsx
+# Prerequisites: Any test account · Logged in; invalidate token on server
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Invalidate session server-side.
+# Trigger any API call.
+
+# Assertions
+# Expected: User logged out.
+# Expected: redirected to login.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

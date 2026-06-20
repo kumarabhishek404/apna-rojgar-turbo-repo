@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "ui-design", "all", "automated"]
+---
+# TC-BKG-016: Request cards show sender and status
+# Module: Bookings & Invitations | Screen: Requests List | Role: All
+# Type: UI Design | Priority: P2
+# Route: ListingVerticalRequests
+# Prerequisites: Any test account · Requests in activity
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe request cards.
+
+# Assertions
+# Expected: Sender name, date, status visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

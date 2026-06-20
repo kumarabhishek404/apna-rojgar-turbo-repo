@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "employer", "automated"]
+---
+# TC-ACT-030: Employer view booked workers from activity
+# Module: Tab: Activity | Screen: Employer Bookings | Role: Employer
+# Type: Functionality | Priority: P0
+# Route: employerBookings.tsx
+# Prerequisites: Employer account · Employer with booking
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Bookings sub-tab.
+- tapOn: "booking"
+
+# Assertions
+# Expected: Booking detail with worker list.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

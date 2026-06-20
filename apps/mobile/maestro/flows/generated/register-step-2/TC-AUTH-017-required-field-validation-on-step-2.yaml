@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "automated"]
+---
+# TC-AUTH-017: Required field validation on step 2
+# Module: Authentication | Screen: Register Step 2 | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /screens/auth/register/second
+# Prerequisites: Logged out · On step 2
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Leave name empty.
+- tapOn: "Next"
+
+# Assertions
+# Expected: Validation error for missing required fields.
+
+# Cleanup

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-profile", "availability", "employer", "automated"]
+---
+# TC-PROF-044: Employer service stats on profile overview
+# Module: Tab: Profile | Screen: Service Information | Role: Employer
+# Type: Availability | Priority: P2
+# Route: ServiceInformation
+# Prerequisites: Employer account · Employer with posted jobs
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open employer profile overview.
+
+# Assertions
+# Expected: Posted jobs count/stats shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

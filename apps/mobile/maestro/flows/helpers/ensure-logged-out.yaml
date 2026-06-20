@@ -1,0 +1,9 @@
+appId: com.kumarabhishek404.labourapp
+---
+# Clears session — use before guest/auth tests
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: login-mobile-input
+    timeout: 60000

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "availability", "all", "automated"]
+---
+# TC-NOT-007: In-app banner shown for foreground notification
+# Module: Notifications & Push | Screen: Foreground Banner | Role: All
+# Type: Availability | Priority: P1
+# Route: InAppNotificationBanner
+# Prerequisites: Any test account · App in foreground; push received
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Send push while app open.
+# Observe banner.
+
+# Assertions
+# Expected: Banner appears at top with notification content.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

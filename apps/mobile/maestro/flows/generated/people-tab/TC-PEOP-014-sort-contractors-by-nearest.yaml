@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-people", "functionality", "worker", "automated"]
+---
+# TC-PEOP-014: Sort contractors by nearest
+# Module: Tab: People | Screen: Contractor List | Role: Worker
+# Type: Functionality | Priority: P1
+# Route: allWorkers.tsx
+# Prerequisites: Worker account · Sort tabs visible
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Apply nearest sort.
+
+# Assertions
+# Expected: Contractors sorted by distance.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

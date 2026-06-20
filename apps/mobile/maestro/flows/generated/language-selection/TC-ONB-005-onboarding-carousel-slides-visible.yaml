@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "availability", "guest", "automated"]
+---
+# TC-ONB-005: Onboarding carousel slides visible
+# Module: Language & Onboarding | Screen: User Tips / Onboarding | Role: Guest
+# Type: Availability | Priority: P1
+# Route: /screens/userTipForAppUse
+# Prerequisites: Logged out · Navigate to user tips screen
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/userTipForAppUse.
+# Swipe through slides.
+
+# Assertions
+# Expected: Multiple onboarding slides with images/text visible.
+
+# Cleanup

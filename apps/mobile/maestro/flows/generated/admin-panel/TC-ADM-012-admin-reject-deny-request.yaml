@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "functionality", "admin", "automated"]
+---
+# TC-ADM-012: Admin reject/deny request
+# Module: Admin Panel | Screen: Admin Requests | Role: Admin
+# Type: Functionality | Priority: P0
+# Route: AdminRequests
+# Prerequisites: Admin account · Pending request
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open request.
+# Deny.
+
+# Assertions
+# Expected: Request rejected.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,36 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  MOBILE: ${MOBILE}
+  OTP: ${STAGING_OTP}
+---
+# Generic login — supports OTP step OR dev single-step login
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: login-mobile-input
+    timeout: 60000
+- tapOn:
+    id: login-mobile-input
+- inputText: ${MOBILE}
+- tapOn:
+    id: login-submit-button
+- extendedWaitUntil:
+    visible:
+      id: login-otp-input
+    timeout: 15000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: login-otp-input
+    commands:
+      - tapOn:
+          id: login-otp-input
+      - inputText: ${OTP}
+      - tapOn:
+          id: login-submit-button
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 90000

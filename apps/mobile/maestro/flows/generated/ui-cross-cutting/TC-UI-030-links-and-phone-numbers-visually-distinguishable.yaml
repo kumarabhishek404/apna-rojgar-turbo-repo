@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "manual-review"]
+---
+# TC-UI-030: Links and phone numbers visually distinguishable
+# Module: Cross-cutting UI Design | Screen: Link Styling | Role: All
+# Type: UI Design | Priority: P2
+# Route: Legal/Support
+# Prerequisites: Any test account · Help and legal screens
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe links on help/legal screens.
+
+# Assertions
+# Expected: Links styled differently from body text.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

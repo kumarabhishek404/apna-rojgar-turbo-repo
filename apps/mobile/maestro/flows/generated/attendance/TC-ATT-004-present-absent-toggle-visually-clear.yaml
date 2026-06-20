@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "ui-design", "employer", "manual-review"]
+---
+# TC-ATT-004: Present/absent toggle visually clear
+# Module: Attendance | Screen: Attendance Component | Role: Employer
+# Type: UI Design | Priority: P1
+# Route: attendanceComponent.tsx
+# Prerequisites: Employer account · On add attendance
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Toggle attendance states.
+
+# Assertions
+# Expected: Clear visual distinction present vs absent.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

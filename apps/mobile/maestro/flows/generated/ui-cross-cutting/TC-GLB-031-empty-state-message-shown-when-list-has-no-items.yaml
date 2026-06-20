@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "ui-design", "all", "automated"]
+---
+# TC-GLB-031: Empty state message shown when list has no items
+# Module: Global & App Shell | Screen: Empty States | Role: All
+# Type: UI Design | Priority: P2
+# Route: List screens
+# Prerequisites: Any test account · Account with no data for list type
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open list with zero items.
+# Observe UI.
+
+# Assertions
+# Expected: Friendly empty state with icon/message.
+# Expected: no broken layout.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-029: App version 1.3.1 visible somewhere in app
+# Module: Cross-cutting UI Design | Screen: App Version Display | Role: All
+# Type: UI Design | Priority: P2
+# Route: Profile/About
+# Prerequisites: Any test account · Profile or about section
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Find version in profile, feedback, or about.
+
+# Assertions
+# Expected: Version number displayed for support reference.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

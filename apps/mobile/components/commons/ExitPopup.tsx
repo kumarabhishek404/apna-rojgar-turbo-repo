@@ -22,10 +22,10 @@ const ExitConfirmationModal = ({ visible, onCancel, onConfirm }: any) => {
             Are you sure you want to exit the app?
           </Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onCancel} testID="exit-modal-cancel">
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.exitBtn} onPress={onConfirm}>
+            <TouchableOpacity style={styles.exitBtn} onPress={onConfirm} testID="exit-modal-confirm">
               <Text style={styles.exitText}>Exit</Text>
             </TouchableOpacity>
           </View>

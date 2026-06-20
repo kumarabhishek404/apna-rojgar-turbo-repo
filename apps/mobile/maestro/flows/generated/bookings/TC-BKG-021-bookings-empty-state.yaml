@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "ui-design", "employer", "automated"]
+---
+# TC-BKG-021: Bookings empty state
+# Module: Bookings & Invitations | Screen: Bookings List | Role: Employer
+# Type: UI Design | Priority: P2
+# Route: /screens/bookings
+# Prerequisites: Employer account · No bookings
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open bookings with none.
+
+# Assertions
+# Expected: Empty state message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

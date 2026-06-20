@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "ui-design", "employer", "manual-review"]
+---
+# TC-ADD-034: Facility toggles visually clear on/off
+# Module: Post a Job Wizard | Screen: Select Facilities | Role: Employer
+# Type: UI Design | Priority: P2
+# Route: SelectFacilities.tsx
+# Prerequisites: Employer account · On facilities step
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Toggle each facility.
+# Observe state.
+
+# Assertions
+# Expected: Clear selected/unselected styling.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

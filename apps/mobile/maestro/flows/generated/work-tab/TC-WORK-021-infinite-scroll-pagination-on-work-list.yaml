@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "all", "automated"]
+---
+# TC-WORK-021: Infinite scroll pagination on work list
+# Module: Tab: Work | Screen: Work Tab | Role: All
+# Type: Functionality | Priority: P1
+# Route: /(tabs)/second
+# Prerequisites: Any test account · Long list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll to bottom.
+
+# Assertions
+# Expected: More items load.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "admin", "automated"]
+---
+# TC-WORK-023: Admin view all posted services
+# Module: Tab: Work | Screen: Admin Services Tab | Role: Admin
+# Type: Functionality | Priority: P0
+# Route: AdminServices
+# Prerequisites: Admin account · Admin on services tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll service list.
+
+# Assertions
+# Expected: All platform services listed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

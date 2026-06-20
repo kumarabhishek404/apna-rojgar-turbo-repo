@@ -1,0 +1,30 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "functionality", "all", "manual-review"]
+---
+# TC-NOT-020: App functions when notification permission denied
+# Module: Notifications & Push | Screen: Push Registration | Role: All
+# Type: Functionality | Priority: P2
+# Route: usePushNotification.ts
+# Prerequisites: Any test account · Permission denied
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Deny permission.
+# Use app normally.
+
+# Assertions
+- assertNotVisible: "Something went wrong"
+# Expected: inbox still works for in-app notifications.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

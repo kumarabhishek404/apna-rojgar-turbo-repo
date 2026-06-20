@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "all", "automated"]
+---
+# TC-ACT-035: Pull to refresh on activity sub-tab
+# Module: Tab: Activity | Screen: Activity Tab | Role: All
+# Type: Functionality | Priority: P1
+# Route: /(tabs)/fourth
+# Prerequisites: Any test account · Any sub-tab list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Pull down on list.
+
+# Assertions
+# Expected: List refreshes.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

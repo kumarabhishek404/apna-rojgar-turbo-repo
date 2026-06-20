@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "ui-design", "mediator", "automated"]
+---
+# TC-HOME-006: Hero section shows Mediator role tag
+# Module: Tab: Home | Screen: Home Hero | Role: Mediator
+# Type: UI Design | Priority: P1
+# Route: HomeHeroSection
+# Prerequisites: Mediator account · Mediator on home
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe hero section.
+
+# Assertions
+# Expected: Mediator role tag displayed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

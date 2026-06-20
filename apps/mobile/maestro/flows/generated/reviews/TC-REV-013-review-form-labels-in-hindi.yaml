@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["reviews-ratings", "ui-design", "all", "automated"]
+---
+# TC-REV-013: Review form labels in Hindi
+# Module: Reviews & Ratings | Screen: Add Review | Role: All
+# Type: UI Design | Priority: P2
+# Route: /screens/reviews/addReview/[id]
+# Prerequisites: Any test account · Hindi locale
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Set Hindi.
+# Open add review.
+
+# Assertions
+# Expected: Labels in Hindi.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

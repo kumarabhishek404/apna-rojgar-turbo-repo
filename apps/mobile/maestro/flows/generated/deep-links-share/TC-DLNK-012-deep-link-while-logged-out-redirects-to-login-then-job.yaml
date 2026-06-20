@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["deep-links-sharing", "functionality", "guest", "automated"]
+---
+# TC-DLNK-012: Deep link while logged out redirects to login then job
+# Module: Deep Links & Sharing | Screen: Deep Link Logged Out | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /job/[id]
+# Prerequisites: Logged out
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Log out.
+# Open job deep link.
+# Login.
+
+# Assertions
+# Expected: After login, lands on job detail or prompts login first.
+
+# Cleanup

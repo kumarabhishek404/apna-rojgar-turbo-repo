@@ -1,0 +1,33 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["service-listing-detail", "availability", "employer", "automated"]
+---
+# TC-SVC-006: Employer sees Applications and Selections tabs on own job
+# Module: Service Listing & Detail | Screen: Service Detail | Role: Employer
+# Type: Availability | Priority: P0
+# Route: /screens/service/[id]
+# Prerequisites: Employer account · Log in as Employer. Open a job YOU posted (Activity → My Services, or your own listing)
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Log in as Employer and navigate to a job you posted.
+# Scroll down looking for tab bar or sections labelled 'Applications' and 'Selections'.
+- tapOn: "each tab and observe the content"
+
+# Assertions
+# Expected: Applications tab is visible on employer's own job.
+# Expected: Selections tab is visible next to Applications.
+# Expected: Applications tab lists workers who applied (or shows empty state).
+# Expected: Selections tab lists workers employer has selected (or empty state).
+# Expected: These tabs are NOT shown when viewing another employer's job.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

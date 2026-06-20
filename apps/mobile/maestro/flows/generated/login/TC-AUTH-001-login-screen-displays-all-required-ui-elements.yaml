@@ -1,0 +1,34 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "availability", "guest", "automated"]
+---
+# TC-AUTH-001: Login screen displays all required UI elements
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: Availability | Priority: P0
+# Route: /screens/auth/login
+# Prerequisites: Logged out
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Look at the full screen from top to bottom.
+- tapOn:
+    id: "login-otp-input"
+- inputText: ${STAGING_OTP}
+# Do not enter any data yet — this test is only about visibility.
+
+# Assertions
+# Expected: Mobile number field is visible and tappable.
+# Expected: Country code +91 is shown next to the mobile field.
+# Expected: Send OTP button is visible and enabled.
+# Expected: New Registration link is visible.
+- assertNotVisible: "Something went wrong"
+
+# Cleanup

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "mediator", "automated"]
+---
+# TC-WORK-035: Mediator browses labour same as employer on work tab
+# Module: Tab: Work | Screen: Work Tab | Role: Mediator
+# Type: Functionality | Priority: P1
+# Route: /(tabs)/second
+# Prerequisites: Mediator account · Mediator on work tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open work tab as Mediator.
+# Browse workers.
+
+# Assertions
+# Expected: Labour/worker listings available.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

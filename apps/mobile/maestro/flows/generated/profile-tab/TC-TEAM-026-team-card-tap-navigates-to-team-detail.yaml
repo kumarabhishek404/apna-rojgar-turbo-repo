@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "functionality", "mediator", "automated"]
+---
+# TC-TEAM-026: Team card tap navigates to team detail
+# Module: Team / Mediator | Screen: Team Admin Card | Role: Mediator
+# Type: Functionality | Priority: P2
+# Route: TeamAdminCard
+# Prerequisites: Mediator account · Team card on profile
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "team admin card"
+
+# Assertions
+# Expected: Opens /screens/team/[id].
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

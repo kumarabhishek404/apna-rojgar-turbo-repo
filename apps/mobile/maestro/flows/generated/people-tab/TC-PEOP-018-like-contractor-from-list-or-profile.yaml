@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-people", "functionality", "employer", "automated"]
+---
+# TC-PEOP-018: Like contractor from list or profile
+# Module: Tab: People | Screen: Contractor List | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: UnifiedPeopleScreen
+# Prerequisites: Employer account · Contractor listed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Like a contractor.
+
+# Assertions
+# Expected: Like status updates.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

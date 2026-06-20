@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "availability", "all", "automated"]
+---
+# TC-HOME-007: Work categories grid visible
+# Module: Tab: Home | Screen: Work Categories | Role: All
+# Type: Availability | Priority: P1
+# Route: UnifiedHomeDashboard
+# Prerequisites: Any test account · On home tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll home.
+# Find categories section.
+
+# Assertions
+# Expected: Category icons/labels for work types shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

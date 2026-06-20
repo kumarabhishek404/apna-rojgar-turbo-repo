@@ -1,0 +1,21 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+tags:
+  - auth
+  - tabs
+---
+- runFlow: ../helpers/login-worker.yaml
+- tapOn:
+    id: tab-work
+- tapOn:
+    id: tab-people
+- tapOn:
+    id: tab-activity
+- tapOn:
+    id: tab-profile
+- tapOn:
+    id: tab-home
+- assertVisible:
+    id: tab-home

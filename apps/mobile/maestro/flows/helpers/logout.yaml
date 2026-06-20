@@ -1,0 +1,16 @@
+appId: com.kumarabhishek404.labourapp
+---
+- tapOn:
+    id: tab-profile
+- tapOn:
+    id: profile-tab-settings
+- scrollUntilVisible:
+    element:
+      id: profile-logout-button
+    direction: DOWN
+- tapOn:
+    id: profile-logout-button
+- extendedWaitUntil:
+    visible:
+      id: login-mobile-input
+    timeout: 30000

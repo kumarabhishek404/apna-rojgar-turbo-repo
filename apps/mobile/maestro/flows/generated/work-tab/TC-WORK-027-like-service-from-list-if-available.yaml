@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "worker", "automated"]
+---
+# TC-WORK-027: Like service from list if available
+# Module: Tab: Work | Screen: Service List | Role: Worker
+# Type: Functionality | Priority: P2
+# Route: allServices.tsx
+# Prerequisites: Worker account · Service with like button
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "heart/like on card if shown"
+
+# Assertions
+# Expected: Service liked.
+# Expected: icon updates.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml
