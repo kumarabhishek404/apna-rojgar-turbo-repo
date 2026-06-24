@@ -578,16 +578,8 @@ const UserProfile = () => {
                 availableSkills={WORKERTYPES}
               />
               <UserInfoComponent user={userDetails} />
-              <WorkInformation
-                information={userDetails?.workDetails}
-                style={{ marginLeft: 0 }}
-              />
-              <View style={{ paddingTop: 12 }}>
-                <ServiceInformation
-                  information={userDetails?.serviceDetails}
-                  style={{ marginLeft: 0 }}
-                />
-              </View>
+              <WorkInformation information={userDetails?.workDetails} />
+              <ServiceInformation information={userDetails?.serviceDetails} />
 
               <JoinWhatsAppGroup
                 groupLink="https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD?mode=gi_t"
@@ -746,6 +738,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 16,
     minHeight: 300,
+    gap: 14,
   },
   formContainer: {
     paddingVertical: 20,
@@ -754,7 +747,6 @@ const styles = StyleSheet.create({
   skillsContainer: {
     padding: 14,
     flexDirection: "column",
-    marginBottom: 12,
     backgroundColor: "#F4F6FA",
     borderRadius: 14,
     borderWidth: 1,

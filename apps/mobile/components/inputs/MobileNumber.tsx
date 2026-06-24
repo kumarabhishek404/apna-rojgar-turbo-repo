@@ -19,6 +19,8 @@ interface MobileNumberFieldProps {
   loading?: boolean;
   icon?: any;
   testID?: string;
+  inputStyle?: object;
+  textStyles?: object;
 }
 
 const MobileNumberField = ({
@@ -36,6 +38,8 @@ const MobileNumberField = ({
   loading,
   icon,
   testID,
+  inputStyle,
+  textStyles,
 }: MobileNumberFieldProps) => {
   return (
     <>
@@ -55,7 +59,8 @@ const MobileNumberField = ({
           loading={loading}
           testID={testID}
           style={{ fontSize: 18 }}
-          textStyles={{ fontSize: 18 }}
+          inputStyle={inputStyle}
+          textStyles={[{ fontSize: 18 }, textStyles]}
           icon={
             <View
               style={{

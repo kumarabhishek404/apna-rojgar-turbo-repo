@@ -125,23 +125,17 @@ const ListingsVerticalWorkers = ({
                         })
                       }
                     >
-                      <View style={styles.callButtonInner}>
-                        <View style={styles.callIconBadge}>
-                          <Ionicons
-                            name="call-outline"
-                            size={15}
-                            color={Colors.primary}
-                          />
-                        </View>
-                        <CustomText
-                          baseFont={14}
-                          color={Colors.primary}
-                          numberOfLines={1}
-                          style={styles.callButtonLabel}
-                        >
-                          {t("listingCall")}
-                        </CustomText>
+                      <View style={styles.callIconCircle}>
+                        <Ionicons name="call" size={14} color={Colors.white} />
                       </View>
+                      <CustomText
+                        baseFont={13}
+                        color={Colors.primary}
+                        numberOfLines={1}
+                        style={styles.callButtonLabel}
+                      >
+                        {t("listingCall")}
+                      </CustomText>
                     </TouchableOpacity>
                   ) : null}
                 </View>
@@ -322,33 +316,34 @@ const styles = StyleSheet.create({
   callButton: {
     marginTop: 8,
     width: "100%",
-    borderRadius: 8,
+    minHeight: 34,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.2)",
-    backgroundColor: "rgba(234, 240, 255, 0.55)",
-    overflow: "hidden",
-  },
-  callButtonInner: {
+    borderColor: "rgba(14, 79, 197, 0.22)",
+    backgroundColor: "#EEF4FF",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 5,
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
-  callIconBadge: {
+  callIconCircle: {
     width: 22,
     height: 22,
-    borderRadius: 6,
-    backgroundColor: Colors.white,
+    borderRadius: 11,
+    backgroundColor: Colors.primary,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.12)",
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   callButtonLabel: {
     fontWeight: "700",
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   cardContent: {
     flex: 1,

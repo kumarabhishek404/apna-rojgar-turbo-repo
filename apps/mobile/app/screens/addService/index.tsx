@@ -296,6 +296,10 @@ const AddServiceScreen = () => {
       bookingType: "byService",
       requirements: JSON.stringify(requirements),
       facilities: JSON.stringify(facilities),
+      promoteSocialMedia: String(promotionChoiceRef.current.promoteSocialMedia),
+      ...(promotionChoiceRef.current.promotionOrderId
+        ? { promotionOrderId: promotionChoiceRef.current.promotionOrderId }
+        : {}),
     };
 
     // Phase 1: small JSON request — succeeds quickly even on slow networks
@@ -316,28 +320,7 @@ const AddServiceScreen = () => {
       }
     }
 
-    formData.append("type", type);
-    formData.append("subType", subType);
-    formData.append("description", description);
-    formData.append("address", address);
-    formData.append("geoLocation", JSON.stringify(finalLocation));
-    formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-    formData.append("duration", duration);
-    formData.append("requirements", JSON.stringify(requirements));
-    formData.append("facilities", JSON.stringify(facilities));
-    formData.append(
-      "promoteSocialMedia",
-      String(promotionChoiceRef.current.promoteSocialMedia),
-    );
-    if (promotionChoiceRef.current.promotionOrderId) {
-      formData.append(
-        "promotionOrderId",
-        promotionChoiceRef.current.promotionOrderId,
-      );
-    }
-
-    const response: any = await EMPLOYER?.addNewService(formData);
-    return response?.data;
+    return service;
   };
 
   const handleEditSubmit = async (id: any) => {

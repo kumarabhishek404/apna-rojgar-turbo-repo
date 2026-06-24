@@ -17,11 +17,14 @@ export default function ContactSupport() {
 
   return (
     <View style={styles.card}>
-      <CustomText textAlign="center" baseFont={16}>
+      <View style={styles.iconWrap}>
+        <Feather name="headphones" size={22} color="#F97316" />
+      </View>
+      <CustomText textAlign="center" baseFont={15} color="#7C2D12">
         {t("supportTitle")}
       </CustomText>
 
-      <CustomText textAlign="center" baseFont={16} fontWeight="600">
+      <CustomText textAlign="center" baseFont={15} fontWeight="700" color="#431407">
         {t("supportSubtitle")}
       </CustomText>
 
@@ -46,18 +49,34 @@ export default function ContactSupport() {
 
 const styles = StyleSheet.create({
   card: {
-    marginTop: 25,
+    marginTop: 18,
     backgroundColor: "#FFF7ED",
-    borderRadius: 16,
+    borderRadius: 22,
     padding: 18,
+    alignItems: "center",
     gap: 8,
-    borderWidth: 2,
-    borderColor: "#FDBA74",
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    shadowColor: "#9A3412",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
     elevation: 3,
   },
 
+  iconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#FFEDD5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
+
   actions: {
-    marginTop: 12,
+    marginTop: 10,
+    width: "100%",
     gap: 12,
   },
 
@@ -74,8 +93,8 @@ const styles = StyleSheet.create({
   whatsappBtn: {
     flexDirection: "row",
     backgroundColor: "#22C55E",
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 15,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
     gap: 10,

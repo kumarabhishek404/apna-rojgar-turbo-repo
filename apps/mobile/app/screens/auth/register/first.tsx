@@ -13,7 +13,7 @@ import { Controller, useForm } from "react-hook-form";
 import Button from "@/components/inputs/Button";
 import CustomHeading from "@/components/commons/CustomHeading";
 import MobileNumberField from "@/components/inputs/MobileNumber";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import TOAST from "@/app/hooks/toast";
 import { Link, router, Stack, useLocalSearchParams } from "expo-router";
@@ -253,41 +253,68 @@ const RegisterScreen: React.FC = () => {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Loader loading={mutationRegister?.isPending} />
-          <View style={styles.centeredView}>
-            <AntDesign
-              name="mobile"
-              size={150}
-              color={Colors.tertieryButton}
-              style={styles.image}
-            />
-            <CustomHeading baseFont={26}>
+          <Loader
+            loading={
+              mutationRegister?.isPending ||
+              sendOtp?.isPending ||
+              verifyOtp?.isPending ||
+              checkMobileNumber?.isPending
+            }
+          />
+          <View style={styles.heroSection}>
+            <View style={styles.heroIconWrap}>
+              <AntDesign name="mobile1" size={70} color={Colors.primary} />
+            </View>
+            <CustomHeading
+              baseFont={26}
+              color={Colors.primary}
+              style={styles.title}
+            >
               {t("verificationTitle")}
             </CustomHeading>
             <CustomText
-              baseFont={16}
-              color={Colors.disabledText}
-              style={{ textAlign: "center" }}
+              baseFont={15}
+              color={Colors.secondary}
+              textAlign="center"
+              style={styles.subtitle}
             >
               {step === 1
                 ? t("verificationDescription1")
                 : t("verificationDescription2")}
             </CustomText>
-
-            <CustomText
-              baseFont={20}
-              color="#FF6B00"
-              style={{
-                textAlign: "center",
-                fontWeight: "bold",
-                marginTop: 20,
-              }}
-            >
-              {t("voiceCallMayBeCome")}
-            </CustomText>
           </View>
 
-          <View style={styles.formContainer}>
+          <View style={styles.formCard}>
+            <View style={styles.stepRow}>
+              <View
+                style={[
+                  styles.stepPill,
+                  step === 1 ? styles.stepPillActive : styles.stepPillDone,
+                ]}
+              >
+                <CustomText
+                  baseFont={12}
+                  fontWeight="800"
+                  color={step === 1 ? Colors.white : Colors.primary}
+                >
+                  1
+                </CustomText>
+              </View>
+              <View style={styles.stepLine} />
+              <View
+                style={[styles.stepPill, step === 2 && styles.stepPillActive]}
+              >
+                <CustomText
+                  baseFont={12}
+                  fontWeight="800"
+                  color={step === 2 ? Colors.white : Colors.primary}
+                >
+                  2
+                </CustomText>
+              </View>
+            </View>
+
+            <View style={styles.formContainer}>
             {step === 1 && (
               <>
                 <Controller
@@ -316,12 +343,16 @@ const RegisterScreen: React.FC = () => {
                       loading={checkMobileNumber?.isPending}
                       isMobileNumberExist={mobileNumberExist === "exist"}
                       placeholder={t("enterMobileTitle")}
+                      inputStyle={styles.authInputContainer}
+                      textStyles={styles.authInputText}
                       icon={
-                        <Feather
-                          name="phone"
-                          size={25}
-                          color={Colors.disabled}
-                        />
+                        <View style={styles.fieldIconBadge}>
+                          <Feather
+                            name="phone"
+                            size={18}
+                            color={Colors.primary}
+                          />
+                        </View>
                       }
                     />
                   )}
@@ -351,7 +382,7 @@ const RegisterScreen: React.FC = () => {
                     (mobileNumberExist === "exist" &&
                       !userCanResumeRegistration)
                   }
-                  textStyle={{ fontSize: 24, fontWeight: "600" }}
+                  textStyle={{ fontSize: 20, fontWeight: "800" }}
                 />
               </>
             )}
@@ -359,11 +390,32 @@ const RegisterScreen: React.FC = () => {
             {step === 2 && (
               <View style={styles.otpContainer}>
                 <View style={styles.mobileNumberView}>
-                  <CustomText baseFont={18} color={Colors.tertieryButton}>
-                    {countryCode} {watch("mobile")}
-                  </CustomText>
-                  <TouchableOpacity onPress={() => setStep(1)}>
-                    <Feather name="edit" size={20} color={Colors.primary} />
+                  <View style={styles.selectedMobile}>
+                    <Ionicons
+                      name="call-outline"
+                      size={16}
+                      color={Colors.primary}
+                    />
+                    <CustomText
+                      baseFont={15}
+                      color={Colors.primary}
+                      fontWeight="700"
+                    >
+                      {countryCode} {watch("mobile")}
+                    </CustomText>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setStep(1)}
+                    style={styles.editButton}
+                  >
+                    <Feather name="edit-2" size={16} color={Colors.primary} />
+                    <CustomText
+                      baseFont={12}
+                      color={Colors.primary}
+                      fontWeight="700"
+                    >
+                      {t("edit")}
+                    </CustomText>
                   </TouchableOpacity>
                 </View>
                 <View style={styles.otpLableContainer}>
@@ -383,7 +435,8 @@ const RegisterScreen: React.FC = () => {
                   >
                     <CustomText
                       color={resendDisabled ? Colors.text : Colors.primary}
-                      baseFont={16}
+                      baseFont={14}
+                      fontWeight="700"
                     >
                       {resendDisabled
                         ? `${t("resendOtpIn", { seconds: timer })}`
@@ -397,7 +450,17 @@ const RegisterScreen: React.FC = () => {
                   maxLength={6}
                   value={otp}
                   onChangeText={setOtp}
+                  placeholder="••••••"
+                  placeholderTextColor="#B8C1D4"
                 />
+                <CustomText
+                  baseFont={14}
+                  color="#F97316"
+                  textAlign="center"
+                  style={styles.voiceHint}
+                >
+                  {t("voiceCallMayBeCome")}
+                </CustomText>
                 <Button
                   isPrimary
                   title={t("verifyOtp")}
@@ -410,7 +473,7 @@ const RegisterScreen: React.FC = () => {
                   }
                   style={styles.button}
                   disabled={otp.length !== 6}
-                  textStyle={{ fontSize: 24, fontWeight: "600" }}
+                  textStyle={{ fontSize: 20, fontWeight: "800" }}
                 />
               </View>
             )}
@@ -428,6 +491,7 @@ const RegisterScreen: React.FC = () => {
             {(sendOtp?.isPending || verifyOtp?.isPending) && (
               <ActivityIndicator size="large" color={Colors.primary} />
             )}
+            </View>
           </View>
         </ScrollView>
         <StickButtonWithWall
@@ -460,40 +524,133 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: Colors.fourth,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    justifyContent: "space-evenly",
+    paddingHorizontal: 18,
+    paddingTop: 86,
+    paddingBottom: 26,
+    justifyContent: "center",
+  },
+  heroSection: {
     alignItems: "center",
+    marginBottom: 22,
+  },
+  heroIconWrap: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: "#EAF0FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.12)",
+  },
+  title: {
+    lineHeight: 32,
+  },
+  subtitle: {
+    marginTop: 8,
+    lineHeight: 21,
+    paddingHorizontal: 8,
+  },
+  formCard: {
+    width: "100%",
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#E4EAF5",
+    shadowColor: "#0F2E6E",
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  stepPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.18)",
+  },
+  stepPillActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  stepPillDone: {
+    backgroundColor: "#EAF8F0",
+    borderColor: "#BFE8CE",
+  },
+  stepLine: {
+    width: 54,
+    height: 2,
+    backgroundColor: "#DDE6F5",
+    marginHorizontal: 8,
   },
   centeredView: {
     alignItems: "center",
     marginBottom: 20,
   },
   formContainer: {
-    gap: 20,
+    gap: 16,
     width: "100%",
     alignItems: "center",
   },
+  fieldIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
+  },
+  authInputContainer: {
+    height: 58,
+    borderRadius: 16,
+    borderColor: "#DDE6F5",
+    backgroundColor: "#F8FAFF",
+    paddingLeft: 12,
+  },
+  authInputText: {
+    color: Colors.heading,
+    fontWeight: "700",
+  },
   button: {
-    height: 53,
-    borderRadius: 8,
+    height: 56,
+    borderRadius: 16,
     width: "100%",
+    backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
   },
   otpContainer: {
     width: "100%",
     alignItems: "center",
-    gap: 10,
+    gap: 14,
   },
   otpInput: {
     width: "100%",
     textAlign: "center",
-    height: 50,
-    borderWidth: 1,
-    borderColor: Colors.inputBorder,
-    borderRadius: 5,
-    fontSize: 20,
-    letterSpacing: 8,
-    backgroundColor: Colors.white,
+    height: 58,
+    borderWidth: 1.5,
+    borderColor: "#DDE6F5",
+    borderRadius: 16,
+    fontSize: 22,
+    letterSpacing: 10,
+    fontWeight: "800",
+    color: Colors.primary,
+    backgroundColor: "#F8FAFF",
   },
   image: { width: 150, height: 150, marginBottom: 20 },
   mobileNumberView: {
@@ -501,7 +658,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    paddingVertical: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    backgroundColor: "#EEF4FF",
+  },
+  selectedMobile: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  editButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: Colors.white,
   },
   otpLableContainer: {
     flexDirection: "row",
@@ -509,10 +683,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
+  voiceHint: {
+    lineHeight: 20,
+    backgroundColor: "#FFF7E8",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
   footerContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
+    gap: 8,
+    paddingTop: 4,
   },
 });

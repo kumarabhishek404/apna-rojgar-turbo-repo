@@ -13,20 +13,33 @@ import TOAST from "@/app/hooks/toast";
 import Loader from "./Loaders/Loader";
 import PaperDropdown from "../inputs/Dropdown";
 import CustomSegmentedButton from "@/app/screens/bottomTabs/(user)/bookingsAndRequests/customTabs";
-import { set } from "lodash";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import { translateWorkerTypes } from "@/constants/functions";
+import CustomText from "./CustomText";
+
+type ServiceRequirement = {
+  name?: string;
+  count?: number;
+  payPerDay?: number;
+};
 
 const AddSkillDrawer = ({
   isDrawerVisible,
   setIsDrawerVisible,
   filteredSkills,
-}: any) => {
+  serviceRequirements,
+}: {
+  isDrawerVisible: boolean;
+  setIsDrawerVisible: (visible: boolean) => void;
+  filteredSkills?: Array<{ label: string; value: string }>;
+  serviceRequirements?: ServiceRequirement[];
+}) => {
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
   const [skillWithPrice, setSkillWithPrice] = useState<any>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
   const [userDetails, setUserDetails] = useAtom(Atoms?.UserAtom);
   const [role, setRole] = useState("worker");
+  const isApplyGuided = Boolean(serviceRequirements?.length);
 
   const TABS: any = [
     { value: "worker", label: "worker" },
@@ -42,7 +55,11 @@ const AddSkillDrawer = ({
         ...userDetails,
         skills: user?.skills,
       });
-      TOAST?.success(t("skillsAddedSuccessfully"));
+      TOAST?.success(
+        isApplyGuided
+          ? t("addSkillApplySuccessReapply")
+          : t("skillsAddedSuccessfully"),
+      );
       // console.log("Response while adding new skills in a worker - ", response);
     },
     onError: (err) => {
@@ -112,13 +129,59 @@ const AddSkillDrawer = ({
     setSkillWithPrice(null);
   };
 
+  const renderRequiredSkills = () => {
+    if (!isApplyGuided) return null;
+
+    return (
+      <View style={styles.guidedSection}>
+        <CustomText baseFont={14} color="#4B5563" textAlign="left" style={styles.guidedMessage}>
+          {t("addSkillApplyGuidedMessage")}
+        </CustomText>
+
+        <CustomText
+          baseFont={13}
+          fontWeight="700"
+          color={Colors.heading}
+          textAlign="left"
+          style={styles.requiredLabel}
+        >
+          {t("addSkillApplyRequiredSkills")}
+        </CustomText>
+
+        <View style={styles.requiredSkillsWrap}>
+          {serviceRequirements?.map((requirement, index) => (
+            <View key={`${requirement?.name}-${index}`} style={styles.requiredSkillChip}>
+              <CustomText baseFont={13} fontWeight="700" color={Colors.primary} textAlign="left">
+                {requirement?.count
+                  ? `${requirement.count} ${getDynamicWorkerType(requirement.name, requirement.count)}`
+                  : getDynamicWorkerType(requirement?.name || "", 1)}
+              </CustomText>
+              {requirement?.payPerDay ? (
+                <CustomText baseFont={11} color={Colors.secondary} textAlign="left">
+                  ₹{requirement.payPerDay}/{t("days")}
+                </CustomText>
+              ) : null}
+            </View>
+          ))}
+        </View>
+
+        <CustomText baseFont={13} color="#0E4FC5" fontWeight="600" textAlign="left" style={styles.reapplyHint}>
+          {t("addSkillApplyReapplyHint")}
+        </CustomText>
+      </View>
+    );
+  };
+
   useEffect(() => {
     if (isDrawerVisible) {
       setDrawerState({
         visible: true,
-        title: "addAtLeastOneSkillApplyServices",
+        title: isApplyGuided
+          ? "addSkillApplyGuidedTitle"
+          : "addAtLeastOneSkillApplyServices",
         content: () => (
           <View style={{ paddingVertical: 10 }}>
+            {renderRequiredSkills()}
             <CustomSegmentedButton
               buttons={TABS}
               selectedTab={role}
@@ -132,8 +195,16 @@ const AddSkillDrawer = ({
               }
               onSelect={(skill: string) => handleSkillSelection(skill)}
               searchEnabled
-              placeholder={t("searchAndSelectSkills")}
-              options={filteredSkills ?? translateWorkerTypes(WORKERTYPES)}
+              placeholder={
+                isApplyGuided
+                  ? t("addSkillApplySelectFromRequired")
+                  : t("searchAndSelectSkills")
+              }
+              options={
+                filteredSkills?.length
+                  ? filteredSkills
+                  : translateWorkerTypes(WORKERTYPES)
+              }
               icon={
                 <MaterialCommunityIcons
                   style={styles.icon}
@@ -165,7 +236,15 @@ const AddSkillDrawer = ({
         },
       });
     }
-  }, [isDrawerVisible, role, selectedSkill, skillWithPrice]); // Re-run when drawer visibility or inputs change
+  }, [
+    isDrawerVisible,
+    role,
+    selectedSkill,
+    skillWithPrice,
+    filteredSkills,
+    serviceRequirements,
+    isApplyGuided,
+  ]);
 
   return <Loader loading={mutationAddSkills?.isPending} />; // Component does not return UI directly
 };
@@ -190,4 +269,32 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   priceInput: {},
+  guidedSection: {
+    marginBottom: 16,
+    gap: 10,
+  },
+  guidedMessage: {
+    lineHeight: 21,
+  },
+  requiredLabel: {
+    marginTop: 4,
+  },
+  requiredSkillsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  requiredSkillChip: {
+    backgroundColor: "#EEF4FF",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.18)",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    gap: 2,
+  },
+  reapplyHint: {
+    marginTop: 4,
+    lineHeight: 19,
+  },
 });

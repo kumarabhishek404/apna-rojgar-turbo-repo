@@ -4,6 +4,7 @@ import CustomHeading from "../commons/CustomHeading";
 import CustomText from "../commons/CustomText";
 import { t } from "@/utils/translationHelper";
 import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 
 interface RoleSelectionProps {
   role: string;
@@ -47,11 +48,30 @@ const RoleSelection = ({ role, setRole, resetSkills }: RoleSelectionProps) => {
           <TouchableOpacity
             key={index}
             activeOpacity={0.7}
-            style={[styles.roleBox, styles.selectedRoleBox]}
+            style={[
+              styles.roleBox,
+              role === selectedRole.id && styles.selectedRoleBox,
+            ]}
             onPress={() => handleSelectRole(selectedRole)}
           >
             <View style={styles.roleContent}>
-              <CustomHeading>{selectedRole.title}</CustomHeading>
+              <Ionicons
+                name={
+                  selectedRole.id === "WORKER"
+                    ? "hammer-outline"
+                    : selectedRole.id === "MEDIATOR"
+                      ? "people-outline"
+                      : "briefcase-outline"
+                }
+                size={18}
+                color={role === selectedRole.id ? Colors.white : Colors.primary}
+              />
+              <CustomHeading
+                baseFont={12}
+                color={role === selectedRole.id ? Colors.white : Colors.primary}
+              >
+                {selectedRole.title}
+              </CustomHeading>
             </View>
             <View
               style={[
@@ -68,45 +88,46 @@ const RoleSelection = ({ role, setRole, resetSkills }: RoleSelectionProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    justifyContent: "center",
     alignItems: "flex-start",
     gap: 5,
   },
   roleContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 10,
     width: "100%",
   },
   roleBox: {
-    width: "30%",
-    padding: 10,
-    backgroundColor: "#FFF",
-    borderRadius: 8,
-    borderColor: "#DDD",
+    flex: 1,
+    minHeight: 86,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    backgroundColor: "#F8FAFF",
+    borderRadius: 14,
+    borderColor: "#DDE6F5",
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "space-between",
   },
   selectedRoleBox: {
-    borderColor: "#007BFF",
-    backgroundColor: "#EAF4FF",
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   roleContent: {
     alignItems: "center",
     gap: 5,
   },
   radioCircle: {
-    height: 20,
-    width: 20,
+    height: 18,
+    width: 18,
     borderRadius: 100,
     borderWidth: 2,
     borderColor: Colors?.disabledText,
-    marginTop: 10,
+    marginTop: 6,
+    backgroundColor: Colors.white,
   },
   selectedRadio: {
-    borderColor: Colors?.tertieryButton,
-    backgroundColor: Colors?.tertieryButton,
+    borderColor: Colors?.white,
+    backgroundColor: Colors?.tertiery,
   },
 });
 

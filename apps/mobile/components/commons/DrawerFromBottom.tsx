@@ -4,6 +4,7 @@ import {
   StyleSheet,
   View,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   Dimensions,
   ScrollView,
 } from "react-native";
@@ -58,15 +59,22 @@ const BottomDrawer = ({
       >
         {/* Header */}
         <View style={styles.header}>
-          <CustomHeading baseFont={22} fontWeight="bold" textAlign="left">
+          <CustomHeading
+            baseFont={18}
+            fontWeight="bold"
+            textAlign="left"
+            style={styles.headerTitle}
+          >
             {title}
           </CustomHeading>
-          <Ionicons
-            name="close"
-            size={28}
-            color={Colors.primary}
+          <TouchableOpacity
             onPress={onClose}
-          />
+            style={styles.closeButton}
+            accessibilityRole="button"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="close" size={24} color={Colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Scrollable Content and Buttons */}
@@ -143,11 +151,20 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingBottom: 10,
+    gap: 12,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: Colors.secondary,
+  },
+  headerTitle: {
+    flex: 1,
+    minWidth: 0,
+  },
+  closeButton: {
+    flexShrink: 0,
+    marginTop: 2,
+    padding: 4,
   },
   scrollContainer: {
     flex: 1,
