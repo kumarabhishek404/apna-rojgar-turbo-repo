@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "ui-design", "admin", "automated"]
+---
+# TC-ADM-009: Admin service cards show employer and status
+# Module: Admin Panel | Screen: Admin Services | Role: Admin
+# Type: UI Design | Priority: P1
+# Route: AdminServices
+# Prerequisites: Admin account · Services listed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe service cards.
+
+# Assertions
+# Expected: Employer name, job status, date visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

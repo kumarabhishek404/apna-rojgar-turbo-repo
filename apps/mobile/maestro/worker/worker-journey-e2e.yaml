@@ -1,0 +1,23 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+tags:
+  - worker
+  - e2e
+---
+# Worker E2E: Login → Home → Work → Activity → Profile → Logout
+- runFlow: ../flows/helpers/login-worker.yaml
+- runFlow: ../flows/helpers/tap-tab-home.yaml
+- scroll
+- runFlow: ../flows/helpers/tap-tab-work.yaml
+- scroll
+- runFlow:
+    when:
+      visible: "View Details"
+    commands:
+      - tapOn: "View Details"
+      - pressKey: back
+- runFlow: ../flows/helpers/tap-tab-activity.yaml
+- runFlow: ../flows/helpers/tap-tab-profile.yaml
+- runFlow: ../flows/helpers/logout.yaml

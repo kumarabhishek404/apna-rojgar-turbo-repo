@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "availability", "employer", "automated"]
+---
+# TC-USR-025: Employer action buttons visible
+# Module: User Browse & Profile Actions | Screen: User Profile Buttons | Role: Employer
+# Type: Availability | Priority: P1
+# Route: buttons.tsx
+# Prerequisites: Employer account · Employer on worker profile
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe action button row.
+
+# Assertions
+# Expected: Book, Like, Call buttons visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

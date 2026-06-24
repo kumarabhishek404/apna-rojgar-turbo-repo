@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "functionality", "all", "automated"]
+---
+# TC-ONB-009: Language change syncs to backend when logged in
+# Module: Language & Onboarding | Screen: Change Language | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/settings/changeLanguage
+# Prerequisites: Any test account · Logged in with valid token
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Change language while logged in.
+# Kill and reopen app.
+# Verify language persisted.
+
+# Assertions
+# Expected: Selected language persists locally and on server profile.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

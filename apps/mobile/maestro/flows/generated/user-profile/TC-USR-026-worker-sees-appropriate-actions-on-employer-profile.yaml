@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "availability", "worker", "automated"]
+---
+# TC-USR-026: Worker sees appropriate actions on employer profile
+# Module: User Browse & Profile Actions | Screen: User Profile Buttons | Role: Worker
+# Type: Availability | Priority: P1
+# Route: buttons.tsx
+# Prerequisites: Worker account · Worker on employer profile
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open employer profile as Worker.
+
+# Assertions
+# Expected: Role-appropriate buttons only.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

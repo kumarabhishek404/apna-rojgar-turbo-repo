@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "ui-design", "employer", "automated"]
+---
+# TC-HOME-005: Hero section shows Employer role tag
+# Module: Tab: Home | Screen: Home Hero | Role: Employer
+# Type: UI Design | Priority: P1
+# Route: HomeHeroSection
+# Prerequisites: Employer account · Employer on home
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe hero section.
+
+# Assertions
+# Expected: Employer role tag displayed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

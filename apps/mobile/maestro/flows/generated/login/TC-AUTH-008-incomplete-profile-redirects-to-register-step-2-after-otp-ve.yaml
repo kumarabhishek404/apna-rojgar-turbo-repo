@@ -1,0 +1,35 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "automated"]
+---
+# TC-AUTH-008: Incomplete profile redirects to Register Step 2 after OTP verification
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: Functionality | Priority: P0
+# Route: /screens/auth/login
+# Prerequisites: Logged out · Use a test account that registered but did NOT complete profile (missing name, address, age, or gender). use team test data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Log in with the incomplete-profile test number.
+- tapOn:
+    id: "login-otp-input"
+- inputText: ${STAGING_OTP}
+- tapOn:
+    id: "login-submit-button"
+# Observe which screen opens next.
+
+# Assertions
+# Expected: After OTP verification, app navigates to Register Step 2 (/screens/auth/register/second).
+# Expected: Personal details form is shown (name, address, etc.).
+# Expected: User is NOT taken to Home tabs until profile is completed.
+# Expected: Partially saved data (if any) may be pre-filled.
+
+# Cleanup

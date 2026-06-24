@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "functionality", "admin", "automated"]
+---
+# TC-ADM-031: Admin filter or sort feedback if available
+# Module: Admin Panel | Screen: All Feedback | Role: Admin
+# Type: Functionality | Priority: P2
+# Route: /screens/allFeedback
+# Prerequisites: Admin account · Feedback list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Apply filter by rating.
+
+# Assertions
+# Expected: Feedback filtered.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

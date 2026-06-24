@@ -33,6 +33,7 @@ type TextInputProps = {
   disabled?: boolean | null;
   loading?: boolean;
   isRequired?: boolean;
+  testID?: string;
 };
 
 const TextInputComponent = ({
@@ -56,6 +57,7 @@ const TextInputComponent = ({
   disabled,
   loading,
   isRequired,
+  testID,
 }: TextInputProps) => {
   const inputRef = useRef<TextInput>(null);
   // const [isFocused, setIsFocused] = useState(false);
@@ -124,6 +126,7 @@ const TextInputComponent = ({
         )}
         <TextInput
           ref={inputRef}
+          testID={testID}
           style={[styles.input, textStyles]}
           keyboardType={type === "number" ? "numeric" : "ascii-capable"}
           maxLength={maxLength}

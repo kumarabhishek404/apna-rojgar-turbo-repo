@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "functionality", "mediator", "automated"]
+---
+# TC-TEAM-004: Mediator cancel sent team request
+# Module: Team / Mediator | Screen: Team Requests Sent | Role: Mediator
+# Type: Functionality | Priority: P1
+# Route: /screens/teamRequests
+# Prerequisites: Mediator account · Sent request pending
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Sent tab.
+# Cancel request.
+
+# Assertions
+# Expected: Request cancelled.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-profile", "availability", "worker", "automated"]
+---
+# TC-PROF-045: Worker work history on profile overview
+# Module: Tab: Profile | Screen: Work Information | Role: Worker
+# Type: Availability | Priority: P2
+# Route: WorkInformation
+# Prerequisites: Worker account · Worker with work history
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open worker profile overview.
+
+# Assertions
+# Expected: Work history summary shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

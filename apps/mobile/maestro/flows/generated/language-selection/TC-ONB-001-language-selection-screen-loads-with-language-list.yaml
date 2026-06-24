@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "availability", "guest", "automated"]
+---
+# TC-ONB-001: Language selection screen loads with language list
+# Module: Language & Onboarding | Screen: Language Selection | Role: Guest
+# Type: Availability | Priority: P0
+# Route: /languageSelection
+# Prerequisites: Logged out · Fresh install or navigate to /languageSelection
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open language selection screen.
+# Observe available languages.
+
+# Assertions
+# Expected: List of supported languages visible (Hindi, English, and regional languages).
+
+# Cleanup

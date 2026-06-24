@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-026: Language change remounts app with new strings
+# Module: Global & App Shell | Screen: Locale Remount | Role: All
+# Type: Functionality | Priority: P1
+# Route: app/context/locale.tsx
+# Prerequisites: Any test account · Logged in
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Change language in settings.
+# Navigate multiple screens.
+
+# Assertions
+# Expected: All visible strings update to selected language.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

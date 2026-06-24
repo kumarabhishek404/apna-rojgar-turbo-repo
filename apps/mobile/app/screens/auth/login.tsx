@@ -255,6 +255,7 @@ export default function Login() {
                       setPhoneNumber={onChange}
                       errors={errors}
                       placeholder={t("enterMobileTitle")}
+                      testID="login-mobile-input"
                       icon={
                         <Feather
                           name="phone"
@@ -305,6 +306,7 @@ export default function Login() {
                         maxLength={6}
                         onChangeText={onChange}
                         placeholder={t("enterYourOtp")}
+                        testID="login-otp-input"
                         errors={errors}
                         textStyles={{ marginLeft: 10 }}
                         icon={
@@ -348,6 +350,7 @@ export default function Login() {
 
                 <Button
                   isPrimary
+                  testID="login-submit-button"
                   title={
                     shouldSkipOtpClient()
                       ? t("login")

@@ -18,6 +18,7 @@ interface MobileNumberFieldProps {
   placeholder: string;
   loading?: boolean;
   icon?: any;
+  testID?: string;
 }
 
 const MobileNumberField = ({
@@ -34,6 +35,7 @@ const MobileNumberField = ({
   placeholder,
   loading,
   icon,
+  testID,
 }: MobileNumberFieldProps) => {
   return (
     <>
@@ -51,6 +53,7 @@ const MobileNumberField = ({
           isMobileNumberNotExist={isMobileNumberNotExist}
           errors={errors}
           loading={loading}
+          testID={testID}
           style={{ fontSize: 18 }}
           textStyles={{ fontSize: 18 }}
           icon={

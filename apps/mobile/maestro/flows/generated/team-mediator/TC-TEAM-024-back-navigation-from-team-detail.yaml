@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "functionality", "mediator", "automated"]
+---
+# TC-TEAM-024: Back navigation from team detail
+# Module: Team / Mediator | Screen: Team Detail | Role: Mediator
+# Type: Functionality | Priority: P1
+# Route: /screens/team/[id]
+# Prerequisites: Mediator account · Team detail
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "back"
+
+# Assertions
+# Expected: Returns to profile.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

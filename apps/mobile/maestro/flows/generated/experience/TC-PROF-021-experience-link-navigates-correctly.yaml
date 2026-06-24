@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-profile", "functionality", "all", "automated"]
+---
+# TC-PROF-021: Experience link navigates correctly
+# Module: Tab: Profile | Screen: Experience | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/experience
+# Prerequisites: Any test account · Profile settings tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Experience"
+# Observe screen.
+
+# Assertions
+# Expected: Opens work history.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,7 @@
+appId: ${APP_ID}
+name: Apna Rojgar Maestro
+tags:
+  include:
+    - automated
+  exclude:
+    - manual-review

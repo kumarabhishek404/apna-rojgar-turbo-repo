@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "worker", "automated"]
+---
+# TC-ACT-027: Worker view confirmed booking details
+# Module: Tab: Activity | Screen: Worker Bookings | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: workerBookings.tsx
+# Prerequisites: Worker account · Worker with confirmed booking
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Bookings sub-tab.
+- tapOn: "booking"
+
+# Assertions
+# Expected: Booking detail with employer info shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

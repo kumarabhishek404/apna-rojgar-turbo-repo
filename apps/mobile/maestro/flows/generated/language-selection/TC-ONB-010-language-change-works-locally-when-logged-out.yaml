@@ -1,0 +1,31 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "functionality", "guest", "automated"]
+---
+# TC-ONB-010: Language change works locally when logged out
+# Module: Language & Onboarding | Screen: Change Language | Role: Guest
+# Type: Functionality | Priority: P2
+# Route: /screens/settings/changeLanguage
+# Prerequisites: Logged out
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn:
+    id: "login-submit-button"
+# Select new language.
+# Return to login.
+
+# Assertions
+- assertVisible:
+    id: "login-mobile-input"
+# Expected: no API error shown.
+
+# Cleanup

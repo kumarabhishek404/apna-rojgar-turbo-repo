@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-009: English text complete on key screens
+# Module: Cross-cutting UI Design | Screen: English Rendering | Role: All
+# Type: UI Design | Priority: P1
+# Route: Global
+# Prerequisites: Any test account · English locale
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Set English.
+# Check login, home, work, profile.
+
+# Assertions
+# Expected: No missing translation keys.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

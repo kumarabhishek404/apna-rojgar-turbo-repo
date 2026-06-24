@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "functionality", "all", "automated"]
+---
+# TC-NOT-008: Tap notification opens deep link URL
+# Module: Notifications & Push | Screen: Notification Tap | Role: All
+# Type: Functionality | Priority: P0
+# Route: NotificationContext.tsx
+# Prerequisites: Any test account · Push with deep link data.url
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Send push with data.url.
+- tapOn: "notification"
+
+# Assertions
+# Expected: App navigates to URL target screen.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

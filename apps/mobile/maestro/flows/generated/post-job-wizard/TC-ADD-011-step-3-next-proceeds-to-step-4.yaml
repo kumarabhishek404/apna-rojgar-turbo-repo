@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "functionality", "employer", "automated"]
+---
+# TC-ADD-011: Step 3: Next proceeds to step 4
+# Module: Post a Job Wizard | Screen: Worker Salary & Requirements | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: /screens/addService (SelectWorkerSalary.tsx)
+# Prerequisites: Employer account · On step 3 with valid data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Fill required fields.
+- tapOn: "Next"
+
+# Assertions
+# Expected: Navigates to step 4.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

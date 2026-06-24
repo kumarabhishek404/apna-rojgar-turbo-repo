@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-020: Background profile photo upload retries after registration
+# Module: Global & App Shell | Screen: Profile Photo Upload | Role: All
+# Type: Functionality | Priority: P2
+# Route: backgroundImageUpload.ts
+# Prerequisites: Any test account · Registration with pending photo upload
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Complete registration with photo.
+# If upload fails, reopen app.
+# Check profile photo.
+
+# Assertions
+# Expected: Pending photo upload retries and appears on profile.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

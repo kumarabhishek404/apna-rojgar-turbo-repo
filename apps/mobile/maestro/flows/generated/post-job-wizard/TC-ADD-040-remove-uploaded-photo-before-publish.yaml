@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "functionality", "employer", "automated"]
+---
+# TC-ADD-040: Remove uploaded photo before publish
+# Module: Post a Job Wizard | Screen: Upload Images | Role: Employer
+# Type: Functionality | Priority: P2
+# Route: UploadImagesStep.tsx
+# Prerequisites: Employer account · Photo uploaded
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Upload photo.
+# Remove it.
+
+# Assertions
+# Expected: Photo removed from grid.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

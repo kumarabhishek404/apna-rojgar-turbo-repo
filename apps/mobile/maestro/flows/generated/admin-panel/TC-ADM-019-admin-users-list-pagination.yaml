@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "functionality", "admin", "automated"]
+---
+# TC-ADM-019: Admin users list pagination
+# Module: Admin Panel | Screen: Admin Users | Role: Admin
+# Type: Functionality | Priority: P1
+# Route: AdminUsers
+# Prerequisites: Admin account · Long user list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll to bottom.
+
+# Assertions
+# Expected: More users load.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "ui-design", "employer", "automated"]
+---
+# TC-ADD-036: Review shows all entered data accurately
+# Module: Post a Job Wizard | Screen: Review & Publish | Role: Employer
+# Type: UI Design | Priority: P1
+# Route: final.tsx
+# Prerequisites: Employer account · On review step
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Compare review to entered values.
+
+# Assertions
+# Expected: All fields match prior steps.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

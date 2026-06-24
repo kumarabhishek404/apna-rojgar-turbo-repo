@@ -5,7 +5,9 @@ Manual QA workbook for the **labour-app** (Apna Rojgar) Android client — **one
 | Artifact | Description |
 |----------|-------------|
 | [apna-rojgar-android-test-cases.xlsx](./apna-rojgar-android-test-cases.xlsx) | Full workbook — **665 cases**, **26 screen tabs** |
-| [scripts/generate-mobile-test-cases.mjs](../../../scripts/generate-mobile-test-cases.mjs) | Regenerator script |
+| [apna-rojgar-mobile-test-cases.csv](./apna-rojgar-mobile-test-cases.csv) | Same cases as CSV (Google Sheets friendly) |
+| [../maestro/README.md](../maestro/README.md) | **Maestro E2E** — 665 generated flows + smoke/regression |
+| [scripts/generate-mobile-test-cases.mjs](../../../scripts/generate-mobile-test-cases.mjs) | Regenerator script (.xlsx) |
 
 **Scope:** Android · All roles · Availability + Functionality + UI Design  
 **App version:** 1.3.1
@@ -55,7 +57,9 @@ Navigation is **not repeated** in every row — only in the sheet banner.
 ## Regenerate
 
 ```bash
-pnpm generate:mobile-test-cases
+pnpm generate:mobile-test-cases        # .xlsx
+pnpm generate:mobile-test-cases-csv    # .csv
+pnpm generate:maestro-flows            # Maestro YAML
 ```
 
-Edit cases in `scripts/mobile-test-cases/modules/` then regenerate.
+Edit cases in `scripts/mobile-test-cases/modules/` then regenerate all three.

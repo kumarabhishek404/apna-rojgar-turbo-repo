@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "availability", "all", "automated"]
+---
+# TC-SUP-005: Live chat modal opens
+# Module: Settings, Support & Legal | Screen: Live Chat Modal | Role: All
+# Type: Availability | Priority: P2
+# Route: /screens/helps
+# Prerequisites: Any test account · Chat option on help
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "live chat/help chat"
+
+# Assertions
+# Expected: Chat modal opens.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -12,7 +12,7 @@ import { PaperProvider } from "react-native-paper";
 import APP_CONTEXT from "./context/locale";
 import NOTIFICATION_CONTEXT from "./context/NotificationContext";
 import { ToastProvider } from "./hooks/toast";
-import { useAppUpdateGuard } from "./hooks/useAppUpdateGuard";
+import { useAppUpdateGuard } from "@/utils/useAppUpdateGuard";
 import ForceUpdateScreen from "@/components/commons/ForceUpdateSection";
 import AnalyticsSession from "@/components/commons/AnalyticsSession";
 

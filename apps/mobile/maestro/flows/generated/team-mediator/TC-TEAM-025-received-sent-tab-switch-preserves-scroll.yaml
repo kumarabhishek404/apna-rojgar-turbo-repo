@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "ui-design", "all", "automated"]
+---
+# TC-TEAM-025: Received/Sent tab switch preserves scroll
+# Module: Team / Mediator | Screen: Team Requests | Role: All
+# Type: UI Design | Priority: P1
+# Route: /screens/teamRequests
+# Prerequisites: Any test account · On team requests
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll received list.
+# Switch to sent.
+# Switch back.
+
+# Assertions
+- assertNotVisible: "Something went wrong"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

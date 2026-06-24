@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "functionality", "employer", "automated"]
+---
+# TC-BKG-010: Employer cancel sent invitation
+# Module: Bookings & Invitations | Screen: Employer Invitations | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: employerWorkRequests.tsx
+# Prerequisites: Employer account · Sent invitation pending
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open sent invitation.
+# Cancel.
+
+# Assertions
+# Expected: Invitation cancelled on server.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

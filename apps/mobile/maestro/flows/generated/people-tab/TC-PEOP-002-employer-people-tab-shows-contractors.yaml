@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-people", "availability", "employer", "automated"]
+---
+# TC-PEOP-002: Employer people tab shows contractors
+# Module: Tab: People | Screen: People Tab | Role: Employer
+# Type: Availability | Priority: P0
+# Route: /(tabs)/third
+# Prerequisites: Employer account · Employer logged in
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open People tab as Employer.
+
+# Assertions
+# Expected: Contractor listings visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

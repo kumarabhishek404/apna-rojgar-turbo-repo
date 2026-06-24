@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-014: Service worker booking cards share consistent card style
+# Module: Cross-cutting UI Design | Screen: Card Consistency | Role: All
+# Type: UI Design | Priority: P2
+# Route: Listings
+# Prerequisites: Any test account · Multiple list types
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Compare cards across home, work, activity.
+
+# Assertions
+# Expected: Consistent corner radius, shadow, padding.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

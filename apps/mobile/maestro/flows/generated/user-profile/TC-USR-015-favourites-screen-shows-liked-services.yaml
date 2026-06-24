@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "availability", "all", "automated"]
+---
+# TC-USR-015: Favourites screen shows liked services
+# Module: User Browse & Profile Actions | Screen: Favourites | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/favourite
+# Prerequisites: Any test account · Liked services exist
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/favourite.
+
+# Assertions
+# Expected: Liked service cards listed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

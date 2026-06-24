@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["reviews-ratings", "availability", "all", "automated"]
+---
+# TC-REV-011: Inline reviews on profile overview
+# Module: Reviews & Ratings | Screen: User Reviews | Role: All
+# Type: Availability | Priority: P2
+# Route: UserReviews
+# Prerequisites: Any test account · Profile with reviews section
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# View profile reviews section.
+
+# Assertions
+# Expected: Recent reviews preview shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

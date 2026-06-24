@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "worker", "automated"]
+---
+# TC-WORK-005: Tap service card opens detail
+# Module: Tab: Work | Screen: Service List | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: allServices.tsx
+# Prerequisites: Worker account · Service list loaded
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "any service card"
+
+# Assertions
+# Expected: Navigates to /screens/service/[id].
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

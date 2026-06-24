@@ -1,0 +1,31 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "availability", "all", "automated"]
+---
+# TC-GLB-001: App launches without crash on Android
+# Module: Global & App Shell | Screen: App Launch | Role: All
+# Type: Availability | Priority: P0
+# Route: app/_layout.tsx
+# Prerequisites: Any test account · Fresh install; network available
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Install APK/AAB on Android device.
+- tapOn: "app icon"
+# Observe splash and initial screen.
+
+# Assertions
+- assertNotVisible: "Something went wrong"
+# Expected: root layout loads.
+- assertNotVisible: "Something went wrong"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

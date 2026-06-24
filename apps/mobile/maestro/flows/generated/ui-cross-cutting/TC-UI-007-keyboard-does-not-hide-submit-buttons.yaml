@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-007: Keyboard does not hide submit buttons
+# Module: Cross-cutting UI Design | Screen: Keyboard Handling | Role: All
+# Type: UI Design | Priority: P1
+# Route: Forms
+# Prerequisites: Any test account · Login, register, add service forms
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Focus bottom form fields.
+# Observe submit button visibility.
+
+# Assertions
+# Expected: Form scrolls or adjusts for keyboard.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

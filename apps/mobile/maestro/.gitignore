@@ -1,0 +1,8 @@
+# Ignore local secrets (keep .env.example tracked)
+.env
+!.env.example
+*.apk
+*.aab
+reports/maestro-junit.xml
+reports/maestro-smoke-junit.xml
+reports/maestro-regression-junit.xml

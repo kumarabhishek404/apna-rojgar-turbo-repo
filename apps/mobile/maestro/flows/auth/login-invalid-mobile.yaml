@@ -1,0 +1,13 @@
+appId: com.kumarabhishek404.labourapp
+tags:
+  - auth
+  - validation
+---
+- runFlow: ../helpers/ensure-logged-out.yaml
+- tapOn:
+    id: login-mobile-input
+- inputText: "12345"
+- tapOn:
+    id: login-submit-button
+- assertVisible:
+    id: login-mobile-input

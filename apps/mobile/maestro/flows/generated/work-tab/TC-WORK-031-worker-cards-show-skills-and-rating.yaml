@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "ui-design", "employer", "automated"]
+---
+# TC-WORK-031: Worker cards show skills and rating
+# Module: Tab: Work | Screen: Worker List | Role: Employer
+# Type: UI Design | Priority: P1
+# Route: allWorkers.tsx
+# Prerequisites: Employer account · Workers listed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe worker card details.
+
+# Assertions
+# Expected: Skills, rating, distance visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

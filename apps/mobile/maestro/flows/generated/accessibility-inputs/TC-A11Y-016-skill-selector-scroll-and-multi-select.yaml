@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "ui-design", "all", "automated"]
+---
+# TC-A11Y-016: Skill selector scroll and multi-select
+# Module: Accessibility & Inputs | Screen: Skill Selector | Role: All
+# Type: UI Design | Priority: P1
+# Route: SkillSelector.tsx
+# Prerequisites: Any test account · Skill picker open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open skill selector.
+# Select multiple skills.
+
+# Assertions
+# Expected: Skills selectable.
+# Expected: list scrolls.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

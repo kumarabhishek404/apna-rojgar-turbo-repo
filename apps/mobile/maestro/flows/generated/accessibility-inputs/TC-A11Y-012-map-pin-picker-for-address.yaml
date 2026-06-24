@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "all", "automated"]
+---
+# TC-A11Y-012: Map pin picker for address
+# Module: Accessibility & Inputs | Screen: Add Address With Location | Role: All
+# Type: Functionality | Priority: P1
+# Route: addAddressWithLocation.tsx
+# Prerequisites: Any test account · Location drawer
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open location drawer.
+# Move pin.
+# Confirm.
+
+# Assertions
+# Expected: Address from map coordinates saved.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

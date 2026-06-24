@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "employer", "automated"]
+---
+# TC-ACT-019: Employer My Services item actions work
+# Module: Tab: Activity | Screen: Activity - My Services | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: UnifiedActivityScreen
+# Prerequisites: Employer account · Employer My Services with data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open My Services.
+# Perform primary action on item.
+
+# Assertions
+# Expected: Action completes or opens detail.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-015: Loading placeholders on list screens
+# Module: Cross-cutting UI Design | Screen: Loading Skeleton | Role: All
+# Type: UI Design | Priority: P2
+# Route: List screens
+# Prerequisites: Any test account · Slow network
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Throttle network.
+# Open list screens.
+
+# Assertions
+# Expected: Spinner or skeleton shown during load.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

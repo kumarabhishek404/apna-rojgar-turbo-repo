@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-023: API requests include X-Client device headers
+# Module: Global & App Shell | Screen: Client Device Headers | Role: All
+# Type: Functionality | Priority: P2
+# Route: app/api/index.tsx
+# Prerequisites: Any test account · API logging or proxy available
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Perform any authenticated API call.
+# Inspect request headers.
+
+# Assertions
+# Expected: X-Client-* headers present with platform and version info.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

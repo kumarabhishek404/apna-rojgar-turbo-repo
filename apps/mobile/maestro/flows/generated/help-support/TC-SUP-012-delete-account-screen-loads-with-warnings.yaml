@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "availability", "all", "automated"]
+---
+# TC-SUP-012: Delete account screen loads with warnings
+# Module: Settings, Support & Legal | Screen: Delete Account | Role: All
+# Type: Availability | Priority: P0
+# Route: /screens/profile/deleteProfile
+# Prerequisites: Any test account · From profile settings
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open delete profile.
+
+# Assertions
+# Expected: Warning text and delete button visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

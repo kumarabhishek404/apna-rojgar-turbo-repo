@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "worker", "automated"]
+---
+# TC-ACT-034: Worker cancel job application from activity
+# Module: Tab: Activity | Screen: Applied Jobs | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: UnifiedActivityScreen
+# Prerequisites: Worker account · Applied to job
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Applied Jobs.
+# Cancel application.
+
+# Assertions
+# Expected: Application cancelled.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

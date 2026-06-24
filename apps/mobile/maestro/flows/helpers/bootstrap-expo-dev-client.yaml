@@ -1,0 +1,10 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  EXPO_DEV_CLIENT_URL: ${EXPO_DEV_CLIENT_URL}
+---
+# Expo dev client: open bundled Metro URL (run-smoke.sh sets adb reverse first).
+- openLink: ${EXPO_DEV_CLIENT_URL}
+- extendedWaitUntil:
+    visible:
+      id: login-mobile-input
+    timeout: 120000

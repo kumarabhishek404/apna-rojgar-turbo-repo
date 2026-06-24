@@ -9,12 +9,17 @@
     "dev": "WATCHMAN_USE_POLLING=true expo start",
     "start": "WATCHMAN_USE_POLLING=true expo start",
     "android": "expo run:android",
+    "android:setup-sdk": "bash scripts/setup-android-sdk.sh",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build": "node -e \"process.exit(0)\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "clean": "rm -rf .expo .turbo"
+    "clean": "rm -rf .expo .turbo",
+    "test:maestro:install": "bash maestro/scripts/install-maestro.sh",
+    "test:maestro:check": "bash maestro/scripts/check-ready.sh",
+    "test:maestro:smoke": "bash maestro/scripts/run-smoke.sh",
+    "test:maestro:regression": "bash maestro/scripts/run-regression.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -34,7 +39,7 @@
     "axios": "^1.7.7",
     "cashfree-pg-api-contract": "^2.1.1",
     "eventemitter3": "^5.0.1",
-    "expo": "~54.0.34",
+    "expo": "~54.0.35",
     "expo-asset": "~12.0.13",
     "expo-av": "~16.0.8",
     "expo-camera": "~17.0.10",

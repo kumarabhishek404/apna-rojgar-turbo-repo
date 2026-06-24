@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "availability", "employer", "automated"]
+---
+# TC-GLB-011: Global side drawer available on attendance view
+# Module: Global & App Shell | Screen: Global Side Drawer | Role: Employer
+# Type: Availability | Priority: P2
+# Route: GlobalSideDrawer
+# Prerequisites: Employer account · Attendance screen accessible
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open attendance report screen.
+# Trigger side drawer action.
+
+# Assertions
+# Expected: Side drawer opens with expected actions.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

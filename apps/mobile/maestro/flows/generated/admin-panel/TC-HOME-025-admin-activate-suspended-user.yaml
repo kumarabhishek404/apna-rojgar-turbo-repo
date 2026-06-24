@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "functionality", "admin", "automated"]
+---
+# TC-HOME-025: Admin activate suspended user
+# Module: Tab: Home | Screen: Admin Users Tab | Role: Admin
+# Type: Functionality | Priority: P0
+# Route: AdminUsers
+# Prerequisites: Admin account · Suspended user exists
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Find suspended user.
+- tapOn: "Activate"
+
+# Assertions
+# Expected: User status returns to active.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

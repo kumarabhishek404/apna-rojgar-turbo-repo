@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "functionality", "employer", "automated"]
+---
+# TC-HOME-017: Add job quick link opens add service wizard
+# Module: Tab: Home | Screen: Quick Links | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: UnifiedHomeDashboard
+# Prerequisites: Employer account · Employer on home
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "add job/post work link"
+
+# Assertions
+# Expected: Navigates to /screens/addService.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

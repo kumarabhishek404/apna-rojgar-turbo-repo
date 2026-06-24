@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "functionality", "employer", "automated"]
+---
+# TC-ATT-009: Side drawer actions on attendance screen
+# Module: Attendance | Screen: Side Drawer | Role: Employer
+# Type: Functionality | Priority: P2
+# Route: GlobalSideDrawer
+# Prerequisites: Employer account · On attendance view
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open side drawer on attendance.
+# Use available action.
+
+# Assertions
+# Expected: Drawer action completes expected operation.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "manual-review"]
+---
+# TC-UI-023: Content respects safe area on notched devices
+# Module: Cross-cutting UI Design | Screen: Safe Area | Role: All
+# Type: UI Design | Priority: P1
+# Route: Global
+# Prerequisites: Any test account · Notched Android device
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Test on punch-hole/notch device.
+
+# Assertions
+# Expected: No content under camera cutout.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

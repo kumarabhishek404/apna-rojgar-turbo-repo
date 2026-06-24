@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "functionality", "all", "automated"]
+---
+# TC-NOT-024: Dismiss foreground notification banner
+# Module: Notifications & Push | Screen: Foreground Banner | Role: All
+# Type: Functionality | Priority: P2
+# Route: InAppNotificationBanner
+# Prerequisites: Any test account · Banner visible
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "dismiss on banner"
+
+# Assertions
+# Expected: Banner closes.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

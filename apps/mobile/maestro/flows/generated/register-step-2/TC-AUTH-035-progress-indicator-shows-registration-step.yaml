@@ -1,0 +1,26 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "ui-design", "guest", "automated"]
+---
+# TC-AUTH-035: Progress indicator shows registration step
+# Module: Authentication | Screen: Register Step 2 | Role: Guest
+# Type: UI Design | Priority: P2
+# Route: /screens/auth/register/second
+# Prerequisites: Logged out · On step 2
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe step indicator on register screens.
+
+# Assertions
+# Expected: User knows current step in multi-step flow.
+
+# Cleanup

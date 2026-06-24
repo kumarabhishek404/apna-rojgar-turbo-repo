@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "all", "manual-review"]
+---
+# TC-A11Y-013: Biometric auth if wired in UI
+# Module: Accessibility & Inputs | Screen: Biometric Auth | Role: All
+# Type: Functionality | Priority: P2
+# Route: useBiometricAuth.ts
+# Prerequisites: Any test account · Device with fingerprint/face unlock
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Check if biometric prompt appears on login or app open.
+
+# Assertions
+# Expected: Document whether biometric is wired.
+# Expected: if yes, auth succeeds.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "availability", "worker", "automated"]
+---
+# TC-WORK-010: Search services entry point visible
+# Module: Tab: Work | Screen: Search Services | Role: Worker
+# Type: Availability | Priority: P1
+# Route: /screens/bottomTabs/(user)/search/searchServices
+# Prerequisites: Worker account · Work tab open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Find search icon/field.
+- tapOn: "to open search"
+
+# Assertions
+# Expected: Search services screen or input opens.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

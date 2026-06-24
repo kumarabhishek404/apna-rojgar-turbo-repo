@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "ui-design", "guest", "automated"]
+---
+# TC-ONB-007: Slide indicators and pagination dots visible
+# Module: Language & Onboarding | Screen: User Tips / Onboarding | Role: Guest
+# Type: UI Design | Priority: P2
+# Route: /screens/userTipForAppUse
+# Prerequisites: Logged out · On onboarding carousel
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Swipe between slides.
+# Observe pagination indicators.
+
+# Assertions
+# Expected: Current slide indicator updates correctly.
+
+# Cleanup

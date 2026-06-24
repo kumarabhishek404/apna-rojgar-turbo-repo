@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["service-listing-detail", "availability", "employer", "automated"]
+---
+# TC-SVC-023: Applicant count summary visible
+# Module: Service Listing & Detail | Screen: Applicants Summary | Role: Employer
+# Type: Availability | Priority: P2
+# Route: applicantsSummary.tsx
+# Prerequisites: Employer account · Job with applicants
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe applicant summary on detail.
+
+# Assertions
+# Expected: Applied/selected counts shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "admin", "automated"]
+---
+# TC-ACT-037: Admin reject suspension request
+# Module: Tab: Activity | Screen: Admin Requests Tab | Role: Admin
+# Type: Functionality | Priority: P0
+# Route: AdminRequests
+# Prerequisites: Admin account · Pending admin requests
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open request.
+# Reject/deny.
+
+# Assertions
+# Expected: Request handled.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

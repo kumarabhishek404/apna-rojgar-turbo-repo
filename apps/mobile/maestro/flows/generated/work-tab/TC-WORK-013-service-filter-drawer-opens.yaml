@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "availability", "worker", "automated"]
+---
+# TC-WORK-013: Service filter drawer opens
+# Module: Tab: Work | Screen: Filter Services | Role: Worker
+# Type: Availability | Priority: P1
+# Route: filterServices.tsx
+# Prerequisites: Worker account · Work tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Filter"
+# Observe drawer.
+
+# Assertions
+# Expected: Filter drawer with category/distance/pay options.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

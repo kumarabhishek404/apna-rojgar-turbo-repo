@@ -1,0 +1,9 @@
+appId: com.kumarabhishek404.labourapp
+---
+- pressKey: back
+- runFlow:
+    when:
+      visible: "Exit App"
+    commands:
+      - tapOn:
+          id: exit-modal-cancel

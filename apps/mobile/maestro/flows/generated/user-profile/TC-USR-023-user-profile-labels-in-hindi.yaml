@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "ui-design", "all", "automated"]
+---
+# TC-USR-023: User profile labels in Hindi
+# Module: User Browse & Profile Actions | Screen: User Profile | Role: All
+# Type: UI Design | Priority: P2
+# Route: /screens/users/[id]
+# Prerequisites: Any test account · Hindi locale
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Set Hindi.
+# Open user profile.
+
+# Assertions
+# Expected: Section labels in Hindi.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

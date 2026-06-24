@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "ui-design", "admin", "automated"]
+---
+# TC-ADM-020: Admin user status badges color-coded
+# Module: Admin Panel | Screen: Admin Users | Role: Admin
+# Type: UI Design | Priority: P1
+# Route: AdminUsers
+# Prerequisites: Admin account · Users listed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe active/suspended/pending badges.
+
+# Assertions
+# Expected: Distinct colors per status.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

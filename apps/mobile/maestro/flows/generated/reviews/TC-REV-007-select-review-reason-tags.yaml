@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["reviews-ratings", "functionality", "all", "automated"]
+---
+# TC-REV-007: Select review reason tags
+# Module: Reviews & Ratings | Screen: Review Reasons | Role: All
+# Type: Functionality | Priority: P1
+# Route: reasons.tsx
+# Prerequisites: Any test account · On add review
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "reason chips"
+# Submit review.
+
+# Assertions
+# Expected: Selected reasons saved with review.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

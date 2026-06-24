@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-006: Buttons and tabs meet minimum touch target size
+# Module: Cross-cutting UI Design | Screen: Touch Targets | Role: All
+# Type: UI Design | Priority: P1
+# Route: Global
+# Prerequisites: Any test account · Small Android phone
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Test tap accuracy on tabs, FAB, list actions"
+
+# Assertions
+# Expected: No mis-taps due to small targets.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

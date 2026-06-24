@@ -1,0 +1,15 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+tags:
+  - auth
+  - session
+---
+- runFlow: ../helpers/login-worker.yaml
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 60000

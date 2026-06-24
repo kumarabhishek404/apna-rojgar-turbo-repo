@@ -1,0 +1,50 @@
+# Apna Rojgar — Maestro test data (placeholders only — never commit real credentials)
+app:
+  id: com.kumarabhishek404.labourapp
+  name: Apna Rojgar
+  version: "1.3.1"
+
+accounts:
+  worker:
+    mobile: "WORKER_MOBILE_PLACEHOLDER"
+    role: WORKER
+    description: Complete worker profile with skills
+  employer:
+    mobile: "EMPLOYER_MOBILE_PLACEHOLDER"
+    role: EMPLOYER
+    description: Active employer with posted services
+  mediator:
+    mobile: "MEDIATOR_MOBILE_PLACEHOLDER"
+    role: MEDIATOR
+    description: Mediator with team capabilities
+  admin:
+    mobile: "ADMIN_MOBILE_PLACEHOLDER"
+    role: ADMIN
+    description: Admin isAdmin flag on backend
+
+auth:
+  staging_otp: "000000"
+  country_code: "+91"
+  invalid_otp: "123456"
+  invalid_mobile_short: "12345"
+  invalid_mobile_alpha: "abcdefghij"
+
+deep_links:
+  sample_job_id: "SAMPLE_JOB_ID_PLACEHOLDER"
+  job_scheme: "apnarojgar://job/SAMPLE_JOB_ID_PLACEHOLDER"
+  job_universal: "https://apnarojgarindia.com/job/SAMPLE_JOB_ID_PLACEHOLDER"
+  service_scheme: "apnarojgar://screens/service/SAMPLE_JOB_ID_PLACEHOLDER"
+  activity_tab_bookings: "/(tabs)/fourth?tab=1"
+
+search:
+  valid_hindi: "राज"
+  valid_english: "construction"
+  empty: ""
+  special_chars: "@#$%"
+  long_text: "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz"
+
+registration:
+  valid_name: "Test User"
+  valid_address: "Test Address Line 1"
+  valid_age: "25"
+  emoji_name: "Test 😀"

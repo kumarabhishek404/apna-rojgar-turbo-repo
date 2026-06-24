@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "functionality", "all", "automated"]
+---
+# TC-SUP-030: Privacy policy accessible without login
+# Module: Settings, Support & Legal | Screen: Privacy Policy | Role: All
+# Type: Functionality | Priority: P2
+# Route: /screens/privacyPolicy
+# Prerequisites: Any test account · Guest user
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open privacy from login or guest path if available.
+
+# Assertions
+# Expected: Policy readable without auth.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

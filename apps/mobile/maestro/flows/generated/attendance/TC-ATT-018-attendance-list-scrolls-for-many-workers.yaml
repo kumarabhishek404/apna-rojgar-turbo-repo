@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "availability", "employer", "automated"]
+---
+# TC-ATT-018: Attendance list scrolls for many workers
+# Module: Attendance | Screen: Attendance Component | Role: Employer
+# Type: Availability | Priority: P1
+# Route: attendanceComponent.tsx
+# Prerequisites: Employer account · Booking with 5+ workers
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open booking with many workers.
+# Scroll attendance list.
+
+# Assertions
+# Expected: All workers accessible via scroll.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

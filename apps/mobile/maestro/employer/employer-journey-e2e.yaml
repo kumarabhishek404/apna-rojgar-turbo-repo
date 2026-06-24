@@ -1,0 +1,15 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+tags:
+  - employer
+  - e2e
+---
+- runFlow: ../flows/helpers/login-employer.yaml
+- runFlow: ../flows/helpers/tap-tab-work.yaml
+- scroll
+- runFlow: ../flows/helpers/tap-tab-home.yaml
+- runFlow: ../flows/helpers/tap-tab-activity.yaml
+- runFlow: ../flows/helpers/tap-tab-profile.yaml
+- runFlow: ../flows/helpers/logout.yaml

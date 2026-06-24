@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["experience-history", "availability", "all", "automated"]
+---
+# TC-EXP-001: Experience screen loads
+# Module: Experience History | Screen: Experience | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/experience
+# Prerequisites: Any test account · From profile menu
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/experience.
+
+# Assertions
+# Expected: Combined work and service history timeline visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

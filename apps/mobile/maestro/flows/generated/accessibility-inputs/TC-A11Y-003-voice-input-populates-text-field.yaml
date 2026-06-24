@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "all", "automated"]
+---
+# TC-A11Y-003: Voice input populates text field
+# Module: Accessibility & Inputs | Screen: Voice to Text | Role: All
+# Type: Functionality | Priority: P2
+# Route: VoiceToText
+# Prerequisites: Any test account · Form with voice input
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "microphone on description field"
+# Speak.
+# Observe text.
+
+# Assertions
+# Expected: Speech converted to text in field.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

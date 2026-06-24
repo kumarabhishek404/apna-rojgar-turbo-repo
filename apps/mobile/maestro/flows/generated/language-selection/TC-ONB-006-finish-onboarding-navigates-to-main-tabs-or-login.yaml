@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "functionality", "guest", "automated"]
+---
+# TC-ONB-006: Finish onboarding navigates to main tabs or login
+# Module: Language & Onboarding | Screen: User Tips / Onboarding | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /screens/userTipForAppUse
+# Prerequisites: Logged out · On onboarding carousel
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Swipe to last slide.
+- tapOn: "Finish/Get Started"
+
+# Assertions
+# Expected: User navigates to /(tabs) or appropriate auth screen.
+
+# Cleanup

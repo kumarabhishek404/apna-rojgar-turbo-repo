@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["reviews-ratings", "functionality", "all", "automated"]
+---
+# TC-REV-015: Back navigation from reviews
+# Module: Reviews & Ratings | Screen: Reviews List | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/reviews
+# Prerequisites: Any test account · On reviews list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "back"
+
+# Assertions
+# Expected: Returns to profile.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

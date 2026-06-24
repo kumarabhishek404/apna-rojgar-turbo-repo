@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "ui-design", "employer", "automated"]
+---
+# TC-USR-029: Booking form keyboard does not hide submit
+# Module: User Browse & Profile Actions | Screen: Add Booking Details | Role: Employer
+# Type: UI Design | Priority: P2
+# Route: /screens/users/addBookingDetails
+# Prerequisites: Employer account · On booking form
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Focus text field.
+# Observe submit button.
+
+# Assertions
+# Expected: Submit remains accessible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-025: Disabled account handling same as suspended
+# Module: Global & App Shell | Screen: Disabled Account | Role: All
+# Type: Functionality | Priority: P0
+# Route: app/api/index.tsx
+# Prerequisites: Any test account · Account disabled on backend
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Use disabled account.
+# Trigger API call.
+
+# Assertions
+# Expected: Appropriate error shown.
+# Expected: user logged out.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

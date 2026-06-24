@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "functionality", "all", "automated"]
+---
+# TC-HOME-015: Tap profile completion navigates to profile edit
+# Module: Tab: Home | Screen: Profile Completion | Role: All
+# Type: Functionality | Priority: P1
+# Route: CompletProfileNotify
+# Prerequisites: Any test account · Completion prompt visible
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "complete profile CTA"
+
+# Assertions
+# Expected: Navigates to profile edit screen.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "functionality", "all", "automated"]
+---
+# TC-HOME-018: Notifications quick link opens inbox
+# Module: Tab: Home | Screen: Quick Links | Role: All
+# Type: Functionality | Priority: P1
+# Route: UnifiedHomeDashboard
+# Prerequisites: Any test account · On home
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "notifications link"
+
+# Assertions
+# Expected: Navigates to /screens/notifications.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

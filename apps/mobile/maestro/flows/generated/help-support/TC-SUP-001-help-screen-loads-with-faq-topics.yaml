@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "availability", "all", "automated"]
+---
+# TC-SUP-001: Help screen loads with FAQ topics
+# Module: Settings, Support & Legal | Screen: Help / FAQ | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/helps
+# Prerequisites: Any test account · From profile or support
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/helps.
+
+# Assertions
+# Expected: FAQ topic list, search bar visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

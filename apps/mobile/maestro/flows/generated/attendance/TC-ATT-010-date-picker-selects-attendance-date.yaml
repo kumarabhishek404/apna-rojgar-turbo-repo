@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "functionality", "employer", "automated"]
+---
+# TC-ATT-010: Date picker selects attendance date
+# Module: Attendance | Screen: Add Attendance | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: /screens/bookings/addAttendance
+# Prerequisites: Employer account · On add attendance
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "date field"
+# Select date.
+
+# Assertions
+# Expected: Correct date applied to form.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

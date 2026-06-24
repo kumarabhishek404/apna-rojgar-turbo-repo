@@ -1,0 +1,100 @@
+name: Maestro Mobile E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "scripts/generate-maestro-flows.mjs"
+      - "scripts/mobile-test-cases/**"
+      - ".github/workflows/maestro-mobile.yml"
+
+jobs:
+  maestro-smoke:
+    name: Maestro smoke (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    continue-on-error: true
+
+    env:
+      APP_ID: com.kumarabhishek404.labourapp
+      STAGING_OTP: ${{ secrets.MAESTRO_STAGING_OTP || '000000' }}
+      WORKER_MOBILE: ${{ secrets.MAESTRO_WORKER_MOBILE }}
+      EMPLOYER_MOBILE: ${{ secrets.MAESTRO_EMPLOYER_MOBILE }}
+      MEDIATOR_MOBILE: ${{ secrets.MAESTRO_MEDIATOR_MOBILE }}
+      ADMIN_MOBILE: ${{ secrets.MAESTRO_ADMIN_MOBILE }}
+      SAMPLE_JOB_ID: ${{ secrets.MAESTRO_SAMPLE_JOB_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Enable KVM (emulator acceleration)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api-34-${{ runner.os }}
+
+      - name: Create AVD and generate snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: echo "AVD snapshot generated"
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Download APK (required)
+        run: |
+          if [ -z "${{ secrets.MAESTRO_ANDROID_APK_URL }}" ]; then
+            echo "::warning::Set MAESTRO_ANDROID_APK_URL repo secret to a staging/debug APK URL."
+            echo "SKIP_MAESTRO=1" >> $GITHUB_ENV
+            exit 0
+          fi
+          curl -fsSL "${{ secrets.MAESTRO_ANDROID_APK_URL }}" -o app.apk
+
+      - name: Run Maestro smoke suite
+        if: env.SKIP_MAESTRO != '1'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          script: |
+            adb install -r app.apk
+            cd apps/mobile/maestro
+            bash scripts/run-smoke.sh
+
+      - name: Upload Maestro reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-reports
+          path: |
+            apps/mobile/maestro/reports/
+          if-no-files-found: ignore
