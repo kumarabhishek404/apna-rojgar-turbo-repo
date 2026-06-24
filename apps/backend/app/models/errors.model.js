@@ -38,8 +38,19 @@ const errorLogSchema = new mongoose.Schema(
   {
     message: { type: String, required: true },
     stack: { type: String },
+    /** backend | mobile | website */
+    source: {
+      type: String,
+      enum: ["backend", "mobile", "website"],
+      default: "backend",
+    },
+    componentStack: { type: String },
     apiRoute: { type: String },
-    method: { type: String, enum: ["GET", "POST", "PUT", "DELETE", "PATCH"] },
+    method: {
+      type: String,
+      enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "CLIENT"],
+      default: "GET",
+    },
     requestBody: { type: Object, default: {} },
     requestParams: { type: Object, default: {} },
     requestQuery: { type: Object, default: {} },

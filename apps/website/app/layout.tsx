@@ -3,6 +3,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import AuthBootstrap from "@/components/AuthBootstrap";
 import SocialWall from "@/components/SocialWall";
 import WebsiteActivityTracker from "@/components/WebsiteActivityTracker";
+import WebsiteErrorReporter from "@/components/WebsiteErrorReporter";
 import { Suspense } from "react";
 import Script from "next/script";
 
@@ -107,7 +108,7 @@ export default function RootLayout({
             <WebsiteActivityTracker />
           </Suspense>
           <SocialWall />
-          {children}
+          <WebsiteErrorReporter>{children}</WebsiteErrorReporter>
         </LanguageProvider>
       </body>
     </html>

@@ -1,29 +1,55 @@
 import { t } from "@/utils/translationHelper";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
+import { normalizePaginatedPage } from "@/utils/paginatedApi";
+import { retryAsync } from "@/utils/retryAsync";
 
-// Helper function for consistent error handling
+// Helper function for consistent error handling (toast shown by caller)
 const handleServiceError = (error: any, operation: string) => {
-  const errorMessage =
-    error?.response?.data?.message || `Failed to ${operation}`;
   console.error(`[ServiceAPI] ${operation} failed:`, {
     error: error?.response?.data || error,
     operation,
   });
-  TOAST?.error(errorMessage);
   throw error;
 };
 
 const addNewService = async (payload: any) => {
   try {
-    const data = await API_CLIENT.makePostRequestFormData(
-      "/employer/add-service",
-      payload,
+    const data = await retryAsync(() =>
+      API_CLIENT.makePostRequestFormData("/employer/add-service", payload),
     );
-
     return data?.data;
   } catch (error: any) {
     handleServiceError(error, "add new service");
+  }
+};
+
+/** Fast JSON-only create — images uploaded separately (better on slow networks). */
+const addNewServiceMetadata = async (payload: Record<string, unknown>) => {
+  try {
+    const data = await retryAsync(() =>
+      API_CLIENT.makePostRequest("/employer/add-service/metadata", payload),
+    );
+    return data?.data;
+  } catch (error: any) {
+    handleServiceError(error, "add new service metadata");
+  }
+};
+
+/** Upload one or more images to an existing service (two-phase upload). */
+const uploadServiceImages = async (serviceId: string, payload: FormData) => {
+  try {
+    const data = await retryAsync(
+      () =>
+        API_CLIENT.makePostRequestFormData(
+          `/employer/add-service/${serviceId}/images`,
+          payload,
+        ),
+      { retries: 4, baseDelayMs: 3000 },
+    );
+    return data?.data;
+  } catch (error: any) {
+    handleServiceError(error, "upload service images");
   }
 };
 
@@ -61,20 +87,20 @@ const editService = async (payload: any) => {
 // My Works
 const fetchMyServices = async ({ pageParam, status }: any) => {
   try {
-    const data = await API_CLIENT.makeGetRequest(
+    const response = await API_CLIENT.makeGetRequest(
       `/employer/my-services?status=${status}&page=${pageParam}&limit=10`,
     );
-    return data?.data;
+    return normalizePaginatedPage(response?.data);
   } catch (error: any) {
     console.error(
       `[employer] An error occurred while fetching my works : `,
-      error?.response?.data?.message,
+      error?.response?.data?.message || error,
     );
     TOAST?.error(
       error?.response?.data?.message ||
         "An error occurred while fetching my works",
     );
-    throw error?.response?.data?.message;
+    throw error;
   }
 };
 
@@ -274,6 +300,8 @@ const getAllUniqueSkills = async () => {
 
 const EMPLOYER = {
   addNewService,
+  addNewServiceMetadata,
+  uploadServiceImages,
   getServiceUploadStatus,
   editService,
   fetchMyServices,

@@ -98,12 +98,41 @@ const fetchAllFeedbacks = async () => {
   }
 };
 
+const fetchPromotionPayments = async ({
+  pageParam,
+  status,
+  search,
+}: {
+  pageParam: number;
+  status: string;
+  search?: string;
+}) => {
+  try {
+    const searchQuery = search ? `&search=${encodeURIComponent(search)}` : "";
+    const data = await API_CLIENT.makeGetRequest(
+      `/admin/promotion-payments?status=${status}&page=${pageParam}&limit=10${searchQuery}`,
+    );
+    return data?.data;
+  } catch (error: any) {
+    console.error(
+      `[adminService] An error occurred while fetching promotion payments:`,
+      error?.response?.data?.message,
+    );
+    TOAST?.error(
+      error?.response?.data?.message ||
+        "An error occurred while fetching promotion payments",
+    );
+    throw error;
+  }
+};
+
 const ADMIN = {
   fetchAllUsers,
   fetchAllRequestsForAdmin,
   suspendUser,
   activateUser,
   fetchAllFeedbacks,
+  fetchPromotionPayments,
 };
 
 export default ADMIN;

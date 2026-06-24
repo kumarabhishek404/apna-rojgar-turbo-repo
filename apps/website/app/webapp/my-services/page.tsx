@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiRequest } from "@/lib/auth";
+import { getPromotionConfig } from "@/lib/payment";
+import { isServicePromoted } from "@/lib/servicePromotion";
+import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 import { useLanguage } from "@/components/LanguageProvider";
 import CreateServiceModal from "@/components/services/CreateServiceModal";
 import ServiceDetailsModal from "@/components/services/ServiceDetailsModal";
@@ -32,6 +35,17 @@ export default function MyServicesPage() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
+  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotingServiceId, setPromotingServiceId] = useState<string | null>(null);
+  const { runPromotionPayment } = useCashfreePromotionPayment();
+
+  useEffect(() => {
+    void getPromotionConfig()
+      .then((config) => {
+        if (config?.amount) setPromotionAmount(config.amount);
+      })
+      .catch(() => undefined);
+  }, []);
 
   const load = useCallback(async () => {
     setError("");
@@ -165,6 +179,30 @@ export default function MyServicesPage() {
     [items, search],
   );
 
+  const handlePromoteLater = useCallback(
+    async (serviceId: string) => {
+      setError("");
+      setMessage("");
+      setPromotingServiceId(serviceId);
+      try {
+        await runPromotionPayment(serviceId);
+        setMessage(
+          t("servicePromotedSuccess", "Your work is now promoted on our social channels."),
+        );
+        await load();
+      } catch (e) {
+        setError(
+          e instanceof Error
+            ? e.message
+            : t("promotionPaymentFailed", "Promotion payment failed. Please try again."),
+        );
+      } finally {
+        setPromotingServiceId(null);
+      }
+    },
+    [load, runPromotionPayment, t],
+  );
+
   return (
     <section className="space-y-4">
       <div className="rounded-2xl bg-gradient-to-r from-violet-700 to-fuchsia-600 p-6 text-white shadow-lg">
@@ -206,6 +244,16 @@ export default function MyServicesPage() {
               service={item}
               distanceKm={distanceKmForService(item)}
               showApply={false}
+              showPromotionStatus={user?.role === "EMPLOYER"}
+              canPromoteLater={
+                user?.role === "EMPLOYER" &&
+                item.status === "HIRING" &&
+                item.bookingType === "byService" &&
+                !isServicePromoted(item)
+              }
+              promotionAmount={promotionAmount}
+              isPromoting={promotingServiceId === item._id}
+              onPromoteLater={() => void handlePromoteLater(item._id)}
               onViewDetails={openDetailsModal}
               t={t}
             />

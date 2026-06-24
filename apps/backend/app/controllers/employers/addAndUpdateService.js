@@ -7,6 +7,9 @@ import { updateUserStats } from "../../utils/updateState.js";
 import logError from "../../utils/addErrorLog.js";
 import { getEnglishTitles } from "../../utils/translations.js";
 import { handleSendNotificationController } from "../notification.controller.js";
+import Payment from "../../models/payment.model.js";
+import { syncPromotionPaymentByOrderId, linkPaymentToService } from "../../utils/payment.service.js";
+import { notifyMatchedUsersInBackground } from "../../utils/serviceNotificationHelpers.js";
 
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -21,7 +24,14 @@ export const handleAddService = asyncHandler(async (req, res) => {
       req.body?.validateOnly === "true" ||
       req.body?.validateOnly === true;
 
-    const serviceData = await parseAndValidateRequest(req);
+    const employer = await User.findById(_id);
+    if (!employer) {
+      throw new Error("Employer not found");
+    }
+
+    const serviceData = await parseAndValidateRequest(req, employer);
+
+    const promotionMeta = await resolveSocialMediaPromotion(req, _id);
 
     if (validateOnly) {
       return res.status(200).json({
@@ -31,23 +41,27 @@ export const handleAddService = asyncHandler(async (req, res) => {
       });
     }
 
-    const employer = await User.findById(_id);
-    if (!employer) {
-      throw new Error("Employer not found");
-    }
-
     const jobID = await generateJobID();
 
     const service = await createServiceEntry({
       ...serviceData,
+      ...promotionMeta,
       employer: _id,
       jobID,
       images: [],
       uploadStatus: "PENDING",
     });
 
+    if (promotionMeta?.socialMediaPromotion?.orderId) {
+      await linkPaymentToService({
+        orderId: promotionMeta.socialMediaPromotion.orderId,
+        userId: _id,
+        serviceId: service._id,
+        serviceJobId: service.jobID,
+      });
+    }
+
     await updateUserStats(employer._id, "SERVICE_CREATED");
-    await notifyEligibleUsers(service, _id, req);
 
     res.status(201).json({
       success: true,
@@ -55,11 +69,9 @@ export const handleAddService = asyncHandler(async (req, res) => {
       message: "Service created. Images are uploading in background.",
     });
 
-    // const images = await processImages(req.files?.images || []);
-    // ✅ Trigger async upload (do not await)
+    // Non-blocking side effects — response is already sent
+    notifyMatchedUsersInBackground(service, _id, req);
     processImagesInBackground(service._id, req.files?.images || [], req);
-
-    // res.status(201).json({ success: true, data: service });
   } catch (error) {
     await logError(error, req);
     handleErrorResponse(res, error);
@@ -93,7 +105,7 @@ export const handleUpdateService = async (req, res) => {
       req.body = JSON.parse(req.body);
     }
 
-    const parsedData = await parseAndValidateRequest(req);
+    const parsedData = await parseAndValidateRequest(req, null);
 
     if (!parsedData) {
       await logError(new Error("Invalid input data"), req, 400);
@@ -123,7 +135,7 @@ export const handleUpdateService = async (req, res) => {
   }
 };
 
-const parseAndValidateRequest = async (req) => {
+const parseAndValidateRequest = async (req, employerDoc = null) => {
   try {
     const {
       type,
@@ -155,19 +167,34 @@ const parseAndValidateRequest = async (req) => {
         ? safeParseJSON(geoLocation)
         : geoLocation;
 
-    // ✅ Fallback to employer geoLocation
+    // ✅ Fallback to employer geoLocation when request doesn't include valid coordinates
     if (
       !finalGeoLocation ||
-      !finalGeoLocation.coordinates ||
+      !Array.isArray(finalGeoLocation.coordinates) ||
       finalGeoLocation.coordinates.length !== 2
     ) {
-      const employer = await User.findById(req.user._id);
+      const employer =
+        employerDoc || (await User.findById(req.user._id));
 
-      if (!employer || !employer.geoLocation?.coordinates?.length) {
-        throw new Error("Geo Location not found");
+      if (
+        employer &&
+        Array.isArray(employer.geoLocation?.coordinates) &&
+        employer.geoLocation.coordinates.length === 2
+      ) {
+        finalGeoLocation = employer.geoLocation;
       }
+    }
 
-      finalGeoLocation = employer.geoLocation;
+    // ✅ Keep service posting non-blocking even when geocoding/profile location is unavailable.
+    if (
+      !finalGeoLocation ||
+      !Array.isArray(finalGeoLocation.coordinates) ||
+      finalGeoLocation.coordinates.length !== 2
+    ) {
+      finalGeoLocation = {
+        type: "Point",
+        coordinates: [0, 0],
+      };
     }
 
     const result = {
@@ -215,6 +242,64 @@ const parseFacilities = (facilities) => {
   }
 };
 
+const parseBooleanField = (value) =>
+  value === true || value === "true" || value === 1 || value === "1";
+
+const resolveSocialMediaPromotion = async (req, employerId) => {
+  const wantsPromotion = parseBooleanField(req.body?.promoteSocialMedia);
+  const promotionOrderId = String(req.body?.promotionOrderId || "").trim();
+
+  if (!wantsPromotion) {
+    return {
+      socialMediaPromotion: {
+        enabled: false,
+        orderId: "",
+        amount: 0,
+        status: "NONE",
+      },
+    };
+  }
+
+  if (!promotionOrderId) {
+    throw new Error("Promotion payment order ID is required");
+  }
+
+  const payment = await Payment.findOne({
+    orderId: promotionOrderId,
+    user: employerId,
+    purpose: "SERVICE_SOCIAL_PROMOTION",
+  });
+
+  if (!payment) {
+    throw new Error("Promotion payment order not found");
+  }
+
+  if (payment.service) {
+    throw new Error("This promotion payment is already linked to another service");
+  }
+
+  if (payment.status !== "PAID") {
+    const syncedPayment = await syncPromotionPaymentByOrderId(promotionOrderId);
+    if (!syncedPayment || syncedPayment.status !== "PAID") {
+      throw new Error("Promotion payment is not completed");
+    }
+    payment.status = syncedPayment.status;
+    payment.paidAt = syncedPayment.paidAt;
+    payment.amount = syncedPayment.amount;
+  }
+
+  return {
+    socialMediaPromotion: {
+      enabled: true,
+      orderId: payment.orderId,
+      amount: payment.amount,
+      status: "PAID",
+      paidAt: payment.paidAt || new Date(),
+    },
+    promotionOrderId: payment.orderId,
+  };
+};
+
 const processImages = async (images) => {
   if (!images || images.length === 0) {
     return [];
@@ -249,32 +334,6 @@ const updateService = async (serviceId, parsedData, savedImages) => {
   );
 };
 
-const notifyEligibleUsers = async (service, employerId, request) => {
-  const eligibleUsers = await User.find({
-    _id: { $ne: employerId },
-
-    // ✅ Users must have at least 1 skill
-    skills: { $exists: true, $not: { $size: 0 } },
-  }).select("_id name skills");
-
-  await Promise.all(
-    eligibleUsers.map((user) =>
-      handleSendNotificationController(
-        user._id,
-        getEnglishTitles()?.NEW_SERVICE_LIVE,
-        {
-          name: user?.name,
-          serviceName: service?.subType,
-        },
-        {
-          actionBy: service?.employer?._id,
-          actionOn: user._id,
-        },
-        request,
-      ),
-    ),
-  );
-};
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 const getServiceById = async (serviceId, employerId) =>
@@ -307,29 +366,30 @@ const processImagesInBackground = async (serviceId, images, req) => {
 
     await Service.findByIdAndUpdate(serviceId, {
       uploadStatus: "PROCESSING",
+      uploadProgress: 0,
     });
 
-    let uploadedImages = [];
-    let progress = 0;
+    const total = images.length;
+    const uploadedImages = new Array(total);
 
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
+    const concurrency = 2;
+    for (let i = 0; i < images.length; i += concurrency) {
+      const batch = images.slice(i, i + concurrency);
+      const results = await Promise.all(
+        batch.map(async (image, batchIndex) => {
+          const uploaded = await uploadOnCloudinary(image.path);
+          if (!uploaded) throw new Error("Upload failed");
+          uploadedImages[i + batchIndex] = uploaded;
+          return uploaded;
+        }),
+      );
 
-      const uploaded = await uploadOnCloudinary(image.path);
-
-      if (!uploaded) throw new Error("Upload failed");
-
-      uploadedImages.push(uploaded);
-
-      // ✅ Update progress
-      progress = Math.round(((i + 1) / images.length) * 100);
-
-      await Service.findByIdAndUpdate(serviceId, {
-        uploadProgress: progress,
-      });
+      const progress = Math.round(
+        (uploadedImages.filter(Boolean).length / total) * 100,
+      );
+      await Service.findByIdAndUpdate(serviceId, { uploadProgress: progress });
     }
 
-    // ✅ Final update
     await Service.findByIdAndUpdate(serviceId, {
       images: uploadedImages,
       uploadStatus: "COMPLETED",
@@ -342,6 +402,102 @@ const processImagesInBackground = async (serviceId, images, req) => {
       uploadStatus: "FAILED",
     });
 
+    await logError(error, req);
+  }
+};
+
+/** Append images to an existing service (used by mobile two-phase upload). */
+export const handleUploadServiceImages = asyncHandler(async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+    const { _id } = req.user;
+
+    if (!isValidObjectId(serviceId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid service ID" });
+    }
+
+    const service = await Service.findOne({
+      _id: serviceId,
+      employer: _id,
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found or unauthorized",
+      });
+    }
+
+    const incoming = req.files?.images || [];
+    const existingCount = Array.isArray(service.images)
+      ? service.images.length
+      : 0;
+
+    if (existingCount + incoming.length > 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum 3 images allowed per service",
+      });
+    }
+
+    if (incoming.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No images provided",
+      });
+    }
+
+    res.status(202).json({
+      success: true,
+      message: "Images are uploading in background.",
+      serviceId,
+      accepted: incoming.length,
+    });
+
+    processImagesAppendInBackground(serviceId, incoming, existingCount, req);
+  } catch (error) {
+    await logError(error, req);
+    handleErrorResponse(res, error);
+  }
+});
+
+const processImagesAppendInBackground = async (
+  serviceId,
+  images,
+  existingCount,
+  req,
+) => {
+  try {
+    await Service.findByIdAndUpdate(serviceId, {
+      uploadStatus: "PROCESSING",
+    });
+
+    const total = existingCount + images.length;
+    const newUrls = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const uploaded = await uploadOnCloudinary(images[i].path);
+      if (!uploaded) throw new Error("Upload failed");
+      newUrls.push(uploaded);
+
+      const progress = Math.round(((existingCount + i + 1) / total) * 100);
+      await Service.findByIdAndUpdate(serviceId, { uploadProgress: progress });
+    }
+
+    await Service.findByIdAndUpdate(
+      serviceId,
+      {
+        $push: { images: { $each: newUrls } },
+        uploadStatus: "COMPLETED",
+        uploadProgress: 100,
+      },
+      { new: true },
+    );
+  } catch (error) {
+    console.error("Append upload failed:", error);
+    await Service.findByIdAndUpdate(serviceId, { uploadStatus: "FAILED" });
     await logError(error, req);
   }
 };
