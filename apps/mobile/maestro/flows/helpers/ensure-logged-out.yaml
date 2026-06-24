@@ -1,9 +1,10 @@
 appId: com.kumarabhishek404.labourapp
+env:
+  EXPO_DEV_CLIENT_URL: ${EXPO_DEV_CLIENT_URL}
 ---
-# Clears session — use before guest/auth tests
-- launchApp:
-    clearState: true
+# Fresh session via dev-client deep link (pm clear + adb reverse done in run-smoke.sh).
+- openLink: ${EXPO_DEV_CLIENT_URL}
 - extendedWaitUntil:
     visible:
       id: login-mobile-input
-    timeout: 60000
+    timeout: 120000

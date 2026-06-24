@@ -4,3 +4,5 @@
 *.apk
 *.aab
 reports/maestro-junit.xml
+reports/maestro-smoke-junit.xml
+reports/maestro-regression-junit.xml

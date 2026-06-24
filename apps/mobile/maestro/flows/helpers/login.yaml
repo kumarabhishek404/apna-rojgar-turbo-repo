@@ -3,13 +3,11 @@ env:
   MOBILE: ${MOBILE}
   OTP: ${STAGING_OTP}
 ---
-# Generic login — supports OTP step OR dev single-step login
-- launchApp:
-    clearState: true
+# Generic login — run ensure-logged-out.yaml first for a clean session.
 - extendedWaitUntil:
     visible:
       id: login-mobile-input
-    timeout: 60000
+    timeout: 120000
 - tapOn:
     id: login-mobile-input
 - inputText: ${MOBILE}

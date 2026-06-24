@@ -1,4 +1,7 @@
-appId: com.kumarabhishek404.labourapp
-env:
-  APP_ID: com.kumarabhishek404.labourapp
-  STAGING_OTP: "000000"
+appId: ${APP_ID}
+name: Apna Rojgar Maestro
+tags:
+  include:
+    - automated
+  exclude:
+    - manual-review

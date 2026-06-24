@@ -15,8 +15,10 @@
     "generate:mobile-test-cases": "node scripts/generate-mobile-test-cases.mjs",
     "generate:mobile-test-cases-csv": "node scripts/generate-mobile-test-cases-csv.mjs",
     "generate:maestro-flows": "node scripts/generate-maestro-flows.mjs",
+    "test:maestro:install": "pnpm --filter labour-app test:maestro:install",
     "test:maestro:check": "pnpm --filter labour-app test:maestro:check",
-    "test:maestro:smoke": "pnpm --filter labour-app test:maestro:smoke"
+    "test:maestro:smoke": "pnpm --filter labour-app test:maestro:smoke",
+    "test:maestro:regression": "pnpm --filter labour-app test:maestro:regression"
   },
   "devDependencies": {
     "exceljs": "^4.4.0",

@@ -2,13 +2,14 @@
 # Run Maestro regression suite (smoke + role E2E journeys).
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT"
 
-"$ROOT/scripts/check-ready.sh" --require-regression
+"$SCRIPT_DIR/check-ready.sh" --require-regression
 
 # shellcheck disable=SC1091
-source "$ROOT/scripts/load-env.sh"
+source "$SCRIPT_DIR/load-env.sh"
 load_maestro_env "$ROOT"
 
 mkdir -p "$ROOT/reports"

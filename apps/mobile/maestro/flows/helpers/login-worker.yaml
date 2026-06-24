@@ -3,4 +3,5 @@ env:
   MOBILE: ${WORKER_MOBILE}
   OTP: ${STAGING_OTP}
 ---
+- runFlow: ensure-logged-out.yaml
 - runFlow: login.yaml

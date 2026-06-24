@@ -3,7 +3,8 @@
 # Usage: check-ready.sh [--require-credentials | --require-regression]
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT"
 
 REQUIRE_CREDS=0
@@ -26,11 +27,11 @@ fail() { echo -e "${RED}✗${NC} $1"; exit 1; }
 
 is_valid_mobile() {
   local mobile="${1:-}"
-  [[ -n "$mobile" && "$mobile" != "REPLACE_ME" && "$mobile" =~ ^[0-9]{10}$ ]]
+  [[ -n "$mobile" && "$mobile" != "6397308499" && "$mobile" =~ ^[0-9]{10}$ ]]
 }
 
 # shellcheck disable=SC1091
-source "$(dirname "$0")/load-env.sh"
+source "$SCRIPT_DIR/load-env.sh"
 
 load_env() {
   if [ ! -f "$ROOT/.env" ]; then
@@ -50,11 +51,22 @@ load_env() {
 echo "Apna Rojgar Maestro — preflight"
 echo "================================"
 
+load_maestro_env "$ROOT"
+
 # Maestro CLI
 if command -v maestro >/dev/null 2>&1; then
   ok "Maestro CLI: $(maestro --version 2>/dev/null | head -1 || echo installed)"
 else
-  fail "Maestro not installed. Run: curl -Ls \"https://get.maestro.mobile.dev\" | bash"
+  fail "Maestro not installed. Run: pnpm test:maestro:install"
+fi
+
+# Java (required by Maestro)
+if command -v java >/dev/null 2>&1 && java -version >/dev/null 2>&1; then
+  ok "Java: $(java -version 2>&1 | head -1)"
+else
+  fail "Java not found (Maestro requires JDK 11+).
+  macOS: brew install openjdk@17
+  Scripts auto-detect Homebrew openjdk@17 when installed."
 fi
 
 load_env
@@ -125,5 +137,5 @@ GENERATED_COUNT=$(find "$ROOT/flows/generated" -name '*.yaml' 2>/dev/null | wc -
 ok "Generated flows: $GENERATED_COUNT"
 
 echo ""
-echo -e "${GREEN}Ready to run:${NC}  ./scripts/run-smoke.sh"
-echo -e "${GREEN}Full regression:${NC} ./scripts/run-regression.sh"
+echo -e "${GREEN}Ready to run:${NC}  pnpm test:maestro:smoke"
+echo -e "${GREEN}Full regression:${NC} pnpm test:maestro:regression"
