@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
-  Image,
   Dimensions,
   ScrollView,
   TouchableOpacity,

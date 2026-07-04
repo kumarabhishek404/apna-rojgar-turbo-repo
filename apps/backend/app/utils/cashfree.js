@@ -2,6 +2,55 @@ import crypto from "crypto";
 import axios from "axios";
 
 const CASHFREE_API_VERSION = "2023-08-01";
+const MOCK_SESSION_PREFIX = "session_dev_bypass_";
+
+const readEnv = (key) => process.env[key]?.trim() || "";
+
+export const isCashfreeConfigured = () =>
+  Boolean(readEnv("CASHFREE_CLIENT_ID") && readEnv("CASHFREE_CLIENT_SECRET"));
+
+export const isMockCashfreePaymentSession = (paymentSessionId = "") =>
+  String(paymentSessionId).startsWith(MOCK_SESSION_PREFIX);
+
+/**
+ * Dev promotion payment bypass when Cashfree keys are not set.
+ * Hosted dev (Render) can set CASHFREE_DEV_BYPASS=true or DEV_BYPASS_OTP=true.
+ * Production / live Cashfree always requires real credentials.
+ */
+export const isCashfreeDevBypassEnabled = () => {
+  if (isCashfreeConfigured()) return false;
+
+  const env = readEnv("CASHFREE_ENV").toLowerCase();
+  if (env === "production") return false;
+
+  const forceLive = readEnv("CASHFREE_FORCE_LIVE").toLowerCase();
+  if (forceLive === "1" || forceLive === "true" || forceLive === "yes") {
+    return false;
+  }
+
+  const explicitBypass = readEnv("CASHFREE_DEV_BYPASS").toLowerCase();
+  if (explicitBypass === "1" || explicitBypass === "true" || explicitBypass === "yes") {
+    return true;
+  }
+  if (explicitBypass === "0" || explicitBypass === "false" || explicitBypass === "no") {
+    return false;
+  }
+
+  const otpBypass = readEnv("DEV_BYPASS_OTP") || readEnv("SKIP_OTP");
+  if (["1", "true", "yes"].includes(otpBypass.toLowerCase())) {
+    return true;
+  }
+
+  return readEnv("NODE_ENV") === "development";
+};
+
+const createMockCashfreeOrder = ({ orderId, amount }) => ({
+  order_id: orderId,
+  payment_session_id: `${MOCK_SESSION_PREFIX}${orderId}`,
+  order_status: "ACTIVE",
+  order_amount: amount,
+  order_currency: "INR",
+});
 
 const isProductionSecret = (secret = "") =>
   /_prod_|cfsk_ma_prod/i.test(secret);
@@ -10,8 +59,8 @@ const isSandboxSecret = (secret = "") =>
   /_test_|cfsk_ma_test|sandbox/i.test(secret);
 
 const assertCashfreeCredentialsMatchEnv = () => {
-  const env = (process.env.CASHFREE_ENV || "sandbox").toLowerCase();
-  const secret = process.env.CASHFREE_CLIENT_SECRET || "";
+  const env = (readEnv("CASHFREE_ENV") || "sandbox").toLowerCase();
+  const secret = readEnv("CASHFREE_CLIENT_SECRET");
 
   if (env === "sandbox" && isProductionSecret(secret)) {
     throw new Error(
@@ -27,12 +76,17 @@ const assertCashfreeCredentialsMatchEnv = () => {
 };
 
 const getCashfreeConfig = () => {
-  const clientId = process.env.CASHFREE_CLIENT_ID;
-  const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
-  const env = (process.env.CASHFREE_ENV || "sandbox").toLowerCase();
+  const clientId = readEnv("CASHFREE_CLIENT_ID");
+  const clientSecret = readEnv("CASHFREE_CLIENT_SECRET");
+  const env = (readEnv("CASHFREE_ENV") || "sandbox").toLowerCase();
 
   if (!clientId || !clientSecret) {
-    throw new Error("Cashfree credentials are not configured");
+    if (isCashfreeDevBypassEnabled()) {
+      return { devBypass: true };
+    }
+    throw new Error(
+      "Cashfree credentials are not configured. Set CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET on the backend, or enable CASHFREE_DEV_BYPASS=true for development.",
+    );
   }
 
   assertCashfreeCredentialsMatchEnv();
@@ -57,7 +111,12 @@ const formatCashfreeError = (error) => {
 };
 
 const cashfreeRequest = async (method, path, data) => {
-  const { clientId, clientSecret, baseURL } = getCashfreeConfig();
+  const config = getCashfreeConfig();
+  if (config.devBypass) {
+    throw new Error("Cashfree API called while dev bypass is active");
+  }
+
+  const { clientId, clientSecret, baseURL } = config;
 
   try {
     const response = await axios({
@@ -92,6 +151,11 @@ export const createCashfreeOrder = async ({
   customerPhone,
   orderNote,
 }) => {
+  const config = getCashfreeConfig();
+  if (config.devBypass) {
+    return createMockCashfreeOrder({ orderId, amount });
+  }
+
   const payload = {
     order_id: orderId,
     order_amount: amount,
@@ -109,6 +173,13 @@ export const createCashfreeOrder = async ({
 };
 
 export const getCashfreeOrder = async (orderId) => {
+  if (!isCashfreeConfigured() && isCashfreeDevBypassEnabled()) {
+    return {
+      order_id: orderId,
+      order_status: "PAID",
+    };
+  }
+
   return cashfreeRequest("GET", `/orders/${orderId}`);
 };
 
@@ -251,8 +322,11 @@ export const verifyCashfreeWebhookSignature = ({
   rawBody,
   signature,
 }) => {
-  const secret = process.env.CASHFREE_CLIENT_SECRET;
+  const secret = readEnv("CASHFREE_CLIENT_SECRET");
   if (!secret) {
+    if (isCashfreeDevBypassEnabled()) {
+      return true;
+    }
     throw new Error("Cashfree credentials are not configured");
   }
 

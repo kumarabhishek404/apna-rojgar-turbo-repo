@@ -67,22 +67,25 @@ function twoFactorResponseOk(data) {
 
 /**
  * Dev OTP bypass: no 2factor SMS; any 6-digit code verifies.
- * Only when NODE_ENV is "development" (override with DEV_BYPASS_OTP=false or OTP_FORCE_LIVE=true).
- * Production / staging / test: always real 2factor (session + VERIFY flow).
+ * Explicit DEV_BYPASS_OTP=true supports hosted *dev* (sandbox Cashfree) only.
+ * Live payment hosts (OTP_FORCE_LIVE / CASHFREE_FORCE_LIVE / CASHFREE_ENV=production)
+ * always use real 2factor SMS, even if a base .env leaked DEV_BYPASS_OTP=true.
  */
-function isDevOtpBypassEnabled() {
-  const forceLive = String(process.env.OTP_FORCE_LIVE ?? "").toLowerCase().trim();
-  if (forceLive === "1" || forceLive === "true" || forceLive === "yes") {
+export function isDevOtpBypassEnabled() {
+  const truthy = (v) => ["1", "true", "yes"].includes(String(v ?? "").toLowerCase().trim());
+  const falsy = (v) => ["0", "false", "no"].includes(String(v ?? "").toLowerCase().trim());
+
+  // Hard stops — never skip SMS on a live payment host.
+  if (truthy(process.env.OTP_FORCE_LIVE)) return false;
+  if (truthy(process.env.CASHFREE_FORCE_LIVE)) return false;
+  if (String(process.env.CASHFREE_ENV ?? "").toLowerCase().trim() === "production") {
     return false;
   }
-  if (process.env.NODE_ENV !== "development") {
-    return false;
-  }
-  const raw = String(
-    process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "",
-  ).toLowerCase().trim();
-  if (raw === "0" || raw === "false" || raw === "no") return false;
-  if (raw === "1" || raw === "true" || raw === "yes") return true;
+
+  const raw = process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "";
+  if (falsy(raw)) return false;
+  if (truthy(raw)) return true;
+  if (process.env.NODE_ENV !== "development") return false;
   return true;
 }
 

@@ -4,8 +4,10 @@ import {
   CFPaymentGatewayService,
 } from "react-native-cashfree-pg-sdk";
 import { CFEnvironment, CFSession } from "cashfree-pg-api-contract";
+import { useQueryClient } from "@tanstack/react-query";
 import PAYMENT from "@/app/api/payment";
 import TOAST from "@/app/hooks/toast";
+import { invalidateAndRefetchServiceLists } from "@/utils/invalidateServiceQueries";
 import { t } from "@/utils/translationHelper";
 
 const getCashfreeEnvironment = () => {
@@ -41,6 +43,7 @@ const getCashfreeErrorMessage = (error: CFErrorResponse) => {
 };
 
 export const useCashfreePromotionPayment = () => {
+  const queryClient = useQueryClient();
   const verifyResolverRef = useRef<((orderId: string) => void) | null>(null);
   const rejectResolverRef = useRef<((error: Error) => void) | null>(null);
 
@@ -59,8 +62,21 @@ export const useCashfreePromotionPayment = () => {
     };
   }, []);
 
+  const refreshServiceLists = useCallback(
+    async (serviceId?: string) => {
+      await invalidateAndRefetchServiceLists(queryClient, serviceId);
+    },
+    [queryClient],
+  );
+
   const startPromotionPayment = useCallback(async (serviceId?: string) => {
     const order = await PAYMENT.createPromotionOrder(serviceId);
+
+    if (order.devBypass) {
+      await PAYMENT.verifyPromotionPayment(order.orderId);
+      await refreshServiceLists(serviceId);
+      return order.orderId;
+    }
 
     await new Promise<void>((resolve, reject) => {
       verifyResolverRef.current = async (orderId: string) => {
@@ -69,6 +85,7 @@ export const useCashfreePromotionPayment = () => {
           rejectResolverRef.current = null;
 
           await PAYMENT.verifyPromotionPayment(orderId);
+          await refreshServiceLists(serviceId);
           resolve();
         } catch (error: any) {
           reject(
@@ -104,7 +121,7 @@ export const useCashfreePromotionPayment = () => {
     });
 
     return order.orderId;
-  }, []);
+  }, [refreshServiceLists]);
 
   const runPromotionPayment = useCallback(async (serviceId?: string) => {
     try {

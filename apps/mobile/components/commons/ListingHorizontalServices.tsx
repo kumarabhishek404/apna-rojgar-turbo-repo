@@ -1,11 +1,11 @@
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import React, { useMemo } from "react";
 import Colors from "@/constants/Colors";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -95,16 +95,18 @@ const ServiceCard = React.memo(({ item, isLast, userDetails }: any) => {
       {/* ── Hero image / icon ── */}
       <View style={styles.imageWrap}>
         {hasPhoto ? (
-          <Image
+          <OptimizedImage
             source={{ uri: item.images[0] }}
             style={styles.image}
-            resizeMode="cover"
+            contentFit="cover"
+            recyclingKey={item.images[0]}
           />
         ) : item?.coverImage ? (
-          <Image
+          <OptimizedImage
             source={{ uri: item.coverImage }}
             style={styles.image}
-            resizeMode="cover"
+            contentFit="cover"
+            recyclingKey={item.coverImage}
           />
         ) : (
           <View style={styles.iconFallback}>

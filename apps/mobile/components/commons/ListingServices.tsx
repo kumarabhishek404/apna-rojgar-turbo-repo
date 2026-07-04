@@ -1,4 +1,5 @@
-import { Image, StyleSheet, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import { StyleSheet, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import * as Speech from "expo-speech";
 import React, { useCallback, useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
@@ -26,11 +27,10 @@ import { isServicePromoted } from "@/utils/servicePromotion";
 import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
 import PAYMENT from "@/app/api/payment";
 import TOAST from "@/app/hooks/toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 const ListingsServices = React.memo(({ item }: any) => {
   const navigation = useNavigation();
-  const queryClient = useQueryClient();
   const locale = useAtomValue(Atoms?.LocaleAtom);
   const userDetails = useAtomValue(Atoms?.UserAtom);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -122,15 +122,12 @@ const ListingsServices = React.memo(({ item }: any) => {
     try {
       await runPromotionPayment(item._id);
       TOAST.success(t("servicePromotedSuccess"));
-      queryClient.invalidateQueries({ queryKey: ["employerWorkRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["myWorkRequests"] });
-      queryClient.invalidateQueries({ queryKey: ["activityEmployerServices"] });
     } catch {
       // toast handled in hook
     } finally {
       setIsPromoting(false);
     }
-  }, [item?._id, isPromoting, queryClient, runPromotionPayment]);
+  }, [item?._id, isPromoting, runPromotionPayment]);
 
   return (
     <>
@@ -145,9 +142,11 @@ const ListingsServices = React.memo(({ item }: any) => {
           >
             <View style={styles.heroWrap}>
               {hasHeroPhoto ? (
-                <Image
+                <OptimizedImage
                   source={{ uri: item.images[0] }}
                   style={styles.heroImage}
+                  contentFit="cover"
+                  recyclingKey={item.images[0]}
                 />
               ) : (
                 <View

@@ -60,12 +60,16 @@ import paymentRoutes from "./app/routes/payment.route.js";
 import scheduleNotifiyLiveServiceOfUserSkills from "./app/cron/activeServicesNotification.js";
 import scheduleNotifyUsersWithPendingRequests from "./app/cron/pendingRequestsNotification.js";
 import scheduleNotifyUsersForCompletingProfile from "./app/cron/profileCompletionNotification.js";
+import scheduleWeeklyRegistrationsExport from "./app/cron/weeklyRegistrationsExport.js";
+import scheduleWeeklyServicesExport from "./app/cron/weeklyServicesExport.js";
 // import { createIndexes } from "./app/utils/createIndexes.js";
 
 // ✅ Start cron jobs
 scheduleNotifiyLiveServiceOfUserSkills();
 scheduleNotifyUsersWithPendingRequests();
 scheduleNotifyUsersForCompletingProfile();
+scheduleWeeklyRegistrationsExport();
+scheduleWeeklyServicesExport();
 // ✅ Routes middleware
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
@@ -106,5 +110,27 @@ app.use((err, req, res, next) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
+  const cashfreeEnv = (process.env.CASHFREE_ENV || "sandbox").toLowerCase();
+  const otpForceLive = ["1", "true", "yes"].includes(
+    String(process.env.OTP_FORCE_LIVE || "").toLowerCase(),
+  );
+  const otpBypassFlag = ["1", "true", "yes"].includes(
+    String(process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "").toLowerCase(),
+  );
+  const livePayments =
+    cashfreeEnv === "production" ||
+    ["1", "true", "yes"].includes(
+      String(process.env.CASHFREE_FORCE_LIVE || "").toLowerCase(),
+    );
+  const otpLive = otpForceLive || livePayments || !otpBypassFlag;
+
   console.log(`🚀 API running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  console.log(
+    `🔐 OTP: ${otpLive ? "live 2factor SMS" : "DEV BYPASS (any 6-digit code)"} | Cashfree: ${cashfreeEnv}`,
+  );
+  if (livePayments && !process.env.TWOFACTOR_API_KEY) {
+    console.error(
+      "❌ TWOFACTOR_API_KEY is missing while Cashfree is in production mode. Login OTP SMS will fail.",
+    );
+  }
 });

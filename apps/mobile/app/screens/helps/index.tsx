@@ -20,7 +20,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Modal,
   ScrollView,
   Linking,

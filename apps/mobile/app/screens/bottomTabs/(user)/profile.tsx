@@ -484,21 +484,31 @@ const UserProfile = () => {
                     <TouchableOpacity
                       style={styles.changeRoleBtn}
                       onPress={() => setRoleModalVisible(true)}
-                      activeOpacity={0.85}
+                      activeOpacity={0.82}
+                      accessibilityRole="button"
+                      accessibilityLabel={t("changeRole")}
                     >
-                      <MaterialCommunityIcons
-                        name="swap-horizontal"
-                        size={14}
-                        color={Colors.white}
-                      />
+                      <View style={styles.changeRoleIconWrap}>
+                        <MaterialCommunityIcons
+                          name="swap-horizontal"
+                          size={15}
+                          color={Colors.white}
+                        />
+                      </View>
                       <CustomText
-                        baseFont={11}
+                        baseFont={12}
                         fontWeight="700"
                         color={Colors.white}
                         numberOfLines={1}
+                        style={styles.changeRoleLabel}
                       >
                         {t("changeRole")}
                       </CustomText>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={14}
+                        color="rgba(255,255,255,0.92)"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -659,14 +669,30 @@ const styles = StyleSheet.create({
   changeRoleBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(255,255,255,0.14)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    gap: 6,
+    backgroundColor: Colors.tertiery,
+    paddingLeft: 8,
+    paddingRight: 10,
+    paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.32)",
     maxWidth: "100%",
+    minHeight: 32,
+    shadowColor: "#c44a00",
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  changeRoleIconWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  changeRoleLabel: {
+    letterSpacing: 0.2,
   },
   actionRow: {
     flexDirection: "row",

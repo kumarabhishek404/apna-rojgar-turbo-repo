@@ -6,6 +6,8 @@ import Notification from "../models/notification.model.js";
 import Payment from "../models/payment.model.js";
 import { getPromotionPaymentStats } from "../utils/payment.service.js";
 import { handleSendNotificationController } from "./notification.controller.js";
+import { exportWeeklyRegistrations } from "../cron/weeklyRegistrationsExport.js";
+import { exportWeeklyServices } from "../cron/weeklyServicesExport.js";
 import logError from "../utils/addErrorLog.js";
 import { getEnglishTitles } from "../utils/translations.js";
 
@@ -510,6 +512,70 @@ export const getAdminPromotionPayments = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to fetch promotion payments",
+    });
+  }
+};
+
+export const handleExportRegistrations = async (req, res) => {
+  try {
+    const result = await exportWeeklyRegistrations();
+
+    if (result.skipped) {
+      return res.status(400).json({
+        success: false,
+        message: result.reason || "Weekly registrations export is disabled",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        result.rowsExported > 0
+          ? `Exported ${result.rowsExported} registration(s) to Google Sheets`
+          : "No new registrations to export",
+      data: {
+        spreadsheetId: result.spreadsheetId,
+        rowsExported: result.rowsExported,
+        spreadsheetUrl: result.spreadsheetUrl,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500, "admin - exportRegistrations");
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to export registrations to Google Sheets",
+    });
+  }
+};
+
+export const handleExportServices = async (req, res) => {
+  try {
+    const result = await exportWeeklyServices();
+
+    if (result.skipped) {
+      return res.status(400).json({
+        success: false,
+        message: result.reason || "Weekly services export is disabled",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        result.rowsExported > 0
+          ? `Exported ${result.rowsExported} service(s) to Google Sheets`
+          : "No new services to export",
+      data: {
+        spreadsheetId: result.spreadsheetId,
+        rowsExported: result.rowsExported,
+        spreadsheetUrl: result.spreadsheetUrl,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500, "admin - exportServices");
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to export services to Google Sheets",
     });
   }
 };

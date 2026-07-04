@@ -1,11 +1,6 @@
 import React from "react";
-import {
-  View,
-  Image,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import Colors from "@/constants/Colors";
@@ -20,11 +15,12 @@ const PublicationsScreen = () => {
 
       <View style={styles.row}>
         <View style={styles.card}>
-          <Image
+          <OptimizedImage
             source={{
               uri: "https://miller.bslthemes.com/ashley-demo/img/blog/1.jpg",
-            }} // Replace with the first image URL
+            }}
             style={styles.image}
+            contentFit="cover"
           />
           <View style={{ paddingHorizontal: 6, paddingBottom: 6 }}>
             <CustomText
@@ -44,11 +40,12 @@ const PublicationsScreen = () => {
         </View>
 
         <View style={styles.card}>
-          <Image
+          <OptimizedImage
             source={{
               uri: "https://miller.bslthemes.com/ashley-demo/img/blog/1.jpg",
-            }} // Replace with the first image URL
+            }}
             style={styles.image}
+            contentFit="cover"
           />
           <View style={{ paddingHorizontal: 6, paddingBottom: 6 }}>
             <CustomText

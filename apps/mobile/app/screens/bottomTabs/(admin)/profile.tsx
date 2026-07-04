@@ -6,10 +6,8 @@ import {
   BackHandler,
   TouchableOpacity,
   Text,
-  StatusBar,
   Platform,
 } from "react-native";
-// import { StatusBar } from "expo-status-bar";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { router, Stack } from "expo-router";

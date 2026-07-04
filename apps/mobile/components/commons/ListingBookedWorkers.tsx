@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import React from "react";
 import Colors from "@/constants/Colors";
 import CustomHeading from "./CustomHeading";

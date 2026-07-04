@@ -8,11 +8,16 @@ import {
   getAllUsers,
   handleActivateUser,
   handleSuspendUser,
+  handleExportRegistrations,
+  handleExportServices,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import checkAdmin from "../middlewares/checkRole.middleware.js";
 import userStatus from "../middlewares/userStatus.middleware.js";
 const router = express.Router();
+
+router.post("/export-registrations", handleExportRegistrations);
+router.post("/export-services", handleExportServices);
 
 router.use(verifyToken, userStatus);
 router.post("/activate-user", checkAdmin, handleActivateUser);

@@ -1,22 +1,21 @@
 import Colors from "@/constants/Colors";
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  StatusBar,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import OptimizedImage from "@/components/commons/OptimizedImage";
 import NOINTERNET from "../../../assets/no-internet.gif";
 import { t } from "@/utils/translationHelper";
 
 const NoInternetScreen = ({ onRetry }: { onRetry: () => void }) => {
   return (
     <>
-      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      <StatusBar style="light" />
       <View style={styles.container}>
-        <Image source={NOINTERNET} style={styles.image} resizeMode="contain" />
+        <OptimizedImage
+          source={NOINTERNET}
+          style={styles.image}
+          contentFit="contain"
+        />
         <Text style={styles.title}>{t("noInternetTitle")}</Text>
         <Text style={styles.subtitle}>{t("noInternetSubtitle")}</Text>
         <View style={styles.buttonContainer}>

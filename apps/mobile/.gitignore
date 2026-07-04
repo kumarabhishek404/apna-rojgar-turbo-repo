@@ -109,7 +109,10 @@ shellAppWorkspaces
 # Expo Client builds
 /client-builds
 
-# Expo web env
+# Expo web env — never commit secrets or release flags
+.env
+.env.*
+!.env.example
 .env.local
 .env.development.local
 .env.test.local

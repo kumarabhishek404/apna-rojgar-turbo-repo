@@ -23,8 +23,12 @@ import homeBannerArt5 from "../../assets/banners/banner5.png";
 import homeBannerArt6 from "../../assets/banners/banner6.png";
 
 const { width: SCREEN_W } = Dimensions.get("window");
-const BANNER_SLIDE_W = SCREEN_W - 44;
-const BANNER_IMAGE_H = 190;
+/** Horizontal padding on gradientBlock (22 * 2). */
+const BANNER_HORIZONTAL_INSET = 44;
+/** Banner assets are ~2:1 (e.g. 1774×887). Keep full artwork visible. */
+const BANNER_ASPECT_RATIO = 2;
+const BANNER_SLIDE_W = SCREEN_W - BANNER_HORIZONTAL_INSET;
+const BANNER_IMAGE_H = Math.round(BANNER_SLIDE_W / BANNER_ASPECT_RATIO);
 const BANNER_BOTTOM_MARGIN = 12;
 
 type Props = {
@@ -63,7 +67,7 @@ const HomeHeroSection = ({ userDetails }: Props) => {
       setActiveBanner((prev) => {
         const next = (prev + 1) % bannerImages.length;
         bannerScrollRef.current?.scrollTo({
-          x: next * (SCREEN_W - 44),
+          x: next * BANNER_SLIDE_W,
           animated: true,
         });
         return next;
@@ -120,26 +124,34 @@ const HomeHeroSection = ({ userDetails }: Props) => {
             style={styles.bannerScroll}
             horizontal
             pagingEnabled
+            decelerationRate="fast"
+            snapToInterval={BANNER_SLIDE_W}
+            snapToAlignment="start"
+            disableIntervalMomentum
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setIsPaused(false)}
             onMomentumScrollEnd={(e) => {
               const slide = Math.round(
-                e.nativeEvent.contentOffset.x /
-                  e.nativeEvent.layoutMeasurement.width,
+                e.nativeEvent.contentOffset.x / BANNER_SLIDE_W,
               );
-              if (!Number.isNaN(slide)) setActiveBanner(slide);
+              if (!Number.isNaN(slide)) {
+                setActiveBanner(
+                  Math.max(0, Math.min(slide, bannerImages.length - 1)),
+                );
+              }
             }}
           >
             {bannerImages.map((img, idx) => (
-              <Image
-                key={idx}
-                source={img}
-                style={styles.bannerCoverImage}
-                resizeMode="cover"
-                accessibilityIgnoresInvertColors
-              />
+              <View key={idx} style={styles.bannerSlide}>
+                <Image
+                  source={img}
+                  style={styles.bannerCoverImage}
+                  resizeMode="contain"
+                  accessibilityIgnoresInvertColors
+                />
+              </View>
             ))}
           </ScrollView>
         </View>
@@ -208,10 +220,11 @@ const styles = StyleSheet.create({
   },
   bannerCard: {
     borderRadius: 26,
+    width: BANNER_SLIDE_W,
     height: BANNER_IMAGE_H,
     marginBottom: BANNER_BOTTOM_MARGIN,
     overflow: "hidden",
-    backgroundColor: "#2D47B3",
+    backgroundColor: "#FFFFFF",
     shadowColor: "#1f3f9a",
     shadowOpacity: 0.24,
     shadowRadius: 18,
@@ -219,12 +232,19 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bannerScroll: {
-    flex: 1,
-  },
-  bannerCoverImage: {
     width: BANNER_SLIDE_W,
     height: BANNER_IMAGE_H,
-    overflow: "hidden",
+  },
+  bannerSlide: {
+    width: BANNER_SLIDE_W,
+    height: BANNER_IMAGE_H,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+  },
+  bannerCoverImage: {
+    width: "100%",
+    height: "100%",
   },
   bannerDots: {
     flexDirection: "row",

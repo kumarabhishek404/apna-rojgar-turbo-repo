@@ -2,7 +2,6 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
-  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,

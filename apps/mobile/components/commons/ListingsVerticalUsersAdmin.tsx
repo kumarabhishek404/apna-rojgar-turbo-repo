@@ -1,11 +1,11 @@
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import React, { useMemo } from "react";
 import Colors from "@/constants/Colors";
 import { FontAwesome } from "@expo/vector-icons";
@@ -94,13 +94,15 @@ const ListingsVerticalUsersAdmin = ({
           }
         >
           <View style={styles.item}>
-            <Image
+            <OptimizedImage
               source={
                 item?.profilePicture
                   ? { uri: item?.profilePicture }
                   : coverImage
               }
               style={styles.image}
+              contentFit="cover"
+              recyclingKey={item?.profilePicture || item?._id}
             />
 
             <View style={styles.itemInfo}>

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
 import Colors from "@/constants/Colors";
 import Button from "@/components/inputs/Button";
 import AddLocationAndAddress from "@/components/commons/AddLocationAndAddress";
 import { Controller, useForm } from "react-hook-form";
-import Step2 from "../../../assets/step2.jpg";
 import DateField from "@/components/inputs/DateField";
 import { isEmptyObject } from "@/constants/functions";
 import { useSetAtom } from "jotai";

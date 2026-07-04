@@ -1,11 +1,11 @@
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import React, { useMemo } from "react";
 import Colors from "@/constants/Colors";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -57,12 +57,13 @@ const WorkerCard = React.memo(
     >
       {/* ── Hero photo ── */}
       <View style={styles.photoWrap}>
-        <Image
+        <OptimizedImage
           source={
             item?.profilePicture ? { uri: item.profilePicture } : coverImage
           }
           style={styles.photo}
-          resizeMode="cover"
+          contentFit="cover"
+          recyclingKey={item?.profilePicture || item?._id}
         />
 
         {/* bookmark heart */}

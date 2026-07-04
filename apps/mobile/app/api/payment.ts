@@ -11,6 +11,7 @@ export interface PromotionOrderResponse {
   paymentSessionId: string;
   amount: number;
   currency: string;
+  devBypass?: boolean;
 }
 
 const getPromotionConfig = async (): Promise<PromotionPaymentConfig> => {

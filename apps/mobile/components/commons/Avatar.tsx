@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Image,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -9,7 +8,6 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
 import CustomText from "./CustomText";
-import placeholderProfileImage from "../../assets/person-placeholder.jpg";
 import { t } from "@/utils/translationHelper";
 import Colors from "@/constants/Colors";
 import ProfilePicture from "./ProfilePicture";

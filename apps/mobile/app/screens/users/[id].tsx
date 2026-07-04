@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Dimensions, Image, StyleSheet, View, Animated } from "react-native";
+import { Dimensions, StyleSheet, View, Animated } from "react-native";
+import OptimizedImage from "@/components/commons/OptimizedImage";
 import {
   Stack,
   useFocusEffect,
@@ -169,9 +170,11 @@ const User = () => {
               backgroundColor: Colors?.fourth,
             }}
           >
-            <Animated.Image
+            <OptimizedImage
               source={user?.coverImage ? { uri: user?.coverImage } : CoverImage}
-              style={[styles.image]}
+              style={styles.image}
+              contentFit="cover"
+              recyclingKey={user?.coverImage || "cover-placeholder"}
             />
             <View style={styles.contentWrapper}>
               <ProfilePicture

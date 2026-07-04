@@ -7,7 +7,10 @@ import {
   generatePromotionOrderId,
   getCashfreeOrder,
   getPromotionAmount,
+  isCashfreeConfigured,
+  isCashfreeDevBypassEnabled,
   isCashfreeOrderPaid,
+  isMockCashfreePaymentSession,
   resolveOrderPaymentMethod,
   verifyCashfreeWebhookSignature,
 } from "../utils/cashfree.js";
@@ -154,6 +157,7 @@ export const createServicePromotionOrder = asyncHandler(async (req, res) => {
         currency: payment.currency,
         serviceId: payment.service || null,
         serviceJobId: payment.serviceJobId || null,
+        devBypass: isMockCashfreePaymentSession(payment.paymentSessionId),
       },
       message: "Promotion payment order created",
     });
@@ -257,6 +261,8 @@ export const getPromotionPaymentConfig = asyncHandler(async (_req, res) => {
       amount: getPromotionAmount(),
       currency: "INR",
       environment: (process.env.CASHFREE_ENV || "sandbox").toLowerCase(),
+      configured: isCashfreeConfigured(),
+      devBypass: isCashfreeDevBypassEnabled(),
     },
   });
 });

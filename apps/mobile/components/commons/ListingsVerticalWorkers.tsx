@@ -1,13 +1,13 @@
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
   type StyleProp,
   type ViewStyle,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import React, { useCallback, useMemo, useRef, type ReactElement } from "react";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
@@ -104,13 +104,15 @@ const ListingsVerticalWorkers = ({
             <View style={styles.itemInner}>
               <View style={styles.mainRow}>
                 <View style={styles.avatarColumn}>
-                  <Image
+                  <OptimizedImage
                     source={
                       item?.profilePicture
                         ? { uri: item.profilePicture }
                         : coverImage
                     }
                     style={styles.avatar}
+                    contentFit="cover"
+                    recyclingKey={item?.profilePicture || item?._id}
                   />
                   {phone ? (
                     <TouchableOpacity
