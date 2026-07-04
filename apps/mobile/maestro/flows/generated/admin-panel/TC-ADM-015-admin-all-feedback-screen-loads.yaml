@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "availability", "admin", "automated"]
+---
+# TC-ADM-015: Admin all feedback screen loads
+# Module: Admin Panel | Screen: All Feedback | Role: Admin
+# Type: Availability | Priority: P1
+# Route: /screens/allFeedback
+# Prerequisites: Admin account · Navigate to allFeedback route
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/allFeedback.
+
+# Assertions
+# Expected: All user feedback listed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

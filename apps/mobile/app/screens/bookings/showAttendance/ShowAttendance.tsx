@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -195,10 +194,8 @@ export default function ShowAttendanceComponent({
             {attendanceReport?.report?.length === 1 ? (
               <View style={styles?.singleWorkerContainer}>
                 <View style={styles.drawerProfileSection}>
-                  <Image
-                    source={{
-                      uri: selectedWorker?.workerDetails?.profilePicture,
-                    }}
+                  <ProfilePicture
+                    uri={selectedWorker?.workerDetails?.profilePicture}
                     style={styles.drawerProfileImage}
                   />
                   <View style={{ flex: 1 }}>

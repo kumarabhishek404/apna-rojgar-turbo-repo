@@ -1,10 +1,14 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ADDSERVICESTEPS, WORKTYPES } from "@/constants";
 import { getAuth } from "@/lib/auth";
+import { getPromotionConfig } from "@/lib/payment";
 import { useLanguage } from "@/components/LanguageProvider";
 import { localizeApiErrorMessage } from "@/lib/i18n";
+import PromotionChoiceModal from "@/components/services/PromotionChoiceModal";
+import ServiceReviewSummary from "@/components/services/ServiceReviewSummary";
+import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 import { ArrowRight, Check, ChevronDown, Loader2 } from "lucide-react";
 
 type RequirementDraft = { name: string; count: number; payPerDay: string };
@@ -28,7 +32,12 @@ type CreateFormState = {
 
 function buildAddServiceFormData(
   form: CreateFormState,
-  options: { validateOnly?: boolean; includeImages?: boolean } = {},
+  options: {
+    validateOnly?: boolean;
+    includeImages?: boolean;
+    promoteSocialMedia?: boolean;
+    promotionOrderId?: string;
+  } = {},
 ) {
   const fd = new FormData();
   if (options.validateOnly) {
@@ -43,6 +52,10 @@ function buildAddServiceFormData(
   fd.append("bookingType", "byService");
   fd.append("requirements", JSON.stringify(form.requirements));
   fd.append("facilities", JSON.stringify(form.facilities));
+  if (options.promoteSocialMedia && options.promotionOrderId) {
+    fd.append("promoteSocialMedia", "true");
+    fd.append("promotionOrderId", options.promotionOrderId);
+  }
   if (options.includeImages !== false) {
     form.images.forEach((file) => fd.append("images", file));
   }
@@ -83,6 +96,22 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
   const [serverVerifyStatus, setServerVerifyStatus] = useState<
     "idle" | "checking" | "ok" | "error"
   >("idle");
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionEnvironment, setPromotionEnvironment] = useState("sandbox");
+  const [isPromotionProcessing, setIsPromotionProcessing] = useState(false);
+  const verifiedPromotionOrderRef = useRef("");
+  const { runPromotionPayment } = useCashfreePromotionPayment();
+
+  useEffect(() => {
+    if (!open) return;
+    void getPromotionConfig()
+      .then((config) => {
+        if (config?.amount) setPromotionAmount(config.amount);
+        if (config?.environment) setPromotionEnvironment(config.environment);
+      })
+      .catch(() => undefined);
+  }, [open]);
 
   const selectedWorkType = useMemo(
     () => WORKTYPES.find((item: { value: string }) => item.value === createForm.type),
@@ -109,47 +138,64 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
     "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-[#22409a] focus:ring-4 focus:ring-[#22409a]/10";
 
   useEffect(() => {
-    if (!open || createStep !== 6 || !canCreate) {
-      setServerVerifyStatus("idle");
-      return;
+    if (!open || createStep === 6) return;
+    setServerVerifyStatus("idle");
+  }, [open, createStep]);
+
+  const validateBeforeSubmit = useCallback(() => {
+    if (!canCreate) return false;
+    if (!createForm.type || !createForm.subType) {
+      setCreateIssue("Please select work type and work subtype.");
+      return false;
     }
+    if (!createForm.address.trim() || !createForm.startDate) {
+      setCreateIssue("Please fill all required fields.");
+      return false;
+    }
+    if (!createForm.requirements.length) {
+      setCreateIssue("Please add at least one requirement.");
+      return false;
+    }
+    const invalidRequirement = createForm.requirements.find(
+      (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
+    );
+    if (invalidRequirement) {
+      setCreateIssue("Please complete requirement details (worker, count and pay/day).");
+      return false;
+    }
+    return true;
+  }, [canCreate, createForm]);
 
-    let cancelled = false;
+  const runServerVerify = useCallback(async () => {
+    if (!canCreate || createStep !== 6) return;
+    if (!validateBeforeSubmit()) return;
 
-    const run = async () => {
-      setServerVerifyStatus("checking");
-      setCreateIssue("");
-      try {
-        const fd = buildAddServiceFormData(createFormRef.current, {
-          validateOnly: true,
-          includeImages: false,
-        });
-        const auth = getAuth();
-        const base =
-          process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
-        const response = await fetch(`${base}/employer/add-service`, {
-          method: "POST",
-          headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
-          body: fd,
-        });
-        const data = (await response.json()) as { success?: boolean; message?: string };
-        if (cancelled) return;
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.message || "Verification failed");
-        }
-        setServerVerifyStatus("ok");
-      } catch (e) {
-        if (cancelled) return;
-        setServerVerifyStatus("error");
-        setCreateIssue(e instanceof Error ? e.message : "Verification failed");
+    setServerVerifyStatus("checking");
+    setCreateIssue("");
+    try {
+      const fd = buildAddServiceFormData(createFormRef.current, {
+        validateOnly: true,
+        includeImages: false,
+      });
+      const auth = getAuth();
+      const base =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
+      const response = await fetch(`${base}/employer/add-service`, {
+        method: "POST",
+        headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
+        body: fd,
+      });
+      const data = (await response.json()) as { success?: boolean; message?: string };
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.message || "Verification failed");
       }
-    };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, createStep, canCreate, t]);
+      setServerVerifyStatus("ok");
+      setShowPromotionModal(true);
+    } catch (e) {
+      setServerVerifyStatus("error");
+      setCreateIssue(e instanceof Error ? e.message : "Verification failed");
+    }
+  }, [canCreate, createStep, validateBeforeSubmit]);
 
   const onCreateNext = () => {
     if (createStep === 1 && (!createForm.type || !createForm.subType)) {
@@ -185,41 +231,27 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
   };
 
   const closeModal = () => {
-    if (creatingService) return;
+    if (creatingService || isPromotionProcessing) return;
     setCreateStep(1);
     setCreateIssue("");
     setServerVerifyStatus("idle");
+    setShowPromotionModal(false);
+    verifiedPromotionOrderRef.current = "";
     onClose();
   };
 
-  const createService = async (event: FormEvent) => {
-    event.preventDefault();
-    if (createStep !== 6) return;
-    if (!canCreate) return;
-    if (!createForm.type || !createForm.subType) {
-      setCreateIssue("Please select work type and work subtype.");
-      return;
-    }
-    if (!createForm.address.trim() || !createForm.startDate) {
-      setCreateIssue("Please fill all required fields.");
-      return;
-    }
-    if (!createForm.requirements.length) {
-      setCreateIssue("Please add at least one requirement.");
-      return;
-    }
-    const invalidRequirement = createForm.requirements.find(
-      (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
-    );
-    if (invalidRequirement) {
-      setCreateIssue("Please complete requirement details (worker, count and pay/day).");
-      return;
-    }
-
+  const submitService = async (options: {
+    promoteSocialMedia: boolean;
+    promotionOrderId?: string;
+  }) => {
     setCreatingService(true);
     setCreateIssue("");
     try {
-      const fd = buildAddServiceFormData(createForm, { includeImages: true });
+      const fd = buildAddServiceFormData(createForm, {
+        includeImages: true,
+        promoteSocialMedia: options.promoteSocialMedia,
+        promotionOrderId: options.promotionOrderId,
+      });
 
       const auth = getAuth();
       const base = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.apnarojgarindia.com/api/v1";
@@ -249,12 +281,48 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         images: [],
       });
       setCreateStep(1);
+      setShowPromotionModal(false);
+      verifiedPromotionOrderRef.current = "";
       onClose();
       await onCreated?.();
     } catch (e) {
       setCreateIssue(e instanceof Error ? e.message : "Work create failed");
     } finally {
       setCreatingService(false);
+    }
+  };
+
+  const handleFinalSubmit = (event: FormEvent) => {
+    event.preventDefault();
+  };
+
+  const submitWithoutPromotion = () => {
+    if (creatingService || isPromotionProcessing || serverVerifyStatus !== "ok") return;
+    setShowPromotionModal(false);
+    void submitService({ promoteSocialMedia: false });
+  };
+
+  const submitWithPromotion = async () => {
+    if (creatingService || isPromotionProcessing || serverVerifyStatus !== "ok") return;
+    setIsPromotionProcessing(true);
+    setCreateIssue("");
+    try {
+      let orderId = verifiedPromotionOrderRef.current;
+      if (!orderId) {
+        orderId = await runPromotionPayment();
+        verifiedPromotionOrderRef.current = orderId;
+      }
+      setShowPromotionModal(false);
+      await submitService({
+        promoteSocialMedia: true,
+        promotionOrderId: orderId,
+      });
+    } catch (e) {
+      setCreateIssue(
+        e instanceof Error ? e.message : t("promotionPaymentFailed", "Promotion payment failed"),
+      );
+    } finally {
+      setIsPromotionProcessing(false);
     }
   };
 
@@ -321,9 +389,12 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
               className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 font-semibold ${
                 createStep === 5
                   ? "bg-gradient-to-r from-[#22409a] to-[#3154bf] text-white shadow-[0_8px_16px_rgba(34,64,154,0.24)]"
-                  : "border border-slate-200 bg-white text-slate-600"
+                  : createStep > 5
+                    ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border border-slate-200 bg-white text-slate-600"
               }`}
             >
+              {createStep > 5 ? <Check size={13} /> : null}
               5. {t("images")}
             </span>
             <span
@@ -340,8 +411,12 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
 
           <form
             id="create-service-modal-form"
-            onSubmit={createService}
-            className="grid gap-4 rounded-2xl border border-slate-200/80 bg-white/85 p-4 shadow-[0_10px_32px_rgba(15,23,42,0.06)] md:grid-cols-2 md:p-5"
+            onSubmit={handleFinalSubmit}
+            className={
+              createStep === 6
+                ? "grid gap-4 md:grid-cols-2"
+                : "grid gap-4 rounded-2xl border border-slate-200/80 bg-white/85 p-4 shadow-[0_10px_32px_rgba(15,23,42,0.06)] md:grid-cols-2 md:p-5"
+            }
           >
           {createStep === 1 ? (
             <>
@@ -566,40 +641,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
           ) : null}
 
           {createStep === 6 ? (
-            <div className="space-y-2 rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white p-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] md:col-span-2">
-              {serverVerifyStatus === "checking" ? (
-                <div className="mb-3 flex items-center gap-2 rounded-xl border border-[#22409a]/20 bg-[#f8faff] px-3 py-2.5 text-sm font-medium text-[#22409a]">
-                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
-                  {t(
-                    "verifyingServiceWithServer",
-                    "Checking details with the server…",
-                  )}
-                </div>
-              ) : null}
-              {serverVerifyStatus === "ok" ? (
-                <div className="mb-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-3 py-2.5 text-sm font-semibold text-emerald-800">
-                  <Check className="h-4 w-4 shrink-0" aria-hidden />
-                  {t(
-                    "serviceDetailsVerifiedReadyToSubmit",
-                    "Details verified. Tap submit to publish.",
-                  )}
-                </div>
-              ) : null}
-              <p><span className="font-semibold">{t("workType")}:</span> {t(createForm.type)}</p>
-              <p><span className="font-semibold">{t("workSubType")}:</span> {t(createForm.subType)}</p>
-              <p><span className="font-semibold">{t("address")}:</span> {createForm.address}</p>
-              <p><span className="font-semibold">{t("startDate")}:</span> {createForm.startDate}</p>
-              <p><span className="font-semibold">{t("duration")}:</span> {createForm.duration}</p>
-              <p><span className="font-semibold">{t("images")}:</span> {createForm.images.length}</p>
-              <p><span className="font-semibold">{t("workRequirements")}:</span></p>
-              <ul className="ml-4 list-disc space-y-1">
-                {createForm.requirements.map((req, idx) => (
-                  <li key={`review-req-${idx}`}>
-                    {t(req.name)} - {req.count} - ₹{req.payPerDay} {t("perDay")}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ServiceReviewSummary form={createForm} verifyStatus={serverVerifyStatus} />
           ) : null}
         </form>
         </div>
@@ -628,26 +670,65 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                 <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
               </span>
             </button>
-          ) : (
+          ) : serverVerifyStatus !== "ok" ? (
             <button
-              type="submit"
-              form="create-service-modal-form"
+              type="button"
+              onClick={() => {
+                void runServerVerify();
+              }}
               disabled={
                 creatingService ||
-                serverVerifyStatus === "checking" ||
-                serverVerifyStatus === "error"
+                isPromotionProcessing ||
+                serverVerifyStatus === "checking"
               }
               className="group rounded-xl bg-gradient-to-r from-[#22409a] via-[#2c4fba] to-[#3154bf] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.35)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2847ab] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="inline-flex items-center gap-2">
-                {creatingService ? t("submitting") : t("submitAllDetails")}
-                {!creatingService ? <ArrowRight size={14} className="transition group-hover:translate-x-0.5" /> : null}
+                {serverVerifyStatus === "checking"
+                  ? t("verifyingServiceWithServer", "Checking details with the server…")
+                  : t("checkDetails", "Verify Details")}
+                {serverVerifyStatus !== "checking" ? (
+                  <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
+                ) : (
+                  <Loader2 size={14} className="animate-spin" />
+                )}
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowPromotionModal(true)}
+              disabled={creatingService || isPromotionProcessing}
+              className="group rounded-xl bg-gradient-to-r from-[#22409a] via-[#2c4fba] to-[#3154bf] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.35)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2847ab] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <span className="inline-flex items-center gap-2">
+                {creatingService || isPromotionProcessing
+                  ? t("submitting", "Submitting…")
+                  : t("continueToPublish", "Continue to Publish")}
+                {!creatingService && !isPromotionProcessing ? (
+                  <ArrowRight size={14} className="transition group-hover:translate-x-0.5" />
+                ) : null}
               </span>
             </button>
           )}
         </div>
         </div>
       </div>
+
+      <PromotionChoiceModal
+        open={showPromotionModal}
+        amount={promotionAmount}
+        paymentEnvironment={promotionEnvironment}
+        loading={isPromotionProcessing || creatingService}
+        onClose={() => {
+          if (isPromotionProcessing || creatingService) return;
+          setShowPromotionModal(false);
+        }}
+        onPromote={() => {
+          void submitWithPromotion();
+        }}
+        onSubmitWithoutPromotion={submitWithoutPromotion}
+      />
     </div>
   );
 }

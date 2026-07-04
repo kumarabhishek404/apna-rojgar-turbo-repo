@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "availability", "worker", "automated"]
+---
+# TC-ACT-005: Worker Applied Jobs sub-tab visible and selectable
+# Module: Tab: Activity | Screen: Activity - Applied Jobs | Role: Worker
+# Type: Availability | Priority: P1
+# Route: UnifiedActivityScreen
+# Prerequisites: Worker account · Worker on activity tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Activity tab.
+- tapOn: "Applied Jobs sub-tab"
+
+# Assertions
+# Expected: Applied Jobs content area loads.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

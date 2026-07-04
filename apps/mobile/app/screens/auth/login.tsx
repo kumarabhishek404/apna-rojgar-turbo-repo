@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { useAtom } from "jotai";
 import { useMutation } from "@tanstack/react-query";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -22,7 +21,6 @@ import CustomHeading from "@/components/commons/CustomHeading";
 import Button from "@/components/inputs/Button";
 import CustomText from "@/components/commons/CustomText";
 import { useTranslation } from "@/utils/i18n";
-import WORKER1 from "@/assets/worker1.png";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
 import AUTH from "@/app/api/auth";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
@@ -209,6 +207,7 @@ export default function Login() {
       <Loader
         loading={sendOtpMutation.isPending || verifyOtpMutation.isPending}
       />
+      <StatusBar style="light" />
       <Stack.Screen options={{ headerShown: false }} />
 
       <KeyboardAvoidingView
@@ -222,17 +221,70 @@ export default function Login() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.screenWrapper}>
-            <View
-              style={[
-                styles.centerBlock,
-                step === 2 ? { minHeight: 650 } : { minHeight: 550 },
-              ]}
-            >
-              <Image source={WORKER1} style={styles.image} />
+            <View pointerEvents="none" style={styles.decorCircleTop} />
+            <View pointerEvents="none" style={styles.decorCircleBottom} />
 
-              <CustomHeading baseFont={24}>
-                {t("welcome")} {t("users")}
+            <View style={styles.authHeader}>
+              <View style={styles.brandMark}>
+                <View style={styles.brandMarkInner}>
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={36}
+                    color={Colors.primary}
+                  />
+                </View>
+              </View>
+              <CustomHeading
+                baseFont={28}
+                color={Colors.white}
+                style={styles.title}
+              >
+                अपना रोजगार में आपका स्वागत है
               </CustomHeading>
+              <CustomText
+                baseFont={14}
+                color="rgba(255, 255, 255, 0.76)"
+                textAlign="center"
+                style={styles.subtitle}
+              >
+                {step === 1
+                  ? t("verificationDescription1")
+                  : t("verificationDescription2")}
+              </CustomText>
+            </View>
+
+            <View style={styles.authCard}>
+              <View style={styles.stepRow}>
+                <View
+                  style={[
+                    styles.stepPill,
+                    step === 1 ? styles.stepPillActive : styles.stepPillDone,
+                  ]}
+                >
+                  <CustomText
+                    baseFont={12}
+                    fontWeight="800"
+                    color={step === 1 ? Colors.white : Colors.primary}
+                  >
+                    1
+                  </CustomText>
+                </View>
+                <View style={styles.stepLine} />
+                <View
+                  style={[
+                    styles.stepPill,
+                    step === 2 && styles.stepPillActive,
+                  ]}
+                >
+                  <CustomText
+                    baseFont={12}
+                    fontWeight="800"
+                    color={step === 2 ? Colors.white : Colors.primary}
+                  >
+                    2
+                  </CustomText>
+                </View>
+              </View>
 
               <View style={styles.formContainer}>
                 {/* MOBILE INPUT */}
@@ -255,12 +307,17 @@ export default function Login() {
                       setPhoneNumber={onChange}
                       errors={errors}
                       placeholder={t("enterMobileTitle")}
+                      testID="login-mobile-input"
+                      inputStyle={styles.authInputContainer}
+                      textStyles={styles.authInputText}
                       icon={
-                        <Feather
-                          name="phone"
-                          size={25}
-                          color={Colors.disabled}
-                        />
+                        <View style={styles.fieldIconBadge}>
+                          <Feather
+                            name="phone"
+                            size={18}
+                            color={Colors.primary}
+                          />
+                        </View>
                       }
                     />
                     // <TextInputComponent
@@ -305,14 +362,18 @@ export default function Login() {
                         maxLength={6}
                         onChangeText={onChange}
                         placeholder={t("enterYourOtp")}
+                        testID="login-otp-input"
                         errors={errors}
-                        textStyles={{ marginLeft: 10 }}
+                        inputStyle={styles.otpInputContainer}
+                        textStyles={styles.otpInputText}
                         icon={
-                          <Ionicons
-                            name="call-outline"
-                            size={25}
-                            color={Colors.secondary}
-                          />
+                          <View style={styles.fieldIconBadge}>
+                            <Ionicons
+                              name="keypad-outline"
+                              size={18}
+                              color={Colors.primary}
+                            />
+                          </View>
                         }
                       />
                     )}
@@ -330,7 +391,8 @@ export default function Login() {
                   >
                     <CustomText
                       color={resendDisabled ? Colors.primary : Colors.danger}
-                      baseFont={16}
+                      baseFont={14}
+                      fontWeight="700"
                       textAlign="right"
                     >
                       {resendDisabled
@@ -348,6 +410,7 @@ export default function Login() {
 
                 <Button
                   isPrimary
+                  testID="login-submit-button"
                   title={
                     shouldSkipOtpClient()
                       ? t("login")
@@ -357,21 +420,16 @@ export default function Login() {
                   }
                   onPress={handleSubmit(handleLoginPress)}
                   style={styles.loginButtonWrapper}
-                  textStyle={{ fontSize: 24, fontWeight: "600" }}
+                  textStyle={{ fontSize: 20, fontWeight: "800" }}
                   disabled={loading} // Disable button when loading
                 />
 
-                {/* <View style={styles.footerContainer}>
-              <CustomText>{t("dontHaveAnAccount")}</CustomText>
-              <TouchableOpacity onPress={handleNewRegistration}>
-                <CustomHeading baseFont={24} color={Colors.tertieryButton}>
-                  {t("signUp")}
-                </CustomHeading>
-              </TouchableOpacity>
-            </View> */}
+                {/* Registration entry remains intentionally hidden to preserve the existing auth flow. */}
               </View>
             </View>
-            <ContactSupport />
+            <View style={styles.supportSlot}>
+              <ContactSupport />
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -379,7 +437,7 @@ export default function Login() {
       <StickButtonWithWall
         content={
           <View style={{ paddingHorizontal: 4 }}>
-            <CustomText fontWeight="bold" baseFont={16} color={Colors?.white}>
+            <CustomText fontWeight="bold" baseFont={16} color={Colors.primary}>
               {t("changeLanguage")}
             </CustomText>
           </View>
@@ -391,7 +449,7 @@ export default function Login() {
           })
         }
         position="top"
-        containerStyles={{ height: 40 }}
+        containerStyles={styles.languageButton}
       />
     </>
   );
@@ -402,47 +460,180 @@ const styles = StyleSheet.create({
   /* Scroll takes full screen height */
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: Colors.fourth,
+    backgroundColor: Colors.primary,
   },
 
   /* Full screen wrapper */
   screenWrapper: {
     flex: 1,
+    paddingHorizontal: 18,
+    paddingTop: 90,
+    paddingBottom: 28,
+    justifyContent: "flex-start",
+    backgroundColor: Colors.primary,
+    overflow: "hidden",
+  },
+
+  authHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  decorCircleTop: {
+    position: "absolute",
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    top: -118,
+    left: -96,
+  },
+  decorCircleBottom: {
+    position: "absolute",
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
+    right: -96,
+    bottom: 110,
+  },
+  brandMark: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    backgroundColor: "rgba(255, 255, 255, 0.14)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.24)",
+  },
+  brandMarkInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    lineHeight: 32,
+    letterSpacing: 0.2,
+  },
+  subtitle: {
+    marginTop: 6,
+    lineHeight: 21,
+    paddingHorizontal: 18,
+  },
+  authCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 28,
     paddingHorizontal: 20,
-    paddingBottom: 30,
-    justifyContent: "space-between", // ⭐ pushes support to bottom
+    paddingVertical: 30,
+    minHeight: 280,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.5)",
+    shadowColor: "#061844",
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
+    marginTop: 2,
   },
-
-  /* Login section centered vertically */
-  centerBlock: {
-    flex: 1,
-    justifyContent: "flex-end",
-    marginBottom: 40,
+  supportSlot: {
+    marginTop: "auto",
+    paddingTop: 32,
   },
-
-  image: {
-    height: 240,
-    resizeMode: "contain",
-    alignSelf: "center",
-    marginBottom: 10,
+  languageButton: {
+    height: 40,
+    backgroundColor: Colors.white,
+    shadowColor: "#061844",
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 26,
+  },
+  stepPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.18)",
+  },
+  stepPillActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  stepPillDone: {
+    backgroundColor: "#EAF8F0",
+    borderColor: "#BFE8CE",
+  },
+  stepLine: {
+    width: 54,
+    height: 2,
+    backgroundColor: "#DDE6F5",
+    marginHorizontal: 8,
   },
 
   formContainer: {
-    marginTop: 10,
-    gap: 15,
+    gap: 18,
+  },
+  fieldIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
+  },
+  authInputContainer: {
+    height: 64,
+    borderRadius: 18,
+    borderColor: "#DDE6F5",
+    backgroundColor: "#F8FAFF",
+    paddingLeft: 12,
+  },
+  authInputText: {
+    color: Colors.heading,
+    fontWeight: "700",
   },
 
   errorText: {
     textAlign: "center",
+    backgroundColor: "#FEEEEE",
+    borderRadius: 12,
+    padding: 10,
   },
 
   loginButtonWrapper: {
     backgroundColor: Colors.primary,
-    borderRadius: 10,
-    height: 55,
+    borderRadius: 18,
+    height: 64,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+  otpInputContainer: {
+    borderRadius: 16,
+  },
+  otpInputText: {
+    marginLeft: 10,
+    fontSize: 20,
+    letterSpacing: 5,
+    fontWeight: "700",
   },
 
   container: {
@@ -451,11 +642,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: "center",
   },
-  // image: {
-  //   height: 260,
-  //   resizeMode: "contain",
-  //   alignSelf: "center",
-  // },
   // formContainer: {
   //   marginTop: 20,
   //   gap: 15,
@@ -480,7 +666,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
+    gap: 8,
+    paddingTop: 4,
   },
   // loginButtonWrapper: {
   //   backgroundColor: Colors.primary,

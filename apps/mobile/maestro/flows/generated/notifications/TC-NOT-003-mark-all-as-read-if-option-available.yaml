@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "functionality", "all", "automated"]
+---
+# TC-NOT-003: Mark all as read if option available
+# Module: Notifications & Push | Screen: Notifications Inbox | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/notifications
+# Prerequisites: Any test account · Multiple unread
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Mark All Read"
+
+# Assertions
+# Expected: All notifications marked read.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

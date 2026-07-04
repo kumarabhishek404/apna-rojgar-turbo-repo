@@ -1,0 +1,35 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "automated"]
+---
+# TC-AUTH-007: Invalid mobile number is rejected before OTP is sent
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /screens/auth/login
+# Prerequisites: Logged out · On Login screen. No OTP sent yet
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn:
+    id: "login-submit-button"
+- tapOn:
+    id: "login-submit-button"
+- tapOn:
+    id: "login-submit-button"
+
+# Assertions
+# Expected: For all three tests: OTP is NOT sent.
+# Expected: A validation error message appears near the mobile field.
+# Expected: OTP input field does NOT appear.
+- assertVisible:
+    id: "login-mobile-input"
+
+# Cleanup

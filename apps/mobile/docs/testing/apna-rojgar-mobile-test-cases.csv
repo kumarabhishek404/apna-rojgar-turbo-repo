@@ -1,0 +1,1243 @@
+Module,#,Test ID,Sub-Screen,Test Case Name,Test Type,Role,Priority,Route,Pre-requisites,Test Steps,Expected Result,Status,Remark
+Setup,,,,Test environment and accounts,,All,,,"Apna Rojgar mobile app v1.3.1 · Android / iOS (Expo) · Staging API · Test mobiles for Worker, Employer, Mediator, Admin (see team test accounts)",Install app from Play Store / EAS build / dev client. Ensure network is available unless testing offline cases.,App launches. Test accounts can complete login and reach main tabs.,,Regenerate: pnpm generate:mobile-test-cases-csv
+01 - App Launch,,,,SCREEN: App Launch,Info,All,,,"App startup, force update, offline mode, global navigation, auth guards, and app-wide behaviour.",Install and open the app. Many cases start from cold launch or logged-in tab roots.,"This module contains 27 test case(s). Filter by Module = ""01 - App Launch"" in Google Sheets.",,
+01 - App Launch,1,TC-GLB-021,Analytics Session,Analytics session events batch upload,Functionality,All,P2,AnalyticsSession,Any test account · Network available; logged in,"1. Use app for 2+ minutes.
+2. Background and foreground app.
+3. Check network/logs if available.",1. Session start/foreground/background events queued without crash.,,
+01 - App Launch,2,TC-GLB-001,App Launch,App launches without crash on Android,Availability,All,P0,app/_layout.tsx,Any test account · Fresh install; network available,"1. Install APK/AAB on Android device.
+2. Tap app icon.
+3. Observe splash and initial screen.","1. App opens without crash.
+2. root layout loads.
+3. no blank white screen persists.",,
+01 - App Launch,3,TC-GLB-008,Auth Guard,Incomplete profile redirects to login or register,Functionality,Guest,P0,/(tabs)/_layout.tsx,Logged out · Incomplete profile or,"1. Clear token or use account missing name/address/age/gender.
+2. Attempt to open tabs.",1. User redirected to /screens/auth/login or register step 2.,,
+01 - App Launch,4,TC-GLB-015,Bottom Tabs,"Worker tab labels show Home, Work, People, Activity, My Profile",UI Design,Worker,P1,/(tabs)/_layout.tsx,Worker account · Logged in as Worker,"1. Login as Worker.
+2. Observe bottom tab bar labels and icons.",1. Correct role-specific labels and icons for all 5 tabs.,,
+01 - App Launch,5,TC-GLB-016,Bottom Tabs,Employer tab labels show correct role-specific names,UI Design,Employer,P1,/(tabs)/_layout.tsx,Employer account · Logged in as Employer,"1. Login as Employer.
+2. Observe tab bar.",1. Employer-specific tab labels displayed (e.g. Work shows labour listings context).,,
+01 - App Launch,6,TC-GLB-017,Bottom Tabs,Mediator tab labels show correct role-specific names,UI Design,Mediator,P1,/(tabs)/_layout.tsx,Mediator account · Logged in as Mediator,"1. Login as Mediator.
+2. Observe tab bar.",1. Mediator-specific tab labels displayed correctly.,,
+01 - App Launch,7,TC-GLB-018,Bottom Tabs,"Admin tab labels show Users, Services, People, Requests, Profile",UI Design,Admin,P1,/(tabs)/_layout.tsx,Admin account · Logged in as Admin,"1. Login as Admin.
+2. Observe tab bar labels.",1. Admin tab labels differ from user roles appropriately.,,
+01 - App Launch,8,TC-GLB-023,Client Device Headers,API requests include X-Client device headers,Functionality,All,P2,app/api/index.tsx,Any test account · API logging or proxy available,"1. Perform any authenticated API call.
+2. Inspect request headers.",1. X-Client-* headers present with platform and version info.,,
+01 - App Launch,9,TC-GLB-029,Deep Link Stack,Deep link to /screens/service/[id] works from root stack,Functionality,All,P1,app/_layout.tsx,Any test account · Logged in,"1. Open apnarojgar://job/<valid-id> or universal link.
+2. Observe navigation.",1. Service detail opens without requiring tab navigation first.,,
+01 - App Launch,10,TC-GLB-022,Error Boundary,Error boundary prevents full app white-screen on component error,Availability,All,P2,app/_layout.tsx,Any test account · None,"1. Navigate through major screens.
+2. Verify no unhandled crash loops.","1. Isolated errors show fallback UI.
+2. app remains usable.",,
+01 - App Launch,11,TC-GLB-002,Force Update,Force update screen blocks app when version too old,Availability,All,P0,ForceUpdateSection,Any test account · Backend minSupportedVersion > installed app version,"1. Set backend minSupportedVersion above current app.
+2. Launch app.
+3. Observe blocking screen.","1. Force update screen shown.
+2. user cannot access tabs until updated.",,
+01 - App Launch,12,TC-GLB-003,Force Update,Update button opens Play Store or update flow,Functionality,All,P1,ForceUpdateSection,Any test account · Force update screen visible,"1. On force update screen tap Update/Go to Store.
+2. Observe navigation.",1. User is directed to app update (Play Store or OTA).,,
+01 - App Launch,13,TC-GLB-010,Global Bottom Drawer,Global bottom drawer opens and closes,Availability,All,P1,GlobalBottomDrawer,Any test account · Screen with filter/address drawer trigger,"1. Open filter or address drawer from listing screen.
+2. Swipe/tap to close.","1. Drawer slides up with content.
+2. closes without UI glitch.",,
+01 - App Launch,14,TC-GLB-011,Global Side Drawer,Global side drawer available on attendance view,Availability,Employer,P2,GlobalSideDrawer,Employer account · Attendance screen accessible,"1. Open attendance report screen.
+2. Trigger side drawer action.",1. Side drawer opens with expected actions.,,
+01 - App Launch,15,TC-GLB-026,Locale Remount,Language change remounts app with new strings,Functionality,All,P1,app/context/locale.tsx,Any test account · Logged in,"1. Change language in settings.
+2. Navigate multiple screens.",1. All visible strings update to selected language.,,
+01 - App Launch,16,TC-GLB-005,No Internet,No internet placeholder shown when offline,Availability,All,P1,/screens/placeholders/noInternet,Any test account · Disable Wi-Fi and mobile data,"1. Turn off network.
+2. Open app or trigger API call.
+3. Observe UI.","1. No internet message/placeholder visible.
+2. app does not crash.",,
+01 - App Launch,17,TC-GLB-006,No Internet,App recovers when network restored,Functionality,All,P1,/screens/placeholders/noInternet,Any test account · App showing offline state,"1. Re-enable network.
+2. Pull to refresh or retry action.","1. Content loads.
+2. offline placeholder dismissed.",,
+01 - App Launch,18,TC-GLB-004,OTA Update,In-app OTA update check runs after version guard passes,Functionality,All,P2,InAppUpdatesChecker,Any test account · OTA update available via Expo,"1. Launch app with supported version.
+2. Wait for OTA checker.","1. OTA prompt shown when update available.
+2. no crash if unavailable.",,
+01 - App Launch,19,TC-GLB-014,Pagination,Infinite scroll loads next page,Functionality,All,P1,List screens,Any test account · List with more than one page of data,"1. Scroll to bottom of list.
+2. Wait for loader.
+3. Continue scrolling.","1. Additional items append.
+2. loader disappears when no more data.",,
+01 - App Launch,20,TC-GLB-009,Pending Approval,Pending approval user sees profile only without bottom tabs,Availability,All,P1,/(tabs)/_layout.tsx,Any test account · Account status not ACTIVE,"1. Login with pending/non-ACTIVE account.
+2. Observe layout.","1. UserProfile full-screen shown.
+2. bottom tab bar hidden.",,
+01 - App Launch,21,TC-GLB-020,Profile Photo Upload,Background profile photo upload retries after registration,Functionality,All,P2,backgroundImageUpload.ts,Any test account · Registration with pending photo upload,"1. Complete registration with photo.
+2. If upload fails, reopen app.
+3. Check profile photo.",1. Pending photo upload retries and appears on profile.,,
+01 - App Launch,22,TC-GLB-013,Pull to Refresh,Pull-to-refresh reloads list data,Functionality,All,P1,List screens,"Any test account · Any paginated list (home, work, activity)","1. Open list screen.
+2. Pull down to refresh.
+3. Observe loader and data.","1. Refresh indicator shown.
+2. list updates with latest data.",,
+01 - App Launch,23,TC-GLB-027,Role Remount,Role switch remounts app with role-specific UI,Functionality,All,P1,app/context/locale.tsx,Any test account · Logged in; role switcher available,"1. Switch role via RoleSwitcher.
+2. Observe tabs and home content.",1. UI updates to match selected role without crash.,,
+01 - App Launch,24,TC-UI-001,Stack Headers,Consistent back button on all stack screens,UI Design,All,P1,/screens/*,Any test account · Logged in,"1. Open 10+ different /screens/* routes.
+2. Verify back button on each.",1. Back navigation present and functional on all.,,
+01 - App Launch,25,TC-GLB-028,Stack Navigation,Stack screens show back navigation header,UI Design,All,P1,app/_layout.tsx,Any test account · Logged in,"1. Open any /screens/* route from tabs.
+2. Observe header.","1. Back button/header visible.
+2. returns to previous screen.",,
+01 - App Launch,26,TC-GLB-007,Tab Root,Hardware back shows exit confirmation at tab root,Functionality,All,P1,/(tabs),Any test account · Logged in; on any tab root,"1. Navigate to any bottom tab root.
+2. Press Android back button.","1. Exit confirmation modal appears.
+2. cancel stays in app.
+3. confirm exits.",,
+01 - App Launch,27,TC-GLB-012,Toast,Success and error toasts display correctly,UI Design,All,P2,toast.tsx,Any test account · Trigger success and error actions,"1. Perform action with success response.
+2. Perform action with error.
+3. Observe toasts.",1. Green success and red error toasts appear briefly and dismiss.,,
+02 - Language Selection,,,,SCREEN: Language Selection,Info,All,,,Test cases for Language Selection.,"Open Language Selection in the app, then run each row's Steps.","This module contains 20 test case(s). Filter by Module = ""02 - Language Selection"" in Google Sheets.",,
+02 - Language Selection,1,TC-ONB-012,Bottom Nav Tutorial,Bottom navigation tutorial overlay displays,Availability,All,P2,/screens/tutorials/bootomNavigation,Any test account · Tutorial trigger if shown,"1. Trigger bottom nav tutorial if available.
+2. Observe overlay modal.",1. Tutorial modal explains tab navigation with dismiss option.,,
+02 - Language Selection,2,TC-ONB-013,Bottom Nav Tutorial,Tutorial dismiss closes overlay,Functionality,All,P2,/screens/tutorials/bootomNavigation,Any test account · Tutorial visible,"1. Open tutorial.
+2. Tap dismiss/close.","1. Overlay closes.
+2. user can interact with tabs.",,
+02 - Language Selection,3,TC-ONB-008,Change Language,Change language screen accessible from settings and login,Availability,All,P1,/screens/settings/changeLanguage,Any test account · Logged in; open from login or profile settings,"1. Profile → Settings → Change Language.
+2. Also test link from login screen.",1. Language list screen opens from both entry points.,,
+02 - Language Selection,4,TC-ONB-009,Change Language,Language change syncs to backend when logged in,Functionality,All,P1,/screens/settings/changeLanguage,Any test account · Logged in with valid token,"1. Change language while logged in.
+2. Kill and reopen app.
+3. Verify language persisted.",1. Selected language persists locally and on server profile.,,
+02 - Language Selection,5,TC-ONB-010,Change Language,Language change works locally when logged out,Functionality,Guest,P2,/screens/settings/changeLanguage,Logged out,"1. From login tap Change Language.
+2. Select new language.
+3. Return to login.","1. Login screen strings update.
+2. no API error shown.",,
+02 - Language Selection,6,TC-ONB-011,Change Language,Currently selected language is highlighted,UI Design,All,P2,/screens/settings/changeLanguage,Any test account · On change language screen,"1. Open change language.
+2. Observe selected language marker.",1. Active language has checkmark or highlight.,,
+02 - Language Selection,7,TC-PROF-041,Change Language,Change Language link navigates correctly,Functionality,All,P1,/screens/settings/changeLanguage,Any test account · Profile settings tab,"1. Tap Change Language.
+2. Observe screen.",1. Opens language picker.,,
+02 - Language Selection,8,TC-SUP-022,Change Language,Change language accessible from settings,Availability,All,P1,/screens/settings/changeLanguage,Any test account · Settings menu,1. Profile → Change Language.,1. Language picker opens.,,
+02 - Language Selection,9,TC-ONB-014,First Launch,First launch flow note — auto onboarding may not be wired,Functionality,Guest,P2,useFirstTimeLaunch.tsx,Logged out · Fresh install,"1. Fresh install.
+2. Observe if language/onboarding auto-shows.","1. Document actual behavior.
+2. manual navigation to languageSelection works.",,useFirstTimeLaunch exists but may not be wired to root nav.
+02 - Language Selection,10,TC-ONB-001,Language Selection,Language selection screen loads with language list,Availability,Guest,P0,/languageSelection,Logged out · Fresh install or navigate to /languageSelection,"1. Open language selection screen.
+2. Observe available languages.","1. List of supported languages visible (Hindi, English, and regional languages).",,
+02 - Language Selection,11,TC-ONB-002,Language Selection,Selecting language applies locale and navigates forward,Functionality,Guest,P0,/languageSelection,Logged out · On language selection screen,"1. Tap a language.
+2. Observe next screen.","1. App strings switch to selected language.
+2. navigates to onboarding or login path.",,
+02 - Language Selection,12,TC-ONB-003,Language Selection,Language selection UI is readable and tappable on small Android screens,UI Design,Guest,P1,/languageSelection,Logged out · On language selection screen,"1. Test on small screen device.
+2. Scroll if needed.
+3. Tap each language row.","1. No text truncation.
+2. touch targets adequate.
+3. no overlap.",,
+02 - Language Selection,13,TC-ONB-004,Language Selection,Each supported locale renders without missing translation keys,Functionality,Guest,P2,/languageSelection,Logged out · Multiple languages available,"1. Select each major language.
+2. Check key screens for raw keys like 'missing.translation'.",1. No untranslated key strings visible on language selection and next screen.,,
+02 - Language Selection,14,TC-ONB-015,Language Selection,Bengali locale selection works,Functionality,Guest,P1,/languageSelection,Logged out · Regional language list,"1. Select Bengali (bn).
+2. Verify strings on next screen.",1. Bengali translations applied.,,
+02 - Language Selection,15,TC-ONB-016,Language Selection,Tamil locale selection works,Functionality,Guest,P1,/languageSelection,Logged out · Regional language list,"1. Select Tamil (ta).
+2. Verify strings on next screen.",1. Tamil translations applied.,,
+02 - Language Selection,16,TC-ONB-017,Language Selection,Telugu locale selection works,Functionality,Guest,P1,/languageSelection,Logged out · Regional language list,"1. Select Telugu (te).
+2. Verify strings on next screen.",1. Telugu translations applied.,,
+02 - Language Selection,17,TC-ONB-005,User Tips / Onboarding,Onboarding carousel slides visible,Availability,Guest,P1,/screens/userTipForAppUse,Logged out · Navigate to user tips screen,"1. Open /screens/userTipForAppUse.
+2. Swipe through slides.",1. Multiple onboarding slides with images/text visible.,,
+02 - Language Selection,18,TC-ONB-006,User Tips / Onboarding,Finish onboarding navigates to main tabs or login,Functionality,Guest,P1,/screens/userTipForAppUse,Logged out · On onboarding carousel,"1. Swipe to last slide.
+2. Tap Finish/Get Started.",1. User navigates to /(tabs) or appropriate auth screen.,,
+02 - Language Selection,19,TC-ONB-007,User Tips / Onboarding,Slide indicators and pagination dots visible,UI Design,Guest,P2,/screens/userTipForAppUse,Logged out · On onboarding carousel,"1. Swipe between slides.
+2. Observe pagination indicators.",1. Current slide indicator updates correctly.,,
+02 - Language Selection,20,TC-ONB-018,User Tips / Onboarding,Skip onboarding if skip button present,Functionality,Guest,P2,/screens/userTipForAppUse,Logged out · On onboarding,"1. Look for Skip button.
+2. Tap if available.",1. User proceeds without viewing all slides.,,
+03 - Login,,,,SCREEN: Login,Info,All,,,Returning user login via mobile + OTP. Gateway to the main app.,"Log out from Profile, or use a fresh install.","This module contains 19 test case(s). Filter by Module = ""03 - Login"" in Google Sheets.",,
+03 - Login,1,TC-GLB-025,Disabled Account,Disabled account handling same as suspended,Functionality,All,P0,app/api/index.tsx,Any test account · Account disabled on backend,"1. Use disabled account.
+2. Trigger API call.","1. Appropriate error shown.
+2. user logged out.",,
+03 - Login,2,TC-AUTH-001,Login,Login screen displays all required UI elements,Availability,Guest,P0,/screens/auth/login,Logged out,"1. Look at the full screen from top to bottom.
+2. Confirm you see: Apna Rojgar branding/logo, mobile number input field, country code (+91), a 'Send OTP' button, a link for New Registration, and optionally a Change Language link.
+3. Do not enter any data yet — this test is only about visibility.","1. Mobile number field is visible and tappable.
+2. Country code +91 is shown next to the mobile field.
+3. Send OTP button is visible and enabled.
+4. New Registration link is visible.
+5. No blank white screen, crash, or missing translation keys (e.g. 'auth.login.title').",,
+03 - Login,3,TC-AUTH-002,Login,Send OTP succeeds for a valid registered mobile number,Functionality,Guest,P0,/screens/auth/login,Logged out · Use a mobile number that is already registered on the staging server (use team test data),"1. Tap the mobile number field and type a valid 10-digit registered number.
+2. Tap the 'Send OTP' button.
+3. Wait up to 30 seconds and watch for: a loading indicator, a success toast/message, and the OTP input field appearing.
+4. Check your SMS inbox (staging: 000000) — an OTP message should arrive.","1. Send OTP button shows loading state while request is in progress.
+2. A success message or toast appears (e.g. 'OTP sent successfully').
+3. OTP input field(s) appear on the same screen — user stays on Login.
+4. No error toast saying 'user not found' for a valid registered number.
+5. SMS OTP is received on the test device (or use dev OTP 000000 on staging).",,
+03 - Login,4,TC-AUTH-003,Login,Correct OTP logs in a user with complete profile and opens Home,Functionality,Guest,P0,/screens/auth/login,"Logged out · OTP has been sent to a registered user with a COMPLETE profile (name, address, age, gender all filled). OTP field is visible on Login screen","1. After OTP is sent, enter the 6-digit OTP received via SMS (on staging/dev you may use 000000).
+2. Tap Verify / Login / Submit button.
+3. Wait for navigation — the app should transition away from Login.
+4. Confirm you see the bottom tab bar with 5 tabs (Home, Work, People, Activity, Profile).","1. OTP is accepted without error.
+2. App navigates to the main app (/(tabs)) — NOT stuck on Login.
+3. Bottom navigation bar with 5 tabs is visible.
+4. Home tab is selected by default.
+5. User remains logged in if app is killed and reopened (session persisted).",,
+03 - Login,5,TC-AUTH-004,Login,Dev bypass OTP 000000 works on staging,Functionality,Guest,P0,/screens/auth/login,Logged out · Staging/dev environment only (staging API). OTP already sent,"1. Send OTP to any valid registered test number.
+2. When OTP field appears, type 000000 (six zeros).
+3. Tap Verify / Login.
+4. Observe whether login succeeds.","1. Login succeeds on staging/dev without needing real SMS.
+2. User navigates to main tabs.
+3. This OTP must NOT work on production — if it does, report as a security bug.",,Dev bypass is in utils/devOtp.ts — staging only.
+03 - Login,6,TC-AUTH-005,Login,Wrong OTP shows clear error and keeps user on Login,Functionality,Guest,P1,/screens/auth/login,Logged out · OTP has been sent. OTP input field is visible,"1. Send OTP to a valid number.
+2. Enter an intentionally wrong OTP.
+3. Tap Verify / Login.
+4. Read any error message shown.","1. An error message appears (e.g. 'Invalid OTP' or similar in Hindi/English).
+2. User remains on the Login screen — NOT navigated to Home.
+3. OTP field is cleared or editable so user can retry.
+4. App does not crash.",,
+03 - Login,7,TC-AUTH-006,Login,Resend OTP delivers a new code after timer expires,Functionality,Guest,P1,/screens/auth/login,Logged out · OTP has been sent. Wait for the Resend OTP countdown timer to finish (usually 30–60 seconds),"1. Send OTP and wait until the 'Resend OTP' button becomes tappable (countdown ends).
+2. Tap 'Resend OTP'.
+3. Wait for confirmation message.
+4. Enter the NEW OTP (not the old one) and submit.","1. Resend button is disabled during countdown, then becomes active.
+2. Tapping Resend shows success feedback.
+3. New OTP is accepted.
+4. old OTP is rejected.
+5. Login completes successfully with the new OTP.",,
+03 - Login,8,TC-AUTH-007,Login,Invalid mobile number is rejected before OTP is sent,Functionality,Guest,P1,/screens/auth/login,Logged out · On Login screen. No OTP sent yet,"1. Test A: Enter only 5 digits and tap Send OTP.
+2. Test B: Enter letters or special characters and tap Send OTP.
+3. Test C: Leave the field empty and tap Send OTP.","1. For all three tests: OTP is NOT sent.
+2. A validation error message appears near the mobile field.
+3. OTP input field does NOT appear.
+4. User stays on Login screen.",,
+03 - Login,9,TC-AUTH-008,Login,Incomplete profile redirects to Register Step 2 after OTP verification,Functionality,Guest,P0,/screens/auth/login,"Logged out · Use a test account that registered but did NOT complete profile (missing name, address, age, or gender). use team test data","1. Log in with the incomplete-profile test number.
+2. Send OTP and enter the correct code.
+3. Tap Verify / Login.
+4. Observe which screen opens next.","1. After OTP verification, app navigates to Register Step 2 (/screens/auth/register/second).
+2. Personal details form is shown (name, address, etc.).
+3. User is NOT taken to Home tabs until profile is completed.
+4. Partially saved data (if any) may be pre-filled.",,
+03 - Login,10,TC-AUTH-009,Login,Change Language link is visible and opens language picker,UI Design,Guest,P2,/screens/auth/login,Logged out · On Login screen while,"1. Scroll if needed to find the 'Change Language' link (often at bottom).
+2. Tap the Change Language link.
+3. Observe the screen that opens.
+4. Select a different language and return to Login.","1. Change Language link is visible without scrolling on most devices.
+2. Tapping it opens /screens/settings/changeLanguage.
+3. After selecting Hindi, Login screen text updates to Hindi.
+4. Back navigation returns to Login.",,
+03 - Login,11,TC-AUTH-010,Login,New Registration link opens signup Step 1,Functionality,Guest,P1,/screens/auth/login,Logged out · On Login screen while,"1. On Login screen, locate the 'New Registration' / 'Register' link.
+2. Tap it.
+3. Observe the screen that opens.","1. App navigates to Register Step 1 (/screens/auth/register/first).
+2. Mobile number + OTP registration form is shown.
+3. Back button returns to Login without crash.",,
+03 - Login,12,TC-AUTH-031,Login,Push token registered after successful login,Functionality,Guest,P1,/screens/auth/login,Logged out · Logged in previously,"1. Login successfully.
+2. Check notification registration.",1. Device push token registered with backend.,,
+03 - Login,13,TC-AUTH-034,Login,OTP input fields styled consistently,UI Design,Guest,P2,/screens/auth/login,Logged out · On login OTP step,"1. Reach OTP step.
+2. Observe OTP boxes/field.","1. OTP UI readable.
+2. keyboard numeric type opens.",,
+03 - Login,14,TC-AUTH-036,Login,Login with unregistered mobile shows error,Functionality,Guest,P1,/screens/auth/login,Logged out · Unregistered mobile on login,"1. Enter unregistered mobile.
+2. Send OTP.",1. Error prompting registration.,,
+03 - Login,15,TC-AUTH-039,Login,Login screen branding and logo visible,UI Design,Guest,P1,/screens/auth/login,Logged out · On login,"1. Open login.
+2. Observe header/branding.","1. Apna Rojgar branding visible.
+2. professional layout.",,
+03 - Login,16,TC-AUTH-029,Logout,Logout clears session and redirects to login,Functionality,All,P0,useLogout.ts,Any test account · Logged in,"1. Profile → Logout.
+2. Confirm.
+3. Observe navigation.","1. Token cleared.
+2. redirected to /screens/auth/login.",,
+03 - Login,17,TC-PROF-010,Logout,Logout confirmation modal,Functionality,All,P0,UserProfile,Any test account · Logged in,"1. Tap Logout.
+2. Observe modal.
+3. Confirm.","1. Modal shown.
+2. logout on confirm.",,
+03 - Login,18,TC-AUTH-030,Session Expiry,401 API response triggers auto logout,Functionality,All,P0,AuthListner.tsx,Any test account · Logged in; invalidate token on server,"1. Invalidate session server-side.
+2. Trigger any API call.","1. User logged out.
+2. redirected to login.",,
+03 - Login,19,TC-GLB-024,Suspended Account,Suspended account shows message and logs out,Functionality,All,P0,app/api/index.tsx,Any test account · Account suspended on backend,"1. Login or use suspended account.
+2. Trigger API call.","1. User notified.
+2. redirected to login.
+3. session cleared.",,
+04 - Register Step 1,,,,SCREEN: Register Step 1,Info,All,,,Test cases for Register Step 1.,"Open Register Step 1 in the app, then run each row's Steps.","This module contains 5 test case(s). Filter by Module = ""04 - Register Step 1"" in Google Sheets.",,
+04 - Register Step 1,1,TC-AUTH-028,Legacy Register,Legacy register wizard still accessible,Availability,Guest,P2,/screens/auth/register,Logged out · Navigate to legacy route,"1. Navigate to /screens/auth/register.
+2. Observe wizard.",1. Legacy multi-step wizard loads without crash.,,Legacy flow; active flow uses first→second→fourth→fifth.
+04 - Register Step 1,2,TC-AUTH-011,Register Step 1,Register step 1 shows mobile and OTP flow,Availability,Guest,P0,/screens/auth/register/first,Logged out · New unregistered mobile,"1. Open register/first.
+2. Observe fields.","1. Mobile input, OTP send/verify, progress indicator visible.",,
+04 - Register Step 1,3,TC-AUTH-012,Register Step 1,New user OTP registration creates account,Functionality,Guest,P0,/screens/auth/register/first,Logged out · New mobile number,"1. Enter new mobile.
+2. Verify OTP.
+3. Proceed.","1. Account created.
+2. navigates to step 2.",,
+04 - Register Step 1,4,TC-AUTH-013,Register Step 1,Resume registration for existing partial user,Functionality,Guest,P1,/screens/auth/register/first,Logged out · Existing partial profile mobile,"1. Enter mobile with partial profile.
+2. Verify OTP.",1. Resumes at correct step (second or fifth).,,
+04 - Register Step 1,5,TC-AUTH-014,Register Step 1,Already registered mobile shows appropriate message,Functionality,Guest,P1,/screens/auth/register/first,Logged out · Already registered complete mobile,"1. Enter fully registered mobile.
+2. Attempt register.",1. Prompt to login instead or error message.,,
+05 - Register Step 2,,,,SCREEN: Register Step 2,Info,All,,,Test cases for Register Step 2.,"Open Register Step 2 in the app, then run each row's Steps.","This module contains 8 test case(s). Filter by Module = ""05 - Register Step 2"" in Google Sheets.",,
+05 - Register Step 2,1,TC-AUTH-015,Register Step 2,Register step 2 shows personal detail fields,Availability,Guest,P0,/screens/auth/register/second,Logged out · Completed step 1,"1. Open register/second.
+2. Observe form.","1. Name, address, email, age, gender, Aadhaar, location fields visible.",,
+05 - Register Step 2,2,TC-AUTH-016,Register Step 2,Submit valid personal details proceeds to step 4,Functionality,Guest,P0,/screens/auth/register/second,Logged out · On step 2,"1. Fill all required fields.
+2. Pick GPS location.
+3. Tap Next.",1. Navigates to register/fourth (step 3 PIN skipped).,,
+05 - Register Step 2,3,TC-AUTH-017,Register Step 2,Required field validation on step 2,Functionality,Guest,P1,/screens/auth/register/second,Logged out · On step 2,"1. Leave name empty.
+2. Tap Next.",1. Validation error for missing required fields.,,
+05 - Register Step 2,4,TC-AUTH-018,Register Step 2,GPS location picker sets address coordinates,Functionality,Guest,P1,/screens/auth/register/second,Logged out · On step 2,"1. Tap location/GPS button.
+2. Allow location permission.
+3. Confirm location.",1. Coordinates and address populated.,,
+05 - Register Step 2,5,TC-AUTH-019,Register Step 2,Gender selector displays all options,UI Design,Guest,P2,/screens/auth/register/second,Logged out · On step 2,"1. Open gender picker.
+2. Select each option.",1. Male/Female/Other options selectable.,,
+05 - Register Step 2,6,TC-AUTH-033,Register Step 2,Email verification if implemented,Functionality,Guest,P2,/screens/auth/register/second,Logged out · On step 2,"1. Enter email.
+2. Request verification code if shown.
+3. Verify.",1. Email verified or field saved correctly.,,
+05 - Register Step 2,7,TC-AUTH-035,Register Step 2,Progress indicator shows registration step,UI Design,Guest,P2,/screens/auth/register/second,Logged out · On step 2,1. Observe step indicator on register screens.,1. User knows current step in multi-step flow.,,
+05 - Register Step 2,8,TC-AUTH-032,Register Step 3 (Legacy PIN),Legacy PIN step accessible but skipped in active flow,Availability,Guest,P2,/screens/auth/register/third,Logged out · Navigate to step 3 directly,"1. Open register/third.
+2. Observe PIN setup.","1. 4-digit PIN UI loads.
+2. active flow skips this step.",,Step 3 skipped in active flow (second → fourth).
+06 - Register Step 4,,,,SCREEN: Register Step 4,Info,All,,,Test cases for Register Step 4.,"Open Register Step 4 in the app, then run each row's Steps.","This module contains 6 test case(s). Filter by Module = ""06 - Register Step 4"" in Google Sheets.",,
+06 - Register Step 4,1,TC-AUTH-020,Register Step 4,Register step 4 shows role selection,Availability,Guest,P0,/screens/auth/register/fourth,Logged out · Completed step 2,"1. Open register/fourth.
+2. Observe options.","1. Worker, Employer, Mediator role cards visible.",,
+06 - Register Step 4,2,TC-AUTH-021,Register Step 4,Select Worker role and skills proceeds,Functionality,Guest,P0,/screens/auth/register/fourth,Logged out · On step 4,"1. Select Worker.
+2. Pick skills.
+3. Tap Next.",1. Navigates to register/fifth.,,
+06 - Register Step 4,3,TC-AUTH-022,Register Step 4,Select Employer role proceeds,Functionality,Guest,P0,/screens/auth/register/fourth,Logged out · On step 4,"1. Select Employer.
+2. Complete role-specific fields.
+3. Next.",1. Navigates to register/fifth.,,
+06 - Register Step 4,4,TC-AUTH-023,Register Step 4,Select Mediator role with team size,Functionality,Guest,P0,/screens/auth/register/fourth,Logged out · On step 4,"1. Select Mediator.
+2. Enter team size if required.
+3. Next.",1. Navigates to register/fifth.,,
+06 - Register Step 4,5,TC-AUTH-024,Register Step 4,Role selection required validation,Functionality,Guest,P1,/screens/auth/register/fourth,Logged out · On step 4 without role,"1. Skip role selection.
+2. Tap Next.",1. Validation prevents proceeding.,,
+06 - Register Step 4,6,TC-AUTH-037,Register Step 4,Skill multi-select on Worker registration,Functionality,Guest,P1,/screens/auth/register/fourth,Logged out · Worker role selected,"1. Select Worker.
+2. Pick multiple skills.
+3. Submit.",1. Selected skills saved to profile.,,
+07 - Register Step 5,,,,SCREEN: Register Step 5,Info,All,,,Test cases for Register Step 5.,"Open Register Step 5 in the app, then run each row's Steps.","This module contains 4 test case(s). Filter by Module = ""07 - Register Step 5"" in Google Sheets.",,
+07 - Register Step 5,1,TC-AUTH-025,Register Step 5,Register step 5 shows selfie/profile photo upload,Availability,Guest,P0,/screens/auth/register/fifth,Logged out · Completed step 4,"1. Open register/fifth.
+2. Observe camera/gallery options.",1. Selfie capture or photo upload UI visible.,,
+07 - Register Step 5,2,TC-AUTH-026,Register Step 5,Complete registration with photo navigates to tabs,Functionality,Guest,P0,/screens/auth/register/fifth,Logged out · On step 5,"1. Capture/upload selfie.
+2. Tap Finish/Submit.","1. Registration complete.
+2. navigates to /(tabs).",,
+07 - Register Step 5,3,TC-AUTH-027,Register Step 5,Camera permission request for selfie,Functionality,Guest,P1,/screens/auth/register/fifth,Logged out · Camera permission,"1. Tap capture selfie.
+2. Observe permission dialog.","1. Android camera permission requested.
+2. capture works when granted.",,
+07 - Register Step 5,4,TC-AUTH-038,Register Step 5,Skip photo if optional and still complete,Functionality,Guest,P2,/screens/auth/register/fifth,Logged out · On step 5,1. Attempt finish without photo if skip available.,1. Behavior matches product rules (required vs optional).,,
+10 - Home Tab,,,,SCREEN: Home Tab,Info,All,,,"Main dashboard — categories, featured listings, quick links, stats.",Log in → tap Home tab (1st bottom icon).,"This module contains 32 test case(s). Filter by Module = ""10 - Home Tab"" in Google Sheets.",,
+10 - Home Tab,1,TC-HOME-013,Company Stats,Company stats section displays,Availability,All,P2,UnifiedHomeDashboard,Any test account · Stats API available,"1. Find stats section on home.
+2. Observe numbers.",1. Stats from /home/stats rendered.,,
+10 - Home Tab,2,TC-HOME-039,Company Stats,Stats section hidden or graceful on API failure,Functionality,All,P2,UnifiedHomeDashboard,Any test account · Stats API error,1. Simulate stats API failure.,"1. Home still usable.
+2. stats hidden or placeholder.",,
+10 - Home Tab,3,TC-HOME-009,Featured Services,Featured services horizontal list visible,Availability,Worker,P1,UnifiedHomeDashboard,Worker account · Active jobs on server,"1. Find featured services section.
+2. Scroll horizontally.",1. Service cards scroll horizontally.,,
+10 - Home Tab,4,TC-HOME-010,Featured Services,Tap featured service opens detail,Functionality,Worker,P1,UnifiedHomeDashboard,Worker account · Featured services visible,"1. Tap a service card.
+2. Observe navigation.",1. Navigates to /screens/service/[id].,,
+10 - Home Tab,5,TC-HOME-035,Featured Services,Service cards show pay and location info,UI Design,Worker,P2,UnifiedHomeDashboard,Worker account · Featured services visible,1. Observe service card content.,"1. Daily pay, location or distance visible on cards.",,
+10 - Home Tab,6,TC-HOME-011,Featured Workers,Featured workers list visible for Employer,Availability,Employer,P1,UnifiedHomeDashboard,Employer account · Workers on server,1. Observe featured workers section.,1. Worker cards shown horizontally.,,
+10 - Home Tab,7,TC-HOME-012,Featured Workers,Tap featured worker opens profile,Functionality,Employer,P1,UnifiedHomeDashboard,Employer account · Featured workers visible,1. Tap worker card.,1. Navigates to /screens/users/[id].,,
+10 - Home Tab,8,TC-HOME-004,Home Hero,Hero section shows Worker role tag,UI Design,Worker,P1,HomeHeroSection,Worker account · Worker on home,"1. Observe hero section.
+2. Check role tag label.",1. Worker/labour role tag displayed correctly.,,
+10 - Home Tab,9,TC-HOME-005,Home Hero,Hero section shows Employer role tag,UI Design,Employer,P1,HomeHeroSection,Employer account · Employer on home,1. Observe hero section.,1. Employer role tag displayed.,,
+10 - Home Tab,10,TC-HOME-006,Home Hero,Hero section shows Mediator role tag,UI Design,Mediator,P1,HomeHeroSection,Mediator account · Mediator on home,1. Observe hero section.,1. Mediator role tag displayed.,,
+10 - Home Tab,11,TC-HOME-030,Home Hero,Mediator hero shows team-related CTA if applicable,Functionality,Mediator,P2,HomeHeroSection,Mediator account · Mediator with team,1. Observe mediator hero CTAs.,1. Team/work relevant CTAs visible.,,
+10 - Home Tab,12,TC-HOME-001,Home Tab,Worker home dashboard loads,Availability,Worker,P0,/(tabs)/index,Worker account · Logged in as Worker,"1. Login as Worker.
+2. Open Home tab.",1. UnifiedHomeDashboard visible with categories and listings.,,
+10 - Home Tab,13,TC-HOME-002,Home Tab,Employer home dashboard loads,Availability,Employer,P0,/(tabs)/index,Employer account · Logged in as Employer,"1. Login as Employer.
+2. Open Home tab.",1. Home dashboard with employer CTAs visible.,,
+10 - Home Tab,14,TC-HOME-003,Home Tab,Mediator home dashboard loads,Availability,Mediator,P0,/(tabs)/index,Mediator account · Logged in as Mediator,"1. Login as Mediator.
+2. Open Home tab.",1. Home dashboard with mediator-specific content.,,
+10 - Home Tab,15,TC-HOME-020,Home Tab,Pull to refresh on home dashboard,Functionality,All,P1,/(tabs)/index,Any test account · On home,"1. Pull down on home.
+2. Wait for reload.",1. Home content refreshes.,,
+10 - Home Tab,16,TC-HOME-021,Home Tab,Home scroll performance smooth,UI Design,All,P2,/(tabs)/index,Any test account · On home,"1. Scroll full home content.
+2. Observe jank.",1. Smooth scroll without major frame drops.,,
+10 - Home Tab,17,TC-HOME-028,Home Tab,Home dashboard Hindi strings render,UI Design,Worker,P2,/(tabs)/index,Worker account · Hindi locale,"1. Set Hindi language.
+2. Open home.",1. Home section headings in Hindi.,,
+10 - Home Tab,18,TC-HOME-029,Home Tab,Home handles empty API gracefully,Availability,All,P2,/(tabs)/index,Any test account · No network initially,1. Load home with empty API response.,"1. Empty states shown.
+2. no crash.",,
+10 - Home Tab,19,TC-HOME-032,Home Tab,Home tab selected when navigating to /(tabs),Functionality,All,P2,/(tabs)/index,Any test account · Deep link to home,"1. Navigate to /(tabs).
+2. Observe active tab.",1. Home tab highlighted.,,
+10 - Home Tab,20,TC-HOME-034,Home Tab,Safe area insets respected on notched devices,UI Design,All,P2,/(tabs)/index,Any test account · On home,"1. Test on notched Android device.
+2. Observe top/bottom padding.",1. Content not hidden under status bar or nav bar.,,
+10 - Home Tab,21,TC-HOME-037,Home Tab,Employer sees post job CTA on home,Functionality,Employer,P1,/(tabs)/index,Employer account · Employer on home,1. Find post job button/link.,1. Clear CTA to add new service.,,
+10 - Home Tab,22,TC-HOME-038,Home Tab,Worker sees browse jobs CTA on home,Functionality,Worker,P1,/(tabs)/index,Worker account · Worker on home,1. Find browse/find work links.,1. Navigation to job listings available.,,
+10 - Home Tab,23,TC-HOME-014,Profile Completion,Profile completion prompt shown when incomplete,Availability,All,P1,CompletProfileNotify,Any test account · Incomplete profile fields,"1. Use account with missing fields.
+2. Open home.",1. Complete profile notification banner visible.,,
+10 - Home Tab,24,TC-HOME-015,Profile Completion,Tap profile completion navigates to profile edit,Functionality,All,P1,CompletProfileNotify,Any test account · Completion prompt visible,1. Tap complete profile CTA.,1. Navigates to profile edit screen.,,
+10 - Home Tab,25,TC-HOME-016,Quick Links,Quick links section visible,Availability,All,P1,UnifiedHomeDashboard,Any test account · On home,"1. Find quick links (notifications, favourites, add job).",1. Quick link icons/labels present.,,
+10 - Home Tab,26,TC-HOME-017,Quick Links,Add job quick link opens add service wizard,Functionality,Employer,P1,UnifiedHomeDashboard,Employer account · Employer on home,1. Tap add job/post work link.,1. Navigates to /screens/addService.,,
+10 - Home Tab,27,TC-HOME-018,Quick Links,Notifications quick link opens inbox,Functionality,All,P1,UnifiedHomeDashboard,Any test account · On home,1. Tap notifications link.,1. Navigates to /screens/notifications.,,
+10 - Home Tab,28,TC-HOME-019,Quick Links,Favourites quick link opens saved services,Functionality,All,P2,UnifiedHomeDashboard,Any test account · On home,1. Tap favourites link.,1. Navigates to /screens/favourite.,,
+10 - Home Tab,29,TC-HOME-031,UnifiedHomeDashboard,Section headings bilingual where configured,UI Design,All,P1,/(tabs)/index,Any test account · On home,1. Check major section titles.,1. Headings readable in selected language.,,
+10 - Home Tab,30,TC-HOME-007,Work Categories,Work categories grid visible,Availability,All,P1,UnifiedHomeDashboard,Any test account · On home tab,"1. Scroll home.
+2. Find categories section.",1. Category icons/labels for work types shown.,,
+10 - Home Tab,31,TC-HOME-008,Work Categories,Tap category navigates to filtered service list,Functionality,All,P1,UnifiedHomeDashboard,Any test account · Categories visible,"1. Tap a work category.
+2. Observe destination.",1. Service list filtered by category opens.,,
+10 - Home Tab,32,TC-HOME-036,Work Categories,Category icons match work type,UI Design,All,P2,UnifiedHomeDashboard,Any test account · Categories visible,1. Compare icon to category name.,1. Icons visually represent category.,,
+11 - Work Tab,,,,SCREEN: Work Tab,Info,All,,,Test cases for Work Tab.,"Open Work Tab in the app, then run each row's Steps.","This module contains 38 test case(s). Filter by Module = ""11 - Work Tab"" in Google Sheets.",,
+11 - Work Tab,1,TC-WORK-017,FAB Add Job,FAB add job button visible for Employer,Availability,Employer,P0,UnifiedTabFab,Employer account · Employer on work tab,1. Observe work tab bottom-right.,1. Floating action button for add job visible.,,
+11 - Work Tab,2,TC-WORK-018,FAB Add Job,FAB add job NOT shown for Worker,Availability,Worker,P1,UnifiedTabFab,Worker account · Worker on work tab,1. Observe work tab as Worker.,1. No add job FAB or different FAB action.,,
+11 - Work Tab,3,TC-WORK-019,FAB Add Job,FAB tap opens add service wizard,Functionality,Employer,P0,UnifiedTabFab,Employer account · Employer on work tab,"1. Tap FAB.
+2. Observe navigation.",1. Navigates to /screens/addService.,,
+11 - Work Tab,4,TC-WORK-013,Filter Services,Service filter drawer opens,Availability,Worker,P1,filterServices.tsx,Worker account · Work tab,"1. Tap filter icon.
+2. Observe drawer.",1. Filter drawer with category/distance/pay options.,,
+11 - Work Tab,5,TC-WORK-014,Filter Services,Apply service filters updates list,Functionality,Worker,P1,filterServices.tsx,Worker account · Filter drawer open,"1. Set filters.
+2. Apply.
+3. Observe list.",1. List filtered per selected criteria.,,
+11 - Work Tab,6,TC-WORK-028,Filter Services,Clear filters resets list,Functionality,Worker,P2,filterServices.tsx,Worker account · Filters applied,"1. Apply filters.
+2. Clear/reset.
+3. Observe list.",1. Full unfiltered list restored.,,
+11 - Work Tab,7,TC-WORK-015,Filter Workers,Worker filter drawer opens,Availability,Employer,P1,filterWorkers.tsx,Employer account · Work tab as Employer,1. Tap filter on worker list.,1. Filter drawer with role/skills/distance.,,
+11 - Work Tab,8,TC-WORK-016,Filter Workers,Apply worker filters updates list,Functionality,Employer,P1,filterWorkers.tsx,Employer account · Filter drawer open,"1. Set skill filter.
+2. Apply.",1. Worker list filtered.,,
+11 - Work Tab,9,TC-WORK-034,Filter Workers,Contractor filter shows Mediators only,Functionality,Employer,P2,filterWorkers.tsx,Employer account · Contractor filter mode,"1. Open contractor browse.
+2. Apply filters.",1. Only MEDIATOR role users shown.,,
+11 - Work Tab,10,TC-WORK-029,Search Hub,Search hub screen accessible,Availability,All,P2,/screens/bottomTabs/(user)/search/index,Any test account · Navigate to search hub,1. Open search index if linked.,1. Search hub with services/workers options.,,
+11 - Work Tab,11,TC-WORK-010,Search Services,Search services entry point visible,Availability,Worker,P1,/screens/bottomTabs/(user)/search/searchServices,Worker account · Work tab open,"1. Find search icon/field.
+2. Tap to open search.",1. Search services screen or input opens.,,
+11 - Work Tab,12,TC-WORK-011,Search Services,Search by keyword filters services,Functionality,Worker,P1,searchServices.tsx,Worker account · On search services,"1. Enter search term.
+2. Submit.",1. Matching services displayed.,,
+11 - Work Tab,13,TC-WORK-012,Search Workers,Search by keyword filters workers,Functionality,Employer,P1,searchWorkers.tsx,Employer account · On search workers,"1. Enter worker name/skill.
+2. Submit.",1. Matching workers displayed.,,
+11 - Work Tab,14,TC-SVC-001,Service List,Service list screen loads with pagination,Availability,All,P0,/screens/service,Any test account · Navigate to service list,1. Open /screens/service.,1. Paginated service cards visible.,,
+11 - Work Tab,15,TC-SVC-002,Service List,Service list filters by saved/hiring query params,Functionality,All,P1,/screens/service,Any test account · List with params,1. Open with ?saved=true or hiring param.,1. List filtered per param.,,
+11 - Work Tab,16,TC-SVC-028,Service List,Horizontal service cards tappable and styled,UI Design,All,P2,ListingHorizontalServices,Any test account · Horizontal list on home,1. Observe horizontal list cards.,"1. Cards consistent size.
+2. tappable.",,
+11 - Work Tab,17,TC-SVC-033,Service List,Service list infinite scroll,Functionality,All,P1,/screens/service,Any test account · Long list,1. Scroll to bottom.,1. More services load.,,
+11 - Work Tab,18,TC-SVC-039,Service List,Favourites list shows liked services only,Functionality,All,P1,/screens/favourite,Any test account · Liked services,"1. Open favourites.
+2. Compare to liked items.",1. Only liked services listed.,,
+11 - Work Tab,19,TC-WORK-004,Service List,Service cards show title pay location distance,UI Design,Worker,P1,allServices.tsx,Worker account · Jobs on server,1. Observe service cards in list.,1. Key job info visible on each card.,,
+11 - Work Tab,20,TC-WORK-005,Service List,Tap service card opens detail,Functionality,Worker,P0,allServices.tsx,Worker account · Service list loaded,1. Tap any service card.,1. Navigates to /screens/service/[id].,,
+11 - Work Tab,21,TC-WORK-025,Service List,Empty state when no active jobs,UI Design,Worker,P2,allServices.tsx,Worker account · Empty job list,1. View work tab with zero jobs.,1. Empty state message shown.,,
+11 - Work Tab,22,TC-WORK-027,Service List,Like service from list if available,Functionality,Worker,P2,allServices.tsx,Worker account · Service with like button,1. Tap heart/like on card if shown.,"1. Service liked.
+2. icon updates.",,
+11 - Work Tab,23,TC-WORK-032,Service List,Service index with query params filters correctly,Functionality,All,P1,/screens/service/index,Any test account · Navigate from home category,1. Open /screens/service?category=X.,1. List filtered by param.,,
+11 - Work Tab,24,TC-WORK-007,Sort Tabs,Sort tabs visible (nearest trusted pay),Availability,All,P1,ScrollableSortTabs,Any test account · On work tab list,1. Observe sort tab bar.,"1. Nearest, Trusted, Pay sort options visible.",,
+11 - Work Tab,25,TC-WORK-008,Sort Tabs,Sort by nearest reorders list,Functionality,All,P1,ScrollableSortTabs,Any test account · List with multiple items,"1. Tap Nearest sort.
+2. Observe order change.",1. List re-sorted by distance.,,
+11 - Work Tab,26,TC-WORK-009,Sort Tabs,Sort by pay reorders list,Functionality,All,P1,ScrollableSortTabs,Any test account · List with pay data,1. Tap Pay sort.,1. List re-sorted by daily pay.,,
+11 - Work Tab,27,TC-WORK-036,Sort Tabs,Sort by trusted reorders list,Functionality,All,P2,ScrollableSortTabs,Any test account · Trusted sort data,1. Tap Trusted sort.,1. List re-sorted by trust/rating metric.,,
+11 - Work Tab,28,TC-WORK-001,Work Tab,Worker work tab shows active job listings,Availability,Worker,P0,/(tabs)/second,Worker account · Worker logged in,1. Open Work tab as Worker.,1. AllServices list with job cards visible.,,
+11 - Work Tab,29,TC-WORK-002,Work Tab,Employer work tab shows labour listings,Availability,Employer,P0,/(tabs)/second,Employer account · Employer logged in,1. Open Work tab as Employer.,1. AllWorkers list with worker cards visible.,,
+11 - Work Tab,30,TC-WORK-003,Work Tab,Mediator work tab shows labour listings,Availability,Mediator,P0,/(tabs)/second,Mediator account · Mediator logged in,1. Open Work tab as Mediator.,1. Worker/labour list visible.,,
+11 - Work Tab,31,TC-WORK-020,Work Tab,Pull to refresh on work tab list,Functionality,All,P1,/(tabs)/second,Any test account · List loaded,1. Pull down on list.,1. List refreshes with latest data.,,
+11 - Work Tab,32,TC-WORK-021,Work Tab,Infinite scroll pagination on work list,Functionality,All,P1,/(tabs)/second,Any test account · Long list,1. Scroll to bottom.,1. More items load.,,
+11 - Work Tab,33,TC-WORK-030,Work Tab,Tab label matches role (Work vs Teams for admin),UI Design,All,P1,/(tabs)/second,Any test account · On work tab,1. Compare tab label to role.,1. Correct label for current role.,,
+11 - Work Tab,34,TC-WORK-035,Work Tab,Mediator browses labour same as employer on work tab,Functionality,Mediator,P1,/(tabs)/second,Mediator account · Mediator on work tab,"1. Open work tab as Mediator.
+2. Browse workers.",1. Labour/worker listings available.,,
+11 - Work Tab,35,TC-WORK-037,Work Tab,Work tab list headings in Hindi,UI Design,All,P2,/(tabs)/second,Any test account · Hindi locale,"1. Set Hindi.
+2. Open work tab.",1. List headings and sort tabs in Hindi.,,
+11 - Work Tab,36,TC-WORK-006,Worker List,Tap worker card opens user profile,Functionality,Employer,P0,allWorkers.tsx,Employer account · Workers on server,1. Tap worker card.,1. Navigates to /screens/users/[id].,,
+11 - Work Tab,37,TC-WORK-026,Worker List,Empty state when no workers found,UI Design,Employer,P2,allWorkers.tsx,Employer account · Empty worker list,1. Apply filter with no results.,1. No results message shown.,,
+11 - Work Tab,38,TC-WORK-031,Worker List,Worker cards show skills and rating,UI Design,Employer,P1,allWorkers.tsx,Employer account · Workers listed,1. Observe worker card details.,"1. Skills, rating, distance visible.",,
+12 - People Tab,,,,SCREEN: People Tab,Info,All,,,Test cases for People Tab.,"Open People Tab in the app, then run each row's Steps.","This module contains 26 test case(s). Filter by Module = ""12 - People Tab"" in Google Sheets.",,
+12 - People Tab,1,TC-PEOP-006,Active Works List,Tap active work opens service detail,Functionality,Mediator,P0,UnifiedPeopleScreen,Mediator account · Active jobs on server,1. Tap job card on People tab.,1. Navigates to /screens/service/[id].,,
+12 - People Tab,2,TC-PEOP-016,Active Works List,Active work cards show pay and workers needed,UI Design,Mediator,P1,UnifiedPeopleScreen,Mediator account · Jobs listed,1. Observe job cards.,1. Pay rate and worker count visible.,,
+12 - People Tab,3,TC-PEOP-020,Active Works List,Apply as mediator from people tab job card path,Functionality,Mediator,P1,UnifiedPeopleScreen,Mediator account · Job listed,"1. Open job from people tab.
+2. Apply with team.",1. Mediator apply drawer opens from detail.,,
+12 - People Tab,4,TC-PEOP-005,Contractor List,Tap contractor opens user profile,Functionality,Worker,P0,UnifiedPeopleScreen,Worker account · Contractors on server,1. Tap contractor card.,1. Navigates to /screens/users/[id].,,
+12 - People Tab,5,TC-PEOP-009,Contractor List,Contractor cards show team size and skills,UI Design,Worker,P1,UnifiedPeopleScreen,Worker account · Contractors listed,1. Observe contractor cards.,1. Team info and skills visible.,,
+12 - People Tab,6,TC-PEOP-012,Contractor List,Send team request to contractor from profile,Functionality,Employer,P1,UnifiedPeopleScreen,Employer account · Contractor profile open,"1. Open contractor profile.
+2. Send team request if applicable.",1. Team request sent successfully.,,
+12 - People Tab,7,TC-PEOP-014,Contractor List,Sort contractors by nearest,Functionality,Worker,P1,allWorkers.tsx,Worker account · Sort tabs visible,1. Apply nearest sort.,1. Contractors sorted by distance.,,
+12 - People Tab,8,TC-PEOP-018,Contractor List,Like contractor from list or profile,Functionality,Employer,P1,UnifiedPeopleScreen,Employer account · Contractor listed,1. Like a contractor.,1. Like status updates.,,
+12 - People Tab,9,TC-PEOP-021,Contractor List,Filter contractors on people tab,Functionality,Worker,P2,filterWorkers.tsx,Worker account · Filter available,"1. Open filter.
+2. Apply skill filter.",1. Contractor list filtered.,,
+12 - People Tab,10,TC-PEOP-024,Contractor List,Contractor profile photos display correctly,UI Design,Worker,P2,UnifiedPeopleScreen,Worker account · Contractors with photos,1. Observe avatar images.,1. Photos load or placeholder shown.,,
+12 - People Tab,11,TC-PEOP-001,People Tab,Worker people tab shows contractors (Mediators),Availability,Worker,P0,/(tabs)/third,Worker account · Worker logged in,1. Open People tab as Worker.,1. Contractor/Mediator listings visible.,,
+12 - People Tab,12,TC-PEOP-002,People Tab,Employer people tab shows contractors,Availability,Employer,P0,/(tabs)/third,Employer account · Employer logged in,1. Open People tab as Employer.,1. Contractor listings visible.,,
+12 - People Tab,13,TC-PEOP-003,People Tab,Mediator people tab shows active work listings,Availability,Mediator,P0,/(tabs)/third,Mediator account · Mediator logged in,1. Open People tab as Mediator.,1. Active job/service listings visible.,,
+12 - People Tab,14,TC-PEOP-004,People Tab,Admin people tab loads,Availability,Admin,P1,/(tabs)/third,Admin account · Admin logged in,1. Open People tab as Admin.,1. UnifiedPeopleScreen or admin content loads without crash.,,
+12 - People Tab,15,TC-PEOP-007,People Tab,Pull to refresh on people tab,Functionality,All,P1,/(tabs)/third,Any test account · List loaded,1. Pull down on list.,1. List refreshes.,,
+12 - People Tab,16,TC-PEOP-008,People Tab,Pagination on people tab list,Functionality,All,P1,/(tabs)/third,Any test account · Long list,1. Scroll to bottom.,1. More items load.,,
+12 - People Tab,17,TC-PEOP-010,People Tab,Section heading indicates contractors,UI Design,Worker,P1,/(tabs)/third,Worker account · Worker on people tab,1. Observe section title.,1. Contractors/teams heading shown.,,
+12 - People Tab,18,TC-PEOP-011,People Tab,Section heading indicates active works,UI Design,Mediator,P1,/(tabs)/third,Mediator account · Mediator on people tab,1. Observe section title.,1. Active works heading shown.,,
+12 - People Tab,19,TC-PEOP-013,People Tab,Empty state on people tab,UI Design,All,P2,/(tabs)/third,Any test account · Empty list,1. View tab with no contractors/jobs.,1. Empty state message shown.,,
+12 - People Tab,20,TC-PEOP-015,People Tab,People tab strings in Hindi,UI Design,All,P2,/(tabs)/third,Any test account · Hindi locale,"1. Set Hindi.
+2. Open people tab.",1. Headings in Hindi.,,
+12 - People Tab,21,TC-PEOP-017,People Tab,Tab icon and label People visible,UI Design,All,P1,/(tabs)/third,Any test account · On people tab,1. Observe third tab.,1. People tab correctly labeled.,,
+12 - People Tab,22,TC-PEOP-019,People Tab,List scroll performance acceptable,UI Design,All,P2,/(tabs)/third,Any test account · On people tab,1. Scroll full list rapidly.,1. No major jank or crash.,,
+12 - People Tab,23,TC-PEOP-022,People Tab,Search contractors if search entry exists,Functionality,Worker,P2,/(tabs)/third,Worker account · Search if available,1. Use search on people listings.,1. Matching contractors shown.,,
+12 - People Tab,24,TC-PEOP-023,People Tab,People tab handles offline gracefully,Availability,All,P1,/(tabs)/third,Any test account · Offline,"1. Disable network.
+2. Open people tab.","1. Offline message or cached data.
+2. no crash.",,
+12 - People Tab,25,TC-PEOP-025,People Tab,Sort active works list,Functionality,Mediator,P2,/(tabs)/third,Mediator account · Sort on active works,1. Apply sort tab if available.,1. Jobs re-ordered.,,
+12 - People Tab,26,TC-PEOP-026,People Tab,Admin people tab consistent with app theme,UI Design,Admin,P2,/(tabs)/third,Admin account · Admin on people tab,1. Observe layout and colors.,1. Consistent with admin theme.,,
+13 - Activity Tab,,,,SCREEN: Activity Tab,Info,All,,,Test cases for Activity Tab.,"Open Activity Tab in the app, then run each row's Steps.","This module contains 44 test case(s). Filter by Module = ""13 - Activity Tab"" in Google Sheets.",,
+13 - Activity Tab,1,TC-ACT-005,Activity - Applied Jobs,Worker Applied Jobs sub-tab visible and selectable,Availability,Worker,P1,UnifiedActivityScreen,Worker account · Worker on activity tab,"1. Open Activity tab.
+2. Tap Applied Jobs sub-tab.",1. Applied Jobs content area loads.,,
+13 - Activity Tab,2,TC-ACT-006,Activity - Applied Jobs,Worker Applied Jobs list shows items and navigates on tap,Functionality,Worker,P1,UnifiedActivityScreen,Worker account · Worker on Applied Jobs tab with data,"1. Open Applied Jobs sub-tab.
+2. Tap a list item.",1. Navigates to relevant detail screen.,,
+13 - Activity Tab,3,TC-ACT-007,Activity - Applied Jobs,Worker Applied Jobs empty state,UI Design,Worker,P2,UnifiedActivityScreen,Worker account · Worker on Applied Jobs empty,1. Open Applied Jobs with no data.,1. Empty state message shown.,,
+13 - Activity Tab,4,TC-ACT-024,Activity - Applied Services,Mediator Applied Services sub-tab visible,Availability,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator on activity tab,1. Tap Applied Services sub-tab.,1. Applied Services section loads.,,
+13 - Activity Tab,5,TC-ACT-025,Activity - Applied Services,Mediator Applied Services list item tap navigates,Functionality,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator Applied Services with data,1. Tap item in Applied Services.,1. Correct detail screen opens.,,
+13 - Activity Tab,6,TC-ACT-008,Activity - Bookings,Worker Bookings sub-tab visible and selectable,Availability,Worker,P1,UnifiedActivityScreen,Worker account · Worker on activity tab,"1. Open Activity tab.
+2. Tap Bookings sub-tab.",1. Bookings content area loads.,,
+13 - Activity Tab,7,TC-ACT-009,Activity - Bookings,Worker Bookings list shows items and navigates on tap,Functionality,Worker,P1,UnifiedActivityScreen,Worker account · Worker on Bookings tab with data,"1. Open Bookings sub-tab.
+2. Tap a list item.",1. Navigates to relevant detail screen.,,
+13 - Activity Tab,8,TC-ACT-010,Activity - Bookings,Worker Bookings empty state,UI Design,Worker,P2,UnifiedActivityScreen,Worker account · Worker on Bookings empty,1. Open Bookings with no data.,1. Empty state message shown.,,
+13 - Activity Tab,9,TC-ACT-014,Activity - Bookings,Employer Bookings sub-tab visible,Availability,Employer,P1,UnifiedActivityScreen,Employer account · Employer on activity tab,1. Tap Bookings sub-tab.,1. Bookings section loads.,,
+13 - Activity Tab,10,TC-ACT-015,Activity - Bookings,Employer Bookings item actions work,Functionality,Employer,P1,UnifiedActivityScreen,Employer account · Employer Bookings with data,"1. Open Bookings.
+2. Perform primary action on item.",1. Action completes or opens detail.,,
+13 - Activity Tab,11,TC-ACT-018,Activity - My Services,Employer My Services sub-tab visible,Availability,Employer,P1,UnifiedActivityScreen,Employer account · Employer on activity tab,1. Tap My Services sub-tab.,1. My Services section loads.,,
+13 - Activity Tab,12,TC-ACT-019,Activity - My Services,Employer My Services item actions work,Functionality,Employer,P1,UnifiedActivityScreen,Employer account · Employer My Services with data,"1. Open My Services.
+2. Perform primary action on item.",1. Action completes or opens detail.,,
+13 - Activity Tab,13,TC-ACT-016,Activity - Sent Invitations,Employer Sent Invitations sub-tab visible,Availability,Employer,P1,UnifiedActivityScreen,Employer account · Employer on activity tab,1. Tap Sent Invitations sub-tab.,1. Sent Invitations section loads.,,
+13 - Activity Tab,14,TC-ACT-017,Activity - Sent Invitations,Employer Sent Invitations item actions work,Functionality,Employer,P1,UnifiedActivityScreen,Employer account · Employer Sent Invitations with data,"1. Open Sent Invitations.
+2. Perform primary action on item.",1. Action completes or opens detail.,,
+13 - Activity Tab,15,TC-ACT-020,Activity - Team Bookings,Mediator Team Bookings sub-tab visible,Availability,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator on activity tab,1. Tap Team Bookings sub-tab.,1. Team Bookings section loads.,,
+13 - Activity Tab,16,TC-ACT-021,Activity - Team Bookings,Mediator Team Bookings list item tap navigates,Functionality,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator Team Bookings with data,1. Tap item in Team Bookings.,1. Correct detail screen opens.,,
+13 - Activity Tab,17,TC-ACT-011,Activity - Work Requests,Worker Work Requests sub-tab visible and selectable,Availability,Worker,P1,UnifiedActivityScreen,Worker account · Worker on activity tab,"1. Open Activity tab.
+2. Tap Work Requests sub-tab.",1. Work Requests content area loads.,,
+13 - Activity Tab,18,TC-ACT-012,Activity - Work Requests,Worker Work Requests list shows items and navigates on tap,Functionality,Worker,P1,UnifiedActivityScreen,Worker account · Worker on Work Requests tab with data,"1. Open Work Requests sub-tab.
+2. Tap a list item.",1. Navigates to relevant detail screen.,,
+13 - Activity Tab,19,TC-ACT-013,Activity - Work Requests,Worker Work Requests empty state,UI Design,Worker,P2,UnifiedActivityScreen,Worker account · Worker on Work Requests empty,1. Open Work Requests with no data.,1. Empty state message shown.,,
+13 - Activity Tab,20,TC-ACT-022,Activity - Work Requests,Mediator Work Requests sub-tab visible,Availability,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator on activity tab,1. Tap Work Requests sub-tab.,1. Work Requests section loads.,,
+13 - Activity Tab,21,TC-ACT-023,Activity - Work Requests,Mediator Work Requests list item tap navigates,Functionality,Mediator,P1,UnifiedActivityScreen,Mediator account · Mediator Work Requests with data,1. Tap item in Work Requests.,1. Correct detail screen opens.,,
+13 - Activity Tab,22,TC-DLNK-015,Activity Deep Link,Activity tab deep link with query param,Functionality,All,P1,/(tabs)/fourth?tab=,Any test account · Deep link with tab param,1. Open link with ?tab=bookings.,1. Activity tab opens with bookings sub-tab.,,
+13 - Activity Tab,23,TC-UI-034,Activity sub-tabs,Activity sub-tabs empty state UI,UI Design,All,P2,List screens,Any test account · Empty Activity sub-tabs,1. Open Activity sub-tabs with zero items.,1. Centered empty state with icon and message.,,
+13 - Activity Tab,24,TC-ACT-001,Activity Tab,Worker activity tab loads with sub-tabs,Availability,Worker,P0,/(tabs)/fourth,Worker account · Worker logged in,1. Open Activity tab as Worker.,1. UnifiedActivityScreen with icon sub-tabs visible.,,
+13 - Activity Tab,25,TC-ACT-002,Activity Tab,Employer activity tab loads with sub-tabs,Availability,Employer,P0,/(tabs)/fourth,Employer account · Employer logged in,1. Open Activity tab as Employer.,1. Employer-specific activity sub-tabs visible.,,
+13 - Activity Tab,26,TC-ACT-003,Activity Tab,Mediator activity tab loads with sub-tabs,Availability,Mediator,P0,/(tabs)/fourth,Mediator account · Mediator logged in,1. Open Activity tab as Mediator.,1. Mediator-specific sub-tabs visible.,,
+13 - Activity Tab,27,TC-ACT-026,Activity Tab,Deep link ?tab= param opens correct activity sub-tab,Functionality,All,P1,/(tabs)/fourth?tab=bookings,Any test account · Deep link with tab param,"1. Open /(tabs)/fourth?tab=bookings.
+2. Observe active sub-tab.",1. Bookings sub-tab pre-selected.,,
+13 - Activity Tab,28,TC-ACT-035,Activity Tab,Pull to refresh on activity sub-tab,Functionality,All,P1,/(tabs)/fourth,Any test account · Any sub-tab list,1. Pull down on list.,1. List refreshes.,,
+13 - Activity Tab,29,TC-ACT-038,Activity Tab,Activity icon sub-tabs scroll if many,UI Design,All,P1,/(tabs)/fourth,Any test account · On activity tab,1. Observe sub-tab bar on small screen.,1. Sub-tabs accessible via scroll.,,
+13 - Activity Tab,30,TC-ACT-040,Activity Tab,Activity sub-tab labels in Hindi,UI Design,All,P2,/(tabs)/fourth,Any test account · Hindi locale,"1. Set Hindi.
+2. Open activity tab.",1. Sub-tab labels translated.,,
+13 - Activity Tab,31,TC-ACT-034,Applied Jobs,Worker cancel job application from activity,Functionality,Worker,P0,UnifiedActivityScreen,Worker account · Applied to job,"1. Open Applied Jobs.
+2. Cancel application.",1. Application cancelled.,,
+13 - Activity Tab,32,TC-BKG-025,Custom Tabs,Legacy custom tabs switch bookings/requests,Availability,All,P2,bookingsAndRequests/customTabs,Any test account · Legacy bookings container,"1. Open legacy container.
+2. Switch tabs.",1. Content switches between bookings and requests.,,
+13 - Activity Tab,33,TC-ACT-030,Employer Bookings,Employer view booked workers from activity,Functionality,Employer,P0,employerBookings.tsx,Employer account · Employer with booking,"1. Open Bookings sub-tab.
+2. Tap booking.",1. Booking detail with worker list.,,
+13 - Activity Tab,34,TC-BKG-023,Employer Bookings,Employer bookings accessible from activity tab,Availability,Employer,P1,employerBookings.tsx,Employer account · Activity tab,1. Activity → Bookings sub-tab.,1. Same data as bookings screen.,,
+13 - Activity Tab,35,TC-ACT-032,Employer My Services,Employer my services list from activity,Functionality,Employer,P1,UnifiedActivityScreen,Employer account · Posted jobs,"1. Open My Services sub-tab.
+2. Tap a service.",1. Navigates to service detail.,,
+13 - Activity Tab,36,TC-ACT-031,Employer Work Requests,Employer cancel sent invitation,Functionality,Employer,P1,employerWorkRequests.tsx,Employer account · Sent invitation,"1. Open Sent Invitations.
+2. Cancel invitation.",1. Invitation cancelled.,,
+13 - Activity Tab,37,TC-ACT-039,Legacy Bookings Requests,Legacy bookingsAndRequests screen accessible,Availability,All,P2,/screens/bottomTabs/(user)/bookingsAndRequests,Any test account · Navigate to legacy route,1. Navigate to legacy route if linked.,1. Bookings/Requests switcher loads.,,Superseded by UnifiedActivityScreen.
+13 - Activity Tab,38,TC-ACT-033,Mediator Bookings,Mediator view team booking,Functionality,Mediator,P1,mediatorBookings.tsx,Mediator account · Mediator booking exists,"1. Open Team Bookings.
+2. Tap booking.",1. Team booking detail shown.,,
+13 - Activity Tab,39,TC-BKG-019,Mediator Bookings,Mediator manage team booking,Functionality,Mediator,P1,mediatorBookings.tsx,Mediator account · Mediator team booking,"1. Open team booking.
+2. View team members.",1. Team members listed with status.,,
+13 - Activity Tab,40,TC-ACT-027,Worker Bookings,Worker view confirmed booking details,Functionality,Worker,P0,workerBookings.tsx,Worker account · Worker with confirmed booking,"1. Open Bookings sub-tab.
+2. Tap booking.",1. Booking detail with employer info shown.,,
+13 - Activity Tab,41,TC-BKG-009,Worker Bookings,Worker cancel confirmed booking,Functionality,Worker,P0,workerBookings.tsx,Worker account · Confirmed booking,"1. Open booking.
+2. Cancel if allowed.",1. Booking cancelled per rules.,,
+13 - Activity Tab,42,TC-BKG-027,Worker Bookings,Worker booking shows employer name and job,UI Design,Worker,P1,workerBookings.tsx,Worker account · Worker booking listed,1. Observe worker booking card.,1. Employer and job title visible.,,
+13 - Activity Tab,43,TC-ACT-028,Worker Work Requests,Worker accept booking invitation,Functionality,Worker,P0,workerWorkRequests.tsx,Worker account · Pending invitation,"1. Open Work Requests.
+2. Tap Accept on invitation.","1. Invitation accepted.
+2. moves to bookings.",,
+13 - Activity Tab,44,TC-ACT-029,Worker Work Requests,Worker reject booking invitation,Functionality,Worker,P0,workerWorkRequests.tsx,Worker account · Pending invitation,1. Tap Reject on invitation.,"1. Invitation rejected.
+2. removed from list.",,
+14 - Profile Tab,,,,SCREEN: Profile Tab,Info,All,,,Test cases for Profile Tab.,"Open Profile Tab in the app, then run each row's Steps.","This module contains 41 test case(s). Filter by Module = ""14 - Profile Tab"" in Google Sheets.",,
+14 - Profile Tab,1,TC-ADM-013,Admin Profile,Admin profile tab loads,Availability,Admin,P1,AdminProfile,Admin account · Admin on profile tab,1. Open profile as Admin.,1. AdminProfile with admin settings.,,
+14 - Profile Tab,2,TC-ADM-025,Admin Profile,Admin logout from profile,Functionality,Admin,P2,AdminProfile,Admin account · Admin profile,"1. Tap Logout.
+2. Confirm.","1. Logged out.
+2. redirected to login.",,
+14 - Profile Tab,3,TC-PROF-019,Admin Profile,Admin profile settings accessible,Functionality,Admin,P1,AdminProfile,Admin account · Admin on profile,1. Open admin settings section.,1. Admin-specific settings visible.,,
+14 - Profile Tab,4,TC-PROF-005,Edit Profile,Edit profile fields and save,Functionality,All,P0,UserProfile,Any test account · On profile,"1. Edit name/address.
+2. Save.",1. Profile updated on server and UI.,,
+14 - Profile Tab,5,TC-PROF-015,Full Profile Screen,Stack profile screen with back header,Availability,All,P2,/screens/profile,Any test account · Navigate from menu,1. Open /screens/profile from link.,1. Full-screen profile with back button.,,
+14 - Profile Tab,6,TC-PROF-029,Help,Help link navigates correctly,Functionality,All,P1,/screens/helps,Any test account · Profile settings tab,"1. Tap Help.
+2. Observe screen.",1. Opens FAQ/help.,,
+14 - Profile Tab,7,TC-PROF-046,Likes Stats,Likes/favourites stats displayed,Availability,All,P2,LikesStats,Any test account · On profile overview,1. Observe likes section.,1. Like counts visible.,,
+14 - Profile Tab,8,TC-PROF-027,Notifications,Notifications link navigates correctly,Functionality,All,P1,/screens/notifications,Any test account · Profile settings tab,"1. Tap Notifications.
+2. Observe screen.",1. Opens notification inbox.,,
+14 - Profile Tab,9,TC-PROF-020,Profile Menu,Experience menu link visible,Availability,All,P1,/screens/experience,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Experience link.",1. Experience link present in menu.,,
+14 - Profile Tab,10,TC-PROF-022,Profile Menu,Reviews menu link visible,Availability,All,P1,/screens/reviews,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Reviews link.",1. Reviews link present in menu.,,
+14 - Profile Tab,11,TC-PROF-024,Profile Menu,Favourites menu link visible,Availability,All,P1,/screens/favourite,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Favourites link.",1. Favourites link present in menu.,,
+14 - Profile Tab,12,TC-PROF-026,Profile Menu,Notifications menu link visible,Availability,All,P1,/screens/notifications,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Notifications link.",1. Notifications link present in menu.,,
+14 - Profile Tab,13,TC-PROF-028,Profile Menu,Help menu link visible,Availability,All,P1,/screens/helps,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Help link.",1. Help link present in menu.,,
+14 - Profile Tab,14,TC-PROF-030,Profile Menu,Share App menu link visible,Availability,All,P1,/screens/shareApp,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Share App link.",1. Share App link present in menu.,,
+14 - Profile Tab,15,TC-PROF-032,Profile Menu,App Feedback menu link visible,Availability,All,P1,/screens/appFeedback,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find App Feedback link.",1. App Feedback link present in menu.,,
+14 - Profile Tab,16,TC-PROF-034,Profile Menu,Privacy Policy menu link visible,Availability,All,P1,/screens/privacyPolicy,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Privacy Policy link.",1. Privacy Policy link present in menu.,,
+14 - Profile Tab,17,TC-PROF-036,Profile Menu,Terms menu link visible,Availability,All,P1,/screens/termsAndConditions,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Terms link.",1. Terms link present in menu.,,
+14 - Profile Tab,18,TC-PROF-038,Profile Menu,Delete Account menu link visible,Availability,All,P1,/screens/profile/deleteProfile,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Delete Account link.",1. Delete Account link present in menu.,,
+14 - Profile Tab,19,TC-PROF-040,Profile Menu,Change Language menu link visible,Availability,All,P1,/screens/settings/changeLanguage,Any test account · Profile settings tab,"1. Open Profile Settings.
+2. Find Change Language link.",1. Change Language link present in menu.,,
+14 - Profile Tab,20,TC-PROF-003,Profile Overview,Overview sub-tab shows stats and info,Availability,All,P1,UserProfile,Any test account · On profile tab,1. Select Overview tab.,"1. Work info, likes, skills sections visible.",,
+14 - Profile Tab,21,TC-PROF-016,Profile Photo,Change profile photo via camera or gallery,Functionality,All,P1,UserProfile,Any test account · On profile,"1. Tap edit photo.
+2. Pick image.
+3. Save.",1. New photo uploaded and displayed.,,
+14 - Profile Tab,22,TC-PROF-004,Profile Settings,Settings sub-tab shows menu links,Availability,All,P1,UserProfile,Any test account · On profile tab,1. Select Settings tab.,1. Profile menu with all links visible.,,
+14 - Profile Tab,23,TC-PROF-001,Profile Tab,Profile tab loads with user info,Availability,All,P0,/(tabs)/fifth,Any test account · Logged in,1. Open Profile tab.,"1. User photo, name, role visible.",,
+14 - Profile Tab,24,TC-PROF-002,Profile Tab,Admin profile tab loads,Availability,Admin,P0,/(tabs)/fifth,Admin account · Admin logged in,1. Open Profile as Admin.,1. AdminProfile component visible.,,
+14 - Profile Tab,25,TC-PROF-017,Profile Tab,Overview and Settings tabs styled consistently,UI Design,All,P1,/(tabs)/fifth,Any test account · On profile,1. Switch between sub-tabs.,1. Clear active tab indicator.,,
+14 - Profile Tab,26,TC-PROF-018,Profile Tab,Profile menu items in Hindi,UI Design,All,P2,/(tabs)/fifth,Any test account · Hindi locale,"1. Set Hindi.
+2. Open settings tab.",1. Menu labels in Hindi.,,
+14 - Profile Tab,27,TC-PROF-043,Profile Tab,Profile tab scrolls smoothly,UI Design,All,P2,/(tabs)/fifth,Any test account · Long profile content,1. Scroll full profile.,1. No layout breaks.,,
+14 - Profile Tab,28,TC-PROF-023,Reviews,Reviews link navigates correctly,Functionality,All,P1,/screens/reviews,Any test account · Profile settings tab,"1. Tap Reviews.
+2. Observe screen.",1. Opens reviews list.,,
+14 - Profile Tab,29,TC-PROF-008,Role Switcher,Role switcher visible on profile,Availability,All,P1,RoleSwitcher,Any test account · Multi-role account or switcher enabled,1. Find RoleSwitcher on profile.,1. Worker/Employer/Mediator options shown.,,
+14 - Profile Tab,30,TC-PROF-009,Role Switcher,Switch role updates entire app UI,Functionality,All,P1,RoleSwitcher,Any test account · Role switcher visible,"1. Switch from Worker to Employer.
+2. Check tabs.",1. Tabs and content reflect new role.,,
+14 - Profile Tab,31,TC-PROF-044,Service Information,Employer service stats on profile overview,Availability,Employer,P2,ServiceInformation,Employer account · Employer with posted jobs,1. Open employer profile overview.,1. Posted jobs count/stats shown.,,
+14 - Profile Tab,32,TC-PROF-006,Skills,Add skill to profile,Functionality,Worker,P1,UserProfile,Worker account · Worker profile,"1. Tap add skill.
+2. Select skill.
+3. Save.",1. Skill added to profile.,,
+14 - Profile Tab,33,TC-PROF-007,Skills,Remove skill from profile,Functionality,Worker,P1,UserProfile,Worker account · Skill on profile,1. Remove existing skill.,1. Skill removed.,,
+14 - Profile Tab,34,TC-PROF-013,Social Links,Join WhatsApp group link opens WhatsApp,Functionality,All,P2,UserProfile,Any test account · On profile settings,1. Tap Join WhatsApp Group.,1. WhatsApp app opens or intent shown.,,
+14 - Profile Tab,35,TC-PROF-014,Social Links,Instagram link opens Instagram,Functionality,All,P2,UserProfile,Any test account · On profile settings,1. Tap Instagram link.,1. Instagram app/browser opens.,,
+14 - Profile Tab,36,TC-PROF-011,Team Admin Card,Team admin card visible on mediator profile,Availability,Mediator,P1,TeamAdminCard,Mediator account · Mediator with team,1. Open Mediator profile overview.,1. Team summary card with member count.,,
+14 - Profile Tab,37,TC-PROF-012,Team Admin Card,Tap team card opens team detail,Functionality,Mediator,P1,TeamAdminCard,Mediator account · Team card visible,1. Tap team admin card.,1. Navigates to team members screen.,,
+14 - Profile Tab,38,TC-TEAM-010,Team Admin Card,Team admin card shows member count,UI Design,Mediator,P1,TeamAdminCard,Mediator account · Mediator profile,1. Observe team card on profile.,1. Member count and team name visible.,,
+14 - Profile Tab,39,TC-TEAM-026,Team Admin Card,Team card tap navigates to team detail,Functionality,Mediator,P2,TeamAdminCard,Mediator account · Team card on profile,1. Tap team admin card.,1. Opens /screens/team/[id].,,
+14 - Profile Tab,40,TC-PROF-037,Terms,Terms link navigates correctly,Functionality,All,P1,/screens/termsAndConditions,Any test account · Profile settings tab,"1. Tap Terms.
+2. Observe screen.",1. Opens terms text.,,
+14 - Profile Tab,41,TC-PROF-045,Work Information,Worker work history on profile overview,Availability,Worker,P2,WorkInformation,Worker account · Worker with work history,1. Open worker profile overview.,1. Work history summary shown.,,
+20 - Service Detail,,,,SCREEN: Service Detail,Info,All,,,"Full job posting page — view, apply, manage applicants, share.","Tap any job card from Home, Work, or People tabs.","This module contains 39 test case(s). Filter by Module = ""20 - Service Detail"" in Google Sheets.",,
+20 - Service Detail,1,TC-SVC-031,Action Buttons,Action buttons match user role,Availability,All,P1,actionButtons.tsx,Any test account · On service detail per role,"1. Open same job as Worker, Employer, Mediator.
+2. Compare buttons.",1. Role-appropriate actions only shown.,,
+20 - Service Detail,2,TC-SVC-023,Applicants Summary,Applicant count summary visible,Availability,Employer,P2,applicantsSummary.tsx,Employer account · Job with applicants,1. Observe applicant summary on detail.,1. Applied/selected counts shown.,,
+20 - Service Detail,3,TC-SVC-014,Applicants Tab,Employer view applicant list,Functionality,Employer,P0,showApplicationsAndSelections,Employer account · Job with applicants,"1. Open Applications tab.
+2. View applicants.",1. Applicant cards with skills and status.,,
+20 - Service Detail,4,TC-SVC-015,Applicants Tab,Employer select worker from applicants,Functionality,Employer,P0,showApplicationsAndSelections,Employer account · Pending applicant,1. Tap Select on applicant.,1. Worker moved to selections.,,
+20 - Service Detail,5,TC-SVC-016,Applicants Tab,Employer reject applicant,Functionality,Employer,P0,showApplicationsAndSelections,Employer account · Pending applicant,1. Tap Reject on applicant.,1. Applicant rejected.,,
+20 - Service Detail,6,TC-TEAM-009,Apply as Mediator,Select subset of team members for job apply,Functionality,Mediator,P0,ApplyAsMediatorDrawer,Mediator account · Mediator with team on job detail,"1. Open apply drawer.
+2. Select some members.
+3. Apply.",1. Application includes only selected members.,,
+20 - Service Detail,7,TC-TEAM-016,Apply as Mediator,Team member skill mismatch indicated,UI Design,Mediator,P1,ApplyAsMediatorDrawer,Mediator account · Drawer open,1. Open job requiring skill member lacks.,1. Mismatch warning or disabled selection.,,
+20 - Service Detail,8,TC-TEAM-023,Apply as Mediator,Cannot double-apply same job as mediator,Functionality,Mediator,P1,ApplyAsMediatorDrawer,Mediator account · Already applied job,"1. Apply to job.
+2. Attempt apply again.",1. Blocked or shows already applied state.,,
+20 - Service Detail,9,TC-TEAM-028,Apply as Mediator,Apply as team button visible for mediator,Availability,Mediator,P0,ApplyAsMediatorDrawer,Mediator account · Job detail as mediator,1. Open job as Mediator.,1. Team apply action visible.,,
+20 - Service Detail,10,TC-SVC-022,Apply Mediator Drawer,Mediator drawer shows skill matching for team,UI Design,Mediator,P1,ApplyAsMediatorDrawer,Mediator account · Drawer open,"1. Open apply drawer.
+2. Observe member skill match.",1. Skill match indicators visible per member.,,
+20 - Service Detail,11,TC-SVC-017,Selections Tab,Employer view selected workers list,Functionality,Employer,P0,selectedApplicants.tsx,Employer account · Selected workers,1. Open Selections tab.,1. Selected workers listed.,,
+20 - Service Detail,12,TC-SVC-003,Service Detail,Job detail page loads with all information sections,Availability,All,P0,/screens/service/[id],Any test account · At least one active job exists on staging. Log in as any role. Know a valid job ID (tap any job card from Home or Work tab),"1. From Home or Work tab, tap any job/service card to open its detail page.
+2. Wait for the page to fully load (spinner disappears).
+3. Slowly scroll from top to bottom and look for each section listed in Expected Result.
+4. Take note if any section is missing or shows an error.","1. Job photo carousel/gallery is visible at the top.
+2. Job title, category, and daily pay rate are shown.
+3. Requirements section shows workers needed per skill.
+4. Facilities section shows food/living/travel/ESI-PF if employer added them.
+5. Employer info box shows employer name and photo.
+6. Map or location section is visible.
+7. Action buttons at bottom match your role (Apply for Worker, Manage for Employer).",,
+20 - Service Detail,13,TC-SVC-004,Service Detail,Worker can apply to an open job,Functionality,Worker,P0,/screens/service/[id],Worker account · Log in as Worker. Open a job you have NOT applied to yet. Worker profile should have matching skills (or be ready to add skill in modal),"1. Log in as Worker and open a job detail page you have not applied to.
+2. Scroll to the bottom action area and find the 'Apply' button.
+3. Tap Apply. If a confirmation dialog or skill modal appears, complete it.
+4. Wait for the API response (loading indicator on button).
+5. Observe how the Apply button changes after success.","1. Apply button shows loading state while submitting.
+2. Success toast appears (e.g. 'Application submitted').
+3. Button changes to 'Applied' or 'Cancel Apply' state.
+4. Job appears in Activity tab → Applied Jobs sub-tab.
+5. Employer can see this worker in the Applicants list for that job.",,
+20 - Service Detail,14,TC-SVC-005,Service Detail,Worker can cancel a pending job application,Functionality,Worker,P0,/screens/service/[id],Worker account · Log in as Worker. Open a job you HAVE already applied to,"1. Log in as Worker and open a job you previously applied to.
+2. Find the 'Cancel Apply' or similar button (replaces Apply after applying).
+3. Tap Cancel Apply and confirm if a dialog appears.
+4. Check Activity tab → Applied Jobs to verify removal.","1. Cancel action succeeds with confirmation toast.
+2. Button reverts to 'Apply' state.
+3. Job is removed from Activity → Applied Jobs list.
+4. Employer no longer sees this worker in Applicants (or status shows cancelled).",,
+20 - Service Detail,15,TC-SVC-006,Service Detail,Employer sees Applications and Selections tabs on own job,Availability,Employer,P0,/screens/service/[id],"Employer account · Log in as Employer. Open a job YOU posted (Activity → My Services, or your own listing)","1. Log in as Employer and navigate to a job you posted.
+2. Scroll down looking for tab bar or sections labelled 'Applications' and 'Selections'.
+3. Tap each tab and observe the content.","1. Applications tab is visible on employer's own job.
+2. Selections tab is visible next to Applications.
+3. Applications tab lists workers who applied (or shows empty state).
+4. Selections tab lists workers employer has selected (or empty state).
+5. These tabs are NOT shown when viewing another employer's job.",,
+20 - Service Detail,16,TC-SVC-007,Service Detail,Image carousel swipe works,UI Design,All,P1,/screens/service/[id],Any test account · Service with images,1. Swipe through job photos.,"1. Images change.
+2. indicators update.",,
+20 - Service Detail,17,TC-SVC-008,Service Detail,Like/unlike service,Functionality,All,P1,/screens/service/[id],Any test account · On service detail,"1. Tap like/heart.
+2. Tap again to unlike.","1. Like state toggles.
+2. persisted.",,
+20 - Service Detail,18,TC-SVC-009,Service Detail,Share service via WhatsApp,Functionality,All,P1,/screens/service/[id],Any test account · On service detail,"1. Tap Share.
+2. Select WhatsApp.",1. Hindi share message with job link opens in WhatsApp.,,
+20 - Service Detail,19,TC-SVC-010,Service Detail,Text-to-speech reads job description,Functionality,All,P2,/screens/service/[id],Any test account · On service detail,1. Tap TTS/speaker icon.,1. Job details read aloud.,,
+20 - Service Detail,20,TC-SVC-011,Service Detail,View map shows job location,Functionality,All,P1,/screens/service/[id],Any test account · Job with location,1. Tap map/view location.,1. Map opens with pin at job location.,,
+20 - Service Detail,21,TC-SVC-012,Service Detail,Add skill modal during apply,Functionality,Worker,P1,/screens/service/[id],Worker account · Job requires skill worker lacks,"1. Tap Apply.
+2. Add missing skill in modal.
+3. Submit.",1. Skill added and application submitted.,,
+20 - Service Detail,22,TC-SVC-013,Service Detail,Call employer button,Functionality,Worker,P1,/screens/service/[id],Worker account · Employer phone on job,1. Tap Call Employer.,1. Phone dialer opens with employer number.,,
+20 - Service Detail,23,TC-SVC-018,Service Detail,Employer complete job,Functionality,Employer,P0,/screens/service/[id],Employer account · Own active job,"1. Tap Complete Job.
+2. Confirm modal.",1. Job marked complete.,,
+20 - Service Detail,24,TC-SVC-019,Service Detail,Employer restore service,Functionality,Employer,P1,/screens/service/[id],Employer account · Completed/deleted job,1. Tap Restore on completed job.,1. Job restored to active.,,
+20 - Service Detail,25,TC-SVC-020,Service Detail,Employer delete service with confirmation,Functionality,Employer,P1,/screens/service/[id],Employer account · Own job,"1. Tap Delete.
+2. Confirm modal.",1. Job deleted.,,
+20 - Service Detail,26,TC-SVC-021,Service Detail,Mediator apply with team drawer,Functionality,Mediator,P0,/screens/service/[id],Mediator account · Mediator with team,"1. Tap Apply as Team.
+2. Select team members.
+3. Submit.",1. Team application submitted.,,
+20 - Service Detail,27,TC-SVC-024,Service Detail,Requirements section shows workers needed and pay,UI Design,All,P1,/screens/service/[id],Any test account · On detail,1. Observe requirements block.,1. Worker count per skill and daily pay visible.,,
+20 - Service Detail,28,TC-SVC-025,Service Detail,Facilities section shows food travel ESI PF,UI Design,All,P1,/screens/service/[id],Any test account · Job with facilities,1. Observe facilities.,1. Facility icons/labels correct.,,
+20 - Service Detail,29,TC-SVC-026,Service Detail,Service view analytics event fired,Functionality,All,P2,/screens/service/[id],Any test account · Analytics enabled,"1. Open service detail.
+2. Check analytics if available.",1. Service view event queued.,,
+20 - Service Detail,30,TC-SVC-027,Service Detail,Invalid service ID shows error state,UI Design,All,P2,/screens/service/[id],Any test account · Invalid service ID,1. Open /screens/service/invalid-id.,"1. Error or not found message.
+2. no crash.",,
+20 - Service Detail,31,TC-SVC-029,Service Detail,Service detail labels in Hindi,UI Design,All,P2,/screens/service/[id],Any test account · Hindi locale,"1. Set Hindi.
+2. Open service detail.",1. Section headings in Hindi.,,
+20 - Service Detail,32,TC-SVC-030,Service Detail,Edit service if edit option available,Functionality,Employer,P1,/screens/service/[id],Employer account · Own job,"1. Tap Edit if shown.
+2. Modify field.
+3. Save.",1. Service updated on server.,,
+20 - Service Detail,33,TC-SVC-032,Service Detail,Back navigation returns to previous screen,Functionality,All,P1,/screens/service/[id],Any test account · On detail,"1. Open from list.
+2. Tap back.",1. Returns to list with scroll position if preserved.,,
+20 - Service Detail,34,TC-SVC-034,Service Detail,Applied state visually distinct on detail,UI Design,Worker,P2,/screens/service/[id],Worker account · Applied job,1. View job already applied to.,1. Applied badge or button state clear.,,
+20 - Service Detail,35,TC-SVC-035,Service Detail,Applicant list scroll and performance,UI Design,Employer,P2,/screens/service/[id],Employer account · Job with many applicants,1. Open job with 20+ applicants.,1. List scrolls smoothly.,,
+20 - Service Detail,36,TC-SVC-036,Service Detail,Service detail handles offline on cached data,Availability,All,P1,/screens/service/[id],Any test account · Offline,1. Open detail offline after cache.,1. Cached data or error message.,,
+20 - Service Detail,37,TC-SVC-037,Service Detail,Mediator cancel team application,Functionality,Mediator,P1,/screens/service/[id],Mediator account · Already applied as team,1. Cancel team apply if available.,1. Application cancelled.,,
+20 - Service Detail,38,TC-SVC-038,Service Detail,Employer info box shows name and rating,UI Design,All,P1,/screens/service/[id],Any test account · On detail,1. Observe employer section.,"1. Employer name, photo, rating visible.",,
+20 - Service Detail,39,TC-SVC-040,Service Detail,Copy job link to clipboard,Functionality,All,P2,/screens/service/[id],Any test account · Share available,"1. Tap share.
+2. Copy link if option exists.",1. Job URL copied.,,
+21 - Post Job Wizard,,,,SCREEN: Post Job Wizard,Info,All,,,Employer 8-step wizard to publish a new job.,Log in as Employer → Work tab → tap + (FAB) button.,"This module contains 41 test case(s). Filter by Module = ""21 - Post Job Wizard"" in Google Sheets.",,
+21 - Post Job Wizard,1,TC-ADD-001,Add Service Wizard,Add service wizard opens at step 1,Availability,Employer,P0,/screens/addService,Employer account · Employer logged in,1. Navigate to /screens/addService.,1. Category selection step visible.,,
+21 - Post Job Wizard,2,TC-ADD-002,Add Service Wizard,Worker cannot access add service or sees blocked,Availability,Worker,P1,/screens/addService,Worker account · Worker logged in,1. Attempt to open add service as Worker.,1. Wizard not accessible or appropriate message.,,
+21 - Post Job Wizard,3,TC-ADD-032,Add Service Wizard,Back button returns to previous step with data preserved,Functionality,Employer,P1,/screens/addService,Employer account · Mid-wizard,"1. Fill step 3.
+2. Go to step 4.
+3. Tap Back.",1. Step 3 data still filled (Jotai draft).,,
+21 - Post Job Wizard,4,TC-ADD-035,Add Service Wizard,Step progress indicator visible,UI Design,Employer,P1,/screens/addService,Employer account · In wizard,1. Observe progress through all steps.,1. User knows current step number.,,
+21 - Post Job Wizard,5,TC-ADD-037,Add Service Wizard,Publish failure shows error toast,Functionality,Employer,P2,/screens/addService,Employer account · Network error on publish,1. Simulate API failure on publish.,"1. Error toast.
+2. user can retry.",,
+21 - Post Job Wizard,6,TC-ADD-039,Add Service Wizard,Wizard labels in Hindi,UI Design,Employer,P2,/screens/addService,Employer account · Hindi locale,"1. Set Hindi.
+2. Walk through wizard.",1. Step labels in Hindi.,,
+21 - Post Job Wizard,7,TC-ADD-018,Duration & Description,Step 6: Duration & Description UI loads,Availability,Employer,P0,/screens/addService (SetDuration&Description.tsx),Employer account · Reached step 6,"1. Navigate to step 6.
+2. Observe form.",1. duration picker and description text visible and usable.,,
+21 - Post Job Wizard,8,TC-ADD-019,Duration & Description,Step 6: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SetDuration&Description.tsx),Employer account · On step 6,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,9,TC-ADD-020,Duration & Description,Step 6: Next proceeds to step 7,Functionality,Employer,P1,/screens/addService (SetDuration&Description.tsx),Employer account · On step 6 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 7.,,
+21 - Post Job Wizard,10,TC-ADD-038,Duration & Description,Voice-to-text for description if available,Functionality,Employer,P1,SetDuration&Description.tsx,Employer account · On description step,"1. Tap voice input.
+2. Speak description.",1. Text populated from speech.,,
+21 - Post Job Wizard,11,TC-ADD-015,Location & Date,Step 5: Location & Date UI loads,Availability,Employer,P0,/screens/addService (SelectLocation&Date.tsx),Employer account · Reached step 5,"1. Navigate to step 5.
+2. Observe form.","1. address, map, start date visible and usable.",,
+21 - Post Job Wizard,12,TC-ADD-016,Location & Date,Step 5: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SelectLocation&Date.tsx),Employer account · On step 5,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,13,TC-ADD-017,Location & Date,Step 5: Next proceeds to step 6,Functionality,Employer,P1,/screens/addService (SelectLocation&Date.tsx),Employer account · On step 5 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 6.,,
+21 - Post Job Wizard,14,TC-ADD-027,Location & Date,Map picker sets job address,Functionality,Employer,P0,SelectLocation&Date.tsx,Employer account · On location step,"1. Tap map/location.
+2. Pick point.
+3. Confirm.",1. Address and coordinates saved.,,
+21 - Post Job Wizard,15,TC-ADD-028,Location & Date,Date picker selects job start date,Functionality,Employer,P1,SelectLocation&Date.tsx,Employer account · On location step,"1. Tap date field.
+2. Select future date.",1. Date saved in form.,,
+21 - Post Job Wizard,16,TC-ADD-024,Review & Publish,Step 8: Review & Publish UI loads,Availability,Employer,P0,/screens/addService (final.tsx),Employer account · Reached step 8,"1. Navigate to step 8.
+2. Observe form.",1. summary review and publish button visible and usable.,,
+21 - Post Job Wizard,17,TC-ADD-025,Review & Publish,Step 8: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (final.tsx),Employer account · On step 8,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,18,TC-ADD-026,Review & Publish,Step 8: Next proceeds to step 9,Functionality,Employer,P1,/screens/addService (final.tsx),Employer account · On step 8 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Ready to publish.,,
+21 - Post Job Wizard,19,TC-ADD-031,Review & Publish,Publish job submits to API,Functionality,Employer,P0,final.tsx,Employer account · All steps completed,"1. Review summary.
+2. Tap Publish.","1. Job created.
+2. success message.
+3. navigates away.",,
+21 - Post Job Wizard,20,TC-ADD-036,Review & Publish,Review shows all entered data accurately,UI Design,Employer,P1,final.tsx,Employer account · On review step,1. Compare review to entered values.,1. All fields match prior steps.,,
+21 - Post Job Wizard,21,TC-ADD-012,Select Facilities,Step 4: Select Facilities UI loads,Availability,Employer,P0,/screens/addService (SelectFacilities.tsx),Employer account · Reached step 4,"1. Navigate to step 4.
+2. Observe form.","1. food, living, travel, ESI/PF toggles visible and usable.",,
+21 - Post Job Wizard,22,TC-ADD-013,Select Facilities,Step 4: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SelectFacilities.tsx),Employer account · On step 4,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,23,TC-ADD-014,Select Facilities,Step 4: Next proceeds to step 5,Functionality,Employer,P1,/screens/addService (SelectFacilities.tsx),Employer account · On step 4 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 5.,,
+21 - Post Job Wizard,24,TC-ADD-034,Select Facilities,Facility toggles visually clear on/off,UI Design,Employer,P2,SelectFacilities.tsx,Employer account · On facilities step,"1. Toggle each facility.
+2. Observe state.",1. Clear selected/unselected styling.,,
+21 - Post Job Wizard,25,TC-ADD-006,Select Sub-Category,Step 2: Select Sub-Category UI loads,Availability,Employer,P0,/screens/addService (SelectWorkSubCategory.tsx),Employer account · Reached step 2,"1. Navigate to step 2.
+2. Observe form.",1. sub-category list visible and usable.,,
+21 - Post Job Wizard,26,TC-ADD-007,Select Sub-Category,Step 2: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SelectWorkSubCategory.tsx),Employer account · On step 2,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,27,TC-ADD-008,Select Sub-Category,Step 2: Next proceeds to step 3,Functionality,Employer,P1,/screens/addService (SelectWorkSubCategory.tsx),Employer account · On step 2 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 3.,,
+21 - Post Job Wizard,28,TC-ADD-003,Select Work Category,Step 1: Select Work Category UI loads,Availability,Employer,P0,/screens/addService (SelectWorkCategory.tsx),Employer account · Reached step 1,"1. Navigate to step 1.
+2. Observe form.",1. work category grid visible and usable.,,
+21 - Post Job Wizard,29,TC-ADD-004,Select Work Category,Step 1: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SelectWorkCategory.tsx),Employer account · On step 1,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,30,TC-ADD-005,Select Work Category,Step 1: Next proceeds to step 2,Functionality,Employer,P1,/screens/addService (SelectWorkCategory.tsx),Employer account · On step 1 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 2.,,
+21 - Post Job Wizard,31,TC-ADD-041,Select Work Category,Category icons match work types,UI Design,Employer,P2,SelectWorkCategory.tsx,Employer account · On category step,1. Observe category grid.,1. Icons and labels aligned with WORKERTYPES.,,
+21 - Post Job Wizard,32,TC-ADD-021,Upload Images,Step 7: Upload Images UI loads,Availability,Employer,P0,/screens/addService (UploadImagesStep.tsx),Employer account · Reached step 7,"1. Navigate to step 7.
+2. Observe form.",1. photo upload grid visible and usable.,,
+21 - Post Job Wizard,33,TC-ADD-022,Upload Images,Step 7: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (UploadImagesStep.tsx),Employer account · On step 7,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,34,TC-ADD-023,Upload Images,Step 7: Next proceeds to step 8,Functionality,Employer,P1,/screens/addService (UploadImagesStep.tsx),Employer account · On step 7 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 8.,,
+21 - Post Job Wizard,35,TC-ADD-029,Upload Images,Upload job photos from gallery,Functionality,Employer,P0,UploadImagesStep.tsx,Employer account · Camera/gallery permission,"1. Tap add photo.
+2. Select from gallery.
+3. Confirm.",1. Photo preview shown in grid.,,
+21 - Post Job Wizard,36,TC-ADD-030,Upload Images,Capture job photo with camera,Functionality,Employer,P1,UploadImagesStep.tsx,Employer account · Camera permission,"1. Tap camera option.
+2. Capture photo.",1. Photo added to upload grid.,,
+21 - Post Job Wizard,37,TC-ADD-040,Upload Images,Remove uploaded photo before publish,Functionality,Employer,P2,UploadImagesStep.tsx,Employer account · Photo uploaded,"1. Upload photo.
+2. Remove it.",1. Photo removed from grid.,,
+21 - Post Job Wizard,38,TC-ADD-033,Worker Salary,Set workers needed and pay per skill,Functionality,Employer,P0,SelectWorkerSalary.tsx,Employer account · On salary step,"1. Add skill row.
+2. Set count and daily pay.
+3. Next.",1. Requirements saved correctly.,,
+21 - Post Job Wizard,39,TC-ADD-009,Worker Salary & Requirements,Step 3: Worker Salary & Requirements UI loads,Availability,Employer,P0,/screens/addService (SelectWorkerSalary.tsx),Employer account · Reached step 3,"1. Navigate to step 3.
+2. Observe form.",1. worker count and daily pay per skill visible and usable.,,
+21 - Post Job Wizard,40,TC-ADD-010,Worker Salary & Requirements,Step 3: validation blocks empty required fields,Functionality,Employer,P1,/screens/addService (SelectWorkerSalary.tsx),Employer account · On step 3,"1. Leave required fields empty.
+2. Tap Next.","1. Validation error.
+2. cannot proceed.",,
+21 - Post Job Wizard,41,TC-ADD-011,Worker Salary & Requirements,Step 3: Next proceeds to step 4,Functionality,Employer,P1,/screens/addService (SelectWorkerSalary.tsx),Employer account · On step 3 with valid data,"1. Fill required fields.
+2. Tap Next.",1. Navigates to step 4.,,
+22 - User Profile,,,,SCREEN: User Profile,Info,All,,,Test cases for User Profile.,"Open User Profile in the app, then run each row's Steps.","This module contains 32 test case(s). Filter by Module = ""22 - User Profile"" in Google Sheets.",,
+22 - User Profile,1,TC-USR-007,Add Booking Details,Booking invitation form fields visible,Availability,Employer,P0,/screens/users/addBookingDetails,Employer account · From user profile book action,1. Open add booking details.,"1. Date, service, message fields visible.",,
+22 - User Profile,2,TC-USR-008,Add Booking Details,Booking form validation,Functionality,Employer,P0,/screens/users/addBookingDetails,Employer account · On booking form,1. Submit empty form.,1. Validation errors shown.,,
+22 - User Profile,3,TC-USR-029,Add Booking Details,Booking form keyboard does not hide submit,UI Design,Employer,P2,/screens/users/addBookingDetails,Employer account · On booking form,"1. Focus text field.
+2. Observe submit button.",1. Submit remains accessible.,,
+22 - User Profile,4,TC-PROF-025,Favourites,Favourites link navigates correctly,Functionality,All,P1,/screens/favourite,Any test account · Profile settings tab,"1. Tap Favourites.
+2. Observe screen.",1. Opens liked services.,,
+22 - User Profile,5,TC-UI-041,Favourites,Favourites empty state UI,UI Design,All,P2,List screens,Any test account · Empty Favourites,1. Open Favourites with zero items.,1. Centered empty state with icon and message.,,
+22 - User Profile,6,TC-USR-015,Favourites,Favourites screen shows liked services,Availability,All,P1,/screens/favourite,Any test account · Liked services exist,1. Open /screens/favourite.,1. Liked service cards listed.,,
+22 - User Profile,7,TC-USR-016,Favourites,Tap favourite opens service detail,Functionality,All,P1,/screens/favourite,Any test account · Favourite listed,1. Tap favourite card.,1. Navigates to service detail.,,
+22 - User Profile,8,TC-USR-017,Favourites,Favourites empty state,UI Design,All,P2,/screens/favourite,Any test account · No favourites,1. Open favourites with none saved.,1. Empty state message.,,
+22 - User Profile,9,TC-USR-018,Favourites,Unlike from favourites list,Functionality,All,P2,/screens/favourite,Any test account · On favourites,1. Remove like from favourites.,1. Item removed from list.,,
+22 - User Profile,10,TC-USR-021,User Info Box,Mediator team info on user info box,Availability,Mediator,P2,UserInfoBox,Mediator account · Mediator profile,1. View mediator profile.,1. Team size info visible.,,
+22 - User Profile,11,TC-USR-003,User Profile,User profile detail loads all sections,Availability,All,P0,/screens/users/[id],Any test account · Valid user ID,"1. Open user profile.
+2. Scroll page.","1. Photo, skills, reviews, work info, action buttons visible.",,
+22 - User Profile,12,TC-USR-004,User Profile,Profile photo and name header styled correctly,UI Design,All,P1,/screens/users/[id],Any test account · User with photo,1. Observe profile header.,"1. Large photo, name, role tag visible.",,
+22 - User Profile,13,TC-USR-005,User Profile,Like/unlike user,Functionality,All,P1,/screens/users/[id],Any test account · On user profile,"1. Tap like.
+2. Tap again to unlike.",1. Like state toggles.,,
+22 - User Profile,14,TC-USR-006,User Profile,Send booking invitation to worker,Functionality,Employer,P0,/screens/users/[id],Employer account · Employer viewing worker,"1. Tap Book/Send Invitation.
+2. Fill booking details.
+3. Send.","1. Invitation sent.
+2. success toast.",,
+22 - User Profile,15,TC-USR-009,User Profile,Send team join request to mediator,Functionality,Worker,P1,/screens/users/[id],Worker account · Worker viewing mediator,"1. Tap join team/request.
+2. Confirm.",1. Team request sent.,,
+22 - User Profile,16,TC-USR-010,User Profile,Call user button opens dialer,Functionality,All,P1,/screens/users/[id],Any test account · User with phone,1. Tap Call.,1. Phone dialer opens.,,
+22 - User Profile,17,TC-USR-011,User Profile,Reviews section shows rating stars,UI Design,All,P1,/screens/users/[id],Any test account · User with reviews,1. Observe reviews block.,1. Star rating and review count visible.,,
+22 - User Profile,18,TC-USR-012,User Profile,Navigate to add review,Functionality,All,P1,/screens/users/[id],Any test account · On user profile,1. Tap Add Review or Reviews.,1. Navigates to review flow.,,
+22 - User Profile,19,TC-USR-013,User Profile,Distance from current user shown,UI Design,All,P1,/screens/users/[id],Any test account · User with location,1. Observe distance label.,1. Distance in km shown if location available.,,
+22 - User Profile,20,TC-USR-019,User Profile,Back navigation from user profile,Functionality,All,P1,/screens/users/[id],Any test account · On profile,1. Tap back.,1. Returns to previous list.,,
+22 - User Profile,21,TC-USR-020,User Profile,Admin suspend user from profile,Functionality,Admin,P1,/screens/users/[id],Admin account · Admin viewing user,1. Tap Suspend if available.,1. User suspended.,,
+22 - User Profile,22,TC-USR-023,User Profile,User profile labels in Hindi,UI Design,All,P2,/screens/users/[id],Any test account · Hindi locale,"1. Set Hindi.
+2. Open user profile.",1. Section labels in Hindi.,,
+22 - User Profile,23,TC-USR-024,User Profile,Invalid user ID error handling,Availability,All,P2,/screens/users/[id],Any test account · Invalid user ID,1. Open /screens/users/invalid.,"1. Error state.
+2. no crash.",,
+22 - User Profile,24,TC-USR-028,User Profile,Skills list wraps without overflow,UI Design,All,P2,/screens/users/[id],Any test account · User with many skills,1. View user with 10+ skills.,1. Skills displayed cleanly.,,
+22 - User Profile,25,TC-USR-025,User Profile Buttons,Employer action buttons visible,Availability,Employer,P1,buttons.tsx,Employer account · Employer on worker profile,1. Observe action button row.,"1. Book, Like, Call buttons visible.",,
+22 - User Profile,26,TC-USR-026,User Profile Buttons,Worker sees appropriate actions on employer profile,Availability,Worker,P1,buttons.tsx,Worker account · Worker on employer profile,1. Open employer profile as Worker.,1. Role-appropriate buttons only.,,
+22 - User Profile,27,TC-USR-001,Users List,Users list screen loads,Availability,All,P0,/screens/users,Any test account · Navigate to users list,1. Open /screens/users.,1. Paginated user/worker cards visible.,,
+22 - User Profile,28,TC-USR-002,Users List,Users list filters by saved/booked params,Functionality,All,P1,/screens/users,Any test account · List with filters,1. Open with filter params.,1. List filtered accordingly.,,
+22 - User Profile,29,TC-USR-014,Users List,Users list pagination,Functionality,All,P1,/screens/users,Any test account · Long list,1. Scroll to bottom.,1. More users load.,,
+22 - User Profile,30,TC-USR-022,Users List,Pull to refresh users list,Functionality,All,P1,/screens/users,Any test account · On users list,1. Pull down.,1. List refreshes.,,
+22 - User Profile,31,TC-USR-027,Users List,Top workers legacy screen accessible,Availability,Employer,P2,/screens/bottomTabs/(user)/employer/topWorkers,Employer account · Navigate to top workers,1. Open topWorkers if linked.,1. Top workers list loads.,,
+22 - User Profile,32,TC-USR-030,Users List,Sort users in browse list,Functionality,Employer,P1,allWorkers.tsx,Employer account · Sort available,1. Apply sort tab.,1. Users re-ordered.,,
+23 - Bookings,,,,SCREEN: Bookings,Info,All,,,Test cases for Bookings.,"Open Bookings in the app, then run each row's Steps.","This module contains 26 test case(s). Filter by Module = ""23 - Bookings"" in Google Sheets.",,
+23 - Bookings,1,TC-BKG-017,Booked Workers,Booked worker cards with actions visible,Availability,Employer,P1,ListingBookedWorkers,Employer account · Booking detail open,1. Observe worker cards in booking.,"1. Worker photo, name, action buttons.",,
+23 - Bookings,2,TC-BKG-005,Booking Actions,Remove worker from booking,Functionality,Employer,P1,actionButtons.tsx,Employer account · Booking with workers,1. Remove a booked worker.,1. Worker removed from booking.,,
+23 - Bookings,3,TC-BKG-024,Booking Confirmation Modal,Confirmation modal for complete/cancel booking,UI Design,Employer,P2,ModalComponent,Employer account · Destructive booking action,"1. Tap complete or cancel.
+2. Observe modal.",1. Clear confirm/cancel options.,,
+23 - Bookings,4,TC-BKG-002,Booking Detail,Booking detail shows selected workers,Availability,Employer,P0,/screens/bookings/[id],Employer account · Valid booking ID,"1. Tap a booking.
+2. Scroll detail.","1. Worker list, dates, status, action buttons visible.",,
+23 - Bookings,5,TC-BKG-003,Booking Detail,Employer complete booking,Functionality,Employer,P0,/screens/bookings/[id],Employer account · Active booking,"1. Tap Complete.
+2. Confirm modal.",1. Booking marked complete.,,
+23 - Bookings,6,TC-BKG-004,Booking Detail,Employer cancel booking,Functionality,Employer,P0,/screens/bookings/[id],Employer account · Active booking,"1. Tap Cancel.
+2. Confirm.",1. Booking cancelled.,,
+23 - Bookings,7,TC-BKG-012,Booking Detail,Navigate to add attendance from booking,Functionality,Employer,P1,/screens/bookings/[id],Employer account · Booking with attendance link,1. Tap Add Attendance link.,1. Navigates to add attendance screen.,,
+23 - Bookings,8,TC-BKG-013,Booking Detail,Navigate to view attendance from booking,Functionality,Employer,P1,/screens/bookings/[id],Employer account · Booking with attendance data,1. Tap View Attendance.,1. Navigates to attendance report.,,
+23 - Bookings,9,TC-BKG-015,Booking Detail,Completed booking visually distinct,UI Design,Employer,P2,/screens/bookings/[id],Employer account · Completed booking,1. Open completed booking.,1. Completed status badge/styling.,,
+23 - Bookings,10,TC-BKG-018,Booking Detail,Invalid booking ID error handling,Functionality,Employer,P2,/screens/bookings/[id],Employer account · Invalid booking ID,1. Open invalid booking ID.,"1. Error state.
+2. no crash.",,
+23 - Bookings,11,TC-BKG-020,Booking Detail,Booking screen labels in Hindi,UI Design,Employer,P2,/screens/bookings/[id],Employer account · Hindi locale,"1. Set Hindi.
+2. Open booking detail.",1. Labels in Hindi.,,
+23 - Bookings,12,TC-BKG-022,Booking Detail,Call worker from booking detail,Functionality,Employer,P1,/screens/bookings/[id],Employer account · Booking detail,1. Tap call on worker card.,1. Dialer opens.,,
+23 - Bookings,13,TC-BKG-026,Booking Detail,View booking work location on map,Functionality,Employer,P1,/screens/bookings/[id],Employer account · Booking with map/address,1. Tap location/map if shown.,1. Map with work location.,,
+23 - Bookings,14,TC-BKG-030,Booking Detail,Booking detail offline handling,Availability,Employer,P1,/screens/bookings/[id],Employer account · Offline,1. Open booking offline.,1. Cached or error message.,,
+23 - Bookings,15,TC-UI-038,Bookings list,Bookings list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Bookings list,1. Open Bookings list with zero items.,1. Centered empty state with icon and message.,,
+23 - Bookings,16,TC-BKG-001,Bookings List,Employer bookings list loads,Availability,Employer,P0,/screens/bookings,Employer account · Employer with bookings,1. Open /screens/bookings.,1. Booked workers grouped by booking visible.,,
+23 - Bookings,17,TC-BKG-011,Bookings List,Booking cards show date status worker count,UI Design,All,P1,ListingVerticalBookings,Any test account · Bookings in list,1. Observe booking cards.,1. Key booking info on card.,,
+23 - Bookings,18,TC-BKG-014,Bookings List,Pull to refresh bookings,Functionality,Employer,P1,/screens/bookings,Employer account · Bookings list,1. Pull down on bookings list.,1. List refreshes.,,
+23 - Bookings,19,TC-BKG-021,Bookings List,Bookings empty state,UI Design,Employer,P2,/screens/bookings,Employer account · No bookings,1. Open bookings with none.,1. Empty state message.,,
+23 - Bookings,20,TC-BKG-029,Bookings List,Bookings list pagination if many bookings,Functionality,Employer,P2,/screens/bookings,Employer account · Pagination,1. Scroll to bottom.,1. More bookings load.,,
+23 - Bookings,21,TC-BKG-010,Employer Invitations,Employer cancel sent invitation,Functionality,Employer,P1,employerWorkRequests.tsx,Employer account · Sent invitation pending,"1. Open sent invitation.
+2. Cancel.",1. Invitation cancelled on server.,,
+23 - Bookings,22,TC-BKG-016,Requests List,Request cards show sender and status,UI Design,All,P2,ListingVerticalRequests,Any test account · Requests in activity,1. Observe request cards.,"1. Sender name, date, status visible.",,
+23 - Bookings,23,TC-BKG-006,Selected Users,Select workers for booking confirmation,Functionality,Employer,P0,/screens/bookings/selectedUsers,Employer account · Job with selected workers,"1. Open selected users.
+2. Confirm selection.",1. Booking created with selected workers.,,
+23 - Bookings,24,TC-BKG-028,Selected Users,Selected users checklist UI,UI Design,Employer,P2,/screens/bookings/selectedUsers,Employer account · Multiple selected workers,1. Observe worker selection UI.,1. Checkboxes/selection state clear.,,
+23 - Bookings,25,TC-BKG-007,Worker Invitations,Worker accept invitation from activity,Functionality,Worker,P0,workerWorkRequests.tsx,Worker account · Pending invitation,"1. Open work request.
+2. Accept.",1. Booking confirmed for worker.,,
+23 - Bookings,26,TC-BKG-008,Worker Invitations,Worker reject invitation,Functionality,Worker,P0,workerWorkRequests.tsx,Worker account · Pending invitation,1. Reject invitation.,1. Invitation removed.,,
+24 - Attendance,,,,SCREEN: Attendance,Info,All,,,Test cases for Attendance.,"Open Attendance in the app, then run each row's Steps.","This module contains 18 test case(s). Filter by Module = ""24 - Attendance"" in Google Sheets.",,
+24 - Attendance,1,TC-ATT-001,Add Attendance,Add attendance screen loads,Availability,Employer,P0,/screens/bookings/addAttendance,Employer account · Employer with active booking,1. Navigate to add attendance from booking.,1. Attendance form with worker list and date visible.,,
+24 - Attendance,2,TC-ATT-002,Add Attendance,Mark worker present for date,Functionality,Employer,P0,/screens/bookings/addAttendance,Employer account · On add attendance,"1. Select date.
+2. Mark worker present.
+3. Submit.","1. Attendance saved.
+2. success toast.",,
+24 - Attendance,3,TC-ATT-003,Add Attendance,Mark worker absent for date,Functionality,Employer,P0,/screens/bookings/addAttendance,Employer account · On add attendance,"1. Mark worker absent.
+2. Submit.",1. Absence recorded.,,
+24 - Attendance,4,TC-ATT-005,Add Attendance,Mark attendance for multiple workers same day,Functionality,Employer,P1,/screens/bookings/addAttendance,Employer account · Multiple workers in booking,"1. Set attendance for each worker.
+2. Submit all.",1. All records saved.,,
+24 - Attendance,5,TC-ATT-010,Add Attendance,Date picker selects attendance date,Functionality,Employer,P1,/screens/bookings/addAttendance,Employer account · On add attendance,"1. Tap date field.
+2. Select date.",1. Correct date applied to form.,,
+24 - Attendance,6,TC-ATT-011,Add Attendance,Validation when no attendance marked,Functionality,Employer,P2,/screens/bookings/addAttendance,Employer account · Submit without selection,1. Submit empty attendance.,1. Validation error or no-op with message.,,
+24 - Attendance,7,TC-ATT-013,Add Attendance,Worker cannot access add attendance,Availability,Worker,P2,/screens/bookings/addAttendance,Worker account · Worker logged in,1. Attempt add attendance as Worker.,1. Not accessible or appropriate restriction.,,
+24 - Attendance,8,TC-ATT-014,Add Attendance,Attendance labels in Hindi,UI Design,Employer,P2,/screens/bookings/addAttendance,Employer account · Hindi locale,"1. Set Hindi.
+2. Open add attendance.",1. Labels in Hindi.,,
+24 - Attendance,9,TC-ATT-015,Add Attendance,Attendance submit failure shows error,Functionality,Employer,P2,/screens/bookings/addAttendance,Employer account · Network error on submit,"1. Simulate API failure.
+2. Submit.","1. Error toast.
+2. data not lost locally if retry supported.",,
+24 - Attendance,10,TC-ATT-017,Add Attendance,Prevent or warn attendance for future dates if applicable,Functionality,Employer,P1,/screens/bookings/addAttendance,Employer account · Future date,"1. Select future date.
+2. Attempt submit.",1. Validation per business rules.,,
+24 - Attendance,11,TC-ATT-004,Attendance Component,Present/absent toggle visually clear,UI Design,Employer,P1,attendanceComponent.tsx,Employer account · On add attendance,1. Toggle attendance states.,1. Clear visual distinction present vs absent.,,
+24 - Attendance,12,TC-ATT-018,Attendance Component,Attendance list scrolls for many workers,Availability,Employer,P1,attendanceComponent.tsx,Employer account · Booking with 5+ workers,"1. Open booking with many workers.
+2. Scroll attendance list.",1. All workers accessible via scroll.,,
+24 - Attendance,13,TC-ATT-006,Show Attendance,Attendance report screen loads,Availability,Employer,P0,/screens/bookings/showAttendance,Employer account · Attendance data exists,1. Open show attendance from booking.,1. Report with dates and worker attendance visible.,,
+24 - Attendance,14,TC-ATT-007,Show Attendance,Attendance report shows correct present/absent counts,Functionality,Employer,P0,ShowAttendance.tsx,Employer account · Report with data,1. Compare report to submitted data.,1. Counts match submitted attendance.,,
+24 - Attendance,15,TC-ATT-008,Show Attendance,Attendance report calendar/grid readable,UI Design,Employer,P1,/screens/bookings/showAttendance,Employer account · Multi-day report,1. Scroll full report.,"1. Dates and workers aligned.
+2. readable on mobile.",,
+24 - Attendance,16,TC-ATT-012,Show Attendance,Empty attendance report state,UI Design,Employer,P2,/screens/bookings/showAttendance,Employer account · No attendance data,1. Open report with no records.,1. Empty state message.,,
+24 - Attendance,17,TC-ATT-016,Show Attendance,Back navigation from attendance report,Functionality,Employer,P1,/screens/bookings/showAttendance,Employer account · Report open,1. Tap back.,1. Returns to booking detail.,,
+24 - Attendance,18,TC-ATT-009,Side Drawer,Side drawer actions on attendance screen,Functionality,Employer,P2,GlobalSideDrawer,Employer account · On attendance view,"1. Open side drawer on attendance.
+2. Use available action.",1. Drawer action completes expected operation.,,
+25 - Team & Mediator,,,,SCREEN: Team & Mediator,Info,All,,,Test cases for Team & Mediator.,"Open Team & Mediator in the app, then run each row's Steps.","This module contains 22 test case(s). Filter by Module = ""25 - Team & Mediator"" in Google Sheets.",,
+25 - Team & Mediator,1,TC-TEAM-019,Mediator Activity,Mediator handle work request from activity,Functionality,Mediator,P1,mediatorWorkRequests.tsx,Mediator account · Mediator work request,"1. Open work request in activity.
+2. Accept/reject.",1. Request handled correctly.,,
+25 - Team & Mediator,2,TC-TEAM-008,Send Team Request,Worker send join team request,Functionality,Worker,P1,useWorkerAction,Worker account · Worker viewing mediator,"1. Open mediator profile.
+2. Send team request.",1. Request appears in mediator sent tab.,,
+25 - Team & Mediator,3,TC-TEAM-021,Send Team Request,Mediator send team invite to worker,Functionality,Mediator,P1,MEDIATOR.sendTeamRequest,Mediator account · Mediator inviting worker,1. From worker profile send invite as mediator if available.,1. Invite appears in worker received tab.,,
+25 - Team & Mediator,4,TC-TEAM-005,Team Detail,Team members list loads,Availability,Mediator,P0,/screens/team/[id],Mediator account · Mediator with team,1. Open team detail from profile.,1. Team member cards with names and skills.,,
+25 - Team & Mediator,5,TC-TEAM-006,Team Detail,Mediator remove team member,Functionality,Mediator,P0,teamDetails.tsx,Mediator account · Team with members,"1. Tap remove on member.
+2. Confirm.",1. Member removed from team.,,
+25 - Team & Mediator,6,TC-TEAM-007,Team Detail,Worker leave team,Functionality,Worker,P1,/screens/team/[id],Worker account · Worker on a team,"1. Tap Leave Team.
+2. Confirm.",1. Worker removed from team.,,
+25 - Team & Mediator,7,TC-TEAM-012,Team Detail,Tap team member opens worker profile,Functionality,Mediator,P1,/screens/team/[id],Mediator account · Team detail open,1. Tap a team member.,1. Navigates to /screens/users/[id].,,
+25 - Team & Mediator,8,TC-TEAM-014,Team Detail,Team screen labels in Hindi,UI Design,Mediator,P2,/screens/team/[id],Mediator account · Hindi locale,"1. Set Hindi.
+2. Open team detail.",1. Labels in Hindi.,,
+25 - Team & Mediator,9,TC-TEAM-017,Team Detail,Invalid team ID error handling,Functionality,Mediator,P2,/screens/team/[id],Mediator account · Invalid team ID,1. Open invalid team ID.,"1. Error state.
+2. no crash.",,
+25 - Team & Mediator,10,TC-TEAM-020,Team Detail,Empty team state on team detail,Availability,Mediator,P1,/screens/team/[id],Mediator account · Empty team,1. Open team with no members.,1. Empty state with add/join prompt.,,
+25 - Team & Mediator,11,TC-TEAM-024,Team Detail,Back navigation from team detail,Functionality,Mediator,P1,/screens/team/[id],Mediator account · Team detail,1. Tap back.,1. Returns to profile.,,
+25 - Team & Mediator,12,TC-TEAM-001,Team Requests,Team requests screen loads with received/sent tabs,Availability,All,P0,/screens/teamRequests,Any test account · Logged in,1. Open /screens/teamRequests.,1. Received and Sent segment tabs visible.,,
+25 - Team & Mediator,13,TC-TEAM-011,Team Requests,Team requests empty state,UI Design,All,P2,/screens/teamRequests,Any test account · No requests,1. Open requests with none.,1. Empty state on both tabs.,,
+25 - Team & Mediator,14,TC-TEAM-013,Team Requests,Pull to refresh team requests,Functionality,All,P1,/screens/teamRequests,Any test account · Requests list,1. Pull down on list.,1. List refreshes.,,
+25 - Team & Mediator,15,TC-TEAM-015,Team Requests,Team request cards show mediator/worker names,UI Design,All,P1,ListingVerticalRequests,Any test account · Requests listed,1. Observe request cards.,"1. Names, date, status visible.",,
+25 - Team & Mediator,16,TC-TEAM-022,Team Requests,Team request push opens team requests screen,Functionality,All,P2,/screens/teamRequests,Any test account · Notification of team request,1. Tap team request notification.,1. Navigates to team requests.,,
+25 - Team & Mediator,17,TC-TEAM-025,Team Requests,Received/Sent tab switch preserves scroll,UI Design,All,P1,/screens/teamRequests,Any test account · On team requests,"1. Scroll received list.
+2. Switch to sent.
+3. Switch back.",1. Tabs switch without crash.,,
+25 - Team & Mediator,18,TC-TEAM-027,Team Requests,Worker sent tab empty or hidden appropriately,Availability,Worker,P1,/screens/teamRequests,Worker account · Worker not on any team,1. Open Sent tab as worker.,1. Empty or N/A state.,,
+25 - Team & Mediator,19,TC-TEAM-002,Team Requests Received,Worker accept team join request,Functionality,Worker,P0,/screens/teamRequests,Worker account · Pending team join request,"1. Open Received tab.
+2. Accept request.","1. Joined team.
+2. request removed.",,
+25 - Team & Mediator,20,TC-TEAM-003,Team Requests Received,Worker reject team join request,Functionality,Worker,P0,/screens/teamRequests,Worker account · Pending team join request,1. Reject request.,1. Request rejected.,,
+25 - Team & Mediator,21,TC-TEAM-018,Team Requests Received,Received requests list scroll performance,UI Design,Worker,P2,/screens/teamRequests,Worker account · Multiple requests,1. Scroll many requests.,1. Smooth scroll.,,
+25 - Team & Mediator,22,TC-TEAM-004,Team Requests Sent,Mediator cancel sent team request,Functionality,Mediator,P1,/screens/teamRequests,Mediator account · Sent request pending,"1. Open Sent tab.
+2. Cancel request.",1. Request cancelled.,,
+26 - Reviews,,,,SCREEN: Reviews,Info,All,,,Test cases for Reviews.,"Open Reviews in the app, then run each row's Steps.","This module contains 18 test case(s). Filter by Module = ""26 - Reviews"" in Google Sheets.",,
+26 - Reviews,1,TC-REV-004,Add Review,Add review form loads,Availability,All,P0,/screens/reviews/addReview/[id],Any test account · Eligible to review user,1. Open add review for a user.,"1. Star selector, reasons, feedback text visible.",,
+26 - Reviews,2,TC-REV-005,Add Review,Submit review with star rating,Functionality,All,P0,/screens/reviews/addReview/[id],Any test account · On add review,"1. Select 5 stars.
+2. Add feedback.
+3. Submit.","1. Review saved.
+2. success message.",,
+26 - Reviews,3,TC-REV-006,Add Review,Submit review requires star rating,Functionality,All,P1,/screens/reviews/addReview/[id],Any test account · On add review,"1. Leave stars empty.
+2. Submit.",1. Validation error.,,
+26 - Reviews,4,TC-REV-008,Add Review,Edit existing review,Functionality,All,P1,/screens/reviews/addReview/[id],Any test account · Existing review by user,"1. Open edit review.
+2. Change rating.
+3. Save.",1. Review updated on server.,,
+26 - Reviews,5,TC-REV-009,Add Review,Delete review if option available,Functionality,All,P2,/screens/reviews/addReview/[id],Any test account · Own review exists,"1. Delete review.
+2. Confirm.",1. Review removed.,,
+26 - Reviews,6,TC-REV-013,Add Review,Review form labels in Hindi,UI Design,All,P2,/screens/reviews/addReview/[id],Any test account · Hindi locale,"1. Set Hindi.
+2. Open add review.",1. Labels in Hindi.,,
+26 - Reviews,7,TC-REV-014,Add Review,Star rating tap targets adequate size,UI Design,All,P1,/screens/reviews/addReview/[id],Any test account · On add review,1. Tap each star.,1. Stars select reliably on mobile.,,
+26 - Reviews,8,TC-REV-016,Add Review,Review submit failure shows error,Functionality,All,P2,/screens/reviews/addReview/[id],Any test account · Network error,"1. Simulate API failure.
+2. Submit.","1. Error toast.
+2. form data retained.",,
+26 - Reviews,9,TC-REV-018,Add Review,Feedback text area supports multiline input,UI Design,All,P2,/screens/reviews/addReview/[id],Any test account · Long feedback text,1. Enter long review text.,"1. Text wraps.
+2. no overflow issues.",,
+26 - Reviews,10,TC-REV-010,Rating Display,Rating component on user profile,Availability,All,P1,RatingAndReviews,Any test account · User profile with rating,"1. Open user profile.
+2. Observe rating.",1. Average stars and count shown.,,
+26 - Reviews,11,TC-REV-007,Review Reasons,Select review reason tags,Functionality,All,P1,reasons.tsx,Any test account · On add review,"1. Tap reason chips.
+2. Submit review.",1. Selected reasons saved with review.,,
+26 - Reviews,12,TC-REV-001,Reviews List,Reviews list screen loads with stats,Availability,All,P0,/screens/reviews,Any test account · User with reviews,1. Open /screens/reviews from profile.,"1. Average rating, review count, review cards visible.",,
+26 - Reviews,13,TC-REV-002,Reviews List,Review cards show stars reviewer name and date,UI Design,All,P1,/screens/reviews,Any test account · Reviews exist,1. Observe review cards.,"1. Star rating, reviewer, date, text visible.",,
+26 - Reviews,14,TC-REV-003,Reviews List,Reviews empty state,UI Design,All,P2,/screens/reviews,Any test account · No reviews,1. Open reviews with none.,1. Empty state message.,,
+26 - Reviews,15,TC-REV-012,Reviews List,Reviews list pagination or scroll,Functionality,All,P1,/screens/reviews,Any test account · Long review list,1. Scroll all reviews.,1. All reviews accessible.,,
+26 - Reviews,16,TC-REV-015,Reviews List,Back navigation from reviews,Functionality,All,P1,/screens/reviews,Any test account · On reviews list,1. Tap back.,1. Returns to profile.,,
+26 - Reviews,17,TC-REV-017,Reviews List,Pull to refresh reviews,Functionality,All,P2,/screens/reviews,Any test account · On reviews,1. Pull down.,1. Reviews refresh.,,
+26 - Reviews,18,TC-REV-011,User Reviews,Inline reviews on profile overview,Availability,All,P2,UserReviews,Any test account · Profile with reviews section,1. View profile reviews section.,1. Recent reviews preview shown.,,
+27 - Notifications,,,,SCREEN: Notifications,Info,All,,,Test cases for Notifications.,"Open Notifications in the app, then run each row's Steps.","This module contains 26 test case(s). Filter by Module = ""27 - Notifications"" in Google Sheets.",,
+27 - Notifications,1,TC-NOT-021,Admin Local Notification,Admin local notification trigger for testing,Functionality,Admin,P2,triggerNotificationAdmin.tsx,Admin account · Admin dev trigger if available,1. Trigger admin test notification if available.,1. Local notification appears.,,Dev/admin feature.
+27 - Notifications,2,TC-NOT-014,Android Channel,Android notification channel created,Functionality,All,P2,usePushNotification.ts,Any test account · Android 8+,1. Check device notification settings for app.,1. Apna Rojgar notification channel exists.,,
+27 - Notifications,3,TC-NOT-007,Foreground Banner,In-app banner shown for foreground notification,Availability,All,P1,InAppNotificationBanner,Any test account · App in foreground; push received,"1. Send push while app open.
+2. Observe banner.",1. Banner appears at top with notification content.,,
+27 - Notifications,4,TC-NOT-024,Foreground Banner,Dismiss foreground notification banner,Functionality,All,P2,InAppNotificationBanner,Any test account · Banner visible,1. Tap dismiss on banner.,1. Banner closes.,,
+27 - Notifications,5,TC-NOT-009,Job Notification,Tap JOB notification opens service detail,Functionality,All,P0,NotificationContext.tsx,Any test account · Push type JOB with job id,"1. Send JOB type push.
+2. Tap notification.",1. Navigates to /screens/service/[id].,,
+27 - Notifications,6,TC-NOT-016,Local Notifications,Local notification triggered for unread while app open,Functionality,All,P2,useInAppNotifications.tsx,Any test account · Unread on server while app open,1. Receive unread while in app.,1. Local notification or banner shown.,,
+27 - Notifications,7,TC-GLB-019,Notification Badge,Unread notification badge updates on tab bar,Functionality,All,P2,/(tabs)/_layout.tsx,Any test account · Unread notifications exist,"1. Ensure unread notifications on server.
+2. Wait up to 30s on tab screen.
+3. Observe badge.",1. Unread count badge appears/updates on relevant tab or profile icon.,,
+27 - Notifications,8,TC-NOT-022,Notification Cleanup,Stale notifications cleaned up,Functionality,All,P2,cleanUpNotifications.tsx,Any test account · Old notifications on device,"1. Accumulate old notifications.
+2. Use app over time.",1. Old notifications pruned without crash.,,
+27 - Notifications,9,TC-NOT-008,Notification Tap,Tap notification opens deep link URL,Functionality,All,P0,NotificationContext.tsx,Any test account · Push with deep link data.url,"1. Send push with data.url.
+2. Tap notification.",1. App navigates to URL target screen.,,
+27 - Notifications,10,TC-NOT-018,Notification Tap,Tap notification cold-starts app to target,Functionality,All,P1,NotificationContext.tsx,Any test account · App killed; push received,"1. Kill app.
+2. Tap push notification.",1. App opens to correct screen.,,
+27 - Notifications,11,TC-NOT-010,Notification Toast,Notification toast UI styled correctly,UI Design,All,P2,NotificationToast,Any test account · In-app notification trigger,1. Trigger in-app notification toast.,1. Toast readable and dismissible.,,
+27 - Notifications,12,TC-NOT-001,Notifications Inbox,Notifications inbox loads,Availability,All,P0,/screens/notifications,Any test account · Logged in,1. Open /screens/notifications.,"1. Notification list with title, body, time visible.",,
+27 - Notifications,13,TC-NOT-002,Notifications Inbox,Mark notification as read on view,Functionality,All,P0,/screens/notifications,Any test account · Unread notifications,"1. Tap unread notification.
+2. Reopen inbox.","1. Notification marked read.
+2. unread count decreases.",,
+27 - Notifications,14,TC-NOT-003,Notifications Inbox,Mark all as read if option available,Functionality,All,P1,/screens/notifications,Any test account · Multiple unread,1. Tap Mark All Read.,1. All notifications marked read.,,
+27 - Notifications,15,TC-NOT-004,Notifications Inbox,Infinite scroll on notifications,Functionality,All,P1,/screens/notifications,Any test account · Long notification list,1. Scroll to bottom.,1. Older notifications load.,,
+27 - Notifications,16,TC-NOT-011,Notifications Inbox,Notifications empty state,UI Design,All,P2,/screens/notifications,Any test account · No notifications,1. Open inbox with none.,1. Empty state message.,,
+27 - Notifications,17,TC-NOT-012,Notifications Inbox,Pull to refresh notifications,Functionality,All,P1,/screens/notifications,Any test account · On inbox,1. Pull down.,1. Notifications refresh.,,
+27 - Notifications,18,TC-NOT-015,Notifications Inbox,Unread notifications visually distinct,UI Design,All,P1,/screens/notifications,Any test account · Mixed read/unread,1. Observe inbox.,1. Unread items have bold/dot/highlight.,,
+27 - Notifications,19,TC-NOT-017,Notifications Inbox,Notification inbox labels in Hindi,UI Design,All,P2,/screens/notifications,Any test account · Hindi locale,"1. Set Hindi.
+2. Open inbox.",1. Headings in Hindi.,,
+27 - Notifications,20,TC-NOT-019,Notifications Inbox,Notifications inbox offline handling,Functionality,All,P2,/screens/notifications,Any test account · Offline,1. Open inbox offline.,1. Cached notifications or offline message.,,
+27 - Notifications,21,TC-NOT-023,Notifications Inbox,Notification item tap navigates to relevant screen,Functionality,All,P1,/screens/notifications,Any test account · Notification with action,1. Tap booking/application notification.,1. Opens related booking or service screen.,,
+27 - Notifications,22,TC-NOT-025,Notifications Inbox,Long notification body truncates or expands,UI Design,All,P2,/screens/notifications,Any test account · Long notification text,1. View notification with long body.,1. Readable layout without breaking UI.,,
+27 - Notifications,23,TC-NOT-006,Push Permission,Notification permission prompt on Android,Functionality,All,P1,usePushNotification.ts,Any test account · Fresh install,"1. Login first time.
+2. Observe permission dialog.",1. Android notification permission requested.,,
+27 - Notifications,24,TC-NOT-005,Push Registration,Push token registered after login,Functionality,All,P0,usePushNotification.ts,Any test account · Fresh login; notification permission,"1. Login.
+2. Grant notification permission.
+3. Verify token on server.",1. Device token registered via NOTIFICATION.registerDevice.,,
+27 - Notifications,25,TC-NOT-020,Push Registration,App functions when notification permission denied,Functionality,All,P2,usePushNotification.ts,Any test account · Permission denied,"1. Deny permission.
+2. Use app normally.","1. No crash.
+2. inbox still works for in-app notifications.",,
+27 - Notifications,26,TC-NOT-013,Unread Badge,Unread badge on tab bar updates after read,Functionality,All,P1,/(tabs)/_layout.tsx,Any test account · Unread count > 0,"1. Note badge count.
+2. Read notifications.
+3. Observe badge.",1. Badge count decreases or clears.,,
+28 - Deep Links & Share,,,,SCREEN: Deep Links & Share,Info,All,,,Test cases for Deep Links & Share.,"Open Deep Links & Share in the app, then run each row's Steps.","This module contains 15 test case(s). Filter by Module = ""28 - Deep Links & Share"" in Google Sheets.",,
+28 - Deep Links & Share,1,TC-DLNK-012,Deep Link Logged Out,Deep link while logged out redirects to login then job,Functionality,Guest,P1,/job/[id],Logged out,"1. Log out.
+2. Open job deep link.
+3. Login.","1. After login, lands on job detail or prompts login first.",,
+28 - Deep Links & Share,2,TC-DLNK-013,Invalid Deep Link,Invalid job deep link shows error,Functionality,All,P2,/job/[id],Any test account · Invalid job ID in link,1. Open apnarojgar://job/invalid.,"1. Error/not found.
+2. no crash.",,
+28 - Deep Links & Share,3,TC-DLNK-001,Job Deep Link Bridge,Custom scheme apnarojgar://job/id opens service detail,Functionality,All,P0,/job/[id],Any test account · Valid job ID; app installed,"1. Open apnarojgar://job/<valid-id> via adb or link.
+2. Observe navigation.",1. Redirects to /screens/service/[id].,,
+28 - Deep Links & Share,4,TC-DLNK-011,Job ID Display,Human-readable job ID shown for sharing,UI Design,All,P2,serviceJobId.ts,Any test account · On service detail,1. Observe job ID on detail or share text.,1. Readable job ID included in share content.,,
+28 - Deep Links & Share,5,TC-DLNK-003,Service Deep Link,Direct /screens/service/id deep link works,Functionality,All,P1,/screens/service/[id],Any test account · Direct service URL,1. Open apnarojgar://screens/service/<id> if supported.,1. Service detail opens.,,
+28 - Deep Links & Share,6,TC-DLNK-006,Share App,Share app screen loads with options,Availability,All,P1,/screens/shareApp,Any test account · From profile menu,1. Open /screens/shareApp.,"1. WhatsApp, SMS, LinkedIn, Copy link options visible.",,
+28 - Deep Links & Share,7,TC-DLNK-014,Share App,Share app screen in Hindi,UI Design,All,P2,/screens/shareApp,Any test account · Hindi locale,"1. Set Hindi.
+2. Open share app.",1. Labels in Hindi.,,
+28 - Deep Links & Share,8,TC-PROF-031,Share App,Share App link navigates correctly,Functionality,All,P1,/screens/shareApp,Any test account · Profile settings tab,"1. Tap Share App.
+2. Observe screen.",1. Opens share options.,,
+28 - Deep Links & Share,9,TC-DLNK-010,Share App Copy Link,Copy app link to clipboard,Functionality,All,P1,/screens/shareApp,Any test account · On share app screen,"1. Tap Copy Link.
+2. Paste in notes app.",1. App download/link URL copied.,,
+28 - Deep Links & Share,10,TC-DLNK-009,Share App LinkedIn,Share app via LinkedIn,Functionality,All,P2,/screens/shareApp,Any test account · LinkedIn installed,1. Tap LinkedIn share.,1. LinkedIn share intent opens.,,
+28 - Deep Links & Share,11,TC-DLNK-008,Share App SMS,Share app via SMS,Functionality,All,P2,/screens/shareApp,Any test account · SMS app available,1. Tap SMS share.,1. SMS composer opens with message.,,
+28 - Deep Links & Share,12,TC-DLNK-007,Share App WhatsApp,Share app via WhatsApp,Functionality,All,P1,/screens/shareApp,Any test account · WhatsApp installed,1. Tap WhatsApp share.,1. WhatsApp opens with app invite message.,,
+28 - Deep Links & Share,13,TC-DLNK-004,Share Service,Share message includes Hindi text and job link,Functionality,All,P1,shareService.ts,Any test account · On service detail,"1. Tap Share on service.
+2. Observe share sheet content.",1. Message includes job details and apnarojgar link.,,
+28 - Deep Links & Share,14,TC-DLNK-005,Share Service,Share service to WhatsApp,Functionality,All,P1,shareService.ts,Any test account · WhatsApp installed,"1. Share → WhatsApp.
+2. Select contact.",1. WhatsApp opens with pre-filled Hindi message.,,
+28 - Deep Links & Share,15,TC-DLNK-002,Universal Link,Universal link https://apnarojgarindia.com/job/id opens app,Functionality,All,P0,/job/[id],Any test account · Universal links configured,"1. Tap universal link on Android.
+2. Observe app opens to job detail.",1. App opens service detail via job bridge.,,
+29 - Experience,,,,SCREEN: Experience,Info,All,,,Test cases for Experience.,"Open Experience in the app, then run each row's Steps.","This module contains 11 test case(s). Filter by Module = ""29 - Experience"" in Google Sheets.",,
+29 - Experience,1,TC-EXP-001,Experience,Experience screen loads,Availability,All,P1,/screens/experience,Any test account · From profile menu,1. Open /screens/experience.,1. Combined work and service history timeline visible.,,
+29 - Experience,2,TC-EXP-002,Experience,Worker work history items listed,Functionality,Worker,P1,/screens/experience,Worker account · Worker with completed jobs,1. Open experience as Worker.,1. Past work/bookings shown chronologically.,,
+29 - Experience,3,TC-EXP-003,Experience,Employer service history items listed,Functionality,Employer,P1,/screens/experience,Employer account · Employer with posted jobs,1. Open experience as Employer.,1. Posted/completed services shown.,,
+29 - Experience,4,TC-EXP-004,Experience,Experience empty state,UI Design,All,P2,/screens/experience,Any test account · No history,1. Open with no history.,1. Empty state message.,,
+29 - Experience,5,TC-EXP-005,Experience,Tap history item navigates to detail,Functionality,All,P2,/screens/experience,Any test account · History item tappable,1. Tap a history entry.,1. Opens related service or booking detail.,,
+29 - Experience,6,TC-EXP-006,Experience,Pull to refresh experience,Functionality,All,P2,/screens/experience,Any test account · On experience,1. Pull down.,1. History refreshes.,,
+29 - Experience,7,TC-EXP-007,Experience,Timeline chronological order correct,UI Design,All,P2,/screens/experience,Any test account · Multiple history items,1. Compare dates on timeline.,1. Most recent first or consistent order.,,
+29 - Experience,8,TC-EXP-008,Experience,Experience labels in Hindi,UI Design,All,P2,/screens/experience,Any test account · Hindi locale,"1. Set Hindi.
+2. Open experience.",1. Section labels in Hindi.,,
+29 - Experience,9,TC-EXP-009,Experience,Back navigation from experience,Functionality,All,P2,/screens/experience,Any test account · On experience,1. Tap back.,1. Returns to profile.,,
+29 - Experience,10,TC-EXP-010,Experience,Mediator experience includes team work,Functionality,Mediator,P2,/screens/experience,Mediator account · Mediator with team jobs,1. Open as Mediator with history.,1. Team-related work entries shown.,,
+29 - Experience,11,TC-PROF-021,Experience,Experience link navigates correctly,Functionality,All,P1,/screens/experience,Any test account · Profile settings tab,"1. Tap Experience.
+2. Observe screen.",1. Opens work history.,,
+31 - Help & Support,,,,SCREEN: Help & Support,Info,All,,,Test cases for Help & Support.,"Open Help & Support in the app, then run each row's Steps.","This module contains 38 test case(s). Filter by Module = ""31 - Help & Support"" in Google Sheets.",,
+31 - Help & Support,1,TC-PROF-033,App Feedback,App Feedback link navigates correctly,Functionality,All,P1,/screens/appFeedback,Any test account · Profile settings tab,"1. Tap App Feedback.
+2. Observe screen.",1. Opens feedback form.,,
+31 - Help & Support,2,TC-SUP-007,App Feedback,App feedback form loads,Availability,All,P1,/screens/appFeedback,Any test account · From profile menu,1. Open /screens/appFeedback.,"1. Star rating, feedback text, submit button visible.",,
+31 - Help & Support,3,TC-SUP-008,App Feedback,Submit app feedback succeeds,Functionality,All,P1,/screens/appFeedback,Any test account · On feedback form,"1. Select rating.
+2. Enter feedback.
+3. Submit.","1. Feedback submitted.
+2. success message.",,Includes device info in payload.
+31 - Help & Support,4,TC-SUP-009,App Feedback,Feedback validation requires rating,Functionality,All,P2,/screens/appFeedback,Any test account · Empty form,1. Submit without rating.,1. Validation error.,,
+31 - Help & Support,5,TC-SUP-019,App Feedback,Star rating UI tappable,UI Design,All,P2,/screens/appFeedback,Any test account · On feedback,1. Tap each star.,1. Rating selects correctly.,,
+31 - Help & Support,6,TC-SUP-026,App Feedback,Feedback submit failure handling,Functionality,All,P2,/screens/appFeedback,Any test account · Network error,"1. Simulate API failure.
+2. Submit.",1. Error toast shown.,,
+31 - Help & Support,7,TC-SUP-031,App Feedback,Feedback text area multiline support,UI Design,All,P2,/screens/appFeedback,Any test account · Long feedback text,1. Enter long feedback.,1. Text wraps without layout break.,,
+31 - Help & Support,8,TC-SUP-035,App Feedback,Feedback includes app version and device info,Functionality,All,P2,/screens/appFeedback,Any test account · Submitted feedback,"1. Submit feedback.
+2. Verify server payload if accessible.",1. Device/version metadata included.,,
+31 - Help & Support,9,TC-SUP-014,Contact Support,Contact support opens email/phone/WhatsApp,Functionality,All,P2,ContactSupport,Any test account · Contact support CTA visible,1. Tap Contact Support.,1. Appropriate contact intent opens.,,
+31 - Help & Support,10,TC-SUP-034,Contact Support,Contact support CTA visible,Availability,All,P2,ContactSupport,Any test account · On profile or help,1. Find Contact Support button.,1. CTA visible and tappable.,,
+31 - Help & Support,11,TC-PROF-039,Delete Account,Delete Account link navigates correctly,Functionality,All,P1,/screens/profile/deleteProfile,Any test account · Profile settings tab,"1. Tap Delete Account.
+2. Observe screen.",1. Opens delete confirmation.,,
+31 - Help & Support,12,TC-PROF-042,Delete Account,Delete account confirmation and API call,Functionality,All,P0,/screens/profile/deleteProfile,Any test account · On delete profile screen,"1. Tap Delete Account.
+2. Confirm in modal.","1. Account deletion initiated.
+2. logged out.",,Use test account only.
+31 - Help & Support,13,TC-SUP-012,Delete Account,Delete account screen loads with warnings,Availability,All,P0,/screens/profile/deleteProfile,Any test account · From profile settings,1. Open delete profile.,1. Warning text and delete button visible.,,
+31 - Help & Support,14,TC-SUP-013,Delete Account,Delete account confirmation modal,Functionality,All,P0,/screens/profile/deleteProfile,Any test account · Test account only,"1. Tap Delete.
+2. Confirm in modal.","1. Account deleted.
+2. logged out.",,Use disposable test account only.
+31 - Help & Support,15,TC-SUP-023,Delete Account,Delete account warning text clearly visible,UI Design,All,P1,/screens/profile/deleteProfile,Any test account · On delete screen,1. Read warning content.,1. Consequences of deletion clearly stated.,,
+31 - Help & Support,16,TC-SUP-032,Delete Account,Cancel delete account returns safely,Functionality,All,P1,/screens/profile/deleteProfile,Any test account · On delete screen,"1. Tap Delete.
+2. Cancel modal.","1. Account not deleted.
+2. stays on screen.",,
+31 - Help & Support,17,TC-SUP-001,Help / FAQ,Help screen loads with FAQ topics,Availability,All,P1,/screens/helps,Any test account · From profile or support,1. Open /screens/helps.,"1. FAQ topic list, search bar visible.",,
+31 - Help & Support,18,TC-SUP-002,Help / FAQ,Tap FAQ topic opens answer modal,Functionality,All,P1,/screens/helps,Any test account · FAQ topics listed,"1. Tap a FAQ topic.
+2. Read answer.",1. Modal with question and answer text.,,
+31 - Help & Support,19,TC-SUP-017,Help / FAQ,Help screen in Hindi,UI Design,All,P2,/screens/helps,Any test account · Hindi locale,"1. Set Hindi.
+2. Open help.",1. FAQ labels in Hindi where translated.,,
+31 - Help & Support,20,TC-SUP-020,Help / FAQ,Close FAQ answer modal,Functionality,All,P2,/screens/helps,Any test account · FAQ modal open,"1. Open FAQ answer.
+2. Tap close/outside.",1. Modal dismisses.,,
+31 - Help & Support,21,TC-SUP-024,Help / FAQ,Help screen scroll performance,UI Design,All,P2,/screens/helps,Any test account · On help,1. Scroll full FAQ list.,1. Smooth scroll.,,
+31 - Help & Support,22,TC-SUP-027,Help / FAQ,Help screen offline — static content still readable,Availability,All,P2,/screens/helps,Any test account · Offline,1. Open help offline.,1. Cached/static FAQ readable or offline message.,,
+31 - Help & Support,23,TC-SUP-033,Help / FAQ,FAQ topic list icons and chevrons aligned,UI Design,All,P1,/screens/helps,Any test account · On help,1. Observe FAQ list layout.,1. Consistent row height and alignment.,,
+31 - Help & Support,24,TC-SUP-003,Help Search,Search FAQ filters topics,Functionality,All,P1,/screens/helps,Any test account · On help screen,"1. Enter search keyword.
+2. Observe filtered list.",1. Matching FAQ topics shown.,,
+31 - Help & Support,25,TC-SUP-004,Help Video,Video help plays tutorial,Functionality,All,P2,/screens/helps,Any test account · Video help section,"1. Tap video help section.
+2. Play video.",1. Video plays without crash.,,
+31 - Help & Support,26,TC-SUP-016,Instagram,Follow Instagram link works,Functionality,All,P2,JoinInstagramAccount,Any test account · Instagram link configured,1. Tap Instagram link.,1. Instagram profile opens.,,
+31 - Help & Support,27,TC-SUP-005,Live Chat Modal,Live chat modal opens,Availability,All,P2,/screens/helps,Any test account · Chat option on help,1. Tap live chat/help chat.,1. Chat modal opens.,,
+31 - Help & Support,28,TC-SUP-029,Live Chat Modal,Live chat send message if functional,Functionality,All,P2,/screens/helps,Any test account · Chat modal open,"1. Type message in chat.
+2. Send.",1. Message sent or appropriate placeholder behavior.,,Verify chat backend wiring.
+31 - Help & Support,29,TC-PROF-035,Privacy Policy,Privacy Policy link navigates correctly,Functionality,All,P1,/screens/privacyPolicy,Any test account · Profile settings tab,"1. Tap Privacy Policy.
+2. Observe screen.",1. Opens privacy text.,,
+31 - Help & Support,30,TC-SUP-010,Privacy Policy,Privacy policy screen loads,Availability,All,P1,/screens/privacyPolicy,Any test account · From profile menu,1. Open privacy policy.,1. Full privacy policy text scrollable.,,
+31 - Help & Support,31,TC-SUP-018,Privacy Policy,Legal text readable on mobile,UI Design,All,P2,/screens/privacyPolicy,Any test account · On privacy policy,1. Scroll full policy.,"1. Text size readable.
+2. no horizontal scroll.",,
+31 - Help & Support,32,TC-SUP-030,Privacy Policy,Privacy policy accessible without login,Functionality,All,P2,/screens/privacyPolicy,Any test account · Guest user,1. Open privacy from login or guest path if available.,1. Policy readable without auth.,,
+31 - Help & Support,33,TC-SUP-006,Support,Support screen wraps help content,Availability,All,P2,/screens/support,Any test account · Navigate to support,1. Open /screens/support.,1. Help/FAQ content displayed.,,
+31 - Help & Support,34,TC-SUP-028,Support,Support route same content as helps,Functionality,All,P2,/screens/support,Any test account · On support,1. Compare /screens/support and /screens/helps.,1. Equivalent help content.,,
+31 - Help & Support,35,TC-SUP-011,Terms & Conditions,Terms and conditions screen loads,Availability,All,P1,/screens/termsAndConditions,Any test account · From profile menu,1. Open terms.,1. Full terms text scrollable.,,
+31 - Help & Support,36,TC-SUP-025,Terms & Conditions,Back navigation from terms,Functionality,All,P2,/screens/termsAndConditions,Any test account · On terms,1. Tap back.,1. Returns to profile.,,
+31 - Help & Support,37,TC-SUP-021,User Problem API,Submit support ticket via API,Functionality,All,P2,userProblem.tsx,Any test account · Support ticket feature if wired,1. Submit user problem if UI exists.,1. Ticket created on server.,,Verify if UI wired to /userProblem/* API.
+31 - Help & Support,38,TC-SUP-015,WhatsApp Group,Join WhatsApp group link works,Functionality,All,P2,JoinWhatsappGroup,Any test account · WhatsApp installed,1. Tap Join WhatsApp Group.,1. WhatsApp group invite opens.,,
+40 - Admin Panel,,,,SCREEN: Admin Panel,Info,All,,,Test cases for Admin Panel.,"Open Admin Panel in the app, then run each row's Steps.","This module contains 50 test case(s). Filter by Module = ""40 - Admin Panel"" in Google Sheets.",,
+40 - Admin Panel,1,TC-ADM-034,Admin API,Admin API calls use admin auth token,Functionality,Admin,P1,admin.tsx,Admin account · Admin session,"1. Perform suspend action.
+2. Verify API success.",1. Admin endpoints respond 200 with valid admin token.,,
+40 - Admin Panel,2,TC-ADM-010,Admin Requests,Admin requests queue loads,Availability,Admin,P0,AdminRequests,Admin account · Admin on tab 4,1. Open Admin Requests tab.,1. Pending activation/suspension requests listed.,,
+40 - Admin Panel,3,TC-ADM-011,Admin Requests,Admin approve user activation request,Functionality,Admin,P0,AdminRequests,Admin account · Pending activation request,"1. Open activation request.
+2. Approve.","1. User activated.
+2. request removed.",,
+40 - Admin Panel,4,TC-ADM-012,Admin Requests,Admin reject/deny request,Functionality,Admin,P0,AdminRequests,Admin account · Pending request,"1. Open request.
+2. Deny.",1. Request rejected.,,
+40 - Admin Panel,5,TC-ADM-021,Admin Requests,Admin request cards show type and timestamp,UI Design,Admin,P1,AdminRequests,Admin account · Requests listed,1. Observe request cards.,"1. Request type, user, date visible.",,
+40 - Admin Panel,6,TC-ADM-024,Admin Requests,Admin pull to refresh requests,Functionality,Admin,P1,AdminRequests,Admin account · Requests list,1. Pull down.,1. Requests refresh.,,
+40 - Admin Panel,7,TC-ADM-029,Admin Requests,Admin requests empty state,Functionality,Admin,P2,AdminRequests,Admin account · Empty requests,1. View with no pending requests.,1. Empty state message.,,
+40 - Admin Panel,8,TC-ACT-004,Admin Requests Tab,Admin activity tab shows requests queue,Availability,Admin,P0,/(tabs)/fourth,Admin account · Admin logged in,1. Open tab 4 as Admin.,1. AdminRequests component visible.,,
+40 - Admin Panel,9,TC-ACT-036,Admin Requests Tab,Admin approve activation request,Functionality,Admin,P0,AdminRequests,Admin account · Pending admin requests,"1. Open pending request.
+2. Approve.",1. User activated.,,
+40 - Admin Panel,10,TC-ACT-037,Admin Requests Tab,Admin reject suspension request,Functionality,Admin,P0,AdminRequests,Admin account · Pending admin requests,"1. Open request.
+2. Reject/deny.",1. Request handled.,,
+40 - Admin Panel,11,TC-ACT-041,Admin Requests Tab,Admin requests show request type and user,UI Design,Admin,P1,AdminRequests,Admin account · Admin requests tab,1. Observe request cards.,"1. Request type, user name, date visible.",,
+40 - Admin Panel,12,TC-ADM-007,Admin Services,Admin services tab loads all jobs,Availability,Admin,P0,AdminServices,Admin account · Admin on tab 2,1. Open Admin Services tab.,1. All platform services listed.,,
+40 - Admin Panel,13,TC-ADM-008,Admin Services,Admin tap service opens detail,Functionality,Admin,P1,AdminServices,Admin account · Service in list,1. Tap a service.,1. Service detail or admin view opens.,,
+40 - Admin Panel,14,TC-ADM-009,Admin Services,Admin service cards show employer and status,UI Design,Admin,P1,AdminServices,Admin account · Services listed,1. Observe service cards.,"1. Employer name, job status, date visible.",,
+40 - Admin Panel,15,TC-ADM-023,Admin Services,Admin pull to refresh services,Functionality,Admin,P2,AdminServices,Admin account · Services list,1. Pull down on services list.,1. List refreshes.,,
+40 - Admin Panel,16,TC-ADM-028,Admin Services,Admin services empty state,Functionality,Admin,P2,AdminServices,Admin account · Empty services,1. View with no services.,1. Empty state message.,,
+40 - Admin Panel,17,TC-WORK-022,Admin Services Tab,Admin work tab shows service management,Availability,Admin,P0,/(tabs)/second,Admin account · Admin logged in,1. Open tab 2 as Admin.,1. AdminServices list visible.,,
+40 - Admin Panel,18,TC-WORK-023,Admin Services Tab,Admin view all posted services,Functionality,Admin,P0,AdminServices,Admin account · Admin on services tab,1. Scroll service list.,1. All platform services listed.,,
+40 - Admin Panel,19,TC-WORK-024,Admin Services Tab,Admin tap service opens detail,Functionality,Admin,P1,AdminServices,Admin account · Service in list,1. Tap a service.,1. Service detail or admin actions open.,,
+40 - Admin Panel,20,TC-WORK-033,Admin Services Tab,Admin service list shows employer and status,UI Design,Admin,P1,AdminServices,Admin account · Admin services tab,1. Observe admin service cards.,1. Employer name and job status visible.,,
+40 - Admin Panel,21,TC-ADM-014,Admin Settings,Admin settings section accessible,Availability,Admin,P2,AdminSettings,Admin account · Admin profile settings,1. Open admin settings.,1. Admin settings placeholders/options visible.,,
+40 - Admin Panel,22,TC-ADM-033,Admin Tab Labels,All 5 admin tabs labeled correctly,UI Design,Admin,P1,/(tabs)/_layout.tsx,Admin account · Admin logged in,1. Observe all tab labels.,"1. Users, Services, People, Requests, Profile labels.",,
+40 - Admin Panel,23,TC-ADM-001,Admin Users,Admin users tab loads user list,Availability,Admin,P0,AdminUsers,Admin account · Admin logged in,"1. Login as Admin.
+2. Open tab 1.",1. Paginated user list with role and status.,,
+40 - Admin Panel,24,TC-ADM-002,Admin Users,Admin suspend user from users tab,Functionality,Admin,P0,AdminUsers,Admin account · Active user in list,"1. Find active user.
+2. Suspend.
+3. Confirm.",1. User status suspended on server.,,
+40 - Admin Panel,25,TC-ADM-003,Admin Users,Admin activate user from users tab,Functionality,Admin,P0,AdminUsers,Admin account · Suspended user,"1. Find suspended user.
+2. Activate.",1. User status active.,,
+40 - Admin Panel,26,TC-ADM-004,Admin Users,Admin filter users by role,Functionality,Admin,P1,AdminUsers,Admin account · Users list,"1. Filter by Worker.
+2. Observe list.",1. Only workers shown.,,
+40 - Admin Panel,27,TC-ADM-005,Admin Users,Admin filter users by status,Functionality,Admin,P1,AdminUsers,Admin account · Users list,1. Filter by Pending/Suspended.,1. List filtered by status.,,
+40 - Admin Panel,28,TC-ADM-006,Admin Users,Admin search users by name/mobile,Functionality,Admin,P1,AdminUsers,Admin account · Search available,1. Enter search query.,1. Matching users displayed.,,
+40 - Admin Panel,29,TC-ADM-019,Admin Users,Admin users list pagination,Functionality,Admin,P1,AdminUsers,Admin account · Long user list,1. Scroll to bottom.,1. More users load.,,
+40 - Admin Panel,30,TC-ADM-020,Admin Users,Admin user status badges color-coded,UI Design,Admin,P1,AdminUsers,Admin account · Users listed,1. Observe active/suspended/pending badges.,1. Distinct colors per status.,,
+40 - Admin Panel,31,TC-ADM-022,Admin Users,Non-admin cannot access admin users view,Availability,Worker,P0,AdminUsers,Worker account · Worker logged in,"1. Login as Worker.
+2. Verify tab 1 is home not admin users.",1. AdminUsers not shown to non-admin.,,
+40 - Admin Panel,32,TC-ADM-027,Admin Users,Admin screens labels in Hindi,UI Design,Admin,P2,AdminUsers,Admin account · Hindi locale,"1. Set Hindi.
+2. Open admin users tab.",1. Labels in Hindi where translated.,,
+40 - Admin Panel,33,TC-ADM-030,Admin Users,Admin tap user opens profile or actions,Functionality,Admin,P1,AdminUsers,Admin account · User in list,1. Tap user row.,1. User detail or action menu opens.,,
+40 - Admin Panel,34,TC-ADM-032,Admin Users,Suspend confirmation modal shown,Functionality,Admin,P2,AdminUsers,Admin account · Suspend action,"1. Tap Suspend.
+2. Observe modal.",1. Confirmation required before suspend.,,
+40 - Admin Panel,35,TC-ADM-035,Admin Users,Admin list safe area and scroll,UI Design,Admin,P2,AdminUsers,Admin account · On admin users,1. Scroll on notched device.,1. Content not clipped.,,
+40 - Admin Panel,36,TC-UI-042,Admin users list,Admin users list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Admin users list,1. Open Admin users list with zero items.,1. Centered empty state with icon and message.,,
+40 - Admin Panel,37,TC-HOME-022,Admin Users Tab,Admin home shows user management list,Availability,Admin,P0,/(tabs)/index,Admin account · Logged in as Admin,"1. Login as Admin.
+2. Open tab 1.",1. AdminUsers component with user list.,,
+40 - Admin Panel,38,TC-HOME-023,Admin Users Tab,Admin filter users by role,Functionality,Admin,P0,AdminUsers,Admin account · Admin on users tab,"1. Apply role filter.
+2. Observe list.",1. List filters by Worker/Employer/Mediator.,,
+40 - Admin Panel,39,TC-HOME-024,Admin Users Tab,Admin suspend user,Functionality,Admin,P0,AdminUsers,Admin account · Admin on users tab,"1. Select active user.
+2. Tap Suspend.
+3. Confirm.",1. User status changes to suspended.,,
+40 - Admin Panel,40,TC-HOME-025,Admin Users Tab,Admin activate suspended user,Functionality,Admin,P0,AdminUsers,Admin account · Suspended user exists,"1. Find suspended user.
+2. Tap Activate.",1. User status returns to active.,,
+40 - Admin Panel,41,TC-HOME-026,Admin Users Tab,Admin user list shows status badges,UI Design,Admin,P1,AdminUsers,Admin account · Admin on users tab,1. Observe user cards.,1. Active/Suspended/Pending status visible.,,
+40 - Admin Panel,42,TC-HOME-027,Admin Users Tab,Admin search users,Functionality,Admin,P1,AdminUsers,Admin account · Admin on users tab,"1. Enter search query.
+2. Observe results.",1. Matching users displayed.,,
+40 - Admin Panel,43,TC-HOME-033,Admin Users Tab,Admin user list pagination,Functionality,Admin,P1,AdminUsers,Admin account · Pagination on user list,"1. Scroll to bottom.
+2. Load more users.",1. Additional users load.,,
+40 - Admin Panel,44,TC-HOME-040,Admin Users Tab,Admin tap user opens detail or actions,Availability,Admin,P1,AdminUsers,Admin account · Admin logged in,1. Tap a user row.,1. User detail or action sheet opens.,,
+40 - Admin Panel,45,TC-ADM-015,All Feedback,Admin all feedback screen loads,Availability,Admin,P1,/screens/allFeedback,Admin account · Navigate to allFeedback route,1. Open /screens/allFeedback.,1. All user feedback listed.,,Nav button may not be wired in UI — use direct route.
+40 - Admin Panel,46,TC-ADM-016,All Feedback,Admin view feedback with ratings,Functionality,Admin,P1,/screens/allFeedback,Admin account · Feedback on server,"1. Scroll feedback list.
+2. Open detail if available.","1. Feedback text, rating, user info shown.",,
+40 - Admin Panel,47,TC-ADM-026,All Feedback,Non-admin allFeedback access restricted,Functionality,Worker,P2,/screens/allFeedback,Worker account · Worker navigates to route,1. Attempt /screens/allFeedback as Worker.,"1. Blocked or empty.
+2. admin-only data.",,Verify access control.
+40 - Admin Panel,48,TC-ADM-031,All Feedback,Admin filter or sort feedback if available,Functionality,Admin,P2,/screens/allFeedback,Admin account · Feedback list,1. Apply filter by rating.,1. Feedback filtered.,,
+40 - Admin Panel,49,TC-ADM-018,Feedback Reasons,Feedback reasons breakdown,Availability,Admin,P2,allFeedback/reasons,Admin account · On all feedback,1. View reasons section.,1. Common feedback reasons listed.,,
+40 - Admin Panel,50,TC-ADM-017,Rating Breakdown,Feedback rating breakdown chart/section,Availability,Admin,P2,allFeedback/ratingBreakdown,Admin account · On all feedback,1. View rating breakdown.,1. Star distribution or summary visible.,,
+50 - Accessibility & Inputs,,,,SCREEN: Accessibility & Inputs,Info,All,,,Test cases for Accessibility & Inputs.,"Open Accessibility & Inputs in the app, then run each row's Steps.","This module contains 20 test case(s). Filter by Module = ""50 - Accessibility & Inputs"" in Google Sheets.",,
+50 - Accessibility & Inputs,1,TC-A11Y-011,Add Address,Manual address entry in drawer,Functionality,All,P1,addAddress.tsx,Any test account · Address drawer open,"1. Open add address drawer.
+2. Enter address.
+3. Save.",1. Address saved to form.,,
+50 - Accessibility & Inputs,2,TC-A11Y-012,Add Address With Location,Map pin picker for address,Functionality,All,P1,addAddressWithLocation.tsx,Any test account · Location drawer,"1. Open location drawer.
+2. Move pin.
+3. Confirm.",1. Address from map coordinates saved.,,
+50 - Accessibility & Inputs,3,TC-A11Y-013,Biometric Auth,Biometric auth if wired in UI,Functionality,All,P2,useBiometricAuth.ts,Any test account · Device with fingerprint/face unlock,1. Check if biometric prompt appears on login or app open.,"1. Document whether biometric is wired.
+2. if yes, auth succeeds.",,Hook exists; verify UI integration.
+50 - Accessibility & Inputs,4,TC-A11Y-008,Current Location,GPS current location picker,Functionality,All,P1,CurrentLocation.tsx,Any test account · Location permission,"1. Tap use current location.
+2. Grant permission.",1. Coordinates and address populated.,,
+50 - Accessibility & Inputs,5,TC-A11Y-014,Date Picker,Android date picker selects date,Functionality,Employer,P1,DateTimePicker,Employer account · Add service or booking date field,"1. Tap date field.
+2. Select date on picker.",1. Date applied to form.,,
+50 - Accessibility & Inputs,6,TC-A11Y-015,Image Upload,Picked image URI normalized for upload,Functionality,All,P1,normalizePickedImageUriForUpload.ts,Any test account · Image pick flow,"1. Pick image from gallery.
+2. Upload.",1. Upload succeeds without URI errors on Android.,,
+50 - Accessibility & Inputs,7,TC-A11Y-006,Mobile Number Input,Mobile input shows country code +91,UI Design,Guest,P1,MobileNumber.tsx,Logged out · Login or register,1. Observe mobile field on login.,"1. India country code displayed.
+2. 10-digit input.",,
+50 - Accessibility & Inputs,8,TC-A11Y-007,Mobile Number Input,Mobile input accepts digits only,Functionality,Guest,P1,MobileNumber.tsx,Logged out · On login,1. Try entering letters.,1. Non-numeric rejected or filtered.,,
+50 - Accessibility & Inputs,9,TC-A11Y-019,Picker Input,Android picker wheel selects value,Functionality,All,P2,Picker,Any test account · Form with dropdown picker,"1. Open picker field.
+2. Select value.",1. Value applied to form.,,
+50 - Accessibility & Inputs,10,TC-A11Y-018,Select Role Input,Role selection cards tappable with clear selection,UI Design,Guest,P1,SelectRole.tsx,Logged out · Register step 4,1. Tap each role card.,1. Selected card highlighted.,,
+50 - Accessibility & Inputs,11,TC-A11Y-004,Selfie Capture,Selfie camera capture for profile photo,Functionality,Guest,P0,Selfie.tsx,Logged out · Register step 5; camera permission,"1. Open selfie capture.
+2. Take photo.
+3. Confirm.","1. Photo preview shown.
+2. upload proceeds.",,
+50 - Accessibility & Inputs,12,TC-A11Y-005,Selfie Capture,Pick profile photo from gallery,Functionality,All,P1,Selfie.tsx,Any test account · Gallery option,"1. Choose gallery instead of camera.
+2. Select image.",1. Image selected and previewed.,,
+50 - Accessibility & Inputs,13,TC-A11Y-016,Skill Selector,Skill selector scroll and multi-select,UI Design,All,P1,SkillSelector.tsx,Any test account · Skill picker open,"1. Open skill selector.
+2. Select multiple skills.","1. Skills selectable.
+2. list scrolls.",,
+50 - Accessibility & Inputs,14,TC-A11Y-001,Text to Speech,TTS reads job description aloud,Functionality,All,P2,TextToSpeech,Any test account · On service detail,"1. Open service detail.
+2. Tap speaker/TTS.
+3. Listen.",1. Job details read in selected language.,,
+50 - Accessibility & Inputs,15,TC-A11Y-002,Text to Speech,Stop TTS playback,Functionality,All,P2,TextToSpeech,Any test account · TTS playing,"1. Start TTS.
+2. Tap stop if available.",1. Speech stops.,,
+50 - Accessibility & Inputs,16,TC-A11Y-020,Text to Speech,TTS reads Hindi text correctly,UI Design,All,P2,TextToSpeech,Any test account · Hindi content,"1. Set Hindi.
+2. Open service with Hindi description.
+3. Play TTS.",1. Hindi text spoken intelligibly.,,
+50 - Accessibility & Inputs,17,TC-A11Y-009,View Map,Map view opens for location,Availability,All,P1,ViewMap.tsx,Any test account · Job or user with location,1. Tap view map on service detail.,1. Map with marker at location.,,
+50 - Accessibility & Inputs,18,TC-A11Y-010,View Map,Open in Google Maps external app,Functionality,All,P2,ViewMap.tsx,Any test account · Map open,1. Tap open in maps if available.,1. Google Maps intent opens.,,Uses map.tsx hook.
+50 - Accessibility & Inputs,19,TC-A11Y-003,Voice to Text,Voice input populates text field,Functionality,All,P2,VoiceToText,Any test account · Form with voice input,"1. Tap microphone on description field.
+2. Speak.
+3. Observe text.",1. Speech converted to text in field.,,Available on add service description step.
+50 - Accessibility & Inputs,20,TC-A11Y-017,Work Requirements Input,Worker count and pay numeric inputs,Functionality,Employer,P1,WorkRequirements.tsx,Employer account · Add service salary step,"1. Enter worker count and daily pay.
+2. Verify values.",1. Numeric values accepted and saved.,,
+90 - UI & Cross-cutting,,,,SCREEN: UI & Cross-cutting,Info,All,,,"Visual consistency, empty states, loading, Hindi/English, keyboard, and layout checks across the app.",Screen varies — follow Steps in each row.,"This module contains 39 test case(s). Filter by Module = ""90 - UI & Cross-cutting"" in Google Sheets.",,
+90 - UI & Cross-cutting,1,TC-UI-029,App Version Display,App version 1.3.1 visible somewhere in app,UI Design,All,P2,Profile/About,Any test account · Profile or about section,"1. Find version in profile, feedback, or about.",1. Version number displayed for support reference.,,
+90 - UI & Cross-cutting,2,TC-UI-014,Card Consistency,Service worker booking cards share consistent card style,UI Design,All,P2,Listings,Any test account · Multiple list types,"1. Compare cards across home, work, activity.","1. Consistent corner radius, shadow, padding.",,
+90 - UI & Cross-cutting,3,TC-UI-027,Chat Component,Chat component UI if wired,Availability,All,P2,Chat.tsx,Any test account · Chat UI if present,"1. Find chat UI in app.
+2. Observe layout.","1. Document if chat is accessible.
+2. verify UI if wired.",,Chat component exists; verify backend wiring.
+90 - UI & Cross-cutting,4,TC-UI-018,Drawer Animation,Bottom drawer slide animation smooth,UI Design,All,P2,GlobalBottomDrawer,Any test account · Filter drawer,1. Open and close filter drawer.,1. Smooth slide up/down animation.,,
+90 - UI & Cross-cutting,5,TC-UI-026,Duplicate Prevention,Double-tap submit prevented with loading state,UI Design,All,P1,Action buttons,Any test account · Slow API,1. Tap Apply/Submit rapidly twice.,"1. Button disabled during loading.
+2. single submission.",,
+90 - UI & Cross-cutting,6,TC-GLB-031,Empty States,Empty state message shown when list has no items,UI Design,All,P2,List screens,Any test account · Account with no data for list type,"1. Open list with zero items.
+2. Observe UI.","1. Friendly empty state with icon/message.
+2. no broken layout.",,
+90 - UI & Cross-cutting,7,TC-UI-009,English Rendering,English text complete on key screens,UI Design,All,P1,Global,Any test account · English locale,"1. Set English.
+2. Check login, home, work, profile.",1. No missing translation keys.,,
+90 - UI & Cross-cutting,8,TC-UI-016,Error States,API error shows user-friendly message not raw error,UI Design,All,P2,API screens,Any test account · API error simulated,1. Simulate 500 error on list load.,"1. Friendly error.
+2. no stack trace shown.",,
+90 - UI & Cross-cutting,9,TC-UI-013,FAB Position,FAB does not overlap tab bar or list content,UI Design,Employer,P2,UnifiedTabFab,Employer account · Employer on work tab,"1. Scroll list to bottom.
+2. Observe FAB position.","1. FAB above tab bar.
+2. not blocking content.",,
+90 - UI & Cross-cutting,10,TC-UI-020,Form Labels,Form field labels aligned with inputs,UI Design,Guest,P1,Auth/Register,Logged out · Registration forms,1. Review register step 2 form layout.,1. Labels above or beside inputs consistently.,,
+90 - UI & Cross-cutting,11,TC-UI-008,Hindi Rendering,Hindi text renders on Login Home Service Detail Profile,UI Design,All,P1,Global,Any test account · Hindi locale,"1. Set Hindi.
+2. Spot-check 4 key screens.","1. No tofu boxes.
+2. Hindi readable.",,
+90 - UI & Cross-cutting,12,TC-UI-031,Home dashboard,Home dashboard empty state UI,UI Design,All,P2,List screens,Any test account · Empty Home dashboard,1. Open Home dashboard with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,13,TC-UI-021,Icon Consistency,Ionicons/Material icons consistent style,UI Design,All,P2,Global,Any test account · Multiple screens,"1. Compare icons on tabs, actions, menus.",1. Consistent icon family and size.,,
+90 - UI & Cross-cutting,14,TC-UI-011,Image Upload Error,Image upload error message on failure,UI Design,All,P2,Upload flows,Any test account · Large or invalid file,1. Attempt invalid image upload.,1. User-friendly error toast/message.,,
+90 - UI & Cross-cutting,15,TC-UI-010,Image Upload Preview,Image preview shown before upload,UI Design,All,P1,Upload flows,Any test account · Add service or profile photo,"1. Pick image.
+2. Observe preview.",1. Thumbnail preview before submit.,,
+90 - UI & Cross-cutting,16,TC-UI-007,Keyboard Handling,Keyboard does not hide submit buttons,UI Design,All,P1,Forms,"Any test account · Login, register, add service forms","1. Focus bottom form fields.
+2. Observe submit button visibility.",1. Form scrolls or adjusts for keyboard.,,
+90 - UI & Cross-cutting,17,TC-UI-022,Landscape Orientation,App layout acceptable in landscape,UI Design,All,P2,Global,Any test account · Rotate device,1. Rotate to landscape on key screens.,1. No broken layout or critical overlap.,,App may be portrait-locked; document behavior.
+90 - UI & Cross-cutting,18,TC-UI-030,Link Styling,Links and phone numbers visually distinguishable,UI Design,All,P2,Legal/Support,Any test account · Help and legal screens,1. Observe links on help/legal screens.,1. Links styled differently from body text.,,
+90 - UI & Cross-cutting,19,TC-UI-024,List Item Ripple,Touchable list items show press feedback,UI Design,All,P2,Android,Any test account · Android device,"1. Tap list items.
+2. Observe ripple/highlight.",1. Visual press feedback on tap.,,
+90 - UI & Cross-cutting,20,TC-UI-015,Loading Skeleton,Loading placeholders on list screens,UI Design,All,P2,List screens,Any test account · Slow network,"1. Throttle network.
+2. Open list screens.",1. Spinner or skeleton shown during load.,,
+90 - UI & Cross-cutting,21,TC-GLB-030,Loading States,Loading spinners shown during data fetch,UI Design,All,P2,List screens,Any test account · Slow network or first load,"1. Open list screen on slow network.
+2. Observe initial load.",1. Loading indicator visible until data or empty state shown.,,
+90 - UI & Cross-cutting,22,TC-UI-017,Modal Backdrop,Modal backdrop dims background,UI Design,All,P2,ModalComponent,Any test account · Any confirmation modal,1. Open confirmation modal.,"1. Background dimmed.
+2. focus on modal.",,
+90 - UI & Cross-cutting,23,TC-UI-003,Modals,Confirmation modals have clear title message and buttons,UI Design,All,P1,ModalComponent,Any test account · Trigger delete/complete/deactivate,"1. Trigger delete service, complete booking, deactivate account modals.","1. Each modal has title, message, Confirm/Cancel.",,
+90 - UI & Cross-cutting,24,TC-UI-035,Notifications inbox,Notifications inbox empty state UI,UI Design,All,P2,List screens,Any test account · Empty Notifications inbox,1. Open Notifications inbox with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,25,TC-UI-033,People tab list,People tab list empty state UI,UI Design,All,P2,List screens,Any test account · Empty People tab list,1. Open People tab list with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,26,TC-UI-040,Reviews list,Reviews list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Reviews list,1. Open Reviews list with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,27,TC-UI-023,Safe Area,Content respects safe area on notched devices,UI Design,All,P1,Global,Any test account · Notched Android device,1. Test on punch-hole/notch device.,1. No content under camera cutout.,,
+90 - UI & Cross-cutting,28,TC-UI-025,Scroll to Top,Tab re-tap scrolls to top if implemented,UI Design,All,P2,Long lists,Any test account · Long scrolled list,"1. Scroll down on tab.
+2. Re-tap same tab.",1. List scrolls to top or stays — document behavior.,,
+90 - UI & Cross-cutting,29,TC-UI-036,Service list,Service list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Service list,1. Open Service list with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,30,TC-UI-012,Status Bar,Status bar readable on all screens,UI Design,All,P2,Global,Any test account · Light and dark screens,1. Navigate light and dark header screens.,1. Status bar icons readable.,,
+90 - UI & Cross-cutting,31,TC-UI-019,Tab Active State,Active tab icon and label highlighted,UI Design,All,P1,/(tabs),Any test account · On any tab,1. Switch between all 5 tabs.,1. Active tab visually distinct each time.,,
+90 - UI & Cross-cutting,32,TC-UI-002,Tab Bar,Bottom tab bar hidden for pending approval users,UI Design,All,P0,/(tabs),Any test account · Pending approval account,"1. Login pending account.
+2. Observe layout.","1. No bottom tab bar.
+2. profile full screen.",,
+90 - UI & Cross-cutting,33,TC-UI-039,Team requests,Team requests empty state UI,UI Design,All,P2,List screens,Any test account · Empty Team requests,1. Open Team requests with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,34,TC-UI-028,Testimonials,Testimonials component renders if shown,UI Design,All,P2,Testimonials.tsx,Any test account · Home or marketing section,1. Find testimonials on home if present.,1. Testimonial cards readable.,,Component exists in commons.
+90 - UI & Cross-cutting,35,TC-UI-004,Theme Colors,Primary brand colors consistent across app,UI Design,All,P2,constants/Colors.ts,Any test account · Navigate major screens,"1. Compare buttons, headers, tabs across 5 screens.",1. Consistent primary/accent colors.,,
+90 - UI & Cross-cutting,36,TC-UI-006,Touch Targets,Buttons and tabs meet minimum touch target size,UI Design,All,P1,Global,Any test account · Small Android phone,"1. Test tap accuracy on tabs, FAB, list actions.",1. No mis-taps due to small targets.,,
+90 - UI & Cross-cutting,37,TC-UI-005,Typography,Font sizes hierarchy consistent (headings vs body),UI Design,All,P2,Global,Any test account · Multiple screens,1. Compare heading and body text sizes.,1. Clear visual hierarchy.,,
+90 - UI & Cross-cutting,38,TC-UI-037,Users list,Users list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Users list,1. Open Users list with zero items.,1. Centered empty state with icon and message.,,
+90 - UI & Cross-cutting,39,TC-UI-032,Work tab list,Work tab list empty state UI,UI Design,All,P2,List screens,Any test account · Empty Work tab list,1. Open Work tab list with zero items.,1. Centered empty state with icon and message.,,

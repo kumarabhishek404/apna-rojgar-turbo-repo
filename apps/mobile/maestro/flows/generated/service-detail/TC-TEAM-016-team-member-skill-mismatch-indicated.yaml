@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "ui-design", "mediator", "automated"]
+---
+# TC-TEAM-016: Team member skill mismatch indicated
+# Module: Team / Mediator | Screen: Apply as Mediator | Role: Mediator
+# Type: UI Design | Priority: P1
+# Route: ApplyAsMediatorDrawer
+# Prerequisites: Mediator account · Drawer open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open job requiring skill member lacks.
+
+# Assertions
+# Expected: Mismatch warning or disabled selection.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

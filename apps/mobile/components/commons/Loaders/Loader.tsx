@@ -1,12 +1,6 @@
 import Colors from "@/constants/Colors";
-import React, { Component } from "react";
-import {
-  StyleSheet,
-  View,
-  Modal,
-  ActivityIndicator,
-  StatusBar,
-} from "react-native";
+import React from "react";
+import { StyleSheet, View, Modal, ActivityIndicator } from "react-native";
 
 const Loader = (props: any) => {
   const { loading, ...attributes } = props;
@@ -20,7 +14,6 @@ const Loader = (props: any) => {
         console.log("close modal");
       }}
     >
-      <StatusBar backgroundColor={Colors?.background} />
       <View style={styles.modalBackground}>
         <View style={styles.activityIndicatorWrapper}>
           <ActivityIndicator

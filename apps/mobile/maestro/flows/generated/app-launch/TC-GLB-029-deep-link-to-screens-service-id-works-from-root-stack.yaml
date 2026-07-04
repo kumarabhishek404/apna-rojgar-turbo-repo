@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-029: Deep link to /screens/service/[id] works from root stack
+# Module: Global & App Shell | Screen: Deep Link Stack | Role: All
+# Type: Functionality | Priority: P1
+# Route: app/_layout.tsx
+# Prerequisites: Any test account · Logged in
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open apnarojgar://job/<valid-id> or universal link.
+# Observe navigation.
+
+# Assertions
+# Expected: Service detail opens without requiring tab navigation first.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

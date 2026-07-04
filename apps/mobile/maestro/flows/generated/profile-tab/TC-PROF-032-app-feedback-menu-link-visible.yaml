@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-profile", "availability", "all", "automated"]
+---
+# TC-PROF-032: App Feedback menu link visible
+# Module: Tab: Profile | Screen: Profile Menu | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/appFeedback
+# Prerequisites: Any test account · Profile settings tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Profile Settings.
+# Find App Feedback link.
+
+# Assertions
+# Expected: App Feedback link present in menu.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

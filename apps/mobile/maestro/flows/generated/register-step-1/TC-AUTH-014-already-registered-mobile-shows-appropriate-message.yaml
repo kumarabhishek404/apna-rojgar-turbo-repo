@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "automated"]
+---
+# TC-AUTH-014: Already registered mobile shows appropriate message
+# Module: Authentication | Screen: Register Step 1 | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /screens/auth/register/first
+# Prerequisites: Logged out · Already registered complete mobile
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn:
+    id: "login-mobile-input"
+- inputText: ${WORKER_MOBILE}
+# Attempt register.
+
+# Assertions
+# Expected: Prompt to login instead or error message.
+
+# Cleanup

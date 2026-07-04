@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-032: Work tab list empty state UI
+# Module: Cross-cutting UI Design | Screen: Work tab list | Role: All
+# Type: UI Design | Priority: P2
+# Route: List screens
+# Prerequisites: Any test account · Empty Work tab list
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Work tab list with zero items.
+
+# Assertions
+# Expected: Centered empty state with icon and message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity, Linking, StyleSheet } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
 import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
 
@@ -17,11 +18,19 @@ export default function ContactSupport() {
 
   return (
     <View style={styles.card}>
-      <CustomText textAlign="center" baseFont={16}>
+      <View style={styles.iconWrap}>
+        <Feather name="headphones" size={17} color={Colors.primary} />
+      </View>
+      <CustomText textAlign="center" baseFont={12} color="#DCE7FF">
         {t("supportTitle")}
       </CustomText>
 
-      <CustomText textAlign="center" baseFont={16} fontWeight="600">
+      <CustomText
+        textAlign="center"
+        baseFont={13}
+        fontWeight="700"
+        color={Colors.white}
+      >
         {t("supportSubtitle")}
       </CustomText>
 
@@ -34,8 +43,8 @@ export default function ContactSupport() {
         </TouchableOpacity> */}
 
         <TouchableOpacity style={styles.whatsappBtn} onPress={openWhatsApp}>
-          <FontAwesome name="whatsapp" size={26} color="#fff" />
-          <CustomText color="#fff" fontWeight="700" baseFont={16}>
+          <FontAwesome name="whatsapp" size={21} color="#fff" />
+          <CustomText color="#fff" fontWeight="700" baseFont={14}>
             {t("whatsappUs")}
           </CustomText>
         </TouchableOpacity>
@@ -46,19 +55,27 @@ export default function ContactSupport() {
 
 const styles = StyleSheet.create({
   card: {
-    marginTop: 25,
-    backgroundColor: "#FFF7ED",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    alignItems: "center",
+    gap: 5,
+    width: "92%",
+    alignSelf: "center",
+  },
+
+  iconWrap: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    padding: 18,
-    gap: 8,
-    borderWidth: 2,
-    borderColor: "#FDBA74",
-    elevation: 3,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   actions: {
-    marginTop: 12,
-    gap: 12,
+    marginTop: 6,
+    width: "100%",
+    gap: 8,
   },
 
   callBtn: {
@@ -74,11 +91,14 @@ const styles = StyleSheet.create({
   whatsappBtn: {
     flexDirection: "row",
     backgroundColor: "#22C55E",
-    paddingVertical: 16,
-    borderRadius: 12,
+    alignSelf: "center",
+    minWidth: 230,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
 
   emailBtn: {

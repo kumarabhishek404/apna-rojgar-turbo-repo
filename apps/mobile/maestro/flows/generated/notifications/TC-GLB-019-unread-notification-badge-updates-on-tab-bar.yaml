@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-019: Unread notification badge updates on tab bar
+# Module: Global & App Shell | Screen: Notification Badge | Role: All
+# Type: Functionality | Priority: P2
+# Route: /(tabs)/_layout.tsx
+# Prerequisites: Any test account · Unread notifications exist
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Ensure unread notifications on server.
+# Wait up to 30s on tab screen.
+# Observe badge.
+
+# Assertions
+# Expected: Unread count badge appears/updates on relevant tab or profile icon.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

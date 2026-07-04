@@ -1,0 +1,35 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["service-listing-detail", "functionality", "worker", "automated"]
+---
+# TC-SVC-004: Worker can apply to an open job
+# Module: Service Listing & Detail | Screen: Service Detail | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: /screens/service/[id]
+# Prerequisites: Worker account · Log in as Worker. Open a job you have NOT applied to yet. Worker profile should have matching skills (or be ready to add skill in modal)
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Log in as Worker and open a job detail page you have not applied to.
+# Scroll to the bottom action area and find the 'Apply' button.
+- tapOn: "Apply. If a confirmation dialog or skill modal appears, complete it"
+# Wait for the API response (loading indicator on button).
+# Observe how the Apply button changes after success.
+
+# Assertions
+# Expected: Apply button shows loading state while submitting.
+# Expected: Success toast appears (e.g. 'Application submitted').
+# Expected: Button changes to 'Applied' or 'Cancel Apply' state.
+# Expected: Job appears in Activity tab → Applied Jobs sub-tab.
+# Expected: Employer can see this worker in the Applicants list for that job.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

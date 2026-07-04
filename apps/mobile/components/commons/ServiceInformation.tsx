@@ -1,5 +1,5 @@
 import Colors from "@/constants/Colors";
-import { Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import CustomHeading from "./CustomHeading";
@@ -15,94 +15,77 @@ const ServiceInformation = ({
   information,
   style,
 }: ServiceInformationProps) => {
+  const serviceStats = [
+    {
+      value: information?.byService?.total || 0,
+      label: t("totalServices"),
+      icon: "list-circle-outline" as const,
+      tone: "#EEF4FF",
+    },
+    {
+      value: information?.byService?.completed || 0,
+      label: t("completed"),
+      icon: "checkmark-done-circle-outline" as const,
+      tone: "#EAF8F0",
+    },
+    {
+      value: information?.byService?.pending || 0,
+      label: t("pending"),
+      icon: "time-outline" as const,
+      tone: "#FFF7E8",
+    },
+    {
+      value: information?.byService?.cancelled || 0,
+      label: t("cancelled"),
+      icon: "close-circle-outline" as const,
+      tone: "#FEEEEE",
+    },
+  ];
+
   return (
-    <View style={styles?.container}>
-      <CustomHeading
-        textAlign="left"
-        style={[style]}
-        color={Colors?.heading}
-        baseFont={22}
-      >
-        {t("serviceInformation")}{" "}
-      </CustomHeading>
-      <CustomText
-        style={[style]}
-        textAlign="left"
-        color={Colors?.tertieryButton}
-        baseFont={18}
-      >
-        ({t("servicesWhichProvidedByYou")})
-      </CustomText>
-      <View style={[styles.workInfoWrapper, { marginTop: 10 }]}>
-        <View
-          style={[
-            styles.workInfoBox,
-            {
-              borderRightColor: "#dddddd",
-              borderRightWidth: 1,
-            },
-          ]}
+    <View style={[styles.container, style]}>
+      <View style={styles.header}>
+        <CustomHeading
+          textAlign="left"
+          color={Colors?.heading}
+          baseFont={22}
+          style={styles.title}
         >
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.total || 0}
-            </CustomHeading>
-            <MaterialCommunityIcons
-              style={{ transform: "rotate(90deg)" }}
-              name="pause-circle-outline"
-              size={28}
-              color={Colors.primary}
-            />
-          </View>
-          <CustomText baseFont={14}>{t("totalServices")}</CustomText>
-        </View>
-        <View style={styles.workInfoBox}>
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.completed || 0}
-            </CustomHeading>
-            <Ionicons
-              name="checkmark-done-circle-outline"
-              size={28}
-              color={Colors.primary}
-            />
-          </View>
-          <CustomText baseFont={14}>
-            {t("completed")} {/* Translation for "Completed" */}
-          </CustomText>
-        </View>
+          {t("serviceInformation")}
+        </CustomHeading>
+        <CustomText
+          textAlign="left"
+          color={Colors?.tertieryButton}
+          baseFont={15}
+          style={styles.subtitle}
+        >
+          {t("servicesWhichProvidedByYou")}
+        </CustomText>
       </View>
-      <View style={[styles.workInfoWrapper, { borderTopWidth: 0 }]}>
-        <View
-          style={[
-            styles.workInfoBox,
-            {
-              borderRightColor: "#dddddd",
-              borderRightWidth: 1,
-            },
-          ]}
-        >
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.pending || 0}
-            </CustomHeading>
-            <MaterialCommunityIcons
-              name="clock-outline"
-              size={28}
+
+      <View style={styles.statGrid}>
+        {serviceStats.map((item) => (
+          <View key={item.label} style={styles.statCard}>
+            <View style={[styles.iconBadge, { backgroundColor: item.tone }]}>
+              <Ionicons name={item.icon} size={18} color={Colors.primary} />
+            </View>
+            <CustomHeading
+              baseFont={24}
               color={Colors.primary}
-            />
-          </View>
-          <CustomText baseFont={14}>{t("pending")}</CustomText>
-        </View>
-        <View style={styles.workInfoBox}>
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.cancelled || 0}
+              style={styles.statValue}
+            >
+              {item.value}
             </CustomHeading>
-            <Fontisto name="close" size={24} color={Colors.primary} />
+            <CustomText
+              baseFont={13}
+              color={Colors.heading}
+              textAlign="center"
+              style={styles.statLabel}
+            >
+              {item.label}
+            </CustomText>
           </View>
-          <CustomText baseFont={14}>{t("cancelled")}</CustomText>
-        </View>
+        ))}
       </View>
     </View>
   );
@@ -111,35 +94,47 @@ const ServiceInformation = ({
 export default ServiceInformation;
 
 const styles = StyleSheet.create({
-  container: {},
-  workInfoHeading: {
-    color: Colors.primary,
-    fontWeight: "700",
-    fontSize: 16,
-    lineHeight: 26,
+  container: {
+    gap: 12,
   },
-  workInfoWrapper: {
-    borderBottomColor: "#dddddd",
-    borderBottomWidth: 1,
-    borderTopColor: "#dddddd",
-    backgroundColor: Colors?.background,
-    borderTopWidth: 1,
-    height: 100,
-    display: "flex",
+  header: {
+    gap: 4,
+  },
+  title: {
+    lineHeight: 28,
+  },
+  subtitle: {
+    lineHeight: 21,
+  },
+  statGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
-  workInfoBox: {
-    width: "50%",
+  statCard: {
+    width: "48.5%",
+    minHeight: 112,
+    borderRadius: 18,
+    backgroundColor: "#F8FAFF",
+    borderWidth: 1,
+    borderColor: "#E4EAF5",
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
   },
-  iconWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
+  statValue: {
+    lineHeight: 30,
   },
-  itemValue: {
-    fontSize: 22,
-    fontWeight: "600",
+  statLabel: {
+    lineHeight: 18,
   },
 });

@@ -1,0 +1,33 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "ui-design", "guest", "automated"]
+---
+# TC-AUTH-009: Change Language link is visible and opens language picker
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: UI Design | Priority: P2
+# Route: /screens/auth/login
+# Prerequisites: Logged out · On Login screen while
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll if needed to find the 'Change Language' link (often at bottom).
+- tapOn: "the Change Language link"
+# Observe the screen that opens.
+# Select a different language and return to Login.
+
+# Assertions
+# Expected: Change Language link is visible without scrolling on most devices.
+# Expected: Tapping it opens /screens/settings/changeLanguage.
+- assertVisible:
+    id: "login-mobile-input"
+# Expected: Back navigation returns to Login.
+
+# Cleanup

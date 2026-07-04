@@ -1,0 +1,33 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["service-listing-detail", "functionality", "worker", "automated"]
+---
+# TC-SVC-005: Worker can cancel a pending job application
+# Module: Service Listing & Detail | Screen: Service Detail | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: /screens/service/[id]
+# Prerequisites: Worker account · Log in as Worker. Open a job you HAVE already applied to
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Log in as Worker and open a job you previously applied to.
+# Find the 'Cancel Apply' or similar button (replaces Apply after applying).
+- tapOn: "Cancel Apply and confirm if a dialog appears"
+# Check Activity tab → Applied Jobs to verify removal.
+
+# Assertions
+# Expected: Cancel action succeeds with confirmation toast.
+# Expected: Button reverts to 'Apply' state.
+# Expected: Job is removed from Activity → Applied Jobs list.
+# Expected: Employer no longer sees this worker in Applicants (or status shows cancelled).
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

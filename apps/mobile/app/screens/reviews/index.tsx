@@ -1,11 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  View,
-  StyleSheet,
-  Image,
-  FlatList,
-  RefreshControl,
-} from "react-native";
+import { View, StyleSheet, FlatList, RefreshControl } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import CustomHeader from "@/components/commons/Header";

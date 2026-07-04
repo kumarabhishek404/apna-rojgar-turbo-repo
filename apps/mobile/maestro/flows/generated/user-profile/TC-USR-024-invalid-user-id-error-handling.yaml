@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "availability", "all", "automated"]
+---
+# TC-USR-024: Invalid user ID error handling
+# Module: User Browse & Profile Actions | Screen: User Profile | Role: All
+# Type: Availability | Priority: P2
+# Route: /screens/users/[id]
+# Prerequisites: Any test account · Invalid user ID
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /screens/users/invalid.
+
+# Assertions
+# Expected: Error state.
+- assertNotVisible: "Something went wrong"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

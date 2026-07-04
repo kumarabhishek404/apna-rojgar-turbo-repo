@@ -8,11 +8,13 @@ import AdminUsersPage from "@/app/webapp/admin/users/page";
 import AdminErrorLogsPage from "@/app/webapp/admin/error-logs/page";
 import AdminAnalyticsPage from "@/app/webapp/admin/analytics/page";
 import AdminNotificationsPage from "@/app/webapp/admin/notifications/page";
+import AdminPaidServicesPage from "@/app/webapp/admin/paid-services/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import Link from "next/link";
 import {
   Suspense,
+  memo,
   useCallback,
   useEffect,
   useMemo,
@@ -20,7 +22,7 @@ import {
   useState,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { apiRequest, clearAuth, getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { isAdminUser } from "@/lib/isAdminUser";
@@ -32,6 +34,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Users,
+  IndianRupee,
   Info,
   LogOut,
   Menu,
@@ -61,7 +64,44 @@ function isPrimaryNavActive(pathname: string, href: string) {
   return false;
 }
 
-function DashboardSidebarContent({
+type AuthProfile = {
+  name: string;
+  mobile: string;
+  photo: string;
+  isAdmin: boolean;
+};
+
+function readAuthProfile(): AuthProfile {
+  if (typeof window === "undefined") {
+    return { name: "User", mobile: "", photo: "", isAdmin: false };
+  }
+
+  const auth = getAuth();
+  const userData = (auth?.user || {}) as Record<string, unknown>;
+  const name =
+    (typeof userData.name === "string" && userData.name) ||
+    (typeof auth?.name === "string" && auth.name) ||
+    "User";
+  const mobile =
+    (typeof userData.mobile === "string" && userData.mobile) ||
+    (typeof userData.phone === "string" && userData.phone) ||
+    "";
+  const photo =
+    (typeof userData.profilePic === "string" && userData.profilePic) ||
+    (typeof userData.profileImage === "string" && userData.profileImage) ||
+    (typeof userData.avatar === "string" && userData.avatar) ||
+    "";
+  const isAdmin = isAdminUser({
+    role: typeof userData.role === "string" ? userData.role : null,
+    mobile:
+      typeof userData.mobile === "string" || typeof userData.mobile === "number"
+        ? userData.mobile
+        : null,
+  });
+  return { name, mobile, photo, isAdmin };
+}
+
+const DashboardSidebarContent = memo(function DashboardSidebarContent({
   pathname,
   router,
   primaryItems,
@@ -351,7 +391,7 @@ function DashboardSidebarContent({
       </nav>
     </div>
   );
-}
+});
 
 export default function ServicesDashboard() {
   const { t, language, setLanguage } = useLanguage();
@@ -371,6 +411,9 @@ export default function ServicesDashboard() {
   const isAdminNotificationsView =
     pathname === "/admin/notifications" ||
     pathname === "/webapp/admin/notifications";
+  const isAdminPaidServicesView =
+    pathname === "/admin/paid-services" ||
+    pathname === "/webapp/admin/paid-services";
   const isAllServicesView = pathname === "/all-services" || pathname === "/";
   const isAppliedServiceRoute = pathname === "/applied-service";
   /** Same list chrome (merged toolbar on scroll) for browse + applied jobs. */
@@ -387,9 +430,23 @@ export default function ServicesDashboard() {
   const [userMobile, setUserMobile] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const userInitial = userName.charAt(0).toUpperCase();
+  const userInitial = userName.charAt(0).toUpperCase() || "U";
+
+  useEffect(() => {
+    const profile = readAuthProfile();
+    setUserName(profile.name);
+    setUserMobile(profile.mobile);
+    setUserPhoto(profile.photo);
+    setIsAdmin(profile.isAdmin);
+  }, []);
 
   const primaryItems = useMemo(() => {
+    const paidServicesItem: PrimaryNavItem = {
+      label: t("paidServices", "Paid Services"),
+      href: "/admin/paid-services",
+      icon: IndianRupee,
+    };
+
     const baseItems: PrimaryNavItem[] = [
         {
           label: t("allServices", "All Works"),
@@ -401,6 +458,7 @@ export default function ServicesDashboard() {
           href: "/my-work",
           icon: ClipboardList,
         },
+        ...(isAdmin ? [paidServicesItem] : []),
         {
           label: t("appliedServices", "Applied Works"),
           href: "/applied-service",
@@ -421,10 +479,10 @@ export default function ServicesDashboard() {
     if (!isAdmin) return baseItems;
     return [
       ...baseItems,
-      { label: "Users", href: "/admin/users", icon: Users },
-      { label: "Error Logs", href: "/admin/error-logs", icon: ShieldAlert },
-      { label: "Analytics", href: "/admin/analytics", icon: ShieldCheck },
-      { label: "Notifications", href: "/admin/notifications", icon: Bell },
+      { label: t("users", "Users"), href: "/admin/users", icon: Users },
+      { label: t("errorLogs", "Error Logs"), href: "/admin/error-logs", icon: ShieldAlert },
+      { label: t("analytics", "Analytics"), href: "/admin/analytics", icon: ShieldCheck },
+      { label: t("notifications", "Notifications"), href: "/admin/notifications", icon: Bell },
     ];
   }, [t, isAdmin]);
 
@@ -436,44 +494,6 @@ export default function ServicesDashboard() {
       ] satisfies BottomNavItem[],
     [t],
   );
-
-  useEffect(() => {
-    const auth = getAuth();
-    const userData = (auth?.user || {}) as Record<string, unknown>;
-    const nextName =
-      (typeof userData.name === "string" && userData.name) ||
-      (typeof auth?.name === "string" && auth.name) ||
-      "User";
-    const nextMobile =
-      (typeof userData.mobile === "string" && userData.mobile) ||
-      (typeof userData.phone === "string" && userData.phone) ||
-      "";
-    const nextPhoto =
-      (typeof userData.profilePic === "string" && userData.profilePic) ||
-      (typeof userData.profileImage === "string" && userData.profileImage) ||
-      (typeof userData.avatar === "string" && userData.avatar) ||
-      "";
-
-    const id = requestAnimationFrame(() => {
-      setUserName(nextName);
-      setUserMobile(nextMobile);
-      setUserPhoto(nextPhoto);
-      setIsAdmin(
-        isAdminUser({
-          role:
-            typeof userData.role === "string"
-              ? userData.role
-              : null,
-          mobile:
-            typeof userData.mobile === "string" ||
-            typeof userData.mobile === "number"
-              ? userData.mobile
-              : null,
-        }),
-      );
-    });
-    return () => cancelAnimationFrame(id);
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -496,11 +516,8 @@ export default function ServicesDashboard() {
   }, []);
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      closeMobileNav();
-    });
-    return () => cancelAnimationFrame(id);
-  }, [pathname, closeMobileNav]);
+    if (mobileNavOpen) closeMobileNav();
+  }, [pathname, mobileNavOpen, closeMobileNav]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;
@@ -539,7 +556,7 @@ export default function ServicesDashboard() {
     };
   }, [languageOpen]);
 
-  const shareLink = async (url: string, title: string) => {
+  const shareLink = useCallback(async (url: string, title: string) => {
     try {
       if (navigator.share) {
         await navigator.share({ title, url });
@@ -550,31 +567,56 @@ export default function ServicesDashboard() {
     } catch {
       // noop for dismissed share action
     }
-  };
+  }, []);
+
+  const onShareWebsite = useCallback(
+    () => shareLink(window.location.origin, "Apna Rojgar Website"),
+    [shareLink],
+  );
+  const onShareApp = useCallback(
+    () =>
+      shareLink(
+        "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
+        "Apna Rojgar App",
+      ),
+    [shareLink],
+  );
   const microLift = {
     whileHover: { y: -2, scale: 1.01 },
     whileTap: { scale: 0.985 },
     transition: { duration: 0.16, ease: "easeOut" as const },
   };
 
-  const sidebarProps = {
-    pathname,
-    router,
-    primaryItems,
-    bottomItems,
-    userPhoto,
-    userName,
-    userMobile,
-    userInitial,
-    viewProfileLabel: t("viewYourProfile", "View Your Profile"),
-    onShareWebsite: () =>
-      shareLink(window.location.origin, "Apna Rojgar Website"),
-    onShareApp: () =>
-      shareLink(
-        "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
-        "Apna Rojgar App",
-      ),
-  };
+  const viewProfileLabel = t("viewYourProfile", "View Your Profile");
+
+  const sidebarProps = useMemo(
+    () => ({
+      pathname,
+      router,
+      primaryItems,
+      bottomItems,
+      userPhoto,
+      userName,
+      userMobile,
+      userInitial,
+      viewProfileLabel,
+      onShareWebsite,
+      onShareApp,
+    }),
+    [
+      pathname,
+      router,
+      primaryItems,
+      bottomItems,
+      userPhoto,
+      userName,
+      userMobile,
+      userInitial,
+      viewProfileLabel,
+      onShareWebsite,
+      onShareApp,
+    ],
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#eaf0ff] via-[#f6f8ff] to-white p-3 md:p-5 lg:h-screen lg:overflow-hidden">
@@ -640,13 +682,15 @@ export default function ServicesDashboard() {
                             : isSettingsView
                               ? t("settings", "Settings")
                               : isAdminUsersView
-                                ? "Users"
+                                ? t("users", "Users")
                                 : isAdminErrorLogsView
-                                  ? "Error Logs"
+                                  ? t("errorLogs", "Error Logs")
                                   : isAdminAnalyticsView
-                                    ? "Analytics"
+                                    ? t("analytics", "Analytics")
                                     : isAdminNotificationsView
-                                      ? "Notifications"
+                                      ? t("notifications", "Notifications")
+                                      : isAdminPaidServicesView
+                                        ? t("paidServices", "Paid Services")
                               : t("allServices")}
                   </h1>
                 </div>
@@ -748,15 +792,7 @@ export default function ServicesDashboard() {
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="rounded-3xl border border-slate-200/90 bg-white p-3 shadow-[0_20px_50px_rgba(34,64,154,0.08)] md:p-4"
-            >
+          <div className="rounded-3xl border border-slate-200/90 bg-white p-3 shadow-[0_20px_50px_rgba(34,64,154,0.08)] md:p-4">
               {isProfileView ? (
                 <ProfilePage />
               ) : isMyWorkView ? (
@@ -787,6 +823,8 @@ export default function ServicesDashboard() {
                 <AdminAnalyticsPage />
               ) : isAdminNotificationsView ? (
                 <AdminNotificationsPage />
+              ) : isAdminPaidServicesView ? (
+                <AdminPaidServicesPage />
               ) : (
                 <Suspense
                   fallback={
@@ -803,8 +841,7 @@ export default function ServicesDashboard() {
                   />
                 </Suspense>
               )}
-            </motion.div>
-          </AnimatePresence>
+          </div>
 
           <div className="pb-2 pt-1 text-center text-xs text-slate-500">
             {"\u00a9"} {currentYear} {t("apnaRojgarIndia", "Apna Rojgar India")}

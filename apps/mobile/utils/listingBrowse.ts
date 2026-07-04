@@ -97,8 +97,8 @@ export function filterServicesBySearch(items: any[], query: string): any[] {
   });
 }
 
-export type WorkerSortId = "nearest" | "top_rated";
-export type ContractorSortId = "nearest" | "larger_team" | "top_rated";
+export type WorkerSortId = "nearest" | "trusted_profiles";
+export type ContractorSortId = "nearest" | "larger_team" | "trusted_profiles";
 export type ServiceSortId =
   | "nearest"
   | "latest"
@@ -107,24 +107,78 @@ export type ServiceSortId =
   | "living_available"
   | "esi_pf";
 
+const hasNonEmptyText = (v: unknown): boolean =>
+  typeof v === "string" ? v.trim().length > 0 : v != null && String(v).trim().length > 0;
+
+const hasSkills = (item: any): boolean => {
+  const s = item?.skills;
+  if (!Array.isArray(s) || s.length === 0) return false;
+  // Supports both ["plumber"] and [{skill:"plumber"}] shapes.
+  return s.some((x: any) => {
+    if (typeof x === "string") return x.trim().length > 0;
+    return hasNonEmptyText(x?.skill);
+  });
+};
+
+const getMobileLike = (item: any): string => {
+  const raw =
+    item?.mobile ??
+    item?.phone ??
+    item?.phoneNumber ??
+    item?.contactNumber ??
+    "";
+  const s = String(raw ?? "").trim();
+  return s === "undefined" || s === "null" ? "" : s;
+};
+
+const getProfilePhoto = (item: any): string => {
+  const raw =
+    item?.profilePicture ??
+    item?.profileImage ??
+    item?.avatar ??
+    item?.photo ??
+    "";
+  return String(raw ?? "").trim();
+};
+
+export const getTrustedProfileScore = (item: any): number => {
+  let score = 0;
+  if (hasNonEmptyText(item?.name)) score += 1;
+  if (hasNonEmptyText(item?.address)) score += 1;
+  if (hasSkills(item)) score += 1;
+  if (hasNonEmptyText(getProfilePhoto(item))) score += 1;
+  if (getMobileLike(item).length > 0) score += 1;
+  return score;
+};
+
+export const isTrustedProfile = (item: any): boolean =>
+  getTrustedProfileScore(item) >= 5;
+
 export function sortWorkerList(
   items: any[],
   sortId: WorkerSortId,
   userLoc: GeoLike,
 ): any[] {
-  const copy = [...items];
-  if (sortId === "nearest") {
+  let copy = [...items];
+
+  if (sortId === "trusted_profiles") {
+    copy = copy.filter(isTrustedProfile);
     copy.sort((a, b) => {
+      const sa = getTrustedProfileScore(a);
+      const sb = getTrustedProfileScore(b);
+      if (sb !== sa) return sb - sa;
       const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
       const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
       return da - db;
     });
-  } else {
-    copy.sort(
-      (a, b) =>
-        (Number(b?.rating?.average) || 0) - (Number(a?.rating?.average) || 0),
-    );
+    return copy;
   }
+
+  copy.sort((a, b) => {
+    const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
+    const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
+    return da - db;
+  });
   return copy;
 }
 
@@ -133,25 +187,35 @@ export function sortContractorList(
   sortId: ContractorSortId,
   userLoc: GeoLike,
 ): any[] {
-  const copy = [...items];
-  if (sortId === "nearest") {
+  let copy = [...items];
+
+  if (sortId === "trusted_profiles") {
+    copy = copy.filter(isTrustedProfile);
     copy.sort((a, b) => {
+      const sa = getTrustedProfileScore(a);
+      const sb = getTrustedProfileScore(b);
+      if (sb !== sa) return sb - sa;
       const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
       const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
       return da - db;
     });
-  } else if (sortId === "larger_team") {
+    return copy;
+  }
+
+  if (sortId === "larger_team") {
     copy.sort(
       (a, b) =>
         (Number(b?.teamDetails?.memberCount) || 0) -
         (Number(a?.teamDetails?.memberCount) || 0),
     );
-  } else {
-    copy.sort(
-      (a, b) =>
-        (Number(b?.rating?.average) || 0) - (Number(a?.rating?.average) || 0),
-    );
+    return copy;
   }
+
+  copy.sort((a, b) => {
+    const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
+    const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
+    return da - db;
+  });
   return copy;
 }
 

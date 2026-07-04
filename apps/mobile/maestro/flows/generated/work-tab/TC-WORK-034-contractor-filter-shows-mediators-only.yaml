@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "employer", "automated"]
+---
+# TC-WORK-034: Contractor filter shows Mediators only
+# Module: Tab: Work | Screen: Filter Workers | Role: Employer
+# Type: Functionality | Priority: P2
+# Route: filterWorkers.tsx
+# Prerequisites: Employer account · Contractor filter mode
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open contractor browse.
+# Apply filters.
+
+# Assertions
+# Expected: Only MEDIATOR role users shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

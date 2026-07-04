@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "functionality", "employer", "automated"]
+---
+# TC-ATT-007: Attendance report shows correct present/absent counts
+# Module: Attendance | Screen: Show Attendance | Role: Employer
+# Type: Functionality | Priority: P0
+# Route: ShowAttendance.tsx
+# Prerequisites: Employer account · Report with data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Compare report to submitted data.
+
+# Assertions
+# Expected: Counts match submitted attendance.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

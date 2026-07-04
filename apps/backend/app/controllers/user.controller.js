@@ -9,6 +9,7 @@ import User from "../models/user.model.js";
 import Team from "../models/team.model.js";
 import State from "../models/state.model.js";
 import logError from "../utils/addErrorLog.js";
+import { withTrustedProfileMatch } from "../utils/trustedProfile.js";
 
 // const SECRET = process.env.JWT_SECRET;
 
@@ -823,9 +824,13 @@ export const getUsersOnRole = async (req, res) => {
     const loggedInUser =
       await User.findById(loggedInUserId).select("geoLocation");
 
+    const listMatch =
+      sortBy === "trusted_profiles" ? withTrustedProfileMatch(match) : match;
+
     // Aggregation pipeline
     const pipeline = [];
     const shouldSortNearest = sortBy === "nearest";
+    // Trusted tab must include users without geo — do not use $geoNear for trusted_profiles.
     const shouldUseGeoNear =
       loggedInUser?.geoLocation && (distance || shouldSortNearest);
 
@@ -844,12 +849,15 @@ export const getUsersOnRole = async (req, res) => {
           distanceField: "distance",
           maxDistance: maxDistanceKm * 1000,
           spherical: true,
-          query: { ...match, mobile: { $nin: [process.env.ADMIN_MOBILE] } },
+          query: {
+            ...listMatch,
+            mobile: { $nin: [process.env.ADMIN_MOBILE] },
+          },
         },
       });
     } else {
       pipeline.push(
-        { $match: match },
+        { $match: listMatch },
         // Exclude admin users
         { $match: { mobile: { $nin: [process.env.ADMIN_MOBILE] } } },
       );
@@ -884,6 +892,8 @@ export const getUsersOnRole = async (req, res) => {
       pipeline.push({ $sort: { "rating.average": -1, createdAt: -1 } });
     } else if (sortBy === "larger_team") {
       pipeline.push({ $sort: { "teamDetails.memberCount": -1, createdAt: -1 } });
+    } else if (sortBy === "trusted_profiles") {
+      pipeline.push({ $sort: { createdAt: -1 } });
     } else if (!shouldSortNearest) {
       pipeline.push({ $sort: { createdAt: -1 } });
     }
@@ -896,7 +906,7 @@ export const getUsersOnRole = async (req, res) => {
 
     const users = await User.aggregate(pipeline);
 
-    const totalUsers = await User.countDocuments(match);
+    const totalUsers = await User.countDocuments(listMatch);
 
     return res.status(200).json({
       success: true,

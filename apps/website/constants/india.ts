@@ -1,6 +1,6 @@
 export const ALL_INDIAN_VILLAGES = [
   {
-    state: "Uttar Predesh",
+    state: "Uttar Pradesh",
     districts: [
       {
         district: "Agra",

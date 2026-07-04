@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-activity", "functionality", "all", "automated"]
+---
+# TC-ACT-026: Deep link ?tab= param opens correct activity sub-tab
+# Module: Tab: Activity | Screen: Activity Tab | Role: All
+# Type: Functionality | Priority: P1
+# Route: /(tabs)/fourth?tab=bookings
+# Prerequisites: Any test account · Deep link with tab param
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open /(tabs)/fourth?tab=bookings.
+# Observe active sub-tab.
+
+# Assertions
+# Expected: Bookings sub-tab pre-selected.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

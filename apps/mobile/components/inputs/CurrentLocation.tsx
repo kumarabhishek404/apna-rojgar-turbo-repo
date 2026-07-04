@@ -158,7 +158,6 @@ export default AutoLocationButton;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 15,
     gap: 8,
   },
   label: {
@@ -167,12 +166,19 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: Colors.primary,
-    padding: 14,
-    borderRadius: 10,
+    minHeight: 58,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
+    shadowColor: Colors.primary,
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   buttonText: {
     color: "white",
@@ -180,19 +186,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   addressBox: {
-    backgroundColor: "#eef7ee",
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: "#EAF8F0",
+    padding: 12,
+    borderRadius: 14,
     flexDirection: "row",
     gap: 8,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#BFE8CE",
   },
   addressText: {
     flex: 1,
     fontSize: 14,
   },
   errorText: {
-    color: "red",
+    color: Colors.error,
     fontSize: 13,
   },
   labelContainer: {

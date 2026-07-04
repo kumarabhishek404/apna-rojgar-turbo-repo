@@ -1,22 +1,50 @@
 const { withAndroidManifest } = require("@expo/config-plugins");
 
 /**
- * Config plugin that overrides the MLKit barcode scanner activity's
- * `screenOrientation` restriction (portrait-only) which Google Play
- * flags as a user-experience issue on large-screen / foldable devices
- * running Android 16+.
+ * Overrides portrait / orientation locks from third-party SDKs (Cashfree,
+ * ML Kit, Credentials) so Google Play no longer flags large-screen
+ * resizability restrictions on Android 16+.
  *
- * The GmsBarcodeScanningDelegateActivity ships inside the ML Kit SDK
- * with `android:screenOrientation="portrait"` locked in its manifest.
- * This plugin declares the same activity in the app's merged manifest
- * with `tools:replace` so the Android manifest merger substitutes
- * our unrestricted value at build time.
+ * Libraries ship activities with `android:screenOrientation="portrait"`.
+ * We re-declare them with `tools:replace` so the manifest merger uses
+ * `unspecified` at build time. Payment and scanner UI still work; the OS
+ * may allow rotation on tablets/foldables.
  */
+const ORIENTATION_UNLOCK_ACTIVITIES = [
+  "com.google.mlkit.vision.codescanner.internal.GmsBarcodeScanningDelegateActivity",
+  "com.cashfree.pg.core.api.ui.CashfreeSubscriptionCheckoutActivity",
+  "com.cashfree.pg.core.api.ui.CashfreeSubscriptionVerificationActivity",
+  "com.cashfree.pg.core.api.ui.CashfreeCoreNativeVerificationActivity",
+  "com.cashfree.pg.ui.hidden.checkout.CashfreeNativeCheckoutActivity",
+  "com.cashfree.pg.core.api.ui.CFSubsCoreUpiPaymentActivity",
+  "com.cashfree.pg.core.api.ui.CashfreeWebCheckoutActivity",
+  "androidx.credentials.playservices.HiddenActivity",
+];
+
+function unlockActivityOrientation(app, activityName) {
+  const existing = app.activity.find(
+    (a) => a.$?.["android:name"] === activityName,
+  );
+
+  const attrs = {
+    "android:name": activityName,
+    "android:screenOrientation": "unspecified",
+    "android:resizeableActivity": "true",
+    "tools:replace": "android:screenOrientation,android:resizeableActivity",
+  };
+
+  if (existing) {
+    existing.$ = { ...existing.$, ...attrs };
+    return;
+  }
+
+  app.activity.push({ $: attrs });
+}
+
 module.exports = function withAndroidOrientationFix(config) {
   return withAndroidManifest(config, (config) => {
     const manifest = config.modResults.manifest;
 
-    // Ensure the tools XML namespace is declared on the root element.
     if (!manifest.$["xmlns:tools"]) {
       manifest.$["xmlns:tools"] = "http://schemas.android.com/tools";
     }
@@ -26,28 +54,8 @@ module.exports = function withAndroidOrientationFix(config) {
 
     if (!app.activity) app.activity = [];
 
-    const MLKIT_ACTIVITY =
-      "com.google.mlkit.vision.codescanner.internal.GmsBarcodeScanningDelegateActivity";
-
-    const existing = app.activity.find(
-      (a) => a.$?.["android:name"] === MLKIT_ACTIVITY,
-    );
-
-    if (existing) {
-      // Activity already declared — remove the orientation lock and tell
-      // the merger to use our value instead of the library's.
-      delete existing.$["android:screenOrientation"];
-      existing.$["tools:replace"] = "android:screenOrientation";
-    } else {
-      // Not yet declared — add an override entry. The merger will see
-      // `tools:replace` and prefer our value over the library's.
-      app.activity.push({
-        $: {
-          "android:name": MLKIT_ACTIVITY,
-          "android:screenOrientation": "unspecified",
-          "tools:replace": "android:screenOrientation",
-        },
-      });
+    for (const activityName of ORIENTATION_UNLOCK_ACTIVITIES) {
+      unlockActivityOrientation(app, activityName);
     }
 
     return config;

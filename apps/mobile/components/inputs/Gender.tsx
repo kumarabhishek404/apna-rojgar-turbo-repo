@@ -60,24 +60,26 @@ const Gender = ({
 };
 
 const styles = StyleSheet.create({
-  genderContainer: { gap: 5 },
+  genderContainer: { gap: 8 },
   genderSelectionWrapper: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
+    gap: 10,
   },
   genderButton: {
+    flex: 1,
     borderWidth: 1,
-    borderColor: "#ccc",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 50,
-    backgroundColor: "#fff",
+    borderColor: "#DDE6F5",
+    paddingVertical: 11,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    backgroundColor: "#F8FAFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   selectedButton: {
-    borderColor: Colors?.tertiery,
-    backgroundColor: Colors?.tertiery,
+    borderColor: Colors?.primary,
+    backgroundColor: Colors?.primary,
   },
   labelContainer: {
     flexDirection: "row",

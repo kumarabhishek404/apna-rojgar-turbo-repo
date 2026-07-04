@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors";
 import React, { useEffect, useMemo, useState } from "react";
-import { View, StyleSheet, RefreshControl, StatusBar } from "react-native";
+import { View, StyleSheet, RefreshControl } from "react-native";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
 import Loader from "@/components/commons/Loaders/Loader";

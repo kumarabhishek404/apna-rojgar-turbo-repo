@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "functionality", "admin", "automated"]
+---
+# TC-ADM-028: Admin services empty state
+# Module: Admin Panel | Screen: Admin Services | Role: Admin
+# Type: Functionality | Priority: P2
+# Route: AdminServices
+# Prerequisites: Admin account · Empty services
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# View with no services.
+
+# Assertions
+# Expected: Empty state message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

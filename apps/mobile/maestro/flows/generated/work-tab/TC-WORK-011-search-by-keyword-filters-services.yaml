@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "worker", "automated"]
+---
+# TC-WORK-011: Search by keyword filters services
+# Module: Tab: Work | Screen: Search Services | Role: Worker
+# Type: Functionality | Priority: P1
+# Route: searchServices.tsx
+# Prerequisites: Worker account · On search services
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Enter search term.
+# Submit.
+
+# Assertions
+# Expected: Matching services displayed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

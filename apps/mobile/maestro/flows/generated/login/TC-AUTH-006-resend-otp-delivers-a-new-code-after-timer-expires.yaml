@@ -1,0 +1,36 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "automated"]
+---
+# TC-AUTH-006: Resend OTP delivers a new code after timer expires
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: Functionality | Priority: P1
+# Route: /screens/auth/login
+# Prerequisites: Logged out · OTP has been sent. Wait for the Resend OTP countdown timer to finish (usually 30–60 seconds)
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Send OTP and wait until the 'Resend OTP' button becomes tappable (countdown ends).
+- tapOn:
+    id: "login-submit-button"
+# Wait for confirmation message.
+- tapOn:
+    id: "login-otp-input"
+- inputText: ${STAGING_OTP}
+
+# Assertions
+# Expected: Resend button is disabled during countdown, then becomes active.
+# Expected: Tapping Resend shows success feedback.
+# Expected: New OTP is accepted.
+# Expected: old OTP is rejected.
+# Expected: Login completes successfully with the new OTP.
+
+# Cleanup

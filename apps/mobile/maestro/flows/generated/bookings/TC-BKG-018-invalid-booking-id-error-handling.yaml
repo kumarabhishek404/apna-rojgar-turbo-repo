@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "functionality", "employer", "automated"]
+---
+# TC-BKG-018: Invalid booking ID error handling
+# Module: Bookings & Invitations | Screen: Booking Detail | Role: Employer
+# Type: Functionality | Priority: P2
+# Route: /screens/bookings/[id]
+# Prerequisites: Employer account · Invalid booking ID
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open invalid booking ID.
+
+# Assertions
+# Expected: Error state.
+- assertNotVisible: "Something went wrong"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

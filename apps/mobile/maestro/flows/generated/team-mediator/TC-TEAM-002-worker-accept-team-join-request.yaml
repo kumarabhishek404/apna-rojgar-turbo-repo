@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "functionality", "worker", "automated"]
+---
+# TC-TEAM-002: Worker accept team join request
+# Module: Team / Mediator | Screen: Team Requests Received | Role: Worker
+# Type: Functionality | Priority: P0
+# Route: /screens/teamRequests
+# Prerequisites: Worker account · Pending team join request
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open Received tab.
+# Accept request.
+
+# Assertions
+# Expected: Joined team.
+# Expected: request removed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

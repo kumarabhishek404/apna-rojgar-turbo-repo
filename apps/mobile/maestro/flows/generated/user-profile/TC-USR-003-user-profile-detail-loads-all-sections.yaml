@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["user-browse-profile-actions", "availability", "all", "automated"]
+---
+# TC-USR-003: User profile detail loads all sections
+# Module: User Browse & Profile Actions | Screen: User Profile | Role: All
+# Type: Availability | Priority: P0
+# Route: /screens/users/[id]
+# Prerequisites: Any test account · Valid user ID
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open user profile.
+# Scroll page.
+
+# Assertions
+# Expected: Photo, skills, reviews, work info, action buttons visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

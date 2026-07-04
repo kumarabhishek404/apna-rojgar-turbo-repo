@@ -39,21 +39,23 @@ const getImageFileMeta = (
 export async function buildServiceImageUploadParts(
   images: unknown[],
 ): Promise<ServiceImageUploadPart[]> {
-  const parts: ServiceImageUploadPart[] = [];
+  const localImages = images.filter(
+    (raw): raw is string =>
+      typeof raw === "string" &&
+      raw.trim().length > 0 &&
+      !raw.startsWith("http://") &&
+      !raw.startsWith("https://"),
+  );
 
-  for (let index = 0; index < images.length; index++) {
-    const raw = images[index];
-    if (typeof raw !== "string" || !raw.trim()) continue;
-    if (raw.startsWith("http://") || raw.startsWith("https://")) continue;
-
-    const normalizedUri = await normalizePickedImageUriForUpload(raw);
-    const { extension, mime } = getImageFileMeta(normalizedUri);
-    parts.push({
-      uri: toMultipartUri(normalizedUri),
-      name: `service_${Date.now()}_${index}.${extension}`,
-      type: mime,
-    });
-  }
-
-  return parts;
+  return Promise.all(
+    localImages.map(async (raw, index) => {
+      const normalizedUri = await normalizePickedImageUriForUpload(raw);
+      const { extension, mime } = getImageFileMeta(normalizedUri);
+      return {
+        uri: toMultipartUri(normalizedUri),
+        name: `service_${Date.now()}_${index}.${extension}`,
+        type: mime,
+      };
+    }),
+  );
 }

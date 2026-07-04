@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
   Alert,
 } from "react-native";
+import ProfilePicture from "@/components/commons/ProfilePicture";
 import ButtonComp from "@/components/inputs/Button";
 import { useRouter } from "expo-router";
 import Colors from "@/constants/Colors";
@@ -54,8 +54,8 @@ export default function AttendanceScreenComponent({
             <View style={styles.workerInfo}>
               <View style={styles.profileImageContainer}>
                 <Text style={styles.workerIndex}>{index + 1}</Text>
-                <Image
-                  source={{ uri: worker?.profilePicture }}
+                <ProfilePicture
+                  uri={worker?.profilePicture}
                   style={styles.profileImage}
                 />
               </View>

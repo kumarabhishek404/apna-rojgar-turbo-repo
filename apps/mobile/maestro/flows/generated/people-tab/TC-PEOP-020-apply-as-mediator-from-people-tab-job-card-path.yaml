@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-people", "functionality", "mediator", "automated"]
+---
+# TC-PEOP-020: Apply as mediator from people tab job card path
+# Module: Tab: People | Screen: Active Works List | Role: Mediator
+# Type: Functionality | Priority: P1
+# Route: UnifiedPeopleScreen
+# Prerequisites: Mediator account · Job listed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open job from people tab.
+# Apply with team.
+
+# Assertions
+# Expected: Mediator apply drawer opens from detail.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

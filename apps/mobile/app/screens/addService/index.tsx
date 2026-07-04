@@ -31,6 +31,9 @@ import SelectDurationAndDescriptionStep from "./SetDuration&Description";
 import FormProgressBar from "@/components/commons/FormProgress";
 import UploadWorkImagesStep from "./UploadImagesStep";
 import { getLatLongFromAddress } from "@/constants/functions";
+import PromotionChoiceModal from "@/components/commons/PromotionChoiceModal";
+import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
+import PAYMENT from "@/app/api/payment";
 import { buildServiceImageUploadParts } from "@/utils/serviceImageUpload";
 
 const AddServiceScreen = () => {
@@ -56,6 +59,19 @@ const AddServiceScreen = () => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const pollingRef = useRef<any>(null);
   const submitGuardRef = useRef(false);
+  const promotionChoiceRef = useRef<{
+    promoteSocialMedia: boolean;
+    promotionOrderId: string;
+  }>({
+    promoteSocialMedia: false,
+    promotionOrderId: "",
+  });
+  const verifiedPromotionOrderRef = useRef<string | null>(null);
+
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [isPromotionProcessing, setIsPromotionProcessing] = useState(false);
+  const { runPromotionPayment } = useCashfreePromotionPayment();
 
   const [startDate, setStartDate] = useState(
     addService?.startDate
@@ -120,6 +136,8 @@ const AddServiceScreen = () => {
       setAddServiceStep(1);
       setIsFormDirty(false);
       setIsNavigating(true);
+      verifiedPromotionOrderRef.current = null;
+      setShowPromotionModal(false);
       requestAnimationFrame(() => {
         router?.replace("/(tabs)/fourth?tab=0" as any);
       });
@@ -171,6 +189,20 @@ const AddServiceScreen = () => {
   useEffect(() => {
     setStep(1);
   }, []);
+
+  useEffect(() => {
+    if (addService?._id) return;
+
+    PAYMENT.getPromotionConfig()
+      .then((config) => {
+        if (config?.amount) {
+          setPromotionAmount(config.amount);
+        }
+      })
+      .catch(() => {
+        setPromotionAmount(100);
+      });
+  }, [addService?._id]);
 
   useEffect(() => {
     const beforeRemoveListener = (e: any) => {
@@ -250,32 +282,45 @@ const AddServiceScreen = () => {
       throw new Error("Required fields are missing");
     }
 
-    const formData: any = new FormData();
-
     const imageParts = await buildServiceImageUploadParts(images);
-    imageParts.forEach((part) => {
-      formData.append("images", {
-        uri: part.uri,
-        name: part.name,
-        type: part.type,
-      } as any);
-    });
-
     const finalLocation = await ensureLocation(location, address);
 
-    formData.append("type", type);
-    formData.append("subType", subType);
-    formData.append("description", description);
-    formData.append("address", address);
-    formData.append("geoLocation", JSON.stringify(finalLocation));
-    formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
-    formData.append("duration", String(duration));
-    formData.append("bookingType", "byService");
-    formData.append("requirements", JSON.stringify(requirements));
-    formData.append("facilities", JSON.stringify(facilities));
+    const metadata = {
+      type,
+      subType,
+      description,
+      address,
+      geoLocation: JSON.stringify(finalLocation),
+      startDate: moment(startDate).format("YYYY-MM-DD"),
+      duration: String(duration),
+      bookingType: "byService",
+      requirements: JSON.stringify(requirements),
+      facilities: JSON.stringify(facilities),
+      promoteSocialMedia: String(promotionChoiceRef.current.promoteSocialMedia),
+      ...(promotionChoiceRef.current.promotionOrderId
+        ? { promotionOrderId: promotionChoiceRef.current.promotionOrderId }
+        : {}),
+    };
 
-    const response: any = await EMPLOYER?.addNewService(formData);
-    return response?.data;
+    // Phase 1: small JSON request — succeeds quickly even on slow networks
+    const response: any = await EMPLOYER?.addNewServiceMetadata(metadata);
+    const service = response?.data;
+    const serviceId = service?._id;
+
+    // Phase 2: upload images one at a time (smaller payloads, easier to retry)
+    if (serviceId && imageParts.length > 0) {
+      for (const part of imageParts) {
+        const imageForm = new FormData();
+        imageForm.append("images", {
+          uri: part.uri,
+          name: part.name,
+          type: part.type,
+        } as any);
+        await EMPLOYER?.uploadServiceImages(serviceId, imageForm);
+      }
+    }
+
+    return service;
   };
 
   const handleEditSubmit = async (id: any) => {
@@ -396,20 +441,22 @@ const AddServiceScreen = () => {
 
   const ensureLocation = async (location: any, address: string) => {
     try {
-      // ✅ Case 1: Already has coordinates
       if (location?.coordinates?.length === 2) {
         return location;
       }
 
-      // ❌ No address → can't proceed
       if (!address) return null;
 
-      // ✅ Fetch from address
-      const coords = await getLatLongFromAddress(address);
+      const GEOCODE_TIMEOUT_MS = 8000;
+      const coords = await Promise.race([
+        getLatLongFromAddress(address),
+        new Promise<null>((resolve) =>
+          setTimeout(() => resolve(null), GEOCODE_TIMEOUT_MS),
+        ),
+      ]);
 
       if (!coords) return null;
 
-      // ✅ Convert to GeoJSON (IMPORTANT)
       return {
         type: "Point",
         coordinates: [coords.longitude, coords.latitude],
@@ -512,25 +559,89 @@ const AddServiceScreen = () => {
       case 8:
         const handleFinalSubmit = () => {
           if (submitGuardRef.current || mutationAddService?.isPending) return;
+
+          if (addService?._id) {
+            submitGuardRef.current = true;
+            promotionChoiceRef.current = {
+              promoteSocialMedia: false,
+              promotionOrderId: "",
+            };
+            mutationAddService.mutate();
+            return;
+          }
+
+          setShowPromotionModal(true);
+        };
+
+        const submitWithoutPromotion = () => {
+          if (submitGuardRef.current || mutationAddService?.isPending) return;
           submitGuardRef.current = true;
+          promotionChoiceRef.current = {
+            promoteSocialMedia: false,
+            promotionOrderId: "",
+          };
+          setShowPromotionModal(false);
           mutationAddService.mutate();
         };
+
+        const submitWithPromotion = async () => {
+          if (submitGuardRef.current || mutationAddService?.isPending) return;
+          setIsPromotionProcessing(true);
+
+          try {
+            let orderId = verifiedPromotionOrderRef.current;
+            if (!orderId) {
+              orderId = await runPromotionPayment();
+              verifiedPromotionOrderRef.current = orderId;
+            }
+
+            submitGuardRef.current = true;
+            promotionChoiceRef.current = {
+              promoteSocialMedia: true,
+              promotionOrderId: orderId,
+            };
+            setShowPromotionModal(false);
+            mutationAddService.mutate();
+          } catch {
+            submitGuardRef.current = false;
+          } finally {
+            setIsPromotionProcessing(false);
+          }
+        };
+
         return (
-          <FinalScreen
-            setStep={setStep}
-            type={type}
-            subType={subType}
-            description={description}
-            address={address}
-            location={location}
-            startDate={startDate}
-            duration={duration}
-            requirements={requirements}
-            images={images}
-            facilities={facilities}
-            handleOnSubmit={handleFinalSubmit}
-            isSubmitting={mutationAddService?.isPending}
-          />
+          <>
+            <FinalScreen
+              setStep={setStep}
+              type={type}
+              subType={subType}
+              description={description}
+              address={address}
+              location={location}
+              startDate={startDate}
+              duration={duration}
+              requirements={requirements}
+              images={images}
+              facilities={facilities}
+              handleOnSubmit={handleFinalSubmit}
+              isSubmitting={
+                mutationAddService?.isPending || isPromotionProcessing
+              }
+            />
+            <PromotionChoiceModal
+              visible={showPromotionModal}
+              amount={promotionAmount}
+              loading={isPromotionProcessing || mutationAddService?.isPending}
+              onClose={() => {
+                if (isPromotionProcessing || mutationAddService?.isPending) {
+                  return;
+                }
+                setShowPromotionModal(false);
+              }}
+              onPromote={submitWithPromotion}
+              onSubmitWithoutPromotion={submitWithoutPromotion}
+            />
+          </>
         );
 
       default:

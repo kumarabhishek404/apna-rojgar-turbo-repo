@@ -9,7 +9,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Linking } from "react-native";
 import React, { useRef, useEffect, useState } from "react";
-import { Tabs, router, usePathname } from "expo-router";
+import { Tabs, router, usePathname, Redirect } from "expo-router";
 import {
   MaterialIcons,
   MaterialCommunityIcons,
@@ -31,6 +31,8 @@ import { getToken } from "@/utils/authStorage";
 import { uploadPendingProfileImage } from "@/utils/backgroundImageUpload";
 import REFRESH_USER from "../hooks/useRefreshUser";
 import APP_CONTEXT from "../context/locale";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isSessionValid } from "@/utils/session";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -70,11 +72,24 @@ export default function Layout() {
   const [showExitModal, setShowExitModal] = useState(false);
   const history = useRef<string[]>([]);
   const [isReady, setIsReady] = useState(false);
+  const [storageHydrated, setStorageHydrated] = useState(false);
   const { refreshUser } = REFRESH_USER.useRefreshUser();
 
   useEffect(() => {
-    // wait one render cycle
     setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    AsyncStorage.getItem("user").finally(() => {
+      // Defer until after jotai atomWithStorage applies the persisted user.
+      setTimeout(() => {
+        if (!cancelled) setStorageHydrated(true);
+      }, 0);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -96,23 +111,6 @@ export default function Layout() {
 
     return () => subscription.remove();
   }, []);
-
-  useEffect(() => {
-    if (!isReady) return;
-
-    if (
-      !userDetails ||
-      !userDetails?.isAuth ||
-      !userDetails?._id ||
-      !userDetails?.name ||
-      !userDetails?.address ||
-      !userDetails?.age ||
-      !userDetails?.gender
-    ) {
-      console.log("Redirecting to login screen -  ", userDetails);
-      router.replace("/screens/auth/login");
-    }
-  }, [userDetails, router, isReady]);
 
   useEffect(() => {
     const fetchUnreadNotifications = async () => {
@@ -182,6 +180,7 @@ export default function Layout() {
     activeIconName,
     iconLibrary = "MaterialIcons",
     itemStyles,
+    testID,
   }: {
     props: any;
     path: string;
@@ -190,6 +189,7 @@ export default function Layout() {
     activeIconName?: string;
     iconLibrary?: IconLibrary;
     itemStyles?: any;
+    testID?: string;
   }) => {
     const isSelected = `/(tabs)${pathname}` === path;
 
@@ -209,7 +209,9 @@ export default function Layout() {
       style: tabBarItemStyle,
       children: _tabChildren,
       onPress,
-      ...pressableRest
+      onLongPress,
+      accessibilityState,
+      accessibilityLabel,
     } = props;
 
     const rowInnerH = TAB_BAR_CONTENT;
@@ -218,9 +220,12 @@ export default function Layout() {
 
     return (
       <Pressable
-        {...pressableRest}
+        testID={testID}
         accessibilityRole="button"
+        accessibilityState={accessibilityState}
+        accessibilityLabel={accessibilityLabel}
         onPress={onPress ?? (() => router.push(path as any))}
+        onLongPress={onLongPress}
         android_ripple={{ color: "rgba(34, 64, 154, 0.14)", foreground: true }}
         style={({ pressed }) => [
           tabBarItemStyle,
@@ -276,7 +281,11 @@ export default function Layout() {
   // Keep bottom-tab labels/icons reactive to language changes.
   void locale;
 
-  if (!isReady) return null;
+  if (!isReady || !storageHydrated) return null;
+
+  if (!isSessionValid(userDetails)) {
+    return <Redirect href="/screens/auth/login" />;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.white }}>
@@ -309,6 +318,7 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/"
+                    testID="tab-home"
                     title={isAdmin ? "services" : "tabHome"}
                     iconName={isAdmin ? "grid-outline" : "home-outline"}
                     activeIconName={isAdmin ? "grid" : "home"}
@@ -325,6 +335,7 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/second"
+                    testID="tab-work"
                     title={workTabTitleKey}
                     iconName={isAdmin ? "people-outline" : "briefcase-outline"}
                     activeIconName={isAdmin ? "people" : "briefcase"}
@@ -341,6 +352,7 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/third"
+                    testID="tab-people"
                     title={peopleTabTitleKey}
                     iconName={apiRole === "MEDIATOR" ? "rocket-outline" : "people-outline"}
                     activeIconName={apiRole === "MEDIATOR" ? "rocket" : "people"}
@@ -357,6 +369,7 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/fourth"
+                    testID="tab-activity"
                     title="tabActivity"
                     iconName={isAdmin ? "alert-circle-outline" : "stats-chart-outline"}
                     activeIconName={isAdmin ? "alert-circle" : "stats-chart"}
@@ -373,6 +386,7 @@ export default function Layout() {
                   <TabButton
                     props={props}
                     path="/(tabs)/fifth"
+                    testID="tab-profile"
                     title="myProfile"
                     iconName="person-outline"
                     activeIconName="person"

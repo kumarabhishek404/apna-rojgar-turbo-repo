@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "ui-design", "all", "automated"]
+---
+# TC-SUP-018: Legal text readable on mobile
+# Module: Settings, Support & Legal | Screen: Privacy Policy | Role: All
+# Type: UI Design | Priority: P2
+# Route: /screens/privacyPolicy
+# Prerequisites: Any test account · On privacy policy
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll full policy.
+
+# Assertions
+# Expected: Text size readable.
+# Expected: no horizontal scroll.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

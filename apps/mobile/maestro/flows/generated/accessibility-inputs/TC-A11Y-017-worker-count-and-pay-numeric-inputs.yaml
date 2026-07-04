@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "employer", "automated"]
+---
+# TC-A11Y-017: Worker count and pay numeric inputs
+# Module: Accessibility & Inputs | Screen: Work Requirements Input | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: WorkRequirements.tsx
+# Prerequisites: Employer account · Add service salary step
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Enter worker count and daily pay.
+# Verify values.
+
+# Assertions
+# Expected: Numeric values accepted and saved.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import CustomHeading from "./CustomHeading";
@@ -11,99 +12,105 @@ interface WorkInformationProps {
 }
 
 const WorkInformation = ({ information, style }: WorkInformationProps) => {
+  const workerStats = [
+    {
+      value:
+        (information?.byService?.appliedIndividually?.total || 0) +
+        (information?.byService?.appliedByMediator?.total || 0),
+      label: t("totalTasks"),
+      icon: "briefcase-outline" as const,
+      tone: "#EEF4FF",
+    },
+    {
+      value:
+        (information?.byService?.appliedIndividually?.completed || 0) +
+        (information?.byService?.appliedByMediator?.completed || 0),
+      label: t("completed"),
+      icon: "checkmark-done-circle-outline" as const,
+      tone: "#EAF8F0",
+    },
+    {
+      value:
+        (information?.byService?.appliedIndividually?.applied || 0) +
+        (information?.byService?.appliedByMediator?.applied || 0) +
+        (information?.byService?.appliedIndividually?.selected || 0) +
+        (information?.byService?.appliedByMediator?.selected || 0),
+      label: t("pending"),
+      icon: "time-outline" as const,
+      tone: "#FFF7E8",
+    },
+    {
+      value:
+        (information?.byService?.appliedIndividually?.cancelledApply
+          ?.byMySelf || 0) +
+        (information?.byService?.appliedIndividually?.cancelledApply
+          ?.byEmployer || 0) +
+        (information?.byService?.appliedIndividually?.cancelledSelection
+          ?.byMySelf || 0) +
+        (information?.byService?.appliedIndividually?.cancelledSelection
+          ?.byEmployer || 0) +
+        (information?.byService?.appliedByMediator?.cancelledApply?.byMySelf ||
+          0) +
+        (information?.byService?.appliedByMediator?.cancelledApply
+          ?.byMediator || 0) +
+        (information?.byService?.appliedByMediator?.cancelledApply
+          ?.byEmployer || 0) +
+        (information?.byService?.appliedByMediator?.cancelledSelection
+          ?.byMySelf || 0) +
+        (information?.byService?.appliedByMediator?.cancelledSelection
+          ?.byMediator || 0) +
+        (information?.byService?.appliedByMediator?.cancelledSelection
+          ?.byEmployer || 0),
+      label: t("cancelled"),
+      icon: "close-circle-outline" as const,
+      tone: "#FEEEEE",
+    },
+  ];
+
   return (
-    <View style={styles?.container}>
-      <CustomHeading
-        textAlign="left"
-        style={[style]}
-        color={Colors?.heading}
-        baseFont={22}
-      >
-        {t("workInformation")}{" "}
-      </CustomHeading>
-      <CustomText
-        style={[style]}
-        textAlign="left"
-        color={Colors?.tertieryButton}
-        baseFont={18}
-      >
-        ({t("servicesInWhichYouHaveWorked")})
-      </CustomText>
-      <View style={[styles.workInfoWrapper, { marginTop: 10 }]}>
-        <View
-          style={[
-            styles.workInfoBox,
-            {
-              borderRightColor: "#dddddd",
-              borderRightWidth: 1,
-            },
-          ]}
+    <View style={[styles.container, style]}>
+      <View style={styles.header}>
+        <CustomHeading
+          textAlign="left"
+          color={Colors?.heading}
+          baseFont={22}
+          style={styles.title}
         >
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.appliedIndividually?.total +
-                information?.byService?.appliedByMediator?.total || 0}
-            </CustomHeading>
-          </View>
-          <CustomText baseFont={14}>{t("totalTasks")}</CustomText>
-        </View>
-        <View style={styles.workInfoBox}>
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.appliedIndividually?.completed +
-                information?.byService?.appliedByMediator?.completed || 0}
-            </CustomHeading>
-          </View>
-          <CustomText baseFont={14}>{t("completed")}</CustomText>
-        </View>
+          {t("workInformation")}
+        </CustomHeading>
+        <CustomText
+          textAlign="left"
+          color={Colors?.tertieryButton}
+          baseFont={15}
+          style={styles.subtitle}
+        >
+          {t("servicesInWhichYouHaveWorked")}
+        </CustomText>
       </View>
-      <View style={[styles.workInfoWrapper, { borderTopWidth: 0 }]}>
-        <View
-          style={[
-            styles.workInfoBox,
-            {
-              borderRightColor: "#dddddd",
-              borderRightWidth: 1,
-            },
-          ]}
-        >
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.appliedIndividually?.applied +
-                information?.byService?.appliedByMediator?.applied +
-                information?.byService?.appliedIndividually?.selected +
-                information?.byService?.appliedByMediator?.selected || 0}
+
+      <View style={styles.statGrid}>
+        {workerStats.map((item) => (
+          <View key={item.label} style={styles.statCard}>
+            <View style={[styles.iconBadge, { backgroundColor: item.tone }]}>
+              <Ionicons name={item.icon} size={18} color={Colors.primary} />
+            </View>
+            <CustomHeading
+              baseFont={24}
+              color={Colors.primary}
+              style={styles.statValue}
+            >
+              {item.value}
             </CustomHeading>
+            <CustomText
+              baseFont={13}
+              color={Colors.heading}
+              textAlign="center"
+              style={styles.statLabel}
+            >
+              {item.label}
+            </CustomText>
           </View>
-          <CustomText baseFont={14}>{t("pending")}</CustomText>
-        </View>
-        <View style={styles.workInfoBox}>
-          <View style={styles?.iconWrapper}>
-            <CustomHeading baseFont={26}>
-              {information?.byService?.appliedIndividually?.cancelledApply
-                ?.byMySelf +
-                information?.byService?.appliedIndividually?.cancelledApply
-                  ?.byEmployer +
-                information?.byService?.appliedIndividually?.cancelledSelection
-                  ?.byMySelf +
-                information?.byService?.appliedIndividually?.cancelledSelection
-                  ?.byEmployer +
-                information?.byService?.appliedByMediator?.cancelledApply
-                  ?.byMySelf +
-                information?.byService?.appliedByMediator?.cancelledApply
-                  ?.byMediator +
-                information?.byService?.appliedByMediator?.cancelledApply
-                  ?.byEmployer +
-                information?.byService?.appliedByMediator?.cancelledSelection
-                  ?.byMySelf +
-                information?.byService?.appliedByMediator?.cancelledSelection
-                  ?.byMediator +
-                information?.byService?.appliedByMediator?.cancelledSelection
-                  ?.byEmployer || 0}
-            </CustomHeading>
-          </View>
-          <CustomText baseFont={14}>{t("cancelled")}</CustomText>
-        </View>
+        ))}
       </View>
     </View>
   );
@@ -113,41 +120,46 @@ export default WorkInformation;
 
 const styles = StyleSheet.create({
   container: {
-    // padding: 20,
+    gap: 12,
   },
-  workInfoHeading: {
-    color: Colors.primary,
-    // marginLeft: 30,
-    fontWeight: "700",
-    fontSize: 16,
-    lineHeight: 26,
+  header: {
+    gap: 4,
   },
-  workInfoWrapper: {
-    // marginTop: 10,
-    borderBottomColor: "#dddddd",
-    borderBottomWidth: 1,
-    borderTopColor: "#dddddd",
-    backgroundColor: Colors?.background,
-    borderTopWidth: 1,
-    height: 100,
-    display: "flex",
+  title: {
+    lineHeight: 28,
+  },
+  subtitle: {
+    lineHeight: 21,
+  },
+  statGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
-  workInfoBox: {
-    width: "50%",
+  statCard: {
+    width: "48.5%",
+    minHeight: 112,
+    borderRadius: 18,
+    backgroundColor: "#F8FAFF",
+    borderWidth: 1,
+    borderColor: "#E4EAF5",
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
   },
-  menuWrapper: {
-    marginTop: 10,
+  statValue: {
+    lineHeight: 30,
   },
-  iconWrapper: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 6,
-  },
-  itemValue: {
-    fontSize: 22,
-    fontWeight: "600",
+  statLabel: {
+    lineHeight: 18,
   },
 });

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["post-a-job-wizard", "availability", "employer", "automated"]
+---
+# TC-ADD-024: Step 8: Review & Publish UI loads
+# Module: Post a Job Wizard | Screen: Review & Publish | Role: Employer
+# Type: Availability | Priority: P0
+# Route: /screens/addService (final.tsx)
+# Prerequisites: Employer account · Reached step 8
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Navigate to step 8.
+# Observe form.
+
+# Assertions
+# Expected: summary review and publish button visible and usable.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

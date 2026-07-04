@@ -17,7 +17,15 @@ app.set("trust proxy", 1);
 // ✅ CORS Setup
 const corsOptions = { origin: "*" };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      if (req.originalUrl === "/api/v1/payments/webhook/cashfree") {
+        req.rawBody = buf.toString("utf8");
+      }
+    },
+  }),
+);
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ Connect to the correct DB
@@ -46,17 +54,22 @@ import errorRoutes from "./app/routes/error.route.js";
 import bookingRoutes from "./app/routes/booking.route.js";
 import appVersionRoutes from "./app/routes/appVersion.route.js";
 import analyticsRoutes from "./app/routes/analytics.route.js";
+import paymentRoutes from "./app/routes/payment.route.js";
 
 // ✅ Import cron jobs
 import scheduleNotifiyLiveServiceOfUserSkills from "./app/cron/activeServicesNotification.js";
 import scheduleNotifyUsersWithPendingRequests from "./app/cron/pendingRequestsNotification.js";
 import scheduleNotifyUsersForCompletingProfile from "./app/cron/profileCompletionNotification.js";
+import scheduleWeeklyRegistrationsExport from "./app/cron/weeklyRegistrationsExport.js";
+import scheduleWeeklyServicesExport from "./app/cron/weeklyServicesExport.js";
 // import { createIndexes } from "./app/utils/createIndexes.js";
 
 // ✅ Start cron jobs
 scheduleNotifiyLiveServiceOfUserSkills();
 scheduleNotifyUsersWithPendingRequests();
 scheduleNotifyUsersForCompletingProfile();
+scheduleWeeklyRegistrationsExport();
+scheduleWeeklyServicesExport();
 // ✅ Routes middleware
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
@@ -75,14 +88,16 @@ app.use("/api/v1/errors", errorRoutes);
 app.use("/api/v1/booking", bookingRoutes);
 app.use("/api/v1/appVersion", appVersionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 
 // ✅ Global Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error("⚠️ Global Error:", err);
 
-  // Only log real errors
-  if (err && err.stack && req.route) {
-    logError(err, req, err.status || 500, req.originalUrl);
+  if (err) {
+    logError(err, req, err.status || 500, req.originalUrl || "global-handler", {
+      source: "backend",
+    });
   }
 
   res.status(err?.status || 500).json({
@@ -95,5 +110,27 @@ app.use((err, req, res, next) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
+  const cashfreeEnv = (process.env.CASHFREE_ENV || "sandbox").toLowerCase();
+  const otpForceLive = ["1", "true", "yes"].includes(
+    String(process.env.OTP_FORCE_LIVE || "").toLowerCase(),
+  );
+  const otpBypassFlag = ["1", "true", "yes"].includes(
+    String(process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "").toLowerCase(),
+  );
+  const livePayments =
+    cashfreeEnv === "production" ||
+    ["1", "true", "yes"].includes(
+      String(process.env.CASHFREE_FORCE_LIVE || "").toLowerCase(),
+    );
+  const otpLive = otpForceLive || livePayments || !otpBypassFlag;
+
   console.log(`🚀 API running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+  console.log(
+    `🔐 OTP: ${otpLive ? "live 2factor SMS" : "DEV BYPASS (any 6-digit code)"} | Cashfree: ${cashfreeEnv}`,
+  );
+  if (livePayments && !process.env.TWOFACTOR_API_KEY) {
+    console.error(
+      "❌ TWOFACTOR_API_KEY is missing while Cashfree is in production mode. Login OTP SMS will fail.",
+    );
+  }
 });

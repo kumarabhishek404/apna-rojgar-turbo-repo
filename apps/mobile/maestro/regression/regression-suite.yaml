@@ -1,0 +1,11 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+tags:
+  - regression
+---
+- runFlow: ../smoke/smoke-suite.yaml
+- runFlow: ../worker/worker-journey-e2e.yaml
+- runFlow: ../employer/employer-journey-e2e.yaml
+- runFlow: ../mediator/mediator-journey-e2e.yaml

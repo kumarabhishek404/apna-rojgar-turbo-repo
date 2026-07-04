@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "availability", "mediator", "automated"]
+---
+# TC-HOME-003: Mediator home dashboard loads
+# Module: Tab: Home | Screen: Home Tab | Role: Mediator
+# Type: Availability | Priority: P0
+# Route: /(tabs)/index
+# Prerequisites: Mediator account · Logged in as Mediator
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Login as Mediator.
+# Open Home tab.
+
+# Assertions
+# Expected: Home dashboard with mediator-specific content.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

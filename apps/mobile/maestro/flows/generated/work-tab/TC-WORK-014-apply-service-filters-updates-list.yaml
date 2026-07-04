@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "worker", "automated"]
+---
+# TC-WORK-014: Apply service filters updates list
+# Module: Tab: Work | Screen: Filter Services | Role: Worker
+# Type: Functionality | Priority: P1
+# Route: filterServices.tsx
+# Prerequisites: Worker account · Filter drawer open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Set filters.
+# Apply.
+# Observe list.
+
+# Assertions
+# Expected: List filtered per selected criteria.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

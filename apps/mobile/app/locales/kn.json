@@ -73,8 +73,8 @@
   "workerDetails": "ಕೆಲಸಗಾರ ವಿವರಗಳು",
   "employerDetails": "ಉದ್ಯೋಗದಾತ ವಿವರಗಳು",
   "mediatorDetails": "ಮಧ್ಯಸ್ಥ ವಿವರಗಳು",
-  "topRatedWorkers": "ಹೆಚ್ಚು ರೇಟ್ ಮಾಡಲಾದ ಕೆಲಸಗಾರರು",
-  "topRatedEmployers": "ಹೆಚ್ಚು ರೇಟ್ ಮಾಡಲಾದ ಉದ್ಯೋಗದಾತರು",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "ಬಲಕ್ಕೆ ಸ್ಕ್ರಾಲ್ ಮಾಡಿ",
   "workInformation": "ಕೆಲಸದ ಮಾಹಿತಿ",
   "publications": "ಪ್ರಕಟಣೆಗಳು",
@@ -655,5 +655,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "ನಿಮ್ಮ ಹಣ ಎಲ್ಲಿಗೆ ಹೋಗುತ್ತಿದೆ ಎಂದು ನಿಖರವಾಗಿ ನೋಡಿ",
   "district": "ಜಿಲ್ಲೆ",
   "subDistrict": "ಉಪಜಿಲ್ಲೆ",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪಡೆಯಿರಿ ಹತ್ತಿರದ {{entity}} ಪಡೆಯಲು"
 }

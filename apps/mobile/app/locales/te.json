@@ -73,8 +73,8 @@
   "workerDetails": "కార్మికుడు వివరాలు",
   "employerDetails": "నియామకుడు వివరాలు",
   "mediatorDetails": "మధ్యవర్తి వివరాలు",
-  "topRatedWorkers": "అధిక రేటింగ్ పొందిన కార్మికులు",
-  "topRatedEmployers": "అధిక రేటింగ్ పొందిన నియామకులు",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "కుడికి స్క్రోల్ చేయండి",
   "workInformation": "పని సమాచారం",
   "publications": "ప్రచురణలు",
@@ -679,5 +679,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "మీ డబ్బు ఎక్కడికి వెళుతుందో సరిగ్గా చూడండి",
   "district": "జిల్లా",
   "subDistrict": "ఉపజిల్లా",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "దయచేసి మీ текండు ప్రదేశాన్ని పొందండి దగ్గరలోని {{entity}} పొందడానికి"
 }

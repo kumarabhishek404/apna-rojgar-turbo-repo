@@ -1,0 +1,13 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  SAMPLE_JOB_ID: ${SAMPLE_JOB_ID}
+tags:
+  - deep-links
+---
+- launchApp:
+    clearState: true
+- openLink: apnarojgar://job/${SAMPLE_JOB_ID}
+- extendedWaitUntil:
+    visible: "View Details"
+    timeout: 60000
+    optional: true

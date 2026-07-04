@@ -1,0 +1,30 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "guest", "manual-review"]
+---
+# TC-A11Y-004: Selfie camera capture for profile photo
+# Module: Accessibility & Inputs | Screen: Selfie Capture | Role: Guest
+# Type: Functionality | Priority: P0
+# Route: Selfie.tsx
+# Prerequisites: Logged out · Register step 5; camera permission
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open selfie capture.
+# Take photo.
+# Confirm.
+
+# Assertions
+# Expected: Photo preview shown.
+# Expected: upload proceeds.
+
+# Cleanup

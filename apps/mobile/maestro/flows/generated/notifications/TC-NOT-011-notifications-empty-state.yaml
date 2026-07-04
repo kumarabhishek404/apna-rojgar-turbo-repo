@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["notifications-push", "ui-design", "all", "automated"]
+---
+# TC-NOT-011: Notifications empty state
+# Module: Notifications & Push | Screen: Notifications Inbox | Role: All
+# Type: UI Design | Priority: P2
+# Route: /screens/notifications
+# Prerequisites: Any test account · No notifications
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open inbox with none.
+
+# Assertions
+# Expected: Empty state message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

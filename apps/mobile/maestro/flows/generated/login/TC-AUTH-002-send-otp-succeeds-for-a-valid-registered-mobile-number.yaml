@@ -1,0 +1,37 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "functionality", "guest", "manual-review"]
+---
+# TC-AUTH-002: Send OTP succeeds for a valid registered mobile number
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: Functionality | Priority: P0
+# Route: /screens/auth/login
+# Prerequisites: Logged out · Use a mobile number that is already registered on the staging server (use team test data)
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "the mobile number field and type a valid 10-digit registered number"
+- tapOn:
+    id: "login-submit-button"
+- tapOn:
+    id: "login-otp-input"
+- inputText: ${STAGING_OTP}
+# Check your SMS inbox (staging: 000000) — an OTP message should arrive.
+
+# Assertions
+# Expected: Send OTP button shows loading state while request is in progress.
+# Expected: A success message or toast appears (e.g. 'OTP sent successfully').
+# Expected: OTP input field(s) appear on the same screen — user stays on Login.
+# Expected: No error toast saying 'user not found' for a valid registered number.
+# Expected: SMS OTP is received on the test device (or use dev OTP 000000 on staging).
+
+# Cleanup

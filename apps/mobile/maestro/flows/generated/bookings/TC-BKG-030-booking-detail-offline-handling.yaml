@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "availability", "employer", "automated"]
+---
+# TC-BKG-030: Booking detail offline handling
+# Module: Bookings & Invitations | Screen: Booking Detail | Role: Employer
+# Type: Availability | Priority: P1
+# Route: /screens/bookings/[id]
+# Prerequisites: Employer account · Offline
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open booking offline.
+
+# Assertions
+# Expected: Cached or error message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

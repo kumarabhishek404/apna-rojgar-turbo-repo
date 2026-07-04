@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["team-mediator", "functionality", "worker", "automated"]
+---
+# TC-TEAM-007: Worker leave team
+# Module: Team / Mediator | Screen: Team Detail | Role: Worker
+# Type: Functionality | Priority: P1
+# Route: /screens/team/[id]
+# Prerequisites: Worker account · Worker on a team
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Leave Team"
+# Confirm.
+
+# Assertions
+# Expected: Worker removed from team.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

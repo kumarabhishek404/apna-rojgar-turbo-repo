@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-home", "availability", "employer", "automated"]
+---
+# TC-HOME-011: Featured workers list visible for Employer
+# Module: Tab: Home | Screen: Featured Workers | Role: Employer
+# Type: Availability | Priority: P1
+# Route: UnifiedHomeDashboard
+# Prerequisites: Employer account · Workers on server
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe featured workers section.
+
+# Assertions
+# Expected: Worker cards shown horizontally.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

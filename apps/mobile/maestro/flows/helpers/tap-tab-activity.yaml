@@ -1,0 +1,4 @@
+appId: com.kumarabhishek404.labourapp
+---
+- tapOn:
+    id: tab-activity

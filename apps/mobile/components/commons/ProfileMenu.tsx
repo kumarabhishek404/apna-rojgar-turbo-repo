@@ -396,6 +396,7 @@ const ProfileMenu = ({ disabled }: any) => {
     },
     {
       title: t("logOut"),
+      testID: "profile-logout-button",
       icon: (
         <AntDesign
           name="logout"
@@ -435,6 +436,7 @@ const ProfileMenu = ({ disabled }: any) => {
             !menu.roleCondition && (
               <View key={index}>
                 <TouchableOpacity
+                  testID={menu?.testID}
                   onPress={menu?.switch ? menu?.onSwitchToggle : menu?.onPress}
                   style={[
                     menu?.style,

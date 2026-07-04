@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import OptimizedImage from "@/components/commons/OptimizedImage";
 import * as ImagePicker from "expo-image-picker";
 import Colors from "@/constants/Colors";
 import { Entypo } from "@expo/vector-icons";
@@ -84,10 +85,12 @@ const ImageUpload = ({
                   onPress={() => removeSingleImage(index)}
                   style={styles.cancelImage}
                 />
-                <Image
+                <OptimizedImage
                   key={index}
                   source={{ uri: imgUri }}
                   style={styles.uploadedImage}
+                  contentFit="cover"
+                  recyclingKey={imgUri}
                 />
               </View>
             ))

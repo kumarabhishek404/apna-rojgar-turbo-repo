@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Image,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -9,10 +8,10 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { normalizePickedImageUriForUpload } from "@/utils/normalizePickedImageUriForUpload";
 import CustomText from "./CustomText";
-import placeholderProfileImage from "../../assets/person-placeholder.jpg";
 import { t } from "@/utils/translationHelper";
 import Colors from "@/constants/Colors";
 import ProfilePicture from "./ProfilePicture";
+import { Ionicons } from "@expo/vector-icons";
 
 type AvatarProps = {
   isEditable: boolean;
@@ -21,6 +20,8 @@ type AvatarProps = {
   onUpload?: any;
   style?: any;
   avatarWrapperStyle?: any;
+  /** Side-by-side profile header: smaller photo + camera chip on avatar. */
+  compact?: boolean;
 };
 
 const AvatarComponent = ({
@@ -30,6 +31,7 @@ const AvatarComponent = ({
   onUpload,
   style,
   avatarWrapperStyle,
+  compact = false,
 }: AvatarProps) => {
   const pickImage = async () => {
     let result: any = await ImagePicker.launchImageLibraryAsync({
@@ -50,21 +52,49 @@ const AvatarComponent = ({
   };
 
   return (
-    <View style={[styles.container, style]}>
-      <View style={[styles.avatarWrapper, avatarWrapperStyle]}>
-        <ProfilePicture uri={profileImage} style={styles.profilePicture} />
+    <View style={[styles.container, compact && styles.containerCompact, style]}>
+      <View
+        style={[
+          styles.avatarOuter,
+          compact && styles.avatarOuterCompact,
+          avatarWrapperStyle,
+        ]}
+      >
+        <View
+          style={[
+            styles.avatarWrapper,
+            compact && styles.avatarWrapperCompact,
+          ]}
+        >
+          <ProfilePicture uri={profileImage} style={styles.profilePicture} />
 
-        {isLoading && (
-          <View style={styles.overlay}>
-            <ActivityIndicator size="large" color={Colors?.white} />
-          </View>
-        )}
+          {isLoading && (
+            <View style={styles.overlay}>
+              <ActivityIndicator
+                size={compact ? "small" : "large"}
+                color={Colors?.white}
+              />
+            </View>
+          )}
+        </View>
+
+        {isEditable && compact ? (
+          <TouchableOpacity
+            style={styles.cameraFab}
+            onPress={pickImage}
+            activeOpacity={0.88}
+            accessibilityRole="button"
+            accessibilityLabel={t("uploadNewImage")}
+          >
+            <Ionicons name="camera" size={15} color={Colors.primary} />
+          </TouchableOpacity>
+        ) : null}
       </View>
-      {isEditable && (
+      {isEditable && !compact ? (
         <TouchableOpacity style={styles.editIcon} onPress={pickImage}>
           <CustomText>{t("uploadNewImage")}</CustomText>
         </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 };
@@ -74,15 +104,57 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarWrapper: {
+  containerCompact: {
+    alignItems: "flex-start",
+  },
+  avatarOuter: {
     position: "relative",
     width: 140,
     height: 140,
+  },
+  avatarOuterCompact: {
+    width: 96,
+    height: 96,
+    marginRight: 2,
+    marginBottom: 2,
+  },
+  avatarWrapper: {
+    width: "100%",
+    height: "100%",
     borderRadius: 80,
     overflow: "hidden",
     borderWidth: 2,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     borderColor: "#ddd",
+  },
+  avatarWrapperCompact: {
+    borderRadius: 48,
+    borderWidth: 3,
+    borderColor: "rgba(255, 255, 255, 0.9)",
+    shadowColor: "#0a162e",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  cameraFab: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    shadowColor: "#0a162e",
+    shadowOpacity: 0.18,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    zIndex: 2,
   },
   loader: {
     position: "absolute",

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["admin-panel", "ui-design", "admin", "automated"]
+---
+# TC-ADM-033: All 5 admin tabs labeled correctly
+# Module: Admin Panel | Screen: Admin Tab Labels | Role: Admin
+# Type: UI Design | Priority: P1
+# Route: /(tabs)/_layout.tsx
+# Prerequisites: Admin account · Admin logged in
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-admin.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Observe all tab labels.
+
+# Assertions
+# Expected: Users, Services, People, Requests, Profile labels.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

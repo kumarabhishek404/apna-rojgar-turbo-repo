@@ -422,6 +422,7 @@ const UserProfile = () => {
             return (
               <TouchableOpacity
                 key={tab.key}
+                testID={`profile-tab-${tab.key}`}
                 style={[styles.tabItem, active && styles.tabItemActive]}
                 onPress={() => setSelectedTab(tab.key)}
                 activeOpacity={0.8}
@@ -449,44 +450,90 @@ const UserProfile = () => {
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Hero / identity section */}
             <View style={styles.heroCard}>
-              <AvatarComponent
-                isLoading={mutationUpdateProfilePicture?.isPending}
-                isEditable={true}
-                onUpload={handleProfilePictureSubmit}
-                profileImage={profilePicture}
-              />
-              <CustomHeading baseFont={22} style={styles.heroName}>
-                {userDetails?.name || "Name"}
-              </CustomHeading>
+              <View style={styles.heroRow}>
+                <AvatarComponent
+                  compact
+                  isLoading={mutationUpdateProfilePicture?.isPending}
+                  isEditable={true}
+                  onUpload={handleProfilePictureSubmit}
+                  profileImage={profilePicture}
+                />
+                <View style={styles.heroInfo}>
+                  <CustomHeading
+                    textAlign="left"
+                    baseFont={20}
+                    numberOfLines={2}
+                    style={styles.heroName}
+                  >
+                    {userDetails?.name || "Name"}
+                  </CustomHeading>
 
-              {/* Role pill + change role btn */}
-              <View style={styles.roleRow}>
-                <View style={[styles.rolePill, { backgroundColor: roleMeta.bg }]}>
-                  <CustomText baseFont={13} fontWeight="700" color={roleMeta.color}>
-                    {roleMeta.emoji}{"  "}{t(role?.toLowerCase() || "worker")}
-                  </CustomText>
+                  <View style={styles.roleRow}>
+                    <View
+                      style={[styles.rolePill, { backgroundColor: roleMeta.bg }]}
+                    >
+                      <CustomText
+                        baseFont={12}
+                        fontWeight="700"
+                        color={roleMeta.color}
+                      >
+                        {roleMeta.emoji}{"  "}
+                        {t(role?.toLowerCase() || "worker")}
+                      </CustomText>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.changeRoleBtn}
+                      onPress={() => setRoleModalVisible(true)}
+                      activeOpacity={0.82}
+                      accessibilityRole="button"
+                      accessibilityLabel={t("changeRole")}
+                    >
+                      <View style={styles.changeRoleIconWrap}>
+                        <MaterialCommunityIcons
+                          name="swap-horizontal"
+                          size={15}
+                          color={Colors.white}
+                        />
+                      </View>
+                      <CustomText
+                        baseFont={12}
+                        fontWeight="700"
+                        color={Colors.white}
+                        numberOfLines={1}
+                        style={styles.changeRoleLabel}
+                      >
+                        {t("changeRole")}
+                      </CustomText>
+                      <Ionicons
+                        name="chevron-forward"
+                        size={14}
+                        color="rgba(255,255,255,0.92)"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <TouchableOpacity
-                  style={styles.changeRoleBtn}
-                  onPress={() => setRoleModalVisible(true)}
-                  activeOpacity={0.85}
-                >
-                  <MaterialCommunityIcons name="swap-horizontal" size={14} color={Colors.white} />
-                  <CustomText baseFont={12} fontWeight="700" color={Colors.white}>
-                    {t("changeRole")}
-                  </CustomText>
-                </TouchableOpacity>
               </View>
 
-              {/* Action buttons */}
               <View style={styles.actionRow}>
                 <TouchableOpacity
                   style={[styles.actionBtn, styles.actionBtnOutline]}
                   onPress={handleRefreshUser}
                   activeOpacity={0.85}
                 >
-                  <Ionicons name="refresh-outline" size={16} color={Colors.primary} />
-                  <CustomText baseFont={13} fontWeight="700" color={Colors.primary}>
+                  <Ionicons
+                    name="refresh-outline"
+                    size={16}
+                    color={Colors.primary}
+                    style={styles.actionBtnIcon}
+                  />
+                  <CustomText
+                    baseFont={13}
+                    fontWeight="700"
+                    color={Colors.primary}
+                    numberOfLines={2}
+                    textAlign="center"
+                    style={styles.actionBtnLabel}
+                  >
                     {t("refreshUser")}
                   </CustomText>
                 </TouchableOpacity>
@@ -495,8 +542,20 @@ const UserProfile = () => {
                   onPress={() => !isEditProfile && handleEditProfile()}
                   activeOpacity={0.85}
                 >
-                  <Ionicons name="create-outline" size={16} color={Colors.white} />
-                  <CustomText baseFont={13} fontWeight="700" color={Colors.white}>
+                  <Ionicons
+                    name="create-outline"
+                    size={16}
+                    color={Colors.white}
+                    style={styles.actionBtnIcon}
+                  />
+                  <CustomText
+                    baseFont={13}
+                    fontWeight="700"
+                    color={Colors.white}
+                    numberOfLines={2}
+                    textAlign="center"
+                    style={styles.actionBtnLabel}
+                  >
                     {t("editProfile")}
                   </CustomText>
                 </TouchableOpacity>
@@ -529,16 +588,8 @@ const UserProfile = () => {
                 availableSkills={WORKERTYPES}
               />
               <UserInfoComponent user={userDetails} />
-              <WorkInformation
-                information={userDetails?.workDetails}
-                style={{ marginLeft: 0 }}
-              />
-              <View style={{ paddingTop: 12 }}>
-                <ServiceInformation
-                  information={userDetails?.serviceDetails}
-                  style={{ marginLeft: 0 }}
-                />
-              </View>
+              <WorkInformation information={userDetails?.workDetails} />
+              <ServiceInformation information={userDetails?.serviceDetails} />
 
               <JoinWhatsAppGroup
                 groupLink="https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD?mode=gi_t"
@@ -585,59 +636,99 @@ const styles = StyleSheet.create({
   /* Hero */
   heroCard: {
     backgroundColor: Colors.primary,
-    paddingTop: 20,
-    paddingBottom: 28,
-    alignItems: "center",
-    gap: 8,
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
+  },
+  heroRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  heroInfo: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 6,
+    gap: 12,
   },
   heroName: {
     color: Colors.white,
-    marginTop: 4,
+    lineHeight: 26,
   },
   roleRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
-    gap: 10,
-    marginTop: 2,
+    gap: 8,
   },
   rolePill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
     borderRadius: 999,
   },
   changeRoleBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    backgroundColor: "rgba(255,255,255,0.18)",
-    paddingHorizontal: 12,
+    gap: 6,
+    backgroundColor: Colors.tertiery,
+    paddingLeft: 8,
+    paddingRight: 10,
     paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.35)",
+    maxWidth: "100%",
+    minHeight: 32,
+    shadowColor: "#c44a00",
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  changeRoleIconWrap: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.22)",
+  },
+  changeRoleLabel: {
+    letterSpacing: 0.2,
   },
   actionRow: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 6,
-    paddingHorizontal: 20,
+    marginTop: 16,
   },
   actionBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
-    paddingVertical: 10,
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minHeight: 48,
     borderRadius: 12,
   },
+  actionBtnIcon: {
+    flexShrink: 0,
+  },
+  actionBtnLabel: {
+    flexShrink: 1,
+    flexGrow: 0,
+  },
   actionBtnOutline: {
-    backgroundColor: Colors.white,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
+    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   actionBtnSolid: {
     backgroundColor: Colors.tertiery,
+    shadowColor: "#c44a00",
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
   /* Tabs */
   tabBar: {
@@ -673,6 +764,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 16,
     minHeight: 300,
+    gap: 14,
   },
   formContainer: {
     paddingVertical: 20,
@@ -681,7 +773,6 @@ const styles = StyleSheet.create({
   skillsContainer: {
     padding: 14,
     flexDirection: "column",
-    marginBottom: 12,
     backgroundColor: "#F4F6FA",
     borderRadius: 14,
     borderWidth: 1,

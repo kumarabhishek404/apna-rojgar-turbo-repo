@@ -7,8 +7,8 @@ import {
   Text,
   Pressable,
   Modal,
-  StatusBar,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Camera, CameraType, CameraView } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -249,7 +249,7 @@ const SelfieScreen = ({
         statusBarTranslucent
         onRequestClose={goBackToChoose}
       >
-        <StatusBar barStyle="light-content" />
+        <StatusBar style="light" />
         <View style={styles.cameraModalRoot}>
           <CameraView
             ref={cameraRef}

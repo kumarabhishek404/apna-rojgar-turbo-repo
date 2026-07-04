@@ -16,6 +16,7 @@ type ButtonProps = {
   textColor?: string;
   loading?: boolean;
   disabled?: boolean;
+  testID?: string;
 };
 
 export default function ButtonComp({
@@ -30,6 +31,7 @@ export default function ButtonComp({
   textColor,
   loading,
   disabled,
+  testID,
 }: ButtonProps) {
   const handlePress = (data: any) => {
     if (!disabled && !loading) {
@@ -76,6 +78,7 @@ export default function ButtonComp({
 
   return (
     <TouchableOpacity
+      testID={testID}
       disabled={disabled || loading}
       onPress={handlePress}
       style={containerStyles}

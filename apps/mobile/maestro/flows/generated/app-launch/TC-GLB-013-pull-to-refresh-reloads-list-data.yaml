@@ -1,0 +1,30 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-013: Pull-to-refresh reloads list data
+# Module: Global & App Shell | Screen: Pull to Refresh | Role: All
+# Type: Functionality | Priority: P1
+# Route: List screens
+# Prerequisites: Any test account · Any paginated list (home, work, activity)
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open list screen.
+# Pull down to refresh.
+# Observe loader and data.
+
+# Assertions
+# Expected: Refresh indicator shown.
+# Expected: list updates with latest data.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

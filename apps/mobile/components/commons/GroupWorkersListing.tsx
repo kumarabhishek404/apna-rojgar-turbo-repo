@@ -1,11 +1,11 @@
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import React, { useMemo } from "react";
 import Colors from "@/constants/Colors";
 import profileImage from "../../assets/images/placeholder-person.jpg";
@@ -61,13 +61,15 @@ const GroupWorkersListing = ({
         style={styles?.container}
       >
         <View style={[styles.item, isLastItem && styles.lastElement]}>
-          <Image
+          <OptimizedImage
             source={
               item?.profilePicture
                 ? { uri: item?.profilePicture }
                 : profileImage
             }
             style={styles.image}
+            contentFit="cover"
+            recyclingKey={item?.profilePicture || item?._id}
           />
           <View>
             <CustomHeading textAlign="left" baseFont={14}>

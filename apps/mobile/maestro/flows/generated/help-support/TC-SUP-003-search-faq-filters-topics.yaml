@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "functionality", "all", "automated"]
+---
+# TC-SUP-003: Search FAQ filters topics
+# Module: Settings, Support & Legal | Screen: Help Search | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/helps
+# Prerequisites: Any test account · On help screen
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Enter search keyword.
+# Observe filtered list.
+
+# Assertions
+# Expected: Matching FAQ topics shown.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

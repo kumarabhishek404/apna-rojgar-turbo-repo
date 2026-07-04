@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-001: Consistent back button on all stack screens
+# Module: Cross-cutting UI Design | Screen: Stack Headers | Role: All
+# Type: UI Design | Priority: P1
+# Route: /screens/*
+# Prerequisites: Any test account · Logged in
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open 10+ different /screens/* routes.
+# Verify back button on each.
+
+# Assertions
+# Expected: Back navigation present and functional on all.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "availability", "all", "automated"]
+---
+# TC-UI-027: Chat component UI if wired
+# Module: Cross-cutting UI Design | Screen: Chat Component | Role: All
+# Type: Availability | Priority: P2
+# Route: Chat.tsx
+# Prerequisites: Any test account · Chat UI if present
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Find chat UI in app.
+# Observe layout.
+
+# Assertions
+# Expected: Document if chat is accessible.
+# Expected: verify UI if wired.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

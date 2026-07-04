@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "all", "automated"]
+---
+# TC-A11Y-010: Open in Google Maps external app
+# Module: Accessibility & Inputs | Screen: View Map | Role: All
+# Type: Functionality | Priority: P2
+# Route: ViewMap.tsx
+# Prerequisites: Any test account · Map open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "open in maps if available"
+
+# Assertions
+# Expected: Google Maps intent opens.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

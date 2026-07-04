@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   RefreshControl,
-  StatusBar,
   TouchableOpacity,
   Dimensions,
 } from "react-native";

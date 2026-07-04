@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "employer", "automated"]
+---
+# TC-UI-013: FAB does not overlap tab bar or list content
+# Module: Cross-cutting UI Design | Screen: FAB Position | Role: Employer
+# Type: UI Design | Priority: P2
+# Route: UnifiedTabFab
+# Prerequisites: Employer account · Employer on work tab
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll list to bottom.
+# Observe FAB position.
+
+# Assertions
+# Expected: FAB above tab bar.
+# Expected: not blocking content.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

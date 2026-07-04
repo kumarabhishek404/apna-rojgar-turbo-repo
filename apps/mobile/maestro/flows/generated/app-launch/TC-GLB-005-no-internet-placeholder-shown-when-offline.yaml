@@ -1,0 +1,30 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "availability", "all", "automated"]
+---
+# TC-GLB-005: No internet placeholder shown when offline
+# Module: Global & App Shell | Screen: No Internet | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/placeholders/noInternet
+# Prerequisites: Any test account · Disable Wi-Fi and mobile data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Turn off network.
+# Open app or trigger API call.
+# Observe UI.
+
+# Assertions
+# Expected: No internet message/placeholder visible.
+- assertNotVisible: "Something went wrong"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

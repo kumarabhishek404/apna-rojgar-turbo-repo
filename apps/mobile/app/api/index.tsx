@@ -1,9 +1,13 @@
 import EventEmitter from "eventemitter3";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosResponse } from "axios";
-import { getToken } from "@/utils/authStorage";
+import { getToken, removeToken } from "@/utils/authStorage";
 import { getClientDeviceHeaders } from "@/utils/clientDeviceInfo";
 import { router } from "expo-router";
+import TOAST from "@/app/hooks/toast";
+import { t } from "@/utils/translationHelper";
+import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
+import reportError from "@/utils/reportError";
 
 const eventEmitter = new EventEmitter();
 
@@ -96,6 +100,8 @@ const toAxiosLikeResponse = (
   request: null as AxiosResponse["request"],
 });
 
+const FORM_DATA_TIMEOUT_MS = 120_000;
+
 const makeFetchFormDataRequest = async (
   method: "POST" | "PUT" | "PATCH",
   url: string,
@@ -114,28 +120,45 @@ const makeFetchFormDataRequest = async (
   delete mergedHeaders["Content-Type"];
   delete mergedHeaders["content-type"];
 
-  const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
-    method,
-    headers: mergedHeaders,
-    body: formData,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
 
-  const responseData = await parseFetchResponseData(response);
+  try {
+    const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
+      method,
+      headers: mergedHeaders,
+      body: formData,
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const error: any = new Error(
-      (responseData as { message?: string })?.message ||
-        `Request failed with ${response.status}`,
-    );
-    error.response = {
-      status: response.status,
-      data: responseData,
-      headers: Object.fromEntries(response.headers.entries()),
-    };
+    const responseData = await parseFetchResponseData(response);
+
+    if (!response.ok) {
+      const error: any = new Error(
+        (responseData as { message?: string })?.message ||
+          `Request failed with ${response.status}`,
+      );
+      error.response = {
+        status: response.status,
+        data: responseData,
+        headers: Object.fromEntries(response.headers.entries()),
+      };
+      throw error;
+    }
+
+    return toAxiosLikeResponse(responseData, response);
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      const timeoutError: any = new Error(
+        "Upload timed out. Please check your internet and try again.",
+      );
+      timeoutError.response = { status: 408, data: { message: timeoutError.message } };
+      throw timeoutError;
+    }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return toAxiosLikeResponse(responseData, response);
 };
 
 const makeFormDataRequest = async (
@@ -165,7 +188,7 @@ const makeFormDataRequest = async (
     transformRequest: (data) => data,
     maxBodyLength: Infinity,
     maxContentLength: Infinity,
-    timeout: 60000,
+    timeout: 120000,
   });
 };
 
@@ -175,14 +198,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+let authLogoutInProgress = false;
+
 const logout = async () => {
+  if (authLogoutInProgress) return;
+  authLogoutInProgress = true;
+
   try {
     console.log("🔒 Logout triggered from API client");
     await AsyncStorage.removeItem("user");
-    // eventEmitter.emit("logout");
-    router.replace('/screens/auth/login')
+    await removeToken();
+    router.replace("/screens/auth/login");
   } catch (error) {
     console.error("Error during logout:", error);
+  } finally {
+    setTimeout(() => {
+      authLogoutInProgress = false;
+    }, 3000);
   }
 };
 
@@ -195,16 +227,23 @@ api.interceptors.response.use(
 
       console.log("API Error:", error.response?.data);
 
-      if (
-        errorMessage === "jwt expired" ||
-        errorMessage === "jwt malformed" ||
-        errorMessage === "Invalid Token" ||
-        statusText === "TokenExpiredError" ||
-        errorMessage === "Unauthorized Request" ||
-        statusText === "Unauthorized Request"
-      ) {
-        console.warn("Token expired. Logging out...");
-        logout();
+      if (isAuthApiError(error)) {
+        console.warn("Auth error from API. Logging out...");
+        if (!authLogoutInProgress) {
+          markGlobalAuthErrorHandled();
+          TOAST.error(t("sessionExpiredPleaseLoginAgain"));
+        }
+        await logout();
+      } else if (error.response.status >= 500) {
+        const apiMessage =
+          typeof errorMessage === "string" && errorMessage.trim()
+            ? errorMessage
+            : "API server error";
+        void reportError({
+          message: apiMessage,
+          route: error.config?.url || "mobile-api",
+          statusCode: error.response.status,
+        });
       }
 
       if (

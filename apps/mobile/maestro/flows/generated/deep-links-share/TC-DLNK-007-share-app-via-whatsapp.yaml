@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["deep-links-sharing", "functionality", "all", "automated"]
+---
+# TC-DLNK-007: Share app via WhatsApp
+# Module: Deep Links & Sharing | Screen: Share App WhatsApp | Role: All
+# Type: Functionality | Priority: P1
+# Route: /screens/shareApp
+# Prerequisites: Any test account · WhatsApp installed
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "WhatsApp share"
+
+# Assertions
+# Expected: WhatsApp opens with app invite message.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

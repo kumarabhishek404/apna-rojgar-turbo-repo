@@ -1,0 +1,31 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "availability", "all", "manual-review"]
+---
+# TC-GLB-002: Force update screen blocks app when version too old
+# Module: Global & App Shell | Screen: Force Update | Role: All
+# Type: Availability | Priority: P0
+# Route: ForceUpdateSection
+# Prerequisites: Any test account · Backend minSupportedVersion > installed app version
+# STATUS: MANUAL REVIEW — contains steps not fully automatable
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Set backend minSupportedVersion above current app.
+# Launch app.
+# Observe blocking screen.
+
+# Assertions
+# Expected: Force update screen shown.
+# Expected: user cannot access tabs until updated.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

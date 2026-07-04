@@ -97,23 +97,35 @@ const SecondScreen = () => {
         <ScrollView
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <View style={styles.centeredView}>
-            <View style={styles.centeredView}>
-              <CustomHeading baseFont={26}>
-                {t("personalDetails")}
-              </CustomHeading>
-              <CustomText
-                baseFont={16}
-                color={Colors.disabledText}
-                style={{ textAlign: "center" }}
-              >
-                {t("pleaseEnterYourPersonalDetailsToContinue")}
-              </CustomText>
+          <View style={styles.header}>
+            <View style={styles.headerIcon}>
+              <Ionicons
+                name="person-circle-outline"
+                size={54}
+                color={Colors.primary}
+              />
             </View>
+            <CustomHeading
+              baseFont={26}
+              color={Colors.primary}
+              style={styles.headerTitle}
+            >
+              {t("personalDetails")}
+            </CustomHeading>
+            <CustomText
+              baseFont={14}
+              color={Colors.secondary}
+              textAlign="center"
+              style={styles.headerSubtitle}
+            >
+              {t("pleaseEnterYourPersonalDetailsToContinue")}
+            </CustomText>
+          </View>
 
-            <View style={styles.centeredView}>
-              <View style={{ width: "100%", flexDirection: "column", gap: 20 }}>
+          <View style={styles.formCard}>
+            <View style={styles.formFields}>
                 {/* Name Field - Required */}
                 <Controller
                   control={control}
@@ -126,9 +138,19 @@ const SecondScreen = () => {
                       value={value}
                       onChangeText={onChange}
                       placeholder={t("enterYourFirstName")}
-                      textStyles={{ fontSize: 16 }}
+                      inputStyle={styles.inputContainer}
+                      textStyles={styles.inputText}
                       errors={errors}
                       isRequired={true}
+                      icon={
+                        <View style={styles.fieldIconBadge}>
+                          <Ionicons
+                            name="person-outline"
+                            size={18}
+                            color={Colors.primary}
+                          />
+                        </View>
+                      }
                     />
                   )}
                 />
@@ -247,8 +269,19 @@ const SecondScreen = () => {
                       placeholder={t("enterYourAge")}
                       type="number"
                       maxLength={2}
+                      inputStyle={styles.inputContainer}
+                      textStyles={styles.inputText}
                       errors={errors}
                       isRequired={true}
+                      icon={
+                        <View style={styles.fieldIconBadge}>
+                          <Ionicons
+                            name="calendar-outline"
+                            size={18}
+                            color={Colors.primary}
+                          />
+                        </View>
+                      }
                     />
                   )}
                 />
@@ -271,7 +304,6 @@ const SecondScreen = () => {
                   />
                 )}
               /> */}
-              </View>
             </View>
           </View>
           <View style={styles.buttonContainer}>
@@ -281,7 +313,8 @@ const SecondScreen = () => {
               onPress={() => router.back()}
               bgColor={Colors.danger}
               borderColor={Colors.danger}
-              style={{ width: "30%" }}
+              style={styles.backButton}
+              textStyle={styles.buttonText}
             />
             <Button
               isPrimary={true}
@@ -289,7 +322,8 @@ const SecondScreen = () => {
               onPress={handleSubmit(onSubmit)}
               bgColor={Colors.success}
               borderColor={Colors.success}
-              style={{ flex: 1 }}
+              style={styles.nextButton}
+              textStyle={styles.buttonText}
             />
           </View>
         </ScrollView>
@@ -302,29 +336,96 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: Colors.fourth,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 18,
+    paddingTop: 42,
+    paddingBottom: 24,
     justifyContent: "space-between",
+  },
+  header: {
     alignItems: "center",
+    marginBottom: 18,
   },
-  heading: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: Colors.primary,
-    marginBottom: 20,
-    textAlign: "center",
+  headerIcon: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#EAF0FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.12)",
   },
-  centeredView: {
+  headerTitle: {
+    lineHeight: 32,
+  },
+  headerSubtitle: {
+    marginTop: 6,
+    lineHeight: 20,
+    paddingHorizontal: 12,
+  },
+  formCard: {
     width: "100%",
+    backgroundColor: Colors.white,
+    borderRadius: 24,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#E4EAF5",
+    shadowColor: "#0F2E6E",
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
+  },
+  formFields: {
+    width: "100%",
+    gap: 16,
+  },
+  inputContainer: {
+    height: 58,
+    borderRadius: 16,
+    borderColor: "#DDE6F5",
+    backgroundColor: "#F8FAFF",
+    paddingLeft: 12,
+  },
+  inputText: {
+    fontSize: 16,
+    color: Colors.heading,
+    fontWeight: "700",
+  },
+  fieldIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
   },
   buttonContainer: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    marginVertical: 20,
-    gap: 20,
+    marginTop: 18,
+    gap: 14,
+  },
+  backButton: {
+    width: "32%",
+    minHeight: 56,
+    borderRadius: 16,
+  },
+  nextButton: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: 16,
+    shadowColor: Colors.success,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+  buttonText: {
+    fontSize: 17,
+    fontWeight: "800",
   },
   errorInput: {
     borderWidth: 1,

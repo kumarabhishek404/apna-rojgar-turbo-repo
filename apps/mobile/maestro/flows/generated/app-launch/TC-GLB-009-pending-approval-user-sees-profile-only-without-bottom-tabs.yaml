@@ -1,0 +1,32 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "availability", "all", "automated"]
+---
+# TC-GLB-009: Pending approval user sees profile only without bottom tabs
+# Module: Global & App Shell | Screen: Pending Approval | Role: All
+# Type: Availability | Priority: P1
+# Route: /(tabs)/_layout.tsx
+# Prerequisites: Any test account · Account status not ACTIVE
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Login with pending/non-ACTIVE account.
+# Observe layout.
+
+# Assertions
+# Expected: UserProfile full-screen shown.
+- assertVisible:
+    id: "tab-home"
+- assertVisible:
+    id: "tab-profile"
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

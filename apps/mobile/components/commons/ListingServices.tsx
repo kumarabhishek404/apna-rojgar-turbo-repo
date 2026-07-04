@@ -1,4 +1,5 @@
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import * as Speech from "expo-speech";
 import React, { useCallback, useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
@@ -22,12 +23,32 @@ import ShowDistance from "./ShowDistance";
 import ShowDuration from "./ShowDuration";
 import ShowFacilities from "./ShowFacilities";
 import { getServiceJobId } from "@/utils/serviceJobId";
+import { isServicePromoted } from "@/utils/servicePromotion";
+import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
+import PAYMENT from "@/app/api/payment";
+import TOAST from "@/app/hooks/toast";
+import { useQuery } from "@tanstack/react-query";
 
 const ListingsServices = React.memo(({ item }: any) => {
   const navigation = useNavigation();
   const locale = useAtomValue(Atoms?.LocaleAtom);
   const userDetails = useAtomValue(Atoms?.UserAtom);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isPromoting, setIsPromoting] = useState(false);
+  const { runPromotionPayment } = useCashfreePromotionPayment();
+
+  const { data: promotionConfig } = useQuery({
+    queryKey: ["promotionConfig"],
+    queryFn: () => PAYMENT.getPromotionConfig(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const promotionAmount = promotionConfig?.amount ?? 100;
+  const isOwnService =
+    userDetails?._id === item?.employer && item?.bookingType === "byService";
+  const canPromoteLater =
+    isOwnService && item?.status === "HIRING" && !isServicePromoted(item);
+  const promoted = isServicePromoted(item);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
@@ -95,6 +116,19 @@ const ListingsServices = React.memo(({ item }: any) => {
     });
   }, [item?._id]);
 
+  const handlePromoteLater = useCallback(async () => {
+    if (!item?._id || isPromoting) return;
+    setIsPromoting(true);
+    try {
+      await runPromotionPayment(item._id);
+      TOAST.success(t("servicePromotedSuccess"));
+    } catch {
+      // toast handled in hook
+    } finally {
+      setIsPromoting(false);
+    }
+  }, [item?._id, isPromoting, runPromotionPayment]);
+
   return (
     <>
       <View style={styles.container}>
@@ -108,9 +142,11 @@ const ListingsServices = React.memo(({ item }: any) => {
           >
             <View style={styles.heroWrap}>
               {hasHeroPhoto ? (
-                <Image
+                <OptimizedImage
                   source={{ uri: item.images[0] }}
                   style={styles.heroImage}
+                  contentFit="cover"
+                  recyclingKey={item.images[0]}
                 />
               ) : (
                 <View
@@ -142,6 +178,28 @@ const ListingsServices = React.memo(({ item }: any) => {
                     numberOfLines={1}
                   >
                     {getServiceJobId(item)}
+                  </CustomText>
+                </View>
+              ) : null}
+              {isOwnService ? (
+                <View
+                  style={[
+                    styles.promotionBadgeOnHero,
+                    promoted ? styles.promotionBadgePaid : styles.promotionBadgeUnpaid,
+                  ]}
+                  pointerEvents="none"
+                >
+                  <Ionicons
+                    name={promoted ? "megaphone" : "megaphone-outline"}
+                    size={13}
+                    color={promoted ? "#047857" : "#B45309"}
+                  />
+                  <CustomText
+                    baseFont={11}
+                    fontWeight="800"
+                    color={promoted ? "#047857" : "#B45309"}
+                  >
+                    {promoted ? t("servicePromotedBadge") : t("serviceNotPromotedBadge")}
                   </CustomText>
                 </View>
               ) : null}
@@ -277,6 +335,42 @@ const ListingsServices = React.memo(({ item }: any) => {
 
             <Requirements type="highlights" requirements={item?.requirements} />
 
+            {promoted && isOwnService ? (
+              <View style={styles.promotedInfoStrip}>
+                <Ionicons name="checkmark-circle" size={16} color="#047857" />
+                <CustomText textAlign="left" baseFont={12} color="#047857" style={{ flex: 1 }}>
+                  {t("servicePromotedHint")}
+                </CustomText>
+              </View>
+            ) : null}
+
+            {canPromoteLater ? (
+              <View style={styles.promoteLaterStrip}>
+                <View style={styles.promoteLaterTextWrap}>
+                  <CustomText textAlign="left" baseFont={12} color={Colors.subHeading}>
+                    {t("promotionModalBenefit")}
+                  </CustomText>
+                </View>
+                <TouchableOpacity
+                  style={styles.promoteLaterButton}
+                  onPress={handlePromoteLater}
+                  disabled={isPromoting}
+                  activeOpacity={0.85}
+                >
+                  {isPromoting ? (
+                    <ActivityIndicator size="small" color={Colors.white} />
+                  ) : (
+                    <>
+                      <Ionicons name="megaphone-outline" size={16} color={Colors.white} />
+                      <CustomText baseFont={13} fontWeight="800" color={Colors.white}>
+                        {t("servicePromoteNow")} · ₹{promotionAmount}
+                      </CustomText>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : null}
+
             <View style={styles.infoBlock}>
               <View style={styles.metaRow}>
                 <View style={styles.metaIconBadge}>
@@ -388,7 +482,11 @@ const ListingsServices = React.memo(({ item }: any) => {
       </View>
     </>
   );
-}, (prev, next) => prev.item._id === next.item._id && prev.item === next.item);
+}, (prev, next) =>
+  prev.item._id === next.item._id &&
+  prev.item === next.item &&
+  prev.item?.socialMediaPromotion?.status === next.item?.socialMediaPromotion?.status,
+);
 
 ListingsServices.displayName = "ListingsServices";
 
@@ -481,6 +579,60 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 8,
     borderRadius: 10,
+  },
+  promotionBadgeOnHero: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  promotionBadgePaid: {
+    backgroundColor: "#DCFCE7",
+    borderColor: "#86EFAC",
+  },
+  promotionBadgeUnpaid: {
+    backgroundColor: "#FEF3C7",
+    borderColor: "#FCD34D",
+  },
+  promotedInfoStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: "#ECFDF5",
+    borderWidth: 1,
+    borderColor: "#86EFAC",
+  },
+  promoteLaterStrip: {
+    marginTop: 10,
+    padding: 12,
+    borderRadius: 14,
+    backgroundColor: "#FFFBEB",
+    borderWidth: 1,
+    borderColor: "#FCD34D",
+    gap: 10,
+  },
+  promoteLaterTextWrap: {
+    gap: 4,
+  },
+  promoteLaterButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
   },
   directTagOnHero: {
     position: "absolute",

@@ -22,6 +22,7 @@ import {
   checkStatusOfImageUploading,
   handleAddService,
   handleUpdateService,
+  handleUploadServiceImages,
 } from "../controllers/employers/addAndUpdateService.js";
 import { handleSendBookingRequestToWorkerOrMediator } from "../controllers/employers/sendBookingRequestToWorkerOrMediator.js";
 import { handleCancelBookingRequestToWorkerOrMediator } from "../controllers/employers/cancelBookingRequestToWorkerOrMediator.js";
@@ -33,6 +34,12 @@ router.use(verifyToken, userStatus);
 
 // router.route("/add-service").post(uploadServiceImages, handleAddService);
 router.post("/add-service", uploadServiceImages, handleAddService);
+router.post("/add-service/metadata", handleAddService);
+router.post(
+  "/add-service/:serviceId/images",
+  uploadServiceImages,
+  handleUploadServiceImages,
+);
 
 router.get("/service-upload-status/:id", checkStatusOfImageUploading);
 

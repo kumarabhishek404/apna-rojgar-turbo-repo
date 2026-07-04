@@ -1,0 +1,34 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  MOBILE: ${MOBILE}
+  OTP: ${STAGING_OTP}
+---
+# Generic login — run ensure-logged-out.yaml first for a clean session.
+- extendedWaitUntil:
+    visible:
+      id: login-mobile-input
+    timeout: 120000
+- tapOn:
+    id: login-mobile-input
+- inputText: ${MOBILE}
+- tapOn:
+    id: login-submit-button
+- extendedWaitUntil:
+    visible:
+      id: login-otp-input
+    timeout: 15000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: login-otp-input
+    commands:
+      - tapOn:
+          id: login-otp-input
+      - inputText: ${OTP}
+      - tapOn:
+          id: login-submit-button
+- extendedWaitUntil:
+    visible:
+      id: tab-home
+    timeout: 90000

@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "employer", "automated"]
+---
+# TC-WORK-012: Search by keyword filters workers
+# Module: Tab: Work | Screen: Search Workers | Role: Employer
+# Type: Functionality | Priority: P1
+# Route: searchWorkers.tsx
+# Prerequisites: Employer account · On search workers
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Enter worker name/skill.
+# Submit.
+
+# Assertions
+# Expected: Matching workers displayed.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

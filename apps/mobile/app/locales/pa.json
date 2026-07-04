@@ -73,8 +73,8 @@
   "workerDetails": "ਕਾਮੇ ਦਾ ਵੇਰਵਾ",
   "employerDetails": "ਮਾਲਕ ਦਾ ਵੇਰਵਾ",
   "mediatorDetails": "ਵਿਚੋਲੇ ਦਾ ਵੇਰਵਾ",
-  "topRatedWorkers": "ਉੱਚ ਦਰਜਾ ਪ੍ਰਾਪਤ ਕਾਮੇ",
-  "topRatedEmployers": "ਉੱਚ ਦਰਜਾ ਪ੍ਰਾਪਤ ਮਾਲਕ",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "ਸੱਜੇ ਪਾਸੇ ਸਕ੍ਰੌਲ ਕਰੋ",
   "workInformation": "ਕੰਮ ਦੀ ਜਾਣਕਾਰੀ",
   "publications": "ਪ੍ਰਕਾਸ਼ਨਾਂ",
@@ -596,5 +596,7 @@
   "subDistrict": "ਉਪਜਿਲ੍ਹਾ",
   "fetchLocation": "ਕਿਰਪਾ ਕਰਕੇ ਆਪਣਾ ਮੌਜੂਦਾ ਸਥਾਨ ਪ੍ਰਾਪਤ ਕਰੋ ਸਭ ਤੋਂ ਨੇੜਲੇ {{entity}} ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ",
   "home": "ਮੁੱਖ ਪੇਜ",
-  "myProfile": "ਪ੍ਰੋਫਾਈਲ"
+  "myProfile": "ਪ੍ਰੋਫਾਈਲ",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted"
 }

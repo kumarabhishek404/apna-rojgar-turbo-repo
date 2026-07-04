@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
   View,
-  Image,
   StyleSheet,
   ScrollView,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
+import OptimizedImage from "./OptimizedImage";
 import { Ionicons } from "@expo/vector-icons"; // ✅ Import Icons
 import CustomHeading from "./CustomHeading";
 import Colors from "@/constants/Colors";
@@ -63,16 +63,19 @@ const ImageSlider = ({ images }: any) => {
       >
         {images && images?.length > 0 ? (
           images?.map((image: any, index: number) => (
-            <Image
+            <OptimizedImage
               key={index}
               source={{ uri: image }}
-              style={{ width, height, resizeMode: "cover" }}
+              style={{ width, height }}
+              contentFit="cover"
+              recyclingKey={image}
             />
           ))
         ) : (
-          <Image
+          <OptimizedImage
             source={PlaceholderImage}
-            style={{ width, height, resizeMode: "cover" }}
+            style={{ width, height }}
+            contentFit="cover"
           />
         )}
       </ScrollView>

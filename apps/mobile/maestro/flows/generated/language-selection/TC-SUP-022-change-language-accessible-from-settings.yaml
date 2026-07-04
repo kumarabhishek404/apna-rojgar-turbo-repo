@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "availability", "all", "automated"]
+---
+# TC-SUP-022: Change language accessible from settings
+# Module: Settings, Support & Legal | Screen: Change Language | Role: All
+# Type: Availability | Priority: P1
+# Route: /screens/settings/changeLanguage
+# Prerequisites: Any test account · Settings menu
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Profile → Change Language.
+
+# Assertions
+# Expected: Language picker opens.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

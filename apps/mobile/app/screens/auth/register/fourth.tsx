@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, Text, Dimensions } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "@/constants/Colors";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -14,7 +14,8 @@ import { WORKTYPES } from "@/constants";
 import ButtonComp from "@/components/inputs/Button";
 import CustomHeading from "@/components/commons/CustomHeading";
 import TextInputComponent from "@/components/inputs/TextInputWithIcon";
-const { width } = Dimensions.get("window");
+import CustomText from "@/components/commons/CustomText";
+import { Ionicons } from "@expo/vector-icons";
 
 const UpdateUserSkillsScreen = () => {
   // const [previousRole, setPreviousRole] = useState("WORKER");
@@ -100,26 +101,22 @@ const UpdateUserSkillsScreen = () => {
       <Stack.Screen options={{ headerShown: false }} />
       {/* <Loader loading={loading} /> */}
       <View style={styles.container}>
-        <CustomHeading style={{ marginTop: 20 }} baseFont={26}>
-          {t("updateYourSkillsAndRole")}
-        </CustomHeading>
-
-        <View style={{ flexDirection: "column", gap: 20 }}>
+        <View style={styles.formContent}>
           <Controller
-            control={control}
-            name="role"
-            rules={{ required: t("selectAtLeastOneSkill") }}
-            render={({ field: { onChange, value } }) => (
-              <RoleSelection
-                role={value}
-                setRole={onChange}
-                resetSkills={() => setValue("skills", [])} // ⭐ MAGIC LINE
-              />
-            )}
-          />
+              control={control}
+              name="role"
+              rules={{ required: t("selectAtLeastOneSkill") }}
+              render={({ field: { onChange, value } }) => (
+                <RoleSelection
+                  role={value}
+                  setRole={onChange}
+                  resetSkills={() => setValue("skills", [])} // ⭐ MAGIC LINE
+                />
+              )}
+            />
 
-          {roleValue === "WORKER" && (
-            <Controller
+            {roleValue === "WORKER" && (
+              <Controller
               control={control}
               name="skills"
               rules={{
@@ -133,11 +130,11 @@ const UpdateUserSkillsScreen = () => {
                   availableOptions={WORKTYPES}
                 />
               )}
-            />
-          )}
+              />
+            )}
 
-          {roleValue === "MEDIATOR" && (
-            <Controller
+            {roleValue === "MEDIATOR" && (
+              <Controller
               control={control}
               name="numberOfWorkersInTeam"
               rules={{
@@ -156,13 +153,24 @@ const UpdateUserSkillsScreen = () => {
                   maxLength={4}
                   errors={errors}
                   isRequired={true}
+                  inputStyle={styles.inputContainer}
+                  textStyles={styles.inputText}
+                  icon={
+                    <View style={styles.fieldIconBadge}>
+                      <Ionicons
+                        name="people-outline"
+                        size={18}
+                        color={Colors.primary}
+                      />
+                    </View>
+                  }
                 />
               )}
             />
-          )}
+            )}
 
-          {roleValue === "MEDIATOR" && (
-            <Controller
+            {roleValue === "MEDIATOR" && (
+              <Controller
               control={control}
               name="skills"
               rules={{
@@ -177,24 +185,26 @@ const UpdateUserSkillsScreen = () => {
                 />
               )}
             />
-          )}
+            )}
         </View>
         <View style={styles?.buttonContainer}>
           <ButtonComp
             isPrimary={true}
             title={t("back")}
             onPress={() => router?.back()}
-            style={{ width: "30%" }}
+            style={styles.backButton}
             bgColor={Colors?.danger}
             borderColor={Colors?.danger}
+            textStyle={styles.buttonText}
           />
           <ButtonComp
             isPrimary={true}
             title={t("saveAndNext")}
             onPress={handleSubmit(handleUpdate)}
-            style={{ flex: 1 }}
+            style={styles.nextButton}
             bgColor={Colors?.success}
             borderColor={Colors?.success}
+            textStyle={styles.buttonText}
           />
         </View>
       </View>
@@ -206,23 +216,63 @@ export default UpdateUserSkillsScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: Colors?.fourth,
-    paddingHorizontal: 20,
-    gap: 20,
-    // paddingTop: 20,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 22,
+    gap: 12,
+  },
+  formContent: {
+    flex: 1,
+    minHeight: 0,
+    gap: 16,
+  },
+  inputContainer: {
+    height: 58,
+    borderRadius: 16,
+    borderColor: "#DDE6F5",
+    backgroundColor: "#F8FAFF",
+    paddingLeft: 12,
+  },
+  inputText: {
+    fontSize: 16,
+    color: Colors.heading,
+    fontWeight: "700",
+  },
+  fieldIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EEF4FF",
   },
   buttonContainer: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-evenly",
     alignItems: "center",
-    gap: 10,
-    position: "absolute",
-    bottom: 0,
-    padding: 20,
-    paddingBottom: 20,
-    width: width,
+    gap: 14,
+    width: "100%",
+    paddingTop: 8,
     backgroundColor: "transparent",
+  },
+  backButton: {
+    width: "32%",
+    minHeight: 56,
+    borderRadius: 16,
+  },
+  nextButton: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: 16,
+    shadowColor: Colors.success,
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+  buttonText: {
+    fontSize: 17,
+    fontWeight: "800",
   },
 });

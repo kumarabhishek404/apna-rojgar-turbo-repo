@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["bookings-invitations", "functionality", "employer", "automated"]
+---
+# TC-BKG-003: Employer complete booking
+# Module: Bookings & Invitations | Screen: Booking Detail | Role: Employer
+# Type: Functionality | Priority: P0
+# Route: /screens/bookings/[id]
+# Prerequisites: Employer account · Active booking
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Complete"
+# Confirm modal.
+
+# Assertions
+# Expected: Booking marked complete.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["attendance", "availability", "employer", "automated"]
+---
+# TC-ATT-001: Add attendance screen loads
+# Module: Attendance | Screen: Add Attendance | Role: Employer
+# Type: Availability | Priority: P0
+# Route: /screens/bookings/addAttendance
+# Prerequisites: Employer account · Employer with active booking
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-employer.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Navigate to add attendance from booking.
+
+# Assertions
+# Expected: Attendance form with worker list and date visible.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

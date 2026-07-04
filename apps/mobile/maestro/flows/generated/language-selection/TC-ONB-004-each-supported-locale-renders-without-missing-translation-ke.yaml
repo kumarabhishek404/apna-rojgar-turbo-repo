@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["language-onboarding", "functionality", "guest", "automated"]
+---
+# TC-ONB-004: Each supported locale renders without missing translation keys
+# Module: Language & Onboarding | Screen: Language Selection | Role: Guest
+# Type: Functionality | Priority: P2
+# Route: /languageSelection
+# Prerequisites: Logged out · Multiple languages available
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Select each major language.
+# Check key screens for raw keys like 'missing.translation'.
+
+# Assertions
+# Expected: No untranslated key strings visible on language selection and next screen.
+
+# Cleanup

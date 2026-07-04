@@ -73,8 +73,8 @@
   "workerDetails": "કામદાર વિગતો",
   "employerDetails": "માલિક વિગતો",
   "mediatorDetails": "મધ્યસ્થી વિગતો",
-  "topRatedWorkers": "ટોચના રેટેડ કામદારો",
-  "topRatedEmployers": "ટોચના રેટેડ માલિકો",
+  "topRatedWorkers": "Trusted Profiles",
+  "topRatedEmployers": "Trusted Profiles",
   "scrollToRight": "જમણી તરફ સ્ક્રોલ કરો",
   "workInformation": "કામ માહિતી",
   "publications": "પ્રકાશનો",
@@ -679,5 +679,7 @@
   "seeExactlyWhereYourMoneyIsGoing": "તમારા પૈસા ક્યાં જાય છે તે બરાબર જુઓ",
   "district": "જિલ્લો",
   "subDistrict": "ઉપજિલ્લો",
+  "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
+  "sortTabTopRated": "Trusted",
   "fetchLocation": "કૃપા કરીને તમારું વર્તમાન સ્થાન મેળવો નજીકના {{entity}} મેળવવા માટે"
 }

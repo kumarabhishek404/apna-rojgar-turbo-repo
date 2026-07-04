@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["deep-links-sharing", "functionality", "all", "automated"]
+---
+# TC-DLNK-004: Share message includes Hindi text and job link
+# Module: Deep Links & Sharing | Screen: Share Service | Role: All
+# Type: Functionality | Priority: P1
+# Route: shareService.ts
+# Prerequisites: Any test account · On service detail
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Share on service"
+# Observe share sheet content.
+
+# Assertions
+# Expected: Message includes job details and apnarojgar link.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

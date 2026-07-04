@@ -1,0 +1,29 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["accessibility-inputs", "functionality", "all", "automated"]
+---
+# TC-A11Y-011: Manual address entry in drawer
+# Module: Accessibility & Inputs | Screen: Add Address | Role: All
+# Type: Functionality | Priority: P1
+# Route: addAddress.tsx
+# Prerequisites: Any test account · Address drawer open
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open add address drawer.
+# Enter address.
+# Save.
+
+# Assertions
+# Expected: Address saved to form.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

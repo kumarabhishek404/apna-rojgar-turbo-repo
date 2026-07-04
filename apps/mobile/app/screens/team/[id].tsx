@@ -3,28 +3,23 @@ import { View, StyleSheet } from "react-native";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
 import Loader from "@/components/commons/Loaders/Loader";
-import CategoryButtons from "@/components/inputs/CategoryButtons";
 import MEDIATOR from "@/app/api/mediator";
 import { Stack, useLocalSearchParams } from "expo-router";
 import PaginationString from "@/components/commons/Pagination/PaginationString";
-import SearchFilter from "@/components/commons/SearchFilter";
 import CustomHeader from "@/components/commons/Header";
 import ListingsVerticalWorkers from "@/components/commons/ListingsVerticalWorkers";
 import { WORKERTYPES } from "@/constants";
-import { t } from "@/utils/translationHelper";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 import Colors from "@/constants/Colors";
 import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
 
 const Members = () => {
   const [totalData, setTotalData] = useState(0);
-  const [filteredData, setFilteredData]: any = useState([]);
-  const [category, setCategory] = useState("");
   const userDetails = useAtomValue(Atoms?.UserAtom);
   const { id } = useLocalSearchParams();
+  const mediatorId = Array.isArray(id) ? id[0] : id;
 
-  console.log("userDetails----", userDetails?._id);
   const {
     data: response,
     isLoading,
@@ -33,12 +28,12 @@ const Members = () => {
     fetchNextPage,
     hasNextPage,
   } = useInfiniteQuery({
-    queryKey: ["members", category, id || userDetails?._id],
+    queryKey: ["members", mediatorId || userDetails?._id],
     queryFn: ({ pageParam }) =>
       MEDIATOR?.fetchAllMembers({
-        mediatorId: id || userDetails?._id,
+        mediatorId: mediatorId || userDetails?._id,
         pageParam,
-        category,
+        category: "",
       }),
     retry: false,
     initialPageParam: 1,
@@ -53,34 +48,46 @@ const Members = () => {
   useFocusEffect(
     React.useCallback(() => {
       refetch();
-    }, [category]),
+    }, [refetch]),
   );
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const unsubscribe = setFilteredData(
-        response?.pages.flatMap((page: any) => {
-          setTotalData(page?.data[0]?.workers?.length);
-          return page?.data[0]?.workers || [];
-        }),
+  const memoizedData = useMemo(() => {
+    const pages = Array.isArray(response?.pages) ? response.pages : [];
+    return pages.flatMap((page: any) => {
+      const rawTeams = Array.isArray(page?.data)
+        ? page.data
+        : page?.data
+          ? [page.data]
+          : [];
+      return rawTeams.flatMap((team: any) =>
+        Array.isArray(team?.workers) ? team.workers : [],
       );
-      return () => unsubscribe;
-    }, [response]),
-  );
+    });
+  }, [response]);
+
+  React.useEffect(() => {
+    if (!response?.pages?.length) {
+      setTotalData(0);
+      return;
+    }
+    const firstPage = response.pages[0];
+    const firstPageTeams = Array.isArray(firstPage?.data)
+      ? firstPage.data
+      : firstPage?.data
+        ? [firstPage.data]
+        : [];
+    const firstPageWorkerCount = firstPageTeams.reduce(
+      (acc: number, team: any) =>
+        acc + (Array.isArray(team?.workers) ? team.workers.length : 0),
+      0,
+    );
+    setTotalData(firstPageWorkerCount || memoizedData.length);
+  }, [response, memoizedData.length]);
 
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  };
-
-  const memoizedData = useMemo(
-    () => filteredData?.flatMap((data: any) => data),
-    [filteredData],
-  );
-
-  const onCatChanged = (category: string) => {
-    setCategory(category);
   };
 
   return (

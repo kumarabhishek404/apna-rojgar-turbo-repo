@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["settings-support-legal", "ui-design", "all", "automated"]
+---
+# TC-SUP-024: Help screen scroll performance
+# Module: Settings, Support & Legal | Screen: Help / FAQ | Role: All
+# Type: UI Design | Priority: P2
+# Route: /screens/helps
+# Prerequisites: Any test account · On help
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Scroll full FAQ list.
+
+# Assertions
+# Expected: Smooth scroll.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

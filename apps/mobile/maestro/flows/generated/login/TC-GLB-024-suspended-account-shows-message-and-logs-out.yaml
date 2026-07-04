@@ -1,0 +1,30 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["global-app-shell", "functionality", "all", "automated"]
+---
+# TC-GLB-024: Suspended account shows message and logs out
+# Module: Global & App Shell | Screen: Suspended Account | Role: All
+# Type: Functionality | Priority: P0
+# Route: app/api/index.tsx
+# Prerequisites: Any test account · Account suspended on backend
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Login or use suspended account.
+# Trigger API call.
+
+# Assertions
+# Expected: User notified.
+# Expected: redirected to login.
+# Expected: session cleared.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

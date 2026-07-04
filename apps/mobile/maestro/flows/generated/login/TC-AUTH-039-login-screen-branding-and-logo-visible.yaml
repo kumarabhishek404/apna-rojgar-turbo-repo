@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["authentication", "ui-design", "guest", "automated"]
+---
+# TC-AUTH-039: Login screen branding and logo visible
+# Module: Authentication | Screen: Login | Role: Guest
+# Type: UI Design | Priority: P1
+# Route: /screens/auth/login
+# Prerequisites: Logged out · On login
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/ensure-logged-out.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open login.
+# Observe header/branding.
+
+# Assertions
+# Expected: Apna Rojgar branding visible.
+# Expected: professional layout.
+
+# Cleanup

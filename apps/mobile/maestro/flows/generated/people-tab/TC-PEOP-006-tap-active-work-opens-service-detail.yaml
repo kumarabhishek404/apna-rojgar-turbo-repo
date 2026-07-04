@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-people", "functionality", "mediator", "automated"]
+---
+# TC-PEOP-006: Tap active work opens service detail
+# Module: Tab: People | Screen: Active Works List | Role: Mediator
+# Type: Functionality | Priority: P0
+# Route: UnifiedPeopleScreen
+# Prerequisites: Mediator account · Active jobs on server
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-mediator.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn:
+    id: "tab-people"
+
+# Assertions
+# Expected: Navigates to /screens/service/[id].
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

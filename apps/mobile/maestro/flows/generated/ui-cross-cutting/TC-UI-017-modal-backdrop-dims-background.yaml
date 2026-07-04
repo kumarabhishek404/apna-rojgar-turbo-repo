@@ -1,0 +1,28 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["cross-cutting-ui-design", "ui-design", "all", "automated"]
+---
+# TC-UI-017: Modal backdrop dims background
+# Module: Cross-cutting UI Design | Screen: Modal Backdrop | Role: All
+# Type: UI Design | Priority: P2
+# Route: ModalComponent
+# Prerequisites: Any test account · Any confirmation modal
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+# Open confirmation modal.
+
+# Assertions
+# Expected: Background dimmed.
+# Expected: focus on modal.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

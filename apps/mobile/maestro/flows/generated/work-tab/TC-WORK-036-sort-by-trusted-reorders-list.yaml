@@ -1,0 +1,27 @@
+appId: com.kumarabhishek404.labourapp
+env:
+  STAGING_OTP: ${STAGING_OTP}
+  WORKER_MOBILE: ${WORKER_MOBILE}
+  EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
+  MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
+  ADMIN_MOBILE: ${ADMIN_MOBILE}
+tags: ["tab-work", "functionality", "all", "automated"]
+---
+# TC-WORK-036: Sort by trusted reorders list
+# Module: Tab: Work | Screen: Sort Tabs | Role: All
+# Type: Functionality | Priority: P2
+# Route: ScrollableSortTabs
+# Prerequisites: Any test account · Trusted sort data
+# Preconditions
+- launchApp:
+    clearState: false
+- runFlow: ../../helpers/login-worker.yaml
+
+# Test steps (from manual case — adjust selectors if UI changes)
+- tapOn: "Trusted sort"
+
+# Assertions
+# Expected: List re-sorted by trust/rating metric.
+
+# Cleanup
+# Optional: - runFlow: ../../helpers/logout.yaml

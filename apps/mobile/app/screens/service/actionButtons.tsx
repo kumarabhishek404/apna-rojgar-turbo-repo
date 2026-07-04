@@ -261,6 +261,16 @@ const ServiceActionButtons = ({
   const handleApply = () => {
     console.log("members---", members);
 
+    const serviceRequirements =
+      service?.requirements?.map((req: any) => req?.name) || [];
+
+    const finalSkills = serviceRequirements?.map((skill: any) => ({
+      label: getDynamicWorkerType(skill, 1),
+      value: skill,
+    }));
+
+    setFilteredSkills(finalSkills);
+
     if (
       (!userDetails?.skills || userDetails?.skills?.length === 0) &&
       (!members || members?.length === 0)
@@ -268,22 +278,11 @@ const ServiceActionButtons = ({
       return setIsAddSkill(true);
     }
 
-    const serviceRequirements =
-      service?.requirements?.map((req: any) => req?.name) || [];
-
     // Check the matched skills of the individual worker
     const matchedSkills = userDetails.skills
       .map((skill: any) => skill.skill)
       .filter((skill: any) => serviceRequirements.includes(skill));
 
-    const finalSkills = serviceRequirements?.map((skill: any) => {
-      return {
-        label: getDynamicWorkerType(skill, 1),
-        value: skill,
-      };
-    });
-
-    setFilteredSkills(finalSkills);
     if (role === "MEDIATOR") {
       // Mediator applying with workers
       setIsWorkerSelectModal(true);
@@ -783,6 +782,7 @@ const ServiceActionButtons = ({
         isDrawerVisible={isAddSkill}
         setIsDrawerVisible={setIsAddSkill}
         filteredSkills={filteredSkills}
+        serviceRequirements={service?.requirements}
       />
 
       <ApplyAsMediatorDrawer

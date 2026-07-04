@@ -1,5 +1,6 @@
 import React from "react";
-import { View, StyleSheet, Image, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+import OptimizedImage from "@/components/commons/OptimizedImage";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import moment from "moment";
@@ -419,7 +420,12 @@ const FinalScreen: React.FC<FinalScreenProps> = ({
           <View style={styles.imageContainer}>
             {normalizedImages.map((imgUri: any, index: number) => (
               <View key={index} style={styles.imagesContainer}>
-                <Image source={{ uri: imgUri }} style={styles.uploadedImage} />
+                <OptimizedImage
+                  source={{ uri: imgUri }}
+                  style={styles.uploadedImage}
+                  contentFit="cover"
+                  recyclingKey={imgUri}
+                />
               </View>
             ))}
           </View>

@@ -6,10 +6,8 @@ import {
   BackHandler,
   TouchableOpacity,
   Text,
-  StatusBar,
   Platform,
 } from "react-native";
-// import { StatusBar } from "expo-status-bar";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import { router, Stack } from "expo-router";
@@ -438,15 +436,13 @@ const AdminProfile = () => {
 
             <WorkInformation
               information={userDetails?.workDetails}
-              style={{ marginLeft: 20 }}
+              style={styles.profileSection}
             />
 
-            <View style={{ paddingTop: 20 }}>
-              <ServiceInformation
-                information={userDetails?.serviceDetails}
-                style={{ marginLeft: 20 }}
-              />
-            </View>
+            <ServiceInformation
+              information={userDetails?.serviceDetails}
+              style={styles.profileSection}
+            />
 
             <CustomText style={styles.copyright}>
               © 2024 Apna Rojgar. All rights reserved.
@@ -523,10 +519,13 @@ const styles = StyleSheet.create({
     padding: 12,
     marginHorizontal: 20,
     flexDirection: "column",
-    marginBottom: 5,
     backgroundColor: Colors?.background,
     borderTopEndRadius: 8,
     borderTopStartRadius: 8,
+  },
+  profileSection: {
+    marginHorizontal: 20,
+    marginTop: 14,
   },
   disableButton: {
     pointerEvents: "none",
