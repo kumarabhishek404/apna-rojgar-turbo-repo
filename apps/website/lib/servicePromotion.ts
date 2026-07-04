@@ -6,9 +6,11 @@ export type SocialMediaPromotion = {
   paidAt?: string;
 };
 
-export const isServicePromoted = (service: {
-  socialMediaPromotion?: SocialMediaPromotion | null;
-}) =>
+export const isServicePromoted = (
+  service?: {
+    socialMediaPromotion?: SocialMediaPromotion | null;
+  } | null,
+) =>
   Boolean(
     service?.socialMediaPromotion?.enabled &&
       service?.socialMediaPromotion?.status === "PAID",
