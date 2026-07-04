@@ -9,7 +9,10 @@ export function shouldSkipOtpClient(): boolean {
   if (v === "0" || v === "false" || v === "no") return false;
 
   // Expo public env values are baked into APKs, so never allow OTP skip against production API.
-  const baseUrl = String(process.env.EXPO_PUBLIC_BASE_URL || "").toLowerCase();
+  // Empty/missing URL defaults to production (see constants/apiBaseUrl.ts).
+  const baseUrl = String(
+    process.env.EXPO_PUBLIC_BASE_URL || "https://api.apnarojgarindia.com",
+  ).toLowerCase();
   if (baseUrl.includes("api.apnarojgarindia.com")) {
     return false;
   }

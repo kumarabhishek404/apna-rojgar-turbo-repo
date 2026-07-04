@@ -10,6 +10,7 @@ import {
   getOtpSession,
   clearOtpSession,
 } from "../utils/otpSessionCache.js";
+import { isDevOtpBypassEnabled } from "../utils/runtimeMode.js";
 
 const generateToken = (user) => {
   return jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -63,30 +64,6 @@ function normalizePhoneForTwoFactor(mobile) {
 
 function twoFactorResponseOk(data) {
   return data && String(data.Status).toLowerCase() === "success";
-}
-
-/**
- * Dev OTP bypass: no 2factor SMS; any 6-digit code verifies.
- * Explicit DEV_BYPASS_OTP=true supports hosted *dev* (sandbox Cashfree) only.
- * Live payment hosts (OTP_FORCE_LIVE / CASHFREE_FORCE_LIVE / CASHFREE_ENV=production)
- * always use real 2factor SMS, even if a base .env leaked DEV_BYPASS_OTP=true.
- */
-export function isDevOtpBypassEnabled() {
-  const truthy = (v) => ["1", "true", "yes"].includes(String(v ?? "").toLowerCase().trim());
-  const falsy = (v) => ["0", "false", "no"].includes(String(v ?? "").toLowerCase().trim());
-
-  // Hard stops — never skip SMS on a live payment host.
-  if (truthy(process.env.OTP_FORCE_LIVE)) return false;
-  if (truthy(process.env.CASHFREE_FORCE_LIVE)) return false;
-  if (String(process.env.CASHFREE_ENV ?? "").toLowerCase().trim() === "production") {
-    return false;
-  }
-
-  const raw = process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "";
-  if (falsy(raw)) return false;
-  if (truthy(raw)) return true;
-  if (process.env.NODE_ENV !== "development") return false;
-  return true;
 }
 
 const DEV_OTP_PATTERN = /^\d{6}$/;

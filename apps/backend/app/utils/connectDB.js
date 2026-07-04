@@ -11,7 +11,14 @@ export const connectDB = async () => {
       : process.env.DEVELOPMENT_DB_NAME;
 
     if (!mongoURI || !dbName) {
-      throw new Error("MongoDB environment variables are missing");
+      const missing = [
+        !mongoURI && "MONGO_URI",
+        !dbName && (isProd ? "PRODUCTION_DB_NAME" : "DEVELOPMENT_DB_NAME"),
+      ].filter(Boolean);
+      throw new Error(
+        `MongoDB environment variables are missing: ${missing.join(", ")} ` +
+          `(NODE_ENV=${process.env.NODE_ENV || "undefined"})`,
+      );
     }
 
     await mongoose.connect(mongoURI, {

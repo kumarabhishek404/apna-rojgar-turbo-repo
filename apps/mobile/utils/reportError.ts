@@ -1,5 +1,6 @@
 import { getToken } from "@/utils/authStorage";
 import { getClientDeviceHeaders } from "@/utils/clientDeviceInfo";
+import { getApiBaseUrl } from "@/constants/apiBaseUrl";
 
 type ReportErrorInput = {
   message: string;
@@ -18,13 +19,7 @@ const reportError = async ({
   route,
   statusCode = 500,
 }: ReportErrorInput) => {
-  const baseUrl = process.env.EXPO_PUBLIC_BASE_URL;
-  if (!baseUrl) {
-    if (__DEV__) {
-      console.warn("[reportError] EXPO_PUBLIC_BASE_URL missing");
-    }
-    return;
-  }
+  const baseUrl = getApiBaseUrl();
 
   const dedupeKey = `${route || "unknown"}:${message}`.slice(0, 200);
   if (reportedKeys.has(dedupeKey)) {

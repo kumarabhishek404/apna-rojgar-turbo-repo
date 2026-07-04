@@ -53,6 +53,9 @@ jobs:
 
       - name: Publish OTA update (Android)
         working-directory: apps/mobile
+        env:
+          # Baked into the OTA JS bundle (same as website production API)
+          EXPO_PUBLIC_BASE_URL: https://api.apnarojgarindia.com/api/v1
         run: |
           eas update \
             --branch production \

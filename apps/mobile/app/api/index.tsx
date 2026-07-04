@@ -8,8 +8,10 @@ import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
 import reportError from "@/utils/reportError";
+import { getApiBaseUrl } from "@/constants/apiBaseUrl";
 
 const eventEmitter = new EventEmitter();
+const API_BASE_URL = getApiBaseUrl();
 
 const getHeaders = async (retries = 3, delay = 500) => {
   try {
@@ -35,7 +37,7 @@ const getHeaders = async (retries = 3, delay = 500) => {
 };
 
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_BASE_URL,
+  baseURL: API_BASE_URL,
 });
 
 const toFormData = (body: unknown): FormData => {
@@ -124,7 +126,7 @@ const makeFetchFormDataRequest = async (
   const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}${url}`, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
       method,
       headers: mergedHeaders,
       body: formData,

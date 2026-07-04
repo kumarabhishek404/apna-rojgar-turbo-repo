@@ -1,9 +1,19 @@
-# EC2: git pull + pm2 restart (or pm2 start if the process name does not exist yet).
-# Secrets: EC2_HOST, EC2_USER, EC2_DEPLOY_PATH, EC2_SSH_KEY or EC2_SSH_KEY_B64, optional EC2_PM2_APP_NAME, EC2_SSH_KEY_PASSPHRASE
+# EC2 deploy: same backend as Cursor, always production mode (`npm start`).
 #
-# Runs on push to main only if the pushed commit message contains [deploy:all] or [deploy:backend].
-# Plain git push does not run this workflow. Use: ./scripts/push-deploy.sh -backend
-# Or put [deploy:backend] in your commit message. workflow_dispatch always runs.
+# Local (Cursor):  pnpm --filter apna-rojgar-backend dev  → DEVELOPMENT_DB_NAME
+# EC2 (this job):  pm2 + ecosystem.config.cjs → npm start → PRODUCTION_DB_NAME
+#
+# Secrets (GitHub → EC2, so you do not hand-edit the server):
+#   EC2_HOST, EC2_USER, EC2_DEPLOY_PATH, EC2_SSH_KEY or EC2_SSH_KEY_B64
+#   optional: EC2_PM2_APP_NAME, EC2_SSH_KEY_PASSPHRASE
+#   BACKEND_ENV_B64            — base64 of apps/backend/.env (from Cursor)
+#   BACKEND_ENV_PRODUCTION_B64 — base64 of apps/backend/.env.production (from Cursor)
+#
+# Sync env from Cursor once (or when secrets change):
+#   ./scripts/sync-backend-env-secrets.sh
+#
+# Runs on push to main only if commit message contains [deploy:all] or [deploy:backend].
+# workflow_dispatch always runs.
 
 name: Deploy Backend (EC2)
 
@@ -42,13 +52,17 @@ jobs:
           fi
           chmod 600 "$KEY"
 
-      - name: Pull & restart
+      - name: Pull, sync env, install, restart
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          BACKEND_ENV_B64: ${{ secrets.BACKEND_ENV_B64 }}
+          BACKEND_ENV_PRODUCTION_B64: ${{ secrets.BACKEND_ENV_PRODUCTION_B64 }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key_path: /home/runner/.ssh/deploy_key.pem
           passphrase: ${{ secrets.EC2_SSH_KEY_PASSPHRASE }}
+          envs: BACKEND_ENV_B64,BACKEND_ENV_PRODUCTION_B64
           script_stop: true
           script: |
             set -e
@@ -57,14 +71,62 @@ jobs:
             NAME="${{ secrets.EC2_PM2_APP_NAME }}"
             test -n "$REPO" || { echo "Set EC2_DEPLOY_PATH"; exit 1; }
             test -n "$NAME" || NAME="apna-rojgar-backend"
+            BACKEND="$REPO/apps/backend"
+
             git config --global --add safe.directory "$REPO" 2>/dev/null || true
+
+            # Keep server env files if git pull would remove a formerly-tracked .env
+            ENV_BACKUP="$(mktemp -d)"
+            for f in .env .env.production .env.local; do
+              if [ -f "$BACKEND/$f" ]; then
+                cp "$BACKEND/$f" "$ENV_BACKUP/$f"
+              fi
+            done
+
             cd "$REPO"
             git pull origin main
-            export NODE_ENV=production
-            if pm2 describe "$NAME" >/dev/null 2>&1; then
-              pm2 restart "$NAME" --update-env
-            else
-              cd "$REPO/apps/backend"
-              pm2 start index.js --name "$NAME" --cwd "$REPO/apps/backend"
+
+            for f in .env .env.production .env.local; do
+              if [ -f "$ENV_BACKUP/$f" ] && [ ! -f "$BACKEND/$f" ]; then
+                echo "Restored $f after git pull"
+                cp "$ENV_BACKUP/$f" "$BACKEND/$f"
+              fi
+            done
+            rm -rf "$ENV_BACKUP"
+
+            # Cursor is source of truth: write env from GitHub secrets when present
+            if [ -n "${BACKEND_ENV_B64:-}" ]; then
+              echo "$BACKEND_ENV_B64" | base64 -d > "$BACKEND/.env"
+              chmod 600 "$BACKEND/.env"
+              echo "Wrote $BACKEND/.env from BACKEND_ENV_B64"
             fi
+            if [ -n "${BACKEND_ENV_PRODUCTION_B64:-}" ]; then
+              echo "$BACKEND_ENV_PRODUCTION_B64" | base64 -d > "$BACKEND/.env.production"
+              chmod 600 "$BACKEND/.env.production"
+              echo "Wrote $BACKEND/.env.production from BACKEND_ENV_PRODUCTION_B64"
+            fi
+
+            if [ ! -f "$BACKEND/.env" ] || [ ! -f "$BACKEND/.env.production" ]; then
+              echo "ERROR: Need $BACKEND/.env and $BACKEND/.env.production"
+              echo "From your Mac (Cursor), run: ./scripts/sync-backend-env-secrets.sh"
+              echo "Then re-run this workflow."
+              exit 1
+            fi
+
+            # Same lockfile install as local monorepo
+            if command -v pnpm >/dev/null 2>&1; then
+              corepack enable 2>/dev/null || true
+              pnpm install --frozen-lockfile
+            else
+              echo "ERROR: pnpm is required on EC2 (same as Cursor). Install: corepack enable && corepack prepare pnpm@9.15.0 --activate"
+              exit 1
+            fi
+
+            cd "$BACKEND"
+            # Always the same as local production: ecosystem → npm start → NODE_ENV=production
+            # Drop any legacy process (bare `node index.js`) so DB mode cannot drift.
+            pm2 delete apna-rojgar-backend 2>/dev/null || true
+            pm2 delete "$NAME" 2>/dev/null || true
+            pm2 start ecosystem.config.cjs
             pm2 save
+            pm2 show apna-rojgar-backend | head -n 50

@@ -1,14 +1,40 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./app/utils/connectDB.js";
 import logError from "./app/utils/addErrorLog.js";
+import { logRuntimeMode } from "./app/utils/runtimeMode.js";
 
-// ✅ Load env: base `.env` then env-specific file (`.env.local` / `.env.production`) overrides
-dotenv.config({ path: ".env" });
+// Same files in Cursor and on EC2 (apps/backend):
+//   npm run dev  → NODE_ENV=development → .env + .env.local      → LOCAL_LABOUR_APP
+//   npm start    → NODE_ENV=production  → .env + .env.production → LABOUR_APP
+// Never use bare `node index.js` on EC2 — always `npm start` or ecosystem.config.cjs.
+const backendDir = path.dirname(fileURLToPath(import.meta.url));
+const nodeEnvFromHost = process.env.NODE_ENV;
+
+dotenv.config({ path: path.join(backendDir, ".env") });
+
+// Host (`npm start` / PM2) always wins over base `.env`.
+if (nodeEnvFromHost) {
+  process.env.NODE_ENV = nodeEnvFromHost;
+}
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+
 const envFile =
   process.env.NODE_ENV === "production" ? ".env.production" : ".env.local";
-dotenv.config({ path: envFile, override: true });
+const envPath = path.join(backendDir, envFile);
+
+if (process.env.NODE_ENV === "production" && !fs.existsSync(envPath)) {
+  console.error(
+    `❌ Missing ${envPath}. Production must load .env.production (OTP, Cashfree, PORT).`,
+  );
+  process.exit(1);
+}
+
+dotenv.config({ path: envPath, override: true });
 
 const app = express();
 /** Behind Render/nginx so req.ip / X-Forwarded-* behave for error logs and analytics */
@@ -110,27 +136,5 @@ app.use((err, req, res, next) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
-  const cashfreeEnv = (process.env.CASHFREE_ENV || "sandbox").toLowerCase();
-  const otpForceLive = ["1", "true", "yes"].includes(
-    String(process.env.OTP_FORCE_LIVE || "").toLowerCase(),
-  );
-  const otpBypassFlag = ["1", "true", "yes"].includes(
-    String(process.env.DEV_BYPASS_OTP ?? process.env.SKIP_OTP ?? "").toLowerCase(),
-  );
-  const livePayments =
-    cashfreeEnv === "production" ||
-    ["1", "true", "yes"].includes(
-      String(process.env.CASHFREE_FORCE_LIVE || "").toLowerCase(),
-    );
-  const otpLive = otpForceLive || livePayments || !otpBypassFlag;
-
-  console.log(`🚀 API running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  console.log(
-    `🔐 OTP: ${otpLive ? "live 2factor SMS" : "DEV BYPASS (any 6-digit code)"} | Cashfree: ${cashfreeEnv}`,
-  );
-  if (livePayments && !process.env.TWOFACTOR_API_KEY) {
-    console.error(
-      "❌ TWOFACTOR_API_KEY is missing while Cashfree is in production mode. Login OTP SMS will fail.",
-    );
-  }
+  logRuntimeMode(PORT);
 });

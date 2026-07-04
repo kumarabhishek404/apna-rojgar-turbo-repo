@@ -7,6 +7,9 @@
     "production": {
       "environment": "production",
       "node": "20.19.4",
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+      },
       "buildArtifactPaths": [
         "android/app/build/outputs/mapping/release/mapping.txt"
       ],
@@ -26,6 +29,9 @@
     },
     "preview": {
       "environment": "preview",
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+      },
       "android": {
         "buildType": "apk"
       },
@@ -33,6 +39,9 @@
     },
     "release": {
       "environment": "release",
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+      },
       "buildArtifactPaths": [
         "android/app/build/outputs/mapping/release/mapping.txt"
       ],

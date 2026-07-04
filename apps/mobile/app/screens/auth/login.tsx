@@ -111,7 +111,12 @@ export default function Login() {
       setStep(2);
     },
     onError: (err: any) => {
-      setLoginError(err?.response?.data?.message || "Failed to send OTP");
+      setLoginError(
+        err?.response?.data?.message ||
+          (!err?.response
+            ? "Cannot reach server. Check internet and try again."
+            : "Failed to send OTP"),
+      );
     },
   });
 

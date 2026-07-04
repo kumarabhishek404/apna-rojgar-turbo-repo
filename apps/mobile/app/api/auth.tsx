@@ -80,10 +80,15 @@ const signIn = async (payload: any) => {
   } catch (error: any) {
     console.log(
       `[Sign In] [userService] An error occurred while signing the user `,
-      error?.response?.data,
+      error?.response?.data || error?.message,
     );
+    const apiMessage = error?.response?.data?.message;
+    const networkFailure = !error?.response;
     TOAST?.error(
-      error?.response?.data?.message || "An error occurred while login user",
+      apiMessage ||
+        (networkFailure
+          ? "Cannot reach server. Check internet and try again."
+          : "An error occurred while login user"),
     );
     throw error;
   }
