@@ -2,12 +2,15 @@ import cron from "node-cron";
 import Service from "../models/service.model.js";
 import CronJobState from "../models/cronJobState.model.js";
 import logError from "../utils/addErrorLog.js";
+import { formatSheetDate } from "../utils/formatSheetDate.js";
+import { getSkillLabel } from "../utils/skillLabels.js";
 import {
   appendRows,
   ensureExportSpreadsheet,
   getNextSerialNumber,
   getSpreadsheetUrl,
   isGoogleSheetsEnabled,
+  getStatsSpreadsheetId,
   SERVICE_SHEET_CONFIG,
 } from "../utils/googleSheets.js";
 
@@ -16,20 +19,11 @@ export const WEEKLY_SERVICES_JOB_KEY = "weekly_services_export";
 const isCronEnabled = () =>
   process.env.CRON_WEEKLY_SERVICES_ENABLED !== "false";
 
-const formatDate = (date) => {
-  if (!date) return "";
-  return new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
-};
-
 const formatRequirements = (requirements = []) =>
   requirements
     .map((item) => {
       if (!item?.name) return "";
+      const skillLabel = getSkillLabel(item.name);
       const perks = [
         item.food ? "Food" : "",
         item.living ? "Living" : "",
@@ -39,7 +33,7 @@ const formatRequirements = (requirements = []) =>
         .filter(Boolean)
         .join("/");
       const perksSuffix = perks ? ` [${perks}]` : "";
-      return `${item.name} x${item.count} @${item.payPerDay}/day${perksSuffix}`;
+      return `${skillLabel} x${item.count} @${item.payPerDay}/day${perksSuffix}`;
     })
     .filter(Boolean)
     .join("; ");
@@ -55,8 +49,10 @@ const formatFacilities = (facilities = {}) => {
 
 const formatAppliedSkill = (appliedSkill) => {
   if (!appliedSkill) return "";
-  if (typeof appliedSkill === "string") return appliedSkill;
-  return appliedSkill.skill || appliedSkill.name || "";
+  if (typeof appliedSkill === "string") return getSkillLabel(appliedSkill);
+  return getSkillLabel(
+    appliedSkill.skill || appliedSkill.name || appliedSkill.label || "",
+  );
 };
 
 const formatImages = (images = []) =>
@@ -70,16 +66,16 @@ const mapServiceToRow = (service, serialNumber) => {
     String(serialNumber),
     service.jobID || "",
     service.status || "",
-    formatDate(service.createdAt),
+    formatSheetDate(service.createdAt),
     employer.name || "",
     employer.countryCode || "91",
     employer.mobile || "",
-    service.type || "",
-    service.subType || "",
+    getSkillLabel(service.type),
+    getSkillLabel(service.subType),
     service.bookingType || "",
     service.address || "",
-    formatDate(service.startDate),
-    formatDate(service.endDate),
+    formatSheetDate(service.startDate),
+    formatSheetDate(service.endDate),
     service.duration != null ? String(service.duration) : "",
     formatRequirements(service.requirements),
     formatFacilities(service.facilities),
@@ -142,16 +138,13 @@ export const exportWeeklyServices = async () => {
     `🚀 [Cron] Weekly services export: ${services.length} service(s) to export`,
   );
 
-  const envSpreadsheetId =
-    process.env[SERVICE_SHEET_CONFIG.envSpreadsheetIdKey]?.trim() || null;
-
   if (!services.length) {
     state.lastRunAt = now;
     state.lastRunStatus = "success";
     state.rowsExported = 0;
     await state.save();
 
-    const spreadsheetId = state.spreadsheetId || envSpreadsheetId;
+    const spreadsheetId = getStatsSpreadsheetId() || state.spreadsheetId;
 
     return {
       skipped: false,
@@ -164,7 +157,7 @@ export const exportWeeklyServices = async () => {
   try {
     const { spreadsheetId, created } = await ensureExportSpreadsheet(
       SERVICE_SHEET_CONFIG,
-      state.spreadsheetId,
+      getStatsSpreadsheetId() || state.spreadsheetId,
     );
 
     if (created || state.spreadsheetId !== spreadsheetId) {
@@ -172,11 +165,18 @@ export const exportWeeklyServices = async () => {
       await state.save();
     }
 
-    const startingSerial = await getNextSerialNumber(spreadsheetId);
+    const startingSerial = await getNextSerialNumber(
+      spreadsheetId,
+      SERVICE_SHEET_CONFIG.tabName,
+    );
     const rows = services.map((service, index) =>
       mapServiceToRow(service, startingSerial + index),
     );
-    await appendRows(spreadsheetId, rows);
+    await appendRows(
+      spreadsheetId,
+      SERVICE_SHEET_CONFIG.tabName,
+      rows,
+    );
 
     state.spreadsheetId = spreadsheetId;
     state.lastExportAt = now;

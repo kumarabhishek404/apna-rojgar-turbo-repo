@@ -2,12 +2,15 @@ import cron from "node-cron";
 import User from "../models/user.model.js";
 import CronJobState from "../models/cronJobState.model.js";
 import logError from "../utils/addErrorLog.js";
+import { formatSheetDate } from "../utils/formatSheetDate.js";
+import { formatSkillLabels } from "../utils/skillLabels.js";
 import {
   appendRows,
   ensureExportSpreadsheet,
   getNextSerialNumber,
   getSpreadsheetUrl,
   isGoogleSheetsEnabled,
+  getStatsSpreadsheetId,
   REGISTRATION_SHEET_CONFIG,
 } from "../utils/googleSheets.js";
 
@@ -16,25 +19,7 @@ export const WEEKLY_REGISTRATIONS_JOB_KEY = "weekly_registrations_export";
 const isCronEnabled = () =>
   process.env.CRON_WEEKLY_REGISTRATIONS_ENABLED !== "false";
 
-const formatRegistrationDate = (date) => {
-  if (!date) return "";
-  return new Date(date).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
-};
-
-const formatSkills = (skills = []) =>
-  skills
-    .map((item) => {
-      if (!item) return "";
-      if (typeof item === "string") return item;
-      return item.skill || "";
-    })
-    .filter(Boolean)
-    .join(", ");
+const formatSkills = (skills = []) => formatSkillLabels(skills);
 
 const formatMobile = (user) => user.mobile || "";
 
@@ -64,7 +49,7 @@ const mapUserToRow = (user, serialNumber) => [
   user.age || "",
   formatEmail(user),
   user.aadhaarNumber || "",
-  formatRegistrationDate(user.createdAt),
+  formatSheetDate(user.createdAt),
   user.profilePicture || "",
 ];
 
@@ -122,9 +107,7 @@ export const exportWeeklyRegistrations = async () => {
     await state.save();
 
     const spreadsheetId =
-      state.spreadsheetId ||
-      process.env[REGISTRATION_SHEET_CONFIG.envSpreadsheetIdKey]?.trim() ||
-      null;
+      getStatsSpreadsheetId() || state.spreadsheetId || null;
 
     return {
       skipped: false,
@@ -137,7 +120,7 @@ export const exportWeeklyRegistrations = async () => {
   try {
     const { spreadsheetId, created } = await ensureExportSpreadsheet(
       REGISTRATION_SHEET_CONFIG,
-      state.spreadsheetId,
+      getStatsSpreadsheetId() || state.spreadsheetId,
     );
 
     if (created || state.spreadsheetId !== spreadsheetId) {
@@ -145,11 +128,18 @@ export const exportWeeklyRegistrations = async () => {
       await state.save();
     }
 
-    const startingSerial = await getNextSerialNumber(spreadsheetId);
+    const startingSerial = await getNextSerialNumber(
+      spreadsheetId,
+      REGISTRATION_SHEET_CONFIG.tabName,
+    );
     const rows = users.map((user, index) =>
       mapUserToRow(user, startingSerial + index),
     );
-    await appendRows(spreadsheetId, rows);
+    await appendRows(
+      spreadsheetId,
+      REGISTRATION_SHEET_CONFIG.tabName,
+      rows,
+    );
 
     state.spreadsheetId = spreadsheetId;
     state.lastExportAt = now;
