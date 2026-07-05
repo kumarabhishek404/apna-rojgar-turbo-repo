@@ -11,6 +11,7 @@ export interface PromotionOrderResponse {
   paymentSessionId: string;
   amount: number;
   currency: string;
+  environment?: string;
   devBypass?: boolean;
 }
 

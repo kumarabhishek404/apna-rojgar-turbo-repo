@@ -4,19 +4,10 @@ import { Alert } from "react-native";
 
 export async function checkForUpdates() {
   try {
-    console.log("Updates---", Updates);
-
-    // ❗ OTA updates only work in production builds
-    if (!Updates.isEnabled) return;
+    // OTA updates only run in release/production builds — not Metro dev or dev client.
+    if (__DEV__ || !Updates.isEnabled) return;
 
     const update = await Updates.checkForUpdateAsync();
-
-    console.log("Updates logs---", {
-      isEnabled: Updates.isEnabled,
-      channel: Updates.channel,
-      runtimeVersion: Updates.runtimeVersion,
-      updateId: Updates.updateId,
-    });
 
     if (update.isAvailable) {
       Alert.alert(
@@ -43,6 +34,9 @@ export async function checkForUpdates() {
       );
     }
   } catch (error) {
-    console.log("Error checking updates:", error);
+    // Expected in dev builds — avoid noisy logs during local development.
+    if (!__DEV__) {
+      console.log("Error checking updates:", error);
+    }
   }
 }

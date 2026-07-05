@@ -24,7 +24,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
 import Requirements from "@/components/commons/Requirements";
 import EmployerCard from "@/components/commons/EmployerCard";
-import Highlights from "@/components/commons/Highlights";
+import ServiceLocationScheduleSection from "@/components/commons/ServiceLocationScheduleSection";
 import ServiceFacilitiesSection from "@/components/commons/ServiceFacilitiesSection";
 import ImageSlider from "@/components/commons/ImageSlider";
 import CustomHeading from "@/components/commons/CustomHeading";
@@ -41,7 +41,6 @@ import {
 } from "@/constants/functions";
 import ProfilePicture from "@/components/commons/ProfilePicture";
 import ButtonComp from "@/components/inputs/Button";
-import DateDisplay from "@/components/commons/ShowDate";
 import ShowAddress from "@/components/commons/ShowAddress";
 import ApplicantsTabScreen from "./showApplicationsAndSelections";
 import ApplicantSummary from "./applicantsSummary";
@@ -893,25 +892,7 @@ const ServiceDetails = () => {
                   </View>
                 )}
 
-                <View style={styles.atAGlanceCard}>
-                  <View style={styles.sectionTitleRow}>
-                    <Ionicons
-                      name="location-outline"
-                      size={20}
-                      color={Colors.primary}
-                    />
-                    <CustomHeading textAlign="left" baseFont={16} color={Colors.black}>
-                      {t("locationAndSchedule")}
-                    </CustomHeading>
-                  </View>
-                  <View style={styles.listingLocationWrapper}>
-                    <ShowAddress address={service?.address} />
-                  </View>
-                  <View style={styles.listingLocationWrapper}>
-                    <DateDisplay date={service?.startDate} type="startDate" />
-                  </View>
-                  <Highlights compact service={service} />
-                </View>
+                <ServiceLocationScheduleSection service={service} />
 
                 <ServiceFacilitiesSection facilities={service?.facilities} />
 

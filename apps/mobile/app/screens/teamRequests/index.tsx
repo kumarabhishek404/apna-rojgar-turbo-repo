@@ -3,28 +3,23 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, RefreshControl } from "react-native";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
-import Loader from "@/components/commons/Loaders/Loader";
-import CategoryButtons from "@/components/inputs/CategoryButtons";
-import Atoms from "@/app/AtomStore";
 import { Stack, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import ListingVerticalRequests from "@/components/commons/ListingVerticalRequests";
-import PaginationString from "@/components/commons/Pagination/PaginationString";
-import SearchFilter from "@/components/commons/SearchFilter";
 import CustomHeader from "@/components/commons/Header";
+import CustomText from "@/components/commons/CustomText";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
-import EmptyDataPlaceholder from "@/components/commons/EmptyDataPlaceholder";
 import SegmentedControl from "@/components/commons/SegmentedControl";
+import TeamRequestsEmptyState from "@/components/commons/TeamRequestsEmptyState";
 import WORKER from "@/app/api/workers";
-import EMPLOYER from "@/app/api/employer";
 import MEDIATOR from "@/app/api/mediator";
 import ListingsBookingsPlaceholder from "@/components/commons/LoadingPlaceholders/ListingBookingPlaceholder";
 
 const Requests = () => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
-  const [totalData, setTotalData] = useState(0);
   const [filteredData, setFilteredData]: any = useState([]);
   const { title, initialCategory } = useLocalSearchParams<{
     title?: string;
@@ -40,11 +35,24 @@ const Requests = () => {
 
   const teamRequestSegments = useMemo(
     () => [
-      { label: t("received"), accessibilityLabel: t("received") },
-      { label: t("sent"), accessibilityLabel: t("sent") },
+      {
+        label: t("received"),
+        icon: "mail-unread-outline" as const,
+        accessibilityLabel: t("received"),
+      },
+      {
+        label: t("sent"),
+        icon: "send-outline" as const,
+        accessibilityLabel: t("sent"),
+      },
     ],
     [],
   );
+
+  const guideText =
+    category === "RECEIVED"
+      ? t("teamRequestsGuideReceived")
+      : t("teamRequestsGuideSent");
 
   const fetchRequests =
     category === "RECEIVED"
@@ -60,7 +68,7 @@ const Requests = () => {
     hasNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [category],
+    queryKey: ["teamRequests", category],
     queryFn: ({ pageParam }) => fetchRequests({ pageParam }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -74,15 +82,13 @@ const Requests = () => {
   useFocusEffect(
     React.useCallback(() => {
       refetch();
-    }, [category])
+    }, [category, refetch]),
   );
 
   useFocusEffect(
     React.useCallback(() => {
-      const totalData = response?.pages[0]?.pagination?.total || 0;
-      setTotalData(totalData);
       setFilteredData(response?.pages?.flatMap((page) => page.data || []));
-    }, [response])
+    }, [response]),
   );
 
   const mutationAcceptRequest = useMutation({
@@ -115,8 +121,17 @@ const Requests = () => {
   };
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(() =>
-    refetch()
+    refetch(),
   );
+
+  const refreshControl = (
+    <RefreshControl
+      refreshing={!isRefetching && refreshing}
+      onRefresh={onRefresh}
+    />
+  );
+
+  const hasData = filteredData && filteredData.length > 0;
 
   return (
     <>
@@ -132,21 +147,31 @@ const Requests = () => {
           ),
         }}
       />
-      <View style={{ flex: 1 }}>
+      <View style={styles.root}>
         {isLoading ? (
           <ListingsBookingsPlaceholder />
         ) : (
           <View style={styles.container}>
-            <View style={styles?.paginationTabs}>
+            <View style={styles.tabsWrap}>
               <SegmentedControl
                 segments={teamRequestSegments}
                 selectedIndex={category === "RECEIVED" ? 0 : 1}
-                onChange={(i) =>
-                  setCategory(i === 0 ? "RECEIVED" : "SENT")
-                }
+                onChange={(i) => setCategory(i === 0 ? "RECEIVED" : "SENT")}
               />
             </View>
-            {filteredData && filteredData?.length > 0 ? (
+
+            <View style={styles.guideCard}>
+              <Ionicons
+                name="information-circle-outline"
+                size={18}
+                color={Colors.primary}
+              />
+              <CustomText textAlign="left" baseFont={13} style={styles.guideText}>
+                {guideText}
+              </CustomText>
+            </View>
+
+            {hasData ? (
               <ListingVerticalRequests
                 listings={filteredData || []}
                 requestType="teamJoiningRequest"
@@ -156,19 +181,14 @@ const Requests = () => {
                   mutationRejectRequest?.isPending
                 }
                 loadMore={loadMore}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={!isRefetching && refreshing}
-                    onRefresh={onRefresh}
-                  />
-                }
+                refreshControl={refreshControl}
                 isFetchingNextPage={isFetchingNextPage}
                 onCancelRequest={mutationCancelRequest.mutate}
                 onAcceptRequest={mutationAcceptRequest.mutate}
                 onRejectRequest={mutationRejectRequest.mutate}
               />
             ) : (
-              <EmptyDataPlaceholder title="requests" leftHeight={300} />
+              <TeamRequestsEmptyState tab={category} refreshControl={refreshControl} />
             )}
           </View>
         )}
@@ -178,15 +198,34 @@ const Requests = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
     backgroundColor: Colors.fourth,
-    paddingHorizontal: 10,
   },
-  paginationTabs: {
-    width: "100%",
-    flexDirection: "column",
-    paddingVertical: 10,
+  container: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingBottom: 8,
+  },
+  tabsWrap: {
+    paddingTop: 12,
+    paddingBottom: 10,
+  },
+  guideCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.1)",
+  },
+  guideText: {
+    flex: 1,
+    lineHeight: 20,
+    color: Colors.subHeading,
   },
 });
 

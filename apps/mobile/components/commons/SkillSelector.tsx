@@ -302,11 +302,12 @@ const styles = StyleSheet.create({
   },
   skillBox: {
     backgroundColor: Colors?.white,
-    borderRadius: 20,
+    borderRadius: 8,
     paddingVertical: 5,
     paddingHorizontal: 10,
     marginRight: 8,
     marginVertical: 6,
+    alignSelf: "flex-start",
   },
   highlightIcon: {
     width: 25,

@@ -35,7 +35,7 @@ export default function MyServicesPage() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [applyingServiceId, setApplyingServiceId] = useState<string | null>(null);
-  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionAmount, setPromotionAmount] = useState(500);
   const [promotingServiceId, setPromotingServiceId] = useState<string | null>(null);
   const { runPromotionPayment } = useCashfreePromotionPayment();
 

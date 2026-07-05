@@ -7,6 +7,7 @@ import Colors from "@/constants/Colors";
 import CustomHeading from "../commons/CustomHeading";
 import CustomText from "../commons/CustomText";
 import AddAddressDrawer from "@/app/screens/location/addAddress";
+import { resolveGeoLocation } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 import PaperDropdown from "./Dropdown";
 
@@ -46,8 +47,12 @@ const AddressSelector = ({
     }
   }, [user?.address, user?.savedAddresses, address, setAddress]);
 
-  const selectAddress = (addr: string) => {
+  const selectAddress = async (addr: string) => {
     setAddress(addr);
+    const geoLocation = await resolveGeoLocation(addr, null);
+    if (geoLocation) {
+      setLocation(geoLocation);
+    }
   };
 
   const addressOptions = addresses.map((addr) => ({
@@ -116,11 +121,18 @@ const AddressSelector = ({
             setAddress(selected);
           }
         }}
-        setSavedAddress={(saved: string[]) => {
-          const unique = Array.from(new Set(saved || []));
+        setSavedAddress={(saved: string[], newAddress?: string) => {
+          const mainAddress = user?.address?.trim();
+          const unique = Array.from(
+            new Set([
+              ...(mainAddress ? [mainAddress] : []),
+              ...(saved || []),
+            ]),
+          ).filter(Boolean) as string[];
           setAddresses(unique);
-          if (unique.length > 0 && !address) {
-            setAddress(unique[unique.length - 1]);
+          const selected = newAddress || unique[unique.length - 1];
+          if (selected) {
+            setAddress(selected);
           }
         }}
         setLocation={setLocation}

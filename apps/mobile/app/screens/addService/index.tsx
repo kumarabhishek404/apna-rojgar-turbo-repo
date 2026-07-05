@@ -30,7 +30,7 @@ import SelectLocationAndDateStep from "./SelectLocation&Date";
 import SelectDurationAndDescriptionStep from "./SetDuration&Description";
 import FormProgressBar from "@/components/commons/FormProgress";
 import UploadWorkImagesStep from "./UploadImagesStep";
-import { getLatLongFromAddress } from "@/constants/functions";
+import { isValidGeoPoint, resolveGeoLocation } from "@/constants/functions";
 import PromotionChoiceModal from "@/components/commons/PromotionChoiceModal";
 import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
 import PAYMENT from "@/app/api/payment";
@@ -69,7 +69,7 @@ const AddServiceScreen = () => {
   const verifiedPromotionOrderRef = useRef<string | null>(null);
 
   const [showPromotionModal, setShowPromotionModal] = useState(false);
-  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionAmount, setPromotionAmount] = useState(500);
   const [isPromotionProcessing, setIsPromotionProcessing] = useState(false);
   const { runPromotionPayment } = useCashfreePromotionPayment();
 
@@ -200,7 +200,7 @@ const AddServiceScreen = () => {
         }
       })
       .catch(() => {
-        setPromotionAmount(100);
+        setPromotionAmount(500);
       });
   }, [addService?._id]);
 
@@ -441,26 +441,21 @@ const AddServiceScreen = () => {
 
   const ensureLocation = async (location: any, address: string) => {
     try {
-      if (location?.coordinates?.length === 2) {
+      if (isValidGeoPoint(location)) {
         return location;
       }
 
       if (!address) return null;
 
       const GEOCODE_TIMEOUT_MS = 8000;
-      const coords = await Promise.race([
-        getLatLongFromAddress(address),
+      const geoLocation = await Promise.race([
+        resolveGeoLocation(address, null),
         new Promise<null>((resolve) =>
           setTimeout(() => resolve(null), GEOCODE_TIMEOUT_MS),
         ),
       ]);
 
-      if (!coords) return null;
-
-      return {
-        type: "Point",
-        coordinates: [coords.longitude, coords.latitude],
-      };
+      return geoLocation;
     } catch (err) {
       console.log("ensureLocation error:", err);
       return null;

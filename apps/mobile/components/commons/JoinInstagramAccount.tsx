@@ -5,8 +5,8 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Linking,
 } from "react-native";
+import { openInstagramProfile } from "@/utils/openExternalLink";
 
 interface FollowInstagramProps {
   profileLink: string;
@@ -21,25 +21,8 @@ const FollowInstagram: React.FC<FollowInstagramProps> = ({
   description = "instaDescription",
   buttonText = "instaButtonText",
 }) => {
-  const handleFollowPress = async () => {
-    const username = profileLink.split("instagram.com/")[1]?.replace("/", "");
-
-    const appUrl = `instagram://user?username=${username}`;
-    const webUrl = profileLink;
-
-    try {
-      const canOpen = await Linking.canOpenURL(appUrl);
-
-      if (canOpen) {
-        // Open profile directly in Instagram app
-        await Linking.openURL(appUrl);
-      } else {
-        // Fallback → open in browser
-        await Linking.openURL(webUrl);
-      }
-    } catch (err) {
-      console.warn("Error opening Instagram", err);
-    }
+  const handleFollowPress = () => {
+    openInstagramProfile(profileLink);
   };
 
   return (

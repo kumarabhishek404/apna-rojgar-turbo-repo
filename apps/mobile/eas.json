@@ -8,7 +8,8 @@
       "environment": "production",
       "node": "20.19.4",
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1",
+        "EXPO_PUBLIC_CASHFREE_ENV": "PRODUCTION"
       },
       "buildArtifactPaths": [
         "android/app/build/outputs/mapping/release/mapping.txt"
@@ -23,14 +24,17 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "EXPO_PUBLIC_BASE_URL": "http://192.168.31.144:4000/api/v1",
+        "EXPO_PUBLIC_SKIP_OTP": "true"
       },
       "channel": "development"
     },
     "preview": {
       "environment": "preview",
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1",
+        "EXPO_PUBLIC_CASHFREE_ENV": "PRODUCTION"
       },
       "android": {
         "buildType": "apk"
@@ -40,7 +44,8 @@
     "release": {
       "environment": "release",
       "env": {
-        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1"
+        "EXPO_PUBLIC_BASE_URL": "https://api.apnarojgarindia.com/api/v1",
+        "EXPO_PUBLIC_CASHFREE_ENV": "PRODUCTION"
       },
       "buildArtifactPaths": [
         "android/app/build/outputs/mapping/release/mapping.txt"

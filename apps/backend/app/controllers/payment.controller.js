@@ -6,7 +6,6 @@ import {
   createCashfreeOrder,
   generatePromotionOrderId,
   getCashfreeOrder,
-  getPromotionAmount,
   isCashfreeConfigured,
   isCashfreeDevBypassEnabled,
   isCashfreeOrderPaid,
@@ -14,6 +13,7 @@ import {
   resolveOrderPaymentMethod,
   verifyCashfreeWebhookSignature,
 } from "../utils/cashfree.js";
+import { getPromotionAmount } from "../utils/appMetadata.service.js";
 import {
   applyPromotionToService,
   isServicePromoted,
@@ -112,7 +112,7 @@ export const createServicePromotionOrder = asyncHandler(async (req, res) => {
     }
 
     const linkedService = await validateServiceForPromotion(serviceId, _id);
-    const amount = getPromotionAmount();
+    const amount = await getPromotionAmount();
     const orderId = generatePromotionOrderId(_id);
 
     const cashfreeOrder = await createCashfreeOrder({
@@ -155,6 +155,7 @@ export const createServicePromotionOrder = asyncHandler(async (req, res) => {
         paymentSessionId: payment.paymentSessionId,
         amount: payment.amount,
         currency: payment.currency,
+        environment: (process.env.CASHFREE_ENV || "sandbox").toLowerCase(),
         serviceId: payment.service || null,
         serviceJobId: payment.serviceJobId || null,
         devBypass: isMockCashfreePaymentSession(payment.paymentSessionId),
@@ -255,10 +256,11 @@ export const verifyServicePromotionPayment = asyncHandler(async (req, res) => {
 });
 
 export const getPromotionPaymentConfig = asyncHandler(async (_req, res) => {
+  const amount = await getPromotionAmount();
   return res.status(200).json({
     success: true,
     data: {
-      amount: getPromotionAmount(),
+      amount,
       currency: "INR",
       environment: (process.env.CASHFREE_ENV || "sandbox").toLowerCase(),
       configured: isCashfreeConfigured(),

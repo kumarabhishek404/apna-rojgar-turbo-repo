@@ -43,7 +43,7 @@ const ListingsServices = React.memo(({ item }: any) => {
     staleTime: 5 * 60 * 1000,
   });
 
-  const promotionAmount = promotionConfig?.amount ?? 100;
+  const promotionAmount = promotionConfig?.amount ?? 500;
   const isOwnService =
     userDetails?._id === item?.employer && item?.bookingType === "byService";
   const canPromoteLater =

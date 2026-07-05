@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF4FF",
     marginHorizontal: -16,
     marginTop: 0,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingTop: 16,
   },
 

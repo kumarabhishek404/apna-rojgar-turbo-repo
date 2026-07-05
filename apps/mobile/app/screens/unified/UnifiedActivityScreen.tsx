@@ -37,8 +37,8 @@ import { flattenPaginatedPages } from "@/utils/paginatedApi";
 import { canUserActAsMediator, resolveDisplayUserRole } from "@/utils/resolveDisplayUserRole";
 import ListingsServices from "@/components/commons/ListingServices";
 import ListingsVerticalServices from "@/components/commons/ListingsVerticalServices";
-import ListingsBookedWorkers from "@/components/commons/ListingBookedWorkers";
 import ListingsVerticalBookings from "@/components/commons/ListingVerticalBookings";
+import ListingsBookedWorkers from "@/components/commons/ListingBookedWorkers";
 import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholders/ListingServicePlaceholder";
 import CustomText from "@/components/commons/CustomText";
 import CustomHeading from "@/components/commons/CustomHeading";
@@ -268,21 +268,291 @@ const emptyStyles = StyleSheet.create({
   },
 });
 
-const useTabWithParams = (DEFAULT_TAB: number) => {
-  const params = useLocalSearchParams();
-  const [tab, setTab] = useState(DEFAULT_TAB);
+
+const BOOKING_REQUESTS_HINT: Record<ApiRole, string> = {
+  WORKER: "activityBookingRequestsHintWorker",
+  EMPLOYER: "activityBookingRequestsHintEmployer",
+  MEDIATOR: "activityBookingRequestsHintMediator",
+};
+
+const BookingRequestsEntry = ({
+  role,
+  activityTab,
+}: {
+  role: ApiRole;
+  activityTab: number;
+}) => (
+  <TouchableOpacity
+    style={requestsEntryStyles.card}
+    activeOpacity={0.88}
+    onPress={() => {
+      router.setParams({ tab: String(activityTab) });
+      router.push({
+        pathname: "/screens/bookings/directBookingRequests",
+        params: { role, returnTab: String(activityTab) },
+      });
+    }}
+  >
+    <View style={requestsEntryStyles.iconWrap}>
+      <Ionicons name="mail-unread-outline" size={22} color={Colors.primary} />
+    </View>
+    <View style={requestsEntryStyles.textWrap}>
+      <CustomText baseFont={14} fontWeight="700" color={Colors.primary}>
+        {t("activityOpenBookingRequests")}
+      </CustomText>
+      <CustomText baseFont={12} color={Colors.subHeading} numberOfLines={2}>
+        {t(BOOKING_REQUESTS_HINT[role])}
+      </CustomText>
+    </View>
+    <Ionicons name="chevron-forward" size={20} color={Colors.primary} />
+  </TouchableOpacity>
+);
+
+const requestsEntryStyles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "rgba(14, 79, 197, 0.12)",
+    shadowColor: "#1e3a8a",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "#EEF4FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textWrap: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+});
+
+const ConfirmedBookingsTab = ({
+  role,
+  activityTab,
+}: {
+  role: ApiRole;
+  activityTab: number;
+}) => {
+  const userDetails = useAtomValue(Atoms.UserAtom);
+
+  const employerBookedQ = useInfiniteQuery({
+    queryKey: ["activityEmployerBookings", userDetails?._id],
+    queryFn: async ({ pageParam = 1 }) => {
+      const token = await getToken();
+      if (!token || !userDetails?._id) throw new Error("Unauthorized");
+      return EMPLOYER.fetchAllBookedWorkers({ pageParam, token });
+    },
+    initialPageParam: 1,
+    enabled: !!userDetails?._id && role === "EMPLOYER",
+    retry: false,
+    getNextPageParam: (lastPage: any) =>
+      lastPage?.pagination?.page < lastPage?.pagination?.pages
+        ? lastPage.pagination.page + 1
+        : undefined,
+  });
+
+  const workerBookedQ = useInfiniteQuery({
+    queryKey: ["activityWorkerConfirmedBookings", userDetails?._id],
+    queryFn: async ({ pageParam = 1 }) =>
+      WORKER.fetchAllMyBookings({ pageParam }),
+    initialPageParam: 1,
+    enabled: !!userDetails?._id && role === "WORKER",
+    retry: false,
+    getNextPageParam: (lastPage: any) =>
+      lastPage?.pagination?.page < lastPage?.pagination?.pages
+        ? lastPage.pagination.page + 1
+        : undefined,
+  });
+
+  const mediatorBookedQ = useInfiniteQuery({
+    queryKey: ["activityMedBooked", userDetails?._id],
+    queryFn: ({ pageParam = 1 }) =>
+      MEDIATOR.fetchMyBookingsAsMediator({ pageParam }),
+    initialPageParam: 1,
+    enabled: !!userDetails?._id && role === "MEDIATOR",
+    retry: false,
+    getNextPageParam: (lastPage: any) =>
+      lastPage?.pagination?.page < lastPage?.pagination?.pages
+        ? lastPage.pagination.page + 1
+        : undefined,
+  });
+
+  const activeQuery =
+    role === "EMPLOYER"
+      ? employerBookedQ
+      : role === "WORKER"
+        ? workerBookedQ
+        : mediatorBookedQ;
 
   useFocusEffect(
     useCallback(() => {
-      if (params?.tab !== undefined) {
+      activeQuery.refetch();
+    }, [activeQuery.refetch]),
+  );
+
+  const bookedList = useMemo(() => {
+    if (role === "WORKER") {
+      return flattenPaginatedPages(workerBookedQ.data?.pages);
+    }
+    if (role === "MEDIATOR") {
+      return flattenPaginatedPages(mediatorBookedQ.data?.pages);
+    }
+    return flattenPaginatedPages(employerBookedQ.data?.pages);
+  }, [role, employerBookedQ.data, workerBookedQ.data, mediatorBookedQ.data]);
+
+  const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
+    activeQuery.refetch,
+  );
+
+  const refreshControl = (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={Colors.primary}
+    />
+  );
+
+  const loadMore = () => {
+    if (activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+      activeQuery.fetchNextPage();
+    }
+  };
+
+  const isLoading =
+    activeQuery.isLoading &&
+    !(activeQuery.data as { pages?: unknown[] } | undefined)?.pages;
+
+  const emptyConfig = (): EmptyStateConfig => {
+    if (role === "MEDIATOR") {
+      return {
+        icon: "calendar-outline",
+        iconColor: "#7C3AED",
+        iconBg: "#F5F3FF",
+        title: t("activityTabMedBookedTitle"),
+        message: t("activityEmptyLineBooked"),
+        ctaLabel: t("browseWorkers"),
+        ctaIcon: "search-outline",
+        ctaColor: "#7C3AED",
+        onCta: () => router.push("/(tabs)/second"),
+      };
+    }
+    if (role === "WORKER") {
+      return {
+        icon: "briefcase-outline",
+        iconColor: "#7C3AED",
+        iconBg: "#F5F3FF",
+        title: t("activityTabWorkerBookingTitle"),
+        message: t("activityEmptyLineBooked"),
+        ctaLabel: t("browseJobs"),
+        ctaIcon: "search-outline",
+        ctaColor: "#7C3AED",
+        onCta: () => router.push("/(tabs)/second"),
+      };
+    }
+    return {
+      icon: "people-outline",
+      iconColor: "#2563EB",
+      iconBg: "#EEF4FF",
+      title: t("noBookedWorkersTitle"),
+      message: t("noBookedWorkersMessage"),
+      ctaLabel: t("browseWorkers"),
+      ctaIcon: "search-outline",
+      ctaColor: "#2563EB",
+      onCta: () => router.push("/(tabs)/second"),
+    };
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <BookingRequestsEntry role={role} activityTab={activityTab} />
+
+      {isLoading ? (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : bookedList.length === 0 ? (
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={refreshControl}
+        >
+          <RichEmptyState {...emptyConfig()} />
+        </ScrollView>
+      ) : role === "MEDIATOR" ? (
+        <FlatList
+          data={bookedList}
+          keyExtractor={(it: any) => String(it?._id ?? "")}
+          renderItem={({ item }) => (
+            <View style={styles.cardWrap}>
+              <ListingsBookedWorkers
+                title="bookingDetails"
+                item={item}
+                showEngagementStrip
+              />
+            </View>
+          )}
+          contentContainerStyle={styles.listInner}
+          refreshControl={refreshControl}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.25}
+          ListFooterComponent={
+            activeQuery.isFetchingNextPage ? (
+              <ActivityIndicator
+                color={Colors.primary}
+                style={{ padding: 16 }}
+              />
+            ) : (
+              <View style={{ height: 80 }} />
+            )
+          }
+        />
+      ) : (
+        <ListingsVerticalBookings
+          listings={bookedList}
+          loadMore={loadMore}
+          isFetchingNextPage={activeQuery.isFetchingNextPage}
+          isLoading={false}
+          refreshControl={refreshControl}
+          showEngagementStrip
+        />
+      )}
+    </View>
+  );
+};
+
+const useTabWithParams = (DEFAULT_TAB: number) => {
+  const params = useLocalSearchParams();
+  const [tab, setTab] = useState(() => {
+    if (params?.tab !== undefined && params.tab !== "") {
+      const nextTab = Number(params.tab);
+      if (!isNaN(nextTab)) return nextTab;
+    }
+    return DEFAULT_TAB;
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      if (params?.tab !== undefined && params.tab !== "") {
         const nextTab = Number(params.tab);
         if (!isNaN(nextTab)) {
           setTab(nextTab);
-          return;
         }
       }
-      setTab(DEFAULT_TAB);
-    }, [params?.tab, DEFAULT_TAB]),
+    }, [params?.tab]),
   );
 
   return { tab, setTab };
@@ -292,30 +562,17 @@ const useTabWithParams = (DEFAULT_TAB: number) => {
    Worker
 ───────────────────────────────────────── */
 const WORKER_TABS: TabDef[] = [
-  { labelKey: "activityTabApplied", icon: "checkmark-circle-outline" },
-  { labelKey: "activityTabBookings", icon: "mail-outline" },
+  { labelKey: "activityTabWorkerAppliedServices", icon: "checkmark-circle-outline" },
+  { labelKey: "activityTabWorkerMyBookings", icon: "calendar-outline" },
 ];
 
 const WorkerActivity = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
   const { tab, setTab } = useTabWithParams(0);
-  const bookingsQ = useInfiniteQuery({
-    queryKey: ["activityWorkerBookings", userDetails?._id],
+  const appliedQ = useInfiniteQuery({
+    queryKey: ["activityWorkerApplied", userDetails?._id],
     queryFn: async ({ pageParam = 1 }) =>
-      WORKER.fetchAllMyBookings({ pageParam }),
-    initialPageParam: 1,
-    enabled: !!userDetails?._id,
-    retry: false,
-    getNextPageParam: (lastPage: any) =>
-      lastPage?.pagination?.page < lastPage?.pagination?.pages
-        ? lastPage.pagination.page + 1
-        : undefined,
-  });
-
-  const bookingInvitesQ = useInfiniteQuery({
-    queryKey: ["activityWorkerBookingInvites", userDetails?._id],
-    queryFn: async ({ pageParam = 1 }) =>
-      WORKER.fetchAllBookingReceivedInvitations({ pageParam }),
+      WORKER.fetchMyAppliedServices({ pageParam }),
     initialPageParam: 1,
     enabled: !!userDetails?._id,
     retry: false,
@@ -327,27 +584,20 @@ const WorkerActivity = () => {
 
   useFocusEffect(
     useCallback(() => {
-      bookingsQ.refetch();
-      bookingInvitesQ.refetch();
-    }, [bookingsQ.refetch, bookingInvitesQ.refetch]),
+      appliedQ.refetch();
+    }, [appliedQ.refetch]),
   );
 
   const services = useMemo(
-    () => dedupeById(flattenPaginatedPages(bookingsQ.data?.pages)),
-    [bookingsQ.data],
-  );
-  const bookingInvites = useMemo(
-    () => bookingInvitesQ.data?.pages?.flatMap((p: any) => p.data || []) || [],
-    [bookingInvitesQ.data],
+    () => dedupeById(flattenPaginatedPages(appliedQ.data?.pages)),
+    [appliedQ.data],
   );
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
-    async () => {
-      await Promise.all([bookingsQ.refetch(), bookingInvitesQ.refetch()]);
-    },
+    appliedQ.refetch,
   );
 
-  if (bookingsQ.isLoading && !bookingsQ.data)
+  if (appliedQ.isLoading && !appliedQ.data)
     return <ListingsServicesPlaceholder />;
 
   return (
@@ -397,13 +647,13 @@ const WorkerActivity = () => {
                   />
                 }
                 onEndReached={() =>
-                  bookingsQ.hasNextPage &&
-                  !bookingsQ.isFetchingNextPage &&
-                  bookingsQ.fetchNextPage()
+                  appliedQ.hasNextPage &&
+                  !appliedQ.isFetchingNextPage &&
+                  appliedQ.fetchNextPage()
                 }
                 onEndReachedThreshold={0.25}
                 ListFooterComponent={
-                  bookingsQ.isFetchingNextPage ? (
+                  appliedQ.isFetchingNextPage ? (
                     <ActivityIndicator
                       color={Colors.primary}
                       style={{ padding: 16 }}
@@ -416,53 +666,7 @@ const WorkerActivity = () => {
             )
           ) : null}
 
-          {tab === 1 ? (
-            bookingInvitesQ.isLoading && !bookingInvitesQ.data ? (
-              <View style={styles.loading}>
-                <ActivityIndicator size="large" color={Colors.primary} />
-              </View>
-            ) : bookingInvites.length === 0 ? (
-              <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-              >
-                <RichEmptyState
-                  icon="briefcase-outline"
-                  iconColor="#7C3AED"
-                  iconBg="#F5F3FF"
-                  title={t("activityTabWorkerBookingTitle")}
-                  message={t("activityEmptyLineBookingInvites")}
-                  ctaLabel={t("browseJobs")}
-                  ctaIcon="search-outline"
-                  onCta={() => router.push("/(tabs)/second")}
-                />
-              </ScrollView>
-            ) : (
-              <ListingsVerticalBookings
-                category="recievedRequests"
-                listings={bookingInvites}
-                loadMore={() =>
-                  bookingInvitesQ.hasNextPage &&
-                  !bookingInvitesQ.isFetchingNextPage &&
-                  bookingInvitesQ.fetchNextPage()
-                }
-                isFetchingNextPage={bookingInvitesQ.isFetchingNextPage}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-              />
-            )
-          ) : null}
+          {tab === 1 ? <ConfirmedBookingsTab role="WORKER" activityTab={1} /> : null}
         </View>
       </View>
     </FadeIn>
@@ -495,42 +699,19 @@ const EmployerActivity = () => {
         : undefined,
   });
 
-  const bookedQ = useInfiniteQuery({
-    queryKey: ["activityEmployerBookings", userDetails?._id],
-    queryFn: async ({ pageParam = 1 }) => {
-      const token = await getToken();
-      if (!token || !userDetails?._id) throw new Error("Unauthorized");
-      return EMPLOYER.fetchAllBookedWorkers({ pageParam, token });
-    },
-    initialPageParam: 1,
-    enabled: !!userDetails?._id,
-    retry: false,
-    getNextPageParam: (lastPage: any) =>
-      lastPage?.pagination?.page < lastPage?.pagination?.pages
-        ? lastPage.pagination.page + 1
-        : undefined,
-  });
-
   useFocusEffect(
     useCallback(() => {
       servicesQ.refetch();
-      bookedQ.refetch();
-    }, [servicesQ.refetch, bookedQ.refetch]),
+    }, [servicesQ.refetch]),
   );
 
   const services = useMemo(
     () => dedupeById(flattenPaginatedPages(servicesQ.data?.pages)),
     [servicesQ.data],
   );
-  const bookedListings = useMemo(
-    () => flattenPaginatedPages(bookedQ.data?.pages),
-    [bookedQ.data],
-  );
 
   const { refreshing: refreshingS, onRefresh: onRefreshS } =
     PULL_TO_REFRESH.usePullToRefresh(servicesQ.refetch);
-  const { refreshing: refreshingB, onRefresh: onRefreshB } =
-    PULL_TO_REFRESH.usePullToRefresh(bookedQ.refetch);
 
   if (servicesQ.isLoading && !servicesQ.data)
     return <ListingsServicesPlaceholder />;
@@ -611,51 +792,9 @@ const EmployerActivity = () => {
             )
           ) : null}
 
-          {/* ── Booked Workers tab ── */}
+          {/* ── Bookings tab ── */}
           {tab === 1 ? (
-            bookedListings.length === 0 ? (
-              <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshingB}
-                    onRefresh={onRefreshB}
-                    tintColor={Colors.primary}
-                  />
-                }
-              >
-                <RichEmptyState
-                  icon="people-outline"
-                  iconColor="#2563EB"
-                  iconBg="#EEF4FF"
-                  title={t("noBookedWorkersTitle")}
-                  message={t("noBookedWorkersMessage")}
-                  ctaLabel={t("browseWorkers")}
-                  ctaIcon="search-outline"
-                  ctaColor="#2563EB"
-                  onCta={() => router.push("/(tabs)/second")}
-                />
-              </ScrollView>
-            ) : (
-              <ListingsVerticalBookings
-                listings={bookedListings}
-                loadMore={() =>
-                  bookedQ.hasNextPage &&
-                  !bookedQ.isFetchingNextPage &&
-                  bookedQ.fetchNextPage()
-                }
-                isFetchingNextPage={bookedQ.isFetchingNextPage}
-                isLoading={false}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshingB}
-                    onRefresh={onRefreshB}
-                    tintColor={Colors.primary}
-                  />
-                }
-                showEngagementStrip
-              />
-            )
+            <ConfirmedBookingsTab role="EMPLOYER" activityTab={1} />
           ) : null}
         </View>
       </View>
@@ -704,25 +843,11 @@ const MediatorActivity = () => {
         : undefined,
   });
 
-  const bookedQ = useInfiniteQuery({
-    queryKey: ["activityMedBooked", userDetails?._id],
-    queryFn: ({ pageParam = 1 }) =>
-      MEDIATOR.fetchMyBookingsAsMediator({ pageParam }),
-    initialPageParam: 1,
-    enabled: !!userDetails?._id,
-    retry: false,
-    getNextPageParam: (lastPage: any) =>
-      lastPage?.pagination?.page < lastPage?.pagination?.pages
-        ? lastPage.pagination.page + 1
-        : undefined,
-  });
-
   useFocusEffect(
     useCallback(() => {
       appliedQ.refetch();
       servicesQ.refetch();
-      bookedQ.refetch();
-    }, [appliedQ.refetch, servicesQ.refetch, bookedQ.refetch]),
+    }, [appliedQ.refetch, servicesQ.refetch]),
   );
 
   const applied = useMemo(
@@ -733,18 +858,10 @@ const MediatorActivity = () => {
     () => dedupeById(flattenPaginatedPages(servicesQ.data?.pages)),
     [servicesQ.data],
   );
-  const booked = useMemo(
-    () => flattenPaginatedPages(bookedQ.data?.pages),
-    [bookedQ.data],
-  );
 
   const { refreshing, onRefresh } = PULL_TO_REFRESH.usePullToRefresh(
     async () => {
-      await Promise.all([
-        appliedQ.refetch(),
-        servicesQ.refetch(),
-        bookedQ.refetch(),
-      ]);
+      await Promise.all([appliedQ.refetch(), servicesQ.refetch()]);
     },
   );
 
@@ -753,8 +870,6 @@ const MediatorActivity = () => {
       servicesQ.fetchNextPage();
     else if (tab === 1 && appliedQ.hasNextPage && !appliedQ.isFetchingNextPage)
       appliedQ.fetchNextPage();
-    else if (tab === 2 && bookedQ.hasNextPage && !bookedQ.isFetchingNextPage)
-      bookedQ.fetchNextPage();
   };
 
   if (
@@ -873,64 +988,7 @@ const MediatorActivity = () => {
           ) : null}
 
           {tab === 2 ? (
-            booked.length === 0 ? (
-              <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-              >
-                <RichEmptyState
-                  icon="calendar-outline"
-                  iconColor="#7C3AED"
-                  iconBg="#F5F3FF"
-                  title={t("activityTabMedBookedTitle")}
-                  message={t("activityEmptyLineBooked")}
-                  ctaLabel={t("browseWorkers")}
-                  ctaIcon="search-outline"
-                  ctaColor="#7C3AED"
-                  onCta={() => router.push("/(tabs)/second")}
-                />
-              </ScrollView>
-            ) : (
-              <FlatList
-                data={booked}
-                keyExtractor={(it: any) => it._id}
-                renderItem={({ item }) => (
-                  <View style={styles.cardWrap}>
-                    <ListingsBookedWorkers
-                      title="bookingDetails"
-                      item={item}
-                      showEngagementStrip
-                    />
-                  </View>
-                )}
-                contentContainerStyle={styles.listInner}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    tintColor={Colors.primary}
-                  />
-                }
-                onEndReached={onEndReached}
-                onEndReachedThreshold={0.25}
-                ListFooterComponent={
-                  bookedQ.isFetchingNextPage ? (
-                    <ActivityIndicator
-                      color={Colors.primary}
-                      style={{ padding: 16 }}
-                    />
-                  ) : (
-                    <View style={{ height: 80 }} />
-                  )
-                }
-              />
-            )
+            <ConfirmedBookingsTab role="MEDIATOR" activityTab={2} />
           ) : null}
         </View>
       </View>
@@ -945,6 +1003,17 @@ const resolveActivityRole = (
   userDetails: Record<string, unknown> | null | undefined,
   appRole: string,
 ): ApiRole => {
+  const normalizedAppRole = String(appRole ?? "")
+    .toUpperCase()
+    .trim();
+  if (
+    normalizedAppRole === "WORKER" ||
+    normalizedAppRole === "EMPLOYER" ||
+    normalizedAppRole === "MEDIATOR"
+  ) {
+    return normalizedAppRole;
+  }
+
   const profile = {
     role: userDetails?.role || appRole,
     skills: userDetails?.skills,
@@ -956,7 +1025,6 @@ const resolveActivityRole = (
         ?.byService?.total,
     ) > 0;
 
-  // Contractors/mediators keep the 3-tab view (posted + applied + booked).
   if (canUserActAsMediator(profile)) {
     return "MEDIATOR";
   }

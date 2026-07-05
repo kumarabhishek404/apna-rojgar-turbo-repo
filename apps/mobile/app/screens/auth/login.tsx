@@ -34,6 +34,7 @@ import {
   DEV_OTP_PLACEHOLDER,
   shouldSkipOtpClient,
 } from "@/utils/devOtp";
+import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
 
 export default function Login() {
   APP_CONTEXT?.useApp();
@@ -168,6 +169,7 @@ export default function Login() {
           user.notificationConsent,
           user._id,
         ),
+        syncPendingLocaleToProfile(user._id),
         refreshUser().then((updatedUser) =>
           setUserDetails({ isAuth: true, ...updatedUser }),
         ),

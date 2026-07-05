@@ -7,6 +7,8 @@ import * as Updates from "expo-updates";
 const UpdateManager = () => {
   useEffect(() => {
     const checkForUpdate = async () => {
+      if (__DEV__ || !Updates.isEnabled) return;
+
       try {
         const update = await Updates.checkForUpdateAsync();
 
@@ -36,7 +38,9 @@ const UpdateManager = () => {
           console.log("✅ App is up to date.");
         }
       } catch (error) {
-        console.warn("⚠️ Failed to check for updates:", error);
+        if (!__DEV__) {
+          console.warn("Failed to check for updates:", error);
+        }
       }
     };
 

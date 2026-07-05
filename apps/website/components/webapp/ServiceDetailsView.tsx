@@ -106,7 +106,7 @@ export default function ServiceDetailsView({
   const [applySubmitError, setApplySubmitError] = useState("");
   const [showCancelApplyConfirm, setShowCancelApplyConfirm] = useState(false);
   const [cancelApplyError, setCancelApplyError] = useState("");
-  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionAmount, setPromotionAmount] = useState(500);
   const [isPromoting, setIsPromoting] = useState(false);
   const [promotionError, setPromotionError] = useState("");
   const { runPromotionPayment } = useCashfreePromotionPayment();

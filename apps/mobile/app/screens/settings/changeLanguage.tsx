@@ -12,12 +12,18 @@ import Button from "@/components/inputs/Button";
 import { LANGUAGE_KEY, LANGUAGES } from "@/constants";
 import { useMutation } from "@tanstack/react-query";
 import USER from "@/app/api/user";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
+import { isUserLoggedIn } from "@/utils/session";
+import {
+  clearPendingLocaleSync,
+  markPendingLocaleSync,
+} from "@/utils/pendingLocaleSync";
 
 export default function LanguageSelectionScreen() {
   const { locale, setLocale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms?.UserAtom);
+  const setLocaleValue = useSetAtom(Atoms?.LocaleAtom);
   const [selectedLanguage, setSelectedLanguage] = useState<string>(locale);
 
   const mutationUpdateProfileInfo = useMutation({
@@ -52,12 +58,19 @@ export default function LanguageSelectionScreen() {
   const handleSave = async () => {
     setLocale(selectedLanguage);
     await AsyncStorage.setItem(LANGUAGE_KEY, selectedLanguage);
-    if (userDetails?._id) {
+    setLocaleValue({ language: selectedLanguage });
+
+    const loggedIn = await isUserLoggedIn(userDetails);
+    if (loggedIn && userDetails?._id) {
+      await clearPendingLocaleSync();
       mutationUpdateProfileInfo?.mutate({
-        _id: userDetails?._id,
+        _id: userDetails._id,
         locale: { language: selectedLanguage },
       });
+    } else {
+      await markPendingLocaleSync(selectedLanguage);
     }
+
     router?.back();
   };
 

@@ -3,8 +3,6 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Linking,
-  Platform,
   Share,
 } from "react-native";
 import {
@@ -15,7 +13,13 @@ import {
 import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import { APPLINK } from "@/constants";
+import { SOCIAL_LINKS } from "@/constants/socialLinks";
 import { t } from "@/utils/translationHelper";
+import {
+  openExternalLink,
+  openInstagramProfile,
+  openPlayStore,
+} from "@/utils/openExternalLink";
 
 interface SocialItem {
   id: string;
@@ -25,18 +29,8 @@ interface SocialItem {
   bg: string;
   border: string;
   iconBg: string;
-  url: string;
-  onPress?: () => void;
+  onPress: () => void | Promise<void>;
 }
-
-const openLink = async (url: string) => {
-  try {
-    const supported = await Linking.canOpenURL(url);
-    if (supported) await Linking.openURL(url);
-  } catch (e) {
-    console.warn("Cannot open URL:", url);
-  }
-};
 
 const shareAppLink = async () => {
   try {
@@ -59,7 +53,7 @@ const SocialLinks = () => {
       bg: "#F0FBF3",
       border: "#B2ECC0",
       iconBg: "#DCF8E6",
-      url: "https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD?mode=gi_t",
+      onPress: () => openExternalLink(SOCIAL_LINKS.whatsappGroup),
     },
     {
       id: "instagram",
@@ -69,7 +63,7 @@ const SocialLinks = () => {
       bg: "#FFF1F5",
       border: "#F7B8CC",
       iconBg: "#FFE0EA",
-      url: "https://instagram.com/apnarojgarindia.com",
+      onPress: () => openInstagramProfile(SOCIAL_LINKS.instagram),
     },
     {
       id: "threads",
@@ -79,7 +73,7 @@ const SocialLinks = () => {
       bg: "#F5F5F5",
       border: "#D4D4D4",
       iconBg: "#E8E8E8",
-      url: "https://threads.net/@apnarojgarindia.com",
+      onPress: () => openExternalLink(SOCIAL_LINKS.threads),
     },
     {
       id: "linkedin",
@@ -89,7 +83,7 @@ const SocialLinks = () => {
       bg: "#EFF6FF",
       border: "#BFDBFE",
       iconBg: "#DBEAFE",
-      url: "https://linkedin.com/company/apnarojgarindia.com",
+      onPress: () => openExternalLink(SOCIAL_LINKS.linkedin),
     },
     {
       id: "facebook",
@@ -99,7 +93,7 @@ const SocialLinks = () => {
       bg: "#EFF6FF",
       border: "#BFDBFE",
       iconBg: "#DBEAFE",
-      url: "https://facebook.com/apnarojgarindia.com",
+      onPress: () => openExternalLink(SOCIAL_LINKS.facebook),
     },
     {
       id: "website",
@@ -109,7 +103,7 @@ const SocialLinks = () => {
       bg: "#F5F3FF",
       border: "#C4B5FD",
       iconBg: "#EDE9FE",
-      url: "https://apnarojgarindia.com",
+      onPress: () => openExternalLink(SOCIAL_LINKS.website),
     },
     {
       id: "playstore",
@@ -121,10 +115,7 @@ const SocialLinks = () => {
       bg: "#F0FBF3",
       border: "#B2ECC0",
       iconBg: "#D4F5E2",
-      url:
-        Platform.OS === "android"
-          ? "market://details?id=com.apnarojgar"
-          : "https://play.google.com/store/apps/details?id=com.apnarojgar",
+      onPress: () => openPlayStore(),
     },
     {
       id: "share",
@@ -140,10 +131,10 @@ const SocialLinks = () => {
       bg: "#EAF2FF",
       border: "#BFDBFE",
       iconBg: "#DBEAFE",
-      url: APPLINK,
       onPress: () => shareAppLink(),
     },
   ];
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
@@ -159,7 +150,7 @@ const SocialLinks = () => {
               styles.card,
               { backgroundColor: item.bg, borderColor: item.border },
             ]}
-            onPress={item.onPress ? item.onPress : () => openLink(item.url)}
+            onPress={item.onPress}
             activeOpacity={0.75}
           >
             <View style={[styles.iconCircle, { backgroundColor: item.iconBg }]}>

@@ -5,10 +5,9 @@ import TOAST from "@/app/hooks/toast";
 import EMPLOYER from "@/app/api/employer";
 import { t } from "@/utils/translationHelper";
 import { WORKTYPES } from ".";
-import { Linking } from "react-native";
+import { Linking, Platform, AppState, type AppStateStatus } from "react-native";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents, type AnalyticsCallMeta } from "@/utils/analyticsEvents";
-import { AppState } from "react-native";
 import { getDynamicWorkerType } from "@/utils/i18n";
 
 export const dateDifference = (date1: Date, date2: Date): string => {
@@ -201,11 +200,126 @@ export const calculateDistance = (
   return Math.floor(R * c); // Distance in kilometers
 };
 
-export const fetchCurrentLocation = async () => {
+export type LocationFetchError =
+  | "services_disabled"
+  | "permission_denied"
+  | "position_unavailable"
+  | "unknown";
+
+export type LocationFetchResult = {
+  location: GeoPoint | Record<string, never>;
+  address: string;
+  addressObject: Location.LocationGeocodedAddress | null;
+  error?: LocationFetchError;
+};
+
+const getPositionWithTimeout = async (
+  accuracy: Location.Accuracy,
+  timeoutMs: number,
+): Promise<Location.LocationObject | null> => {
   try {
-    const servicesEnabled = await Location.hasServicesEnabledAsync();
+    return await Promise.race([
+      Location.getCurrentPositionAsync({ accuracy }),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("location_timeout")), timeoutMs),
+      ),
+    ]);
+  } catch {
+    return null;
+  }
+};
+
+export type LocationSettingsPromptResult =
+  | "already_enabled"
+  | "enabled_via_dialog"
+  | "dialog_dismissed";
+
+/**
+ * Shows the Google Play in-app location dialog on Android (Image 1).
+ * Does NOT auto-open the full system Location settings screen.
+ */
+export const promptEnableDeviceLocation =
+  async (): Promise<LocationSettingsPromptResult> => {
+    if (await Location.hasServicesEnabledAsync()) {
+      return "already_enabled";
+    }
+
+    if (Platform.OS === "android") {
+      try {
+        await Location.enableNetworkProviderAsync();
+        if (await Location.hasServicesEnabledAsync()) {
+          return "enabled_via_dialog";
+        }
+      } catch {
+        // User tapped "No thanks" or dismissed the dialog.
+      }
+      return "dialog_dismissed";
+    }
+
+    return "dialog_dismissed";
+  };
+
+/** Opens full system location settings — call only when the user explicitly needs it. */
+export const openSystemLocationSettings = async (): Promise<void> => {
+  try {
+    if (Platform.OS === "android") {
+      try {
+        const IntentLauncher = await import("expo-intent-launcher");
+        await IntentLauncher.startActivityAsync(
+          IntentLauncher.ActivityAction.LOCATION_SOURCE_SETTINGS,
+        );
+        return;
+      } catch {
+        // Native module may be missing in older dev builds — fall back below.
+      }
+    }
+
+    await Linking.openSettings();
+  } catch (err) {
+    console.log("openSystemLocationSettings error:", err);
+  }
+};
+
+/** Runs `callback` when the app returns to the foreground (e.g. after a settings dialog). */
+export const onAppForeground = (callback: () => void): (() => void) => {
+  const subscription = AppState.addEventListener(
+    "change",
+    (nextState: AppStateStatus) => {
+      if (nextState === "active") {
+        callback();
+      }
+    },
+  );
+  return () => subscription.remove();
+};
+
+/** Opens app settings so the user can grant location permission. */
+export const openAppLocationSettings = async (): Promise<void> => {
+  try {
+    await Linking.openSettings();
+  } catch (err) {
+    console.log("openAppLocationSettings error:", err);
+  }
+};
+
+export const fetchCurrentLocation = async (): Promise<LocationFetchResult> => {
+  const emptyResult = (
+    error: LocationFetchError,
+  ): LocationFetchResult => ({
+    location: {},
+    address: "",
+    addressObject: null,
+    error,
+  });
+
+  try {
+    let servicesEnabled = await Location.hasServicesEnabledAsync();
     if (!servicesEnabled) {
-      return { location: {}, address: "", addressObject: null };
+      await promptEnableDeviceLocation();
+      servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        return emptyResult("services_disabled");
+      }
     }
 
     let permission = await Location.getForegroundPermissionsAsync();
@@ -213,18 +327,28 @@ export const fetchCurrentLocation = async () => {
       permission = await Location.requestForegroundPermissionsAsync();
     }
     if (permission.status !== "granted") {
-      return { location: {}, address: "", addressObject: null };
+      if (permission.canAskAgain === false) {
+        await openAppLocationSettings();
+      }
+      return emptyResult("permission_denied");
     }
 
     let currentLocation = await Location.getLastKnownPositionAsync({
-      maxAge: 60_000,
-      requiredAccuracy: 150,
+      maxAge: 300_000,
+      requiredAccuracy: 500,
     });
 
     if (!currentLocation) {
-      currentLocation = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
+      const accuracyLevels = [
+        Location.Accuracy.Balanced,
+        Location.Accuracy.Low,
+        Location.Accuracy.High,
+      ];
+
+      for (const accuracy of accuracyLevels) {
+        currentLocation = await getPositionWithTimeout(accuracy, 15_000);
+        if (currentLocation) break;
+      }
     }
 
     if (
@@ -232,10 +356,10 @@ export const fetchCurrentLocation = async () => {
       !Number.isFinite(currentLocation.coords.longitude) ||
       !Number.isFinite(currentLocation.coords.latitude)
     ) {
-      return { location: {}, address: "", addressObject: null };
+      return emptyResult("position_unavailable");
     }
 
-    const tempLocation = {
+    const tempLocation: GeoPoint = {
       type: "Point",
       coordinates: [
         currentLocation.coords.longitude,
@@ -251,20 +375,27 @@ export const fetchCurrentLocation = async () => {
       });
     } catch {
       await new Promise((resolve) => setTimeout(resolve, 350));
-      response = await Location.reverseGeocodeAsync({
-        longitude: currentLocation.coords.longitude,
-        latitude: currentLocation.coords.latitude,
-      });
+      try {
+        response = await Location.reverseGeocodeAsync({
+          longitude: currentLocation.coords.longitude,
+          latitude: currentLocation.coords.latitude,
+        });
+      } catch {
+        // Coordinates are still valid even when reverse geocoding fails.
+      }
     }
+
+    const addressObject = response?.[0] || null;
+    const resolvedAddress = buildAddressFromGeocoded(addressObject);
 
     return {
       location: tempLocation,
-      address: response?.[0]?.formattedAddress || "",
-      addressObject: response?.[0] || null,
+      address: resolvedAddress,
+      addressObject,
     };
   } catch (err) {
     console.log("Error while fetching location:", err);
-    return { location: {}, address: "", addressObject: null };
+    return emptyResult("unknown");
   }
 };
 
@@ -608,18 +739,89 @@ export const translateWorkerTypes = (workerTypes: any[]) => {
   }));
 };
 
+export type LatLong = { latitude: number; longitude: number };
+
+export type GeoPoint = {
+  type: "Point";
+  coordinates: [number, number];
+};
+
+export const isValidGeoPoint = (location: any): location is GeoPoint => {
+  const coords = location?.coordinates;
+  if (!Array.isArray(coords) || coords.length < 2) return false;
+  const [lng, lat] = coords;
+  return Number.isFinite(lng) && Number.isFinite(lat);
+};
+
+export const buildAddressFromGeocoded = (
+  addressObject: Location.LocationGeocodedAddress | null | undefined,
+): string => {
+  if (!addressObject) return "";
+  if (addressObject.formattedAddress?.trim()) {
+    return addressObject.formattedAddress.trim();
+  }
+
+  const parts = [
+    addressObject.name,
+    addressObject.street,
+    addressObject.streetNumber,
+    addressObject.district || addressObject.subregion,
+    addressObject.city,
+    addressObject.region,
+    addressObject.postalCode,
+    addressObject.country,
+  ].filter((part) => part && String(part).trim());
+
+  return [...new Set(parts.map((part) => String(part).trim()))].join(", ");
+};
+
+const geocodeAddressVariants = (address: string): string[] => {
+  const trimmed = address.trim();
+  if (!trimmed) return [];
+
+  const variants = new Set<string>([trimmed]);
+
+  const withoutPlusCode = trimmed.replace(/^[\w\d]+\+[\w\d]+,\s*/i, "").trim();
+  if (withoutPlusCode) variants.add(withoutPlusCode);
+
+  if (!/\bindia\b/i.test(trimmed)) {
+    variants.add(`${trimmed}, India`);
+    if (withoutPlusCode) variants.add(`${withoutPlusCode}, India`);
+  }
+
+  const segments = trimmed.split(",").map((part) => part.trim()).filter(Boolean);
+  if (segments.length > 2) {
+    variants.add(segments.slice(-3).join(", "));
+    variants.add(segments.slice(-4).join(", "));
+  }
+
+  return Array.from(variants);
+};
+
 /** Forward geocoding does not need GPS / foreground location permission. */
-export const getLatLongFromAddress = async (address: string) => {
+export const getLatLongFromAddress = async (
+  address: string,
+): Promise<LatLong | null> => {
   try {
     if (!address?.trim()) return null;
 
-    const result = await Location.geocodeAsync(address);
-    
-    if (result.length > 0) {
-      return {
-        latitude: result[0].latitude,
-        longitude: result[0].longitude,
-      };
+    for (const variant of geocodeAddressVariants(address)) {
+      try {
+        const result = await Location.geocodeAsync(variant);
+        const first = result?.[0];
+        if (
+          first &&
+          Number.isFinite(first.latitude) &&
+          Number.isFinite(first.longitude)
+        ) {
+          return {
+            latitude: first.latitude,
+            longitude: first.longitude,
+          };
+        }
+      } catch {
+        // Try the next address variant.
+      }
     }
 
     return null;
@@ -627,6 +829,102 @@ export const getLatLongFromAddress = async (address: string) => {
     console.log("Geocode error:", error);
     return null;
   }
+};
+
+export const getLatLongFromAddressParts = async (parts: {
+  village?: string;
+  subDistrict?: string;
+  district?: string;
+  state?: string;
+  pinCode?: string;
+  additionalDetails?: string;
+}): Promise<LatLong | null> => {
+  const fullAddress = [
+    parts.additionalDetails,
+    parts.village,
+    parts.subDistrict,
+    parts.district,
+    parts.state,
+    parts.pinCode,
+    "India",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (!fullAddress || fullAddress === "India") return null;
+
+  const coords = await getLatLongFromAddress(fullAddress);
+  if (coords) return coords;
+
+  const fallbackAddress = [
+    parts.village,
+    parts.district,
+    parts.state,
+    parts.pinCode,
+    "India",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (fallbackAddress && fallbackAddress !== "India") {
+    const coords = await getLatLongFromAddress(fallbackAddress);
+    if (coords) return coords;
+  }
+
+  const pinCodeFallback = [
+    parts.district,
+    parts.state,
+    parts.pinCode,
+    "India",
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (pinCodeFallback && pinCodeFallback !== "India") {
+    const coords = await getLatLongFromAddress(pinCodeFallback);
+    if (coords) return coords;
+  }
+
+  if (parts.pinCode?.length === 6) {
+    return getLatLongFromAddress(`${parts.pinCode}, India`);
+  }
+
+  return null;
+};
+
+export const resolveGeoLocation = async (
+  address: string,
+  existingLocation?: { coordinates?: number[] } | null,
+  manualParts?: {
+    village?: string;
+    subDistrict?: string;
+    district?: string;
+    state?: string;
+    pinCode?: string;
+    additionalDetails?: string;
+  },
+): Promise<GeoPoint | null> => {
+  if (isValidGeoPoint(existingLocation)) {
+    return {
+      type: "Point",
+      coordinates: [
+        existingLocation.coordinates[0],
+        existingLocation.coordinates[1],
+      ],
+    };
+  }
+
+  let coords = await getLatLongFromAddress(address);
+  if (!coords && manualParts) {
+    coords = await getLatLongFromAddressParts(manualParts);
+  }
+
+  if (!coords) return null;
+
+  return {
+    type: "Point",
+    coordinates: [coords.longitude, coords.latitude],
+  };
 };
 
 export const getDistanceFromLocation = async (

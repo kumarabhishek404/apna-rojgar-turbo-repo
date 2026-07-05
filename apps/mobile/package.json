@@ -1,7 +1,7 @@
 {
   "name": "labour-app",
   "main": "expo-router/entry",
-  "version": "1.3.3",
+  "version": "1.3.5",
   "engines": {
     "node": ">=20.19.4"
   },
@@ -49,6 +49,7 @@
     "expo-font": "~14.0.12",
     "expo-image-manipulator": "~14.0.8",
     "expo-image-picker": "~17.0.11",
+    "expo-intent-launcher": "~13.0.8",
     "expo-linear-gradient": "~15.0.8",
     "expo-linking": "~8.0.12",
     "expo-local-authentication": "~17.0.8",

@@ -97,7 +97,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
     "idle" | "checking" | "ok" | "error"
   >("idle");
   const [showPromotionModal, setShowPromotionModal] = useState(false);
-  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionAmount, setPromotionAmount] = useState(500);
   const [promotionEnvironment, setPromotionEnvironment] = useState("sandbox");
   const [isPromotionProcessing, setIsPromotionProcessing] = useState(false);
   const verifiedPromotionOrderRef = useRef("");

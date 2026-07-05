@@ -11,6 +11,7 @@ export type PromotionOrderResponse = {
   paymentSessionId: string;
   amount: number;
   currency: string;
+  environment?: string;
   serviceId?: string | null;
   serviceJobId?: string | null;
 };

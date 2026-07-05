@@ -7,15 +7,25 @@ import {
   verifyPromotionPayment,
 } from "@/lib/payment";
 
-const getCashfreeMode = () => {
+const getCashfreeMode = (environment?: string) => {
   const env = (
-    process.env.NEXT_PUBLIC_CASHFREE_ENV || "SANDBOX"
+    environment ||
+    process.env.NEXT_PUBLIC_CASHFREE_ENV ||
+    "SANDBOX"
   ).toUpperCase();
   return env === "PRODUCTION" ? "production" : "sandbox";
 };
 
 const getFriendlyError = (message: string) => {
   const raw = message || "";
+  if (
+    raw.includes("token is not present") ||
+    raw.includes("order_token_invalid") ||
+    raw.includes("payment_session_id is not present") ||
+    raw.includes("payment_session_id_invalid")
+  ) {
+    return "Payment session could not be opened. The app and server Cashfree environments must match (both sandbox or both production).";
+  }
   if (
     raw.includes("authentication failed") ||
     raw.includes("Cashfree authentication failed") ||
@@ -30,7 +40,7 @@ export function useCashfreePromotionPayment() {
   const startPromotionPayment = useCallback(async (serviceId?: string) => {
     const order = await createPromotionOrder(serviceId);
 
-    const cashfree = await load({ mode: getCashfreeMode() });
+    const cashfree = await load({ mode: getCashfreeMode(order.environment) });
 
     await new Promise<void>((resolve, reject) => {
       cashfree

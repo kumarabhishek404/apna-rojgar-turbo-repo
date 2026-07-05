@@ -7,7 +7,6 @@ import {
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Linking } from "react-native";
 import React, { useRef, useEffect, useState } from "react";
 import { Tabs, router, usePathname, Redirect } from "expo-router";
 import {
@@ -32,7 +31,8 @@ import { uploadPendingProfileImage } from "@/utils/backgroundImageUpload";
 import REFRESH_USER from "../hooks/useRefreshUser";
 import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isSessionValid } from "@/utils/session";
+import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
+import { isAuthApiError } from "@/utils/apiError";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -97,41 +97,50 @@ export default function Layout() {
   }, [userDetails]);
 
   useEffect(() => {
-    const getUrlAsync = async () => {
-      const initialUrl = await Linking.getInitialURL();
-      if (initialUrl) console.log("Opened via URL:", initialUrl);
-    };
+    if (!storageHydrated) return;
 
-    getUrlAsync();
+    const shouldPollNotifications =
+      isSessionValid(userDetails) && hasAuthenticatedUser(userDetails);
 
-    const subscription = Linking.addEventListener("url", ({ url }) => {
-      console.log("Received URL:", url);
-      // parse the URL and navigate
-    });
-
-    return () => subscription.remove();
-  }, []);
-
-  useEffect(() => {
     const fetchUnreadNotifications = async () => {
+      if (!shouldPollNotifications) {
+        setNotificationCount(0);
+        return;
+      }
+
+      const token = await getToken();
+      if (!token) {
+        setNotificationCount(0);
+        return;
+      }
+
       try {
-        const token = await getToken();
-        if (!token || !userDetails?._id || !userDetails?.isAuth) return;
         const data = await NOTIFICATION.fetchUnreadNotificationsCount();
         setNotificationCount(data?.unreadCount || 0);
-      } catch (error: any) {
-        console.error("Error fetching notifications:", error?.response);
+      } catch (error: unknown) {
+        if (!isAuthApiError(error)) {
+          console.error("Error fetching notifications:", error);
+        }
       }
     };
 
-    let intervalId: ReturnType<typeof setInterval>;
-    if (userDetails?._id) {
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+
+    if (shouldPollNotifications) {
       fetchUnreadNotifications();
       intervalId = setInterval(fetchUnreadNotifications, POLLING_INTERVAL);
+    } else {
+      setNotificationCount(0);
     }
 
-    return () => clearInterval(intervalId);
-  }, [userDetails?._id, setNotificationCount]); // Added setNotificationCount to dependencies
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [
+    storageHydrated,
+    userDetails,
+    setNotificationCount,
+  ]);
 
   useEffect(() => {
     if (!history.current.includes(pathname)) {

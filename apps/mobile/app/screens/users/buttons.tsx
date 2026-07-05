@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, Dimensions, Animated, Easing } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import Colors from "@/constants/Colors";
@@ -37,6 +37,7 @@ const ButtonContainer = ({
     control,
     watch,
     setValue,
+    reset,
     handleSubmit,
     formState: { errors },
   } = useForm({
@@ -46,7 +47,7 @@ const ButtonContainer = ({
       location: {},
       startDate: new Date(),
       duration: 0,
-      noOfWorkers: 0,
+      noOfWorkers: 1,
       description: "",
       facilities: {
         food: false,
@@ -86,46 +87,46 @@ const ButtonContainer = ({
   const mutationAddBookingRequest = useMutation({
     mutationKey: ["addBookingRequest"],
     mutationFn: (payload: any) => EMPLOYER?.addBookingRequest(payload),
-    onSuccess: (response) => {
+    onSuccess: () => {
       trackEvent(AnalyticsEvents.WORKER_BOOKING_REQUEST_SUCCESS, {
         workerUserId: String(Array.isArray(id) ? id[0] : id ?? ""),
       });
-      setDrawerState({
-        visible: false,
-      }); // Close the drawer after success
+      setDrawerState({ visible: false });
       refetch();
       TOAST?.success(t("bookRequestSentSuccessfully"));
     },
   });
 
   const handleSubmitBooking = async (data: any) => {
-    console.log("handleSubmitBooking", data);
+    const workerUserId = Array.isArray(id) ? id[0] : id;
 
     if (
-      !data?.appliedSkill ||
-      !data?.address ||
+      !data?.appliedSkill?.skill ||
+      !data?.address?.trim() ||
       !data?.startDate ||
-      !data?.duration
+      !data?.duration ||
+      !data?.noOfWorkers
     ) {
-      throw new Error("Required fields are missing");
+      throw new Error(t("pleaseFillAllFields"));
     }
 
     const formData: any = new FormData();
 
-    formData.append("requiredNumberOfWorkers", data?.noOfWorkers);
-    formData.append("userId", id);
-    formData.append("duration", data?.duration);
-    formData.append("description", data?.description);
-    formData.append("address", data?.address);
-    formData.append("location", JSON.stringify(data?.location || {}));
-    formData.append("startDate", moment(data?.startDate).format("YYYY-MM-DD"));
-    formData.append("facilities", JSON.stringify(data?.facilities));
-    formData.append("appliedSkill", JSON.stringify(data?.appliedSkill));
+    formData.append("requiredNumberOfWorkers", String(data.noOfWorkers));
+    formData.append("userId", String(workerUserId));
+    formData.append("duration", String(data.duration));
+    formData.append("description", data.description || "");
+    formData.append("address", data.address);
+    formData.append("location", JSON.stringify(data.location || {}));
+    formData.append("startDate", moment(data.startDate).format("YYYY-MM-DD"));
+    formData.append("facilities", JSON.stringify(data.facilities || {}));
+    formData.append("appliedSkill", JSON.stringify(data.appliedSkill));
 
-    console.log("Form data --", formData);
+    await mutationAddBookingRequest.mutateAsync(formData);
+  };
 
-    const response: any = mutationAddBookingRequest?.mutate(formData);
-    return response?.data;
+  const handleSubmitBookingErrors = () => {
+    TOAST?.error(t("pleaseFillAllFields"));
   };
 
   useEffect(() => {
@@ -133,6 +134,13 @@ const ButtonContainer = ({
       if (!prevState?.visible) return prevState;
       return {
         ...prevState,
+        primaryButton: prevState.primaryButton
+          ? {
+              ...prevState.primaryButton,
+              loading: mutationAddBookingRequest.isPending,
+              disabled: mutationAddBookingRequest.isPending,
+            }
+          : prevState.primaryButton,
         content: () => (
           <AddBookingDetails
             control={control}
@@ -151,10 +159,33 @@ const ButtonContainer = ({
     watch("noOfWorkers"),
     watch("startDate"),
     watch("address"),
+    watch("location"),
     errors,
-  ]); // ✅ Re-renders drawer when 'appliedSkill' and 'facilities changes
+    mutationAddBookingRequest.isPending,
+    user?.skills,
+  ]);
 
   const handleAddBookingDetails = () => {
+    const workerSkills = user?.skills || [];
+    const defaultSkill =
+      workerSkills.length === 1 ? workerSkills[0] : {};
+
+    reset({
+      appliedSkill: defaultSkill,
+      address: userDetails?.address || "",
+      location: {},
+      startDate: new Date(),
+      duration: 0,
+      noOfWorkers: 1,
+      description: "",
+      facilities: {
+        food: false,
+        living: false,
+        esi_pf: false,
+        travelling: false,
+      },
+    });
+
     setDrawerState({
       visible: true,
       title: "addBookingDetails",
@@ -164,12 +195,14 @@ const ButtonContainer = ({
           setValue={setValue}
           errors={errors}
           watch={watch}
-          workerSkills={user?.skills}
+          workerSkills={workerSkills}
         />
       ),
       primaryButton: {
         title: "addBookingDetails",
-        action: handleSubmit(handleSubmitBooking),
+        action: handleSubmit(handleSubmitBooking, handleSubmitBookingErrors),
+        loading: mutationAddBookingRequest.isPending,
+        disabled: mutationAddBookingRequest.isPending,
       },
       secondaryButton: {
         title: "cancel",

@@ -382,13 +382,14 @@ const styles = StyleSheet.create({
   },
   skillTag: {
     backgroundColor: "#F8FAFC",
-    borderRadius: 999,
+    borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginRight: 6,
     marginBottom: 4,
     borderWidth: 1,
     borderColor: "rgba(34, 64, 154, 0.12)",
+    alignSelf: "flex-start",
   },
   skillTagText: {
     fontSize: 11,

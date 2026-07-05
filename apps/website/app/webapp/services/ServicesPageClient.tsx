@@ -108,7 +108,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [scrollModalToApply, setScrollModalToApply] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [promotionAmount, setPromotionAmount] = useState(100);
+  const [promotionAmount, setPromotionAmount] = useState(500);
   const [promotingServiceId, setPromotingServiceId] = useState<string | null>(null);
   const { runPromotionPayment } = useCashfreePromotionPayment();
 

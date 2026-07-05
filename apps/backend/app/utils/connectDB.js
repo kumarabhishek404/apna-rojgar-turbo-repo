@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { seedAppMetadataDefaults } from "./appMetadata.service.js";
 
 export const connectDB = async () => {
   try {
@@ -24,6 +25,8 @@ export const connectDB = async () => {
     await mongoose.connect(mongoURI, {
       dbName,
     });
+
+    await seedAppMetadataDefaults();
 
     console.log(`✅ MongoDB Connected`);
     console.log(`📂 Database: ${dbName}`);

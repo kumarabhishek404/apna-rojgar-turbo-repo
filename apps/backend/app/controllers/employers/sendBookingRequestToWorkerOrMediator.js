@@ -73,7 +73,7 @@ const validateAndExtractData = (req, res, employerId) => {
     requiredNumberOfWorkers,
   } = req.body;
 
-  if (employerId.toString() === userId.toString()) {
+  if (employerId.toString() === userId?.toString()) {
     res.status(400).json({
       success: false,
       message: "You cannot send an invitation to yourself.",
@@ -81,7 +81,26 @@ const validateAndExtractData = (req, res, employerId) => {
     return null;
   }
 
-  if (!userId || !startDate || !appliedSkill || !duration || !address || !requiredNumberOfWorkers) {
+  let parsedSkill = appliedSkill;
+  if (typeof appliedSkill === "string") {
+    try {
+      parsedSkill = JSON.parse(appliedSkill);
+    } catch {
+      parsedSkill = null;
+    }
+  }
+
+  const workerCount = Number(requiredNumberOfWorkers);
+
+  if (
+    !userId ||
+    !startDate ||
+    !parsedSkill?.skill ||
+    !duration ||
+    !address?.trim?.() ||
+    !Number.isFinite(workerCount) ||
+    workerCount <= 0
+  ) {
     res.status(400).json({
       success: false,
       message: "All fields are required except description.",
@@ -94,12 +113,15 @@ const validateAndExtractData = (req, res, employerId) => {
     startDate,
     type,
     subType,
-    appliedSkill,
+    appliedSkill:
+      typeof appliedSkill === "string"
+        ? appliedSkill
+        : JSON.stringify(parsedSkill),
     duration,
     facilities,
     description,
     address,
-    requiredNumberOfWorkers,
+    requiredNumberOfWorkers: workerCount,
   };
 };
 
@@ -165,19 +187,29 @@ const createInvitation = async (
   req
 ) => {
   try {
+    const facilities =
+      typeof invitationData.facilities === "string"
+        ? JSON.parse(invitationData.facilities)
+        : invitationData.facilities || {};
+
+    const appliedSkill =
+      typeof invitationData.appliedSkill === "string"
+        ? JSON.parse(invitationData.appliedSkill)
+        : invitationData.appliedSkill;
+
     return await Invitation.create({
       employer: employerId,
       bookedWorker: invitationData.userId,
       startDate: invitationData.startDate,
       type: invitationData.type,
       subType: invitationData.subType,
-      appliedSkill: JSON.parse(invitationData?.appliedSkill),
+      appliedSkill,
       duration: invitationData.duration,
-      facilities: JSON.parse(invitationData.facilities),
+      facilities,
       description: invitationData.description || "",
       address: invitationData.address,
       images,
-      requiredNumberOfWorkers: invitationData.requiredNumberOfWorkers ?? [],
+      requiredNumberOfWorkers: invitationData.requiredNumberOfWorkers,
       status: "PENDING",
     });
   } catch (error) {

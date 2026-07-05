@@ -19,6 +19,7 @@ import {
   savePendingProfileUpload,
   uploadPendingProfileImage,
 } from "@/utils/backgroundImageUpload";
+import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
 import Loader from "@/components/commons/Loaders/Loader";
 
@@ -61,6 +62,7 @@ const UploadProfilePictureScreen = () => {
         ).catch((err) =>
           console.error("Push notification registration failed: ", err),
         );
+        void syncPendingLocaleToProfile(user._id);
       }
       setIsSavingProfileStep(false);
     },

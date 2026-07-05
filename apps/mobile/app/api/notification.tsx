@@ -1,5 +1,6 @@
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
+import { getToken } from "@/utils/authStorage";
 
 const registerDevice = async (payload: any) => {
   try {
@@ -44,13 +45,18 @@ const fetchAllNotifications = async ({ pageParam }: any) => {
 };
 
 const fetchUnreadNotificationsCount = async () => {
+  const token = await getToken();
+  if (!token || token === "null" || token === "undefined") {
+    return null;
+  }
+
   try {
     const data = await API_CLIENT.makeGetRequest(`/notification/unread-count`);
     return data?.data;
   } catch (error: any) {
     console.error(
       `[userService] An error occurred while fetching unread notifications count : `,
-      error?.response
+      error?.response?.data?.message ?? error?.response,
     );
     throw error;
   }

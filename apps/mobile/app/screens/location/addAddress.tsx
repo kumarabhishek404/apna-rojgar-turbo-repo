@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -23,8 +23,11 @@ import { t } from "@/utils/translationHelper";
 import { STATES } from "@/constants";
 import SERVICE from "@/app/api/services";
 import {
+  buildAddressFromGeocoded,
   fetchCurrentLocation,
-  getLatLongFromAddress,
+  isValidGeoPoint,
+  onAppForeground,
+  resolveGeoLocation,
 } from "@/constants/functions";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import ButtonComp from "@/components/inputs/Button";
@@ -101,7 +104,7 @@ const AddAddressDrawer = ({
         primaryButton: null,
         secondaryButton: null,
       });
-      // await refreshUser();
+      await refreshUser();
       onClose();
       reset();
       setIsEditing(false);
@@ -112,17 +115,6 @@ const AddAddressDrawer = ({
       console.error("Error updating address", err);
     },
   });
-
-  const buildGeoLocation = async (address: string) => {
-    const coords = await getLatLongFromAddress(address);
-
-    if (!coords) return null;
-
-    return {
-      type: "Point",
-      coordinates: [coords.longitude, coords.latitude],
-    };
-  };
 
   useEffect(() => {
     if (visible) {
@@ -171,12 +163,10 @@ const AddAddressDrawer = ({
           })) || [];
 
       setSubDistricts(foundSubDistricts);
-      setVillages([]); // Reset villages
+      setVillages([]);
 
       setValue("subDistrict", "");
       setValue("village", "");
-      // setValue("pinCode", "");
-      // setValue("additionalDetails", "");
       setPinCode("");
       setAdditionalDetails("");
     }
@@ -197,26 +187,65 @@ const AddAddressDrawer = ({
 
       setVillages(foundVillages);
       setValue("village", "");
-      // setValue("pinCode", "");
-      // setValue("additionalDetails", "");
       setPinCode("");
       setAdditionalDetails("");
     }
   }, [selectedSubDistrict, allStateVillages]);
 
+  const villageRequired = villages?.length > 0;
+  const formLocation = watch("location");
+  const hasCapturedLocation =
+    Boolean(locationAddress) || isValidGeoPoint(formLocation);
+
+  const isManualAddressComplete =
+    Boolean(watch("state") && watch("district") && watch("subDistrict")) &&
+    pinCode?.length >= 6 &&
+    (!villageRequired || Boolean(watch("village")));
+
+  const usesManualAddress = isEditing || isManualAddressComplete;
+  const canSaveNewAddress =
+    hasCapturedLocation || isManualAddressComplete;
+
+  const buildManualAddress = (data: any) =>
+    [
+      additionalDetails,
+      data.village,
+      data.subDistrict,
+      data.district,
+      data.state,
+      pinCode,
+      "India",
+    ]
+      .filter(Boolean)
+      .join(", ");
+
   const onAddAddress = async (data: any) => {
     let finalAddress =
       selectedTab === "savedAddresses"
         ? selectedAddress
-        : isEditing
-          ? `${additionalDetails} ${data.village}, ${data.subDistrict}, ${data.district}, ${data.state}, ${pinCode}`
+        : usesManualAddress
+          ? buildManualAddress(data)
           : locationAddress;
 
-    // 🔥 STEP 1: Get fresh geoLocation
-    const geoLocation = await buildGeoLocation(finalAddress);
+    const manualParts = usesManualAddress
+      ? {
+          village: data.village,
+          subDistrict: data.subDistrict,
+          district: data.district,
+          state: data.state,
+          pinCode,
+          additionalDetails,
+        }
+      : undefined;
 
-    if (!geoLocation) {
-      TOAST?.error("Unable to fetch location from address");
+    const geoLocation = await resolveGeoLocation(
+      finalAddress,
+      data.location,
+      manualParts,
+    );
+
+    if (!geoLocation && type !== "secondary") {
+      TOAST?.error(t("unableToFetchLocationFromAddress"));
       return;
     }
 
@@ -231,11 +260,11 @@ const AddAddressDrawer = ({
         ? {
             address: finalAddress,
             savedAddresses: userDetails?.savedAddresses || [],
-            geoLocation: geoLocation, // ✅ always correct
+            ...(geoLocation ? { geoLocation } : {}),
           }
         : {
             savedAddresses: updatedSavedAddresses,
-            geoLocation: geoLocation,
+            ...(geoLocation ? { geoLocation } : {}),
           }),
     });
 
@@ -244,12 +273,25 @@ const AddAddressDrawer = ({
     // ================================
     if (type === "secondary") {
       setAddress({ address: finalAddress });
-      setLocation(geoLocation); // ✅ FIXED
-      setSavedAddress(updatedSavedAddresses);
-      // Persist in profile as well, so it appears in saved addresses consistently.
+      if (geoLocation) {
+        setLocation(geoLocation);
+      }
+      setSavedAddress(updatedSavedAddresses, finalAddress);
+      setDrawerState({
+        visible: false,
+        title: "",
+        content: () => null,
+        primaryButton: null,
+        secondaryButton: null,
+      });
+      onClose();
+      reset();
+      setIsEditing(false);
+      setLocationAddress("");
+      TOAST?.success(t("addressAddedSuccessfully"));
       mutationUpdateProfileInfo.mutate({
         savedAddresses: finalAddress,
-        geoLocation,
+        ...(geoLocation ? { geoLocation } : {}),
       });
       return;
     }
@@ -260,12 +302,12 @@ const AddAddressDrawer = ({
     if (isMainAddress) {
       mutationUpdateProfileInfo.mutate({
         address: finalAddress,
-        geoLocation, // ✅ SEND THIS
+        ...(geoLocation ? { geoLocation } : {}),
       });
     } else {
       mutationUpdateProfileInfo.mutate({
         savedAddresses: finalAddress,
-        geoLocation,
+        ...(geoLocation ? { geoLocation } : {}),
       });
     }
   };
@@ -307,21 +349,53 @@ const AddAddressDrawer = ({
     },
   });
 
-  const fetchLocation = async () => {
+  const pendingLocationRetryRef = useRef(false);
+  const isFetchingLocationRef = useRef(false);
+
+  const fetchLocation = useCallback(async () => {
     setIsFetchingLocation(true);
-    let { location, address, addressObject }: any =
+    isFetchingLocationRef.current = true;
+    const { location, address, addressObject, error } =
       await fetchCurrentLocation();
-    if (address) {
-      // const cleanAddress = address.split(",").slice(1).join(",").trim();
-      setLocationAddress(address);
-      setValue("location", location);
-      setValue("state", addressObject?.region);
-      setValue("pinCode", addressObject?.postalCode);
+    const resolvedAddress =
+      address || buildAddressFromGeocoded(addressObject);
+
+    if (isValidGeoPoint(location)) {
+      pendingLocationRetryRef.current = false;
+      setIsEditing(false);
+      setLocationAddress(resolvedAddress || t("currentLocationCaptured"));
+      setValue("location", location as { coordinates: number[] });
+      if (addressObject?.region) setValue("state", addressObject.region);
+      if (addressObject?.postalCode) setValue("pinCode", addressObject.postalCode);
+    } else if (error === "permission_denied") {
+      pendingLocationRetryRef.current = true;
+      TOAST?.error(t("locationPermissionDenied"));
+    } else if (error === "services_disabled") {
+      pendingLocationRetryRef.current = true;
+      TOAST?.error(t("locationServicesDisabled"));
+    } else if (error === "position_unavailable") {
+      pendingLocationRetryRef.current = false;
+      TOAST?.error(t("locationUnavailable"));
     } else {
-      TOAST?.error("Something went wrong while fetching location.");
+      pendingLocationRetryRef.current = false;
+      TOAST?.error(t("locationFetchFailed"));
     }
+    isFetchingLocationRef.current = false;
     setIsFetchingLocation(false);
-  };
+  }, [setValue]);
+
+  useEffect(() => {
+    if (!visible) {
+      pendingLocationRetryRef.current = false;
+      return;
+    }
+
+    return onAppForeground(() => {
+      if (pendingLocationRetryRef.current && !isFetchingLocationRef.current) {
+        fetchLocation();
+      }
+    });
+  }, [visible, fetchLocation]);
 
   const renderSavedAddresses = () => (
     <View style={{ marginTop: 20 }}>
@@ -569,13 +643,8 @@ const AddAddressDrawer = ({
               userDetails?.savedAddresses?.length === 0) ||
             (selectedTab === "addNewAddress" &&
               isEditing &&
-              (!watch("state") ||
-                !watch("district") ||
-                !watch("subDistrict") ||
-                !watch("village") ||
-                pinCode?.length < 6)) ||
-            (selectedTab === "addNewAddress" && !isEditing && !locationAddress),
-          // (!selectedAddress && !isEditing),
+              !isManualAddressComplete) ||
+            (selectedTab === "addNewAddress" && !canSaveNewAddress),
         },
         secondaryButton: {
           title: "cancel",
@@ -592,6 +661,7 @@ const AddAddressDrawer = ({
     selectedTab,
     selectedAddress,
     locationAddress,
+    formLocation,
     isEditing,
     selectedState,
     districts,
@@ -599,9 +669,12 @@ const AddAddressDrawer = ({
     subDistricts,
     selectedSubDistrict,
     villages,
+    villageRequired,
     watch("village"),
     pinCode,
     additionalDetails,
+    isManualAddressComplete,
+    canSaveNewAddress,
     isFetchingLocation,
     fetchStateDetailsMutation?.isPending,
     mutationUpdateProfileInfo?.isPending,

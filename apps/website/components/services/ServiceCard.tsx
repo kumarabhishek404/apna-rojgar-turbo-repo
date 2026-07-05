@@ -176,7 +176,7 @@ function ServiceCardComponent({
   t,
   showPromotionStatus = false,
   canPromoteLater = false,
-  promotionAmount = 100,
+  promotionAmount = 500,
   isPromoting = false,
   onPromoteLater,
 }: Props) {

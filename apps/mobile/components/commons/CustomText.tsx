@@ -13,10 +13,11 @@ interface CustomTextProps {
   margin?: number;
   padding?: number;
   lineHeight?: number;
-  numberOfLines?: number; // Added prop
+  numberOfLines?: number;
+  adjustsFontSizeToFit?: boolean;
+  minimumFontScale?: number;
   style?: any;
   selectable?: boolean;
-  restProps?: any;
 }
 
 const CustomText = ({
@@ -28,7 +29,9 @@ const CustomText = ({
   margin = 0,
   padding = 0,
   lineHeight,
-  numberOfLines, // Extracted from props
+  numberOfLines,
+  adjustsFontSizeToFit,
+  minimumFontScale,
   selectable,
   style,
   ...restProps
@@ -49,8 +52,10 @@ const CustomText = ({
         style,
         { fontSize: getFontSize(locale, baseFont) },
       ]}
-      numberOfLines={numberOfLines} // ✅ Applied numberOfLines
-      ellipsizeMode="tail" // ✅ Ensures truncated text has "..."
+      numberOfLines={numberOfLines}
+      ellipsizeMode="tail"
+      adjustsFontSizeToFit={adjustsFontSizeToFit}
+      minimumFontScale={minimumFontScale}
       selectable={selectable}
       {...restProps}
     >

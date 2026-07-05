@@ -110,8 +110,14 @@ const LocationField = ({
         setLocation={(location: any) => {
           setLocation(location);
         }}
-        setSavedAddress={(address: any) => {
-          setSavedAddress(...savedAddress, address);
+        setSavedAddress={(saved: string[], newAddress?: string) => {
+          const merged = Array.from(
+            new Set([...(savedAddress || []), ...(saved || [])]),
+          );
+          setSavedAddress(merged);
+          if (newAddress) {
+            setAddress(newAddress);
+          }
         }}
       />
     </View>

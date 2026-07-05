@@ -3,25 +3,28 @@ import {
   CFErrorResponse,
   CFPaymentGatewayService,
 } from "react-native-cashfree-pg-sdk";
-import { CFEnvironment, CFSession } from "cashfree-pg-api-contract";
+import { CFSession } from "cashfree-pg-api-contract";
 import { useQueryClient } from "@tanstack/react-query";
 import PAYMENT from "@/app/api/payment";
 import TOAST from "@/app/hooks/toast";
 import { invalidateAndRefetchServiceLists } from "@/utils/invalidateServiceQueries";
+import { resolveCashfreeEnvironment } from "@/utils/cashfreeEnv";
 import { t } from "@/utils/translationHelper";
-
-const getCashfreeEnvironment = () => {
-  const env = (process.env.EXPO_PUBLIC_CASHFREE_ENV || "SANDBOX").toUpperCase();
-  return env === "PRODUCTION"
-    ? CFEnvironment.PRODUCTION
-    : CFEnvironment.SANDBOX;
-};
 
 const getCashfreeErrorMessage = (error: CFErrorResponse) => {
   const raw =
     error?.message ||
     (typeof error === "object" ? JSON.stringify(error) : "") ||
     "";
+
+  if (
+    raw.includes("token is not present") ||
+    raw.includes("order_token_invalid") ||
+    raw.includes("payment_session_id is not present") ||
+    raw.includes("payment_session_id_invalid")
+  ) {
+    return t("promotionPaymentEnvMismatch");
+  }
 
   if (
     raw.includes("not a trusted source") ||
@@ -72,6 +75,10 @@ export const useCashfreePromotionPayment = () => {
   const startPromotionPayment = useCallback(async (serviceId?: string) => {
     const order = await PAYMENT.createPromotionOrder(serviceId);
 
+    if (!order?.paymentSessionId || !order?.orderId) {
+      throw new Error(t("promotionPaymentFailed"));
+    }
+
     if (order.devBypass) {
       await PAYMENT.verifyPromotionPayment(order.orderId);
       await refreshServiceLists(serviceId);
@@ -106,7 +113,7 @@ export const useCashfreePromotionPayment = () => {
         const session = new CFSession(
           order.paymentSessionId,
           order.orderId,
-          getCashfreeEnvironment(),
+          resolveCashfreeEnvironment(order.environment),
         );
         CFPaymentGatewayService.doWebPayment(session);
       } catch (error: any) {

@@ -2,19 +2,25 @@ import Colors from "@/constants/Colors";
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import Button from "../inputs/Button";
+import ButtonComp from "../inputs/Button";
 import { getDistanceFromLocation, handleCall } from "@/constants/functions";
-// import { openGoogleMaps } from "@/app/hooks/map";
 import CustomText from "./CustomText";
 import CustomHeading from "./CustomHeading";
 import { t } from "@/utils/translationHelper";
 import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 
+const formatPhoneDisplay = (mobile: string) => {
+  const digits = String(mobile).replace(/\D/g, "");
+  if (digits.length === 10) {
+    return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+  }
+  return mobile;
+};
+
 const Highlights = ({ service, compact }: { service: any; compact?: boolean }) => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
-
-  const [distance, setDistance] = useState<any>(null);
+  const [distance, setDistance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchDistance = async () => {
@@ -23,134 +29,98 @@ const Highlights = ({ service, compact }: { service: any; compact?: boolean }) =
         userDetails?.geoLocation,
         service?.address,
       );
-      setDistance(dist);
+      setDistance(typeof dist === "number" && !isNaN(dist) ? dist : null);
     };
 
     fetchDistance();
   }, [service, userDetails]);
 
-  return (
-    <View
-      style={[styles?.container, compact && styles.containerCompact]}
-    >
-      <View style={styles.highlightWrapper}>
-        <View style={styles?.highlightBox}>
-          <View style={styles.highlightIcon}>
-            <Ionicons name="time" size={18} color={Colors.tertieryButton} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <CustomText textAlign="left">{t("duration")}</CustomText>
-            <CustomHeading textAlign="left">
-              {t("lessThanMultipleDays", { duration: service?.duration })}
-            </CustomHeading>
-          </View>
-        </View>
-        {service?.address ? (
-          <View
-            style={{
-              flexDirection: "column",
-              width: "100%",
-            }}
-          >
-            <View style={{ flexDirection: "row" }}>
-              <View style={styles.highlightIcon}>
-                <MaterialCommunityIcons
-                  name="map-marker-distance"
-                  size={18}
-                  color={Colors.tertieryButton}
-                />
-              </View>
-              <View style={{ width: "45%" }}>
-                <CustomText textAlign="left">{t("distance")}</CustomText>
+  const employerId =
+    typeof service?.employer === "string"
+      ? service.employer
+      : service?.employer?._id;
+  const showCallButton =
+    service?.employer?.mobile && userDetails?._id !== employerId;
 
-                {distance !== null && !isNaN(distance) && (
-                  <CustomHeading textAlign="left">
-                    {`${distance} ${t("kms")}`}
-                  </CustomHeading>
-                )}
-              </View>
-            </View>
-            {/* <Button
-              isPrimary={false}
-              title={t("getDirection")}
-              onPress={() => {}}
-              icon={
-                <FontAwesome
-                  name="users"
-                  size={12}
-                  color={Colors.primary}
-                  style={{ marginRight: 6 }}
-                />
-              }
-              style={{
-                width: "35%",
-                marginTop: 6,
-                borderWidth: 1.5,
-                paddingVertical: 3,
-                paddingHorizontal: 5,
-              }}
-              textStyle={{
-                fontWeight: "700",
-                fontSize: 12,
-              }}
-            /> */}
+  const durationValue = service?.duration
+    ? t("lessThanMultipleDays", { duration: service.duration })
+    : "—";
+
+  const distanceValue =
+    distance !== null ? `${distance} ${t("kms")}` : "—";
+
+  return (
+    <View style={[styles.container, compact && styles.containerCompact]}>
+      <View style={styles.statsRow}>
+        <View style={styles.statTile}>
+          <View style={styles.statIconWrap}>
+            <Ionicons name="time-outline" size={16} color={Colors.primary} />
           </View>
-        ) : (
-          <View>
-            <CustomText baseFont={14} color={Colors?.secondary}>
-              {t("noLocationFound")}
-            </CustomText>
+          <CustomText textAlign="left" baseFont={12} color={Colors.subHeading}>
+            {t("duration")}
+          </CustomText>
+          <CustomHeading textAlign="left" baseFont={15}>
+            {durationValue}
+          </CustomHeading>
+        </View>
+
+        <View style={styles.statTile}>
+          <View style={styles.statIconWrap}>
+            <MaterialCommunityIcons
+              name="map-marker-distance"
+              size={16}
+              color={Colors.primary}
+            />
           </View>
-        )}
+          <CustomText textAlign="left" baseFont={12} color={Colors.subHeading}>
+            {t("distance")}
+          </CustomText>
+          <CustomHeading textAlign="left" baseFont={15}>
+            {service?.address ? distanceValue : t("noLocationFound")}
+          </CustomHeading>
+        </View>
       </View>
 
       {service?.employer?.mobile ? (
-        <View style={[styles?.highlightBox, { width: "100%", marginTop: 20 }]}>
-          <View style={styles.highlightIcon}>
-            <Ionicons name="call" size={18} color={Colors.tertieryButton} />
-          </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <View style={{ flex: 1, paddingRight: 8 }}>
-              <CustomText textAlign="left">{t("mobileNumber")}</CustomText>
-              <CustomHeading textAlign="left">
-                {service?.employer?.mobile}
+        <View style={styles.contactSection}>
+          <View style={styles.contactHeader}>
+            <View style={styles.contactIconWrap}>
+              <Ionicons name="call-outline" size={18} color={Colors.primary} />
+            </View>
+            <View style={styles.contactTextWrap}>
+              <CustomText textAlign="left" baseFont={12} color={Colors.subHeading}>
+                {t("mobileNumber")}
+              </CustomText>
+              <CustomHeading textAlign="left" baseFont={18}>
+                {formatPhoneDisplay(service.employer.mobile)}
               </CustomHeading>
             </View>
-            {userDetails?._id !== service?.employer && (
-              <Button
-                isPrimary={true}
-                title={t("callEmployer")}
-                onPress={() =>
-                  handleCall(service?.employer?.mobile, {
-                    source: "service_highlights",
-                    serviceId: String(service?._id ?? ""),
-                  })
-                }
-                style={{
-                  paddingVertical: 6,
-                  paddingHorizontal: 10,
-                }}
-                icon={
-                  <FontAwesome5
-                    name="phone-alt"
-                    size={16}
-                    color={Colors.white}
-                    style={{ marginRight: 10 }}
-                  />
-                }
-              />
-            )}
           </View>
+
+          {showCallButton ? (
+            <ButtonComp
+              isPrimary
+              title={t("callEmployer")}
+              onPress={() =>
+                handleCall(service.employer.mobile, {
+                  source: "service_highlights",
+                  serviceId: String(service?._id ?? ""),
+                })
+              }
+              style={styles.callButton}
+              textStyle={styles.callButtonText}
+              icon={
+                <FontAwesome5
+                  name="phone-alt"
+                  size={15}
+                  color={Colors.white}
+                  style={{ marginRight: 8 }}
+                />
+              }
+            />
+          ) : null}
         </View>
       ) : null}
-
     </View>
   );
 };
@@ -158,43 +128,65 @@ const Highlights = ({ service, compact }: { service: any; compact?: boolean }) =
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
+    gap: 16,
   },
   containerCompact: {
     marginTop: 4,
   },
-  highlightWrapper: {
+  statsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    gap: 10,
   },
-  highlightBox: {
-    flexDirection: "row",
-    width: "48%",
+  statTile: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: Colors.fourth,
+    borderRadius: 12,
+    padding: 12,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(34, 64, 154, 0.08)",
   },
-  highlightIcon: {
-    backgroundColor: Colors?.white,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+  statIconWrap: {
+    width: 28,
+    height: 28,
     borderRadius: 8,
-    marginRight: 8,
-    display: "flex",
-    justifyContent: "center",
+    backgroundColor: Colors.white,
     alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
   },
-  highlightTxt: {
-    fontSize: 12,
-    color: "#999",
+  contactSection: {
+    gap: 12,
   },
-  highlightTxtVal: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginRight: 10,
+  contactHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  getDirectionText: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginRight: 10,
-    textAlign: "left",
+  contactIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: Colors.fourth,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  contactTextWrap: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  callButton: {
+    width: "100%",
+    minHeight: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  callButtonText: {
+    fontSize: 15,
+    flexWrap: "nowrap",
   },
 });
 

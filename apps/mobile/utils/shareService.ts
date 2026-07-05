@@ -25,7 +25,7 @@ const HI = {
   duration: "अवधि (लगभग)",
   days: "दिन",
   skillPay: "कौशल और दिहाड़ी (सीधा काम)",
-  workersNeeded: "किन-किन कारीगरों की जरूरत है",
+  workersNeeded: "काम के लिए कौन-कौन से कारीगर चाहिए",
   workersNeededNote:
     "नीचे हर पंक्ति में: कितने आदमी चाहिए और प्रतिदिन कितनी दिहाड़ी — यही जानकारी आवेदन के लिए जरूरी है।",
   facilitiesTitle: "मालिक जो सुविधाएँ दे रहा है (केवल यही उपलब्ध हैं)",
@@ -131,7 +131,7 @@ export function buildServiceShareMessage(
   const reqs = service.requirements;
   if (Array.isArray(reqs) && reqs.length > 0) {
     const total = reqs.reduce((sum, r) => sum + (r.count || 0), 0);
-    lines.push(`👥 जरूरत: ${total} मजदूर`);
+    lines.push(`👥 काम: ${total} मजदूर`);
   }
 
   // 💰 Salary

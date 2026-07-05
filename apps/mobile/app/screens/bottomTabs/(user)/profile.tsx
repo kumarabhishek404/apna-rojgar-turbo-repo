@@ -40,6 +40,7 @@ import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import JoinWhatsAppGroup from "@/components/commons/JoinWhatsappGroup";
 import FollowInstagram from "@/components/commons/JoinInstagramAccount";
+import { SOCIAL_LINKS } from "@/constants/socialLinks";
 import RoleSwitcher from "@/components/commons/RoleSwitcher";
 import {
   isCoreProfileIncomplete,
@@ -468,46 +469,62 @@ const UserProfile = () => {
                     {userDetails?.name || "Name"}
                   </CustomHeading>
 
-                  <View style={styles.roleRow}>
-                    <View
-                      style={[styles.rolePill, { backgroundColor: roleMeta.bg }]}
+                  <View style={styles.roleSection}>
+                    <CustomText
+                      baseFont={11}
+                      fontWeight="600"
+                      color="rgba(255,255,255,0.72)"
+                      textAlign="left"
+                      style={styles.roleCaption}
                     >
-                      <CustomText
-                        baseFont={12}
-                        fontWeight="700"
-                        color={roleMeta.color}
+                      {t("currentRole")}
+                    </CustomText>
+
+                    <View style={styles.roleBadge}>
+                      <View
+                        style={[
+                          styles.roleBadgeIcon,
+                          { backgroundColor: roleMeta.bg },
+                        ]}
                       >
-                        {roleMeta.emoji}{"  "}
+                        <CustomText baseFont={14}>{roleMeta.emoji}</CustomText>
+                      </View>
+                      <CustomText
+                        baseFont={14}
+                        fontWeight="700"
+                        color={Colors.white}
+                        textAlign="left"
+                      >
                         {t(role?.toLowerCase() || "worker")}
                       </CustomText>
                     </View>
+
                     <TouchableOpacity
                       style={styles.changeRoleBtn}
                       onPress={() => setRoleModalVisible(true)}
-                      activeOpacity={0.82}
+                      activeOpacity={0.88}
                       accessibilityRole="button"
                       accessibilityLabel={t("changeRole")}
                     >
-                      <View style={styles.changeRoleIconWrap}>
+                      <View style={styles.changeRoleLeft}>
                         <MaterialCommunityIcons
                           name="swap-horizontal"
-                          size={15}
-                          color={Colors.white}
+                          size={18}
+                          color={Colors.primary}
                         />
+                        <CustomText
+                          baseFont={14}
+                          fontWeight="700"
+                          color={Colors.primary}
+                          numberOfLines={1}
+                        >
+                          {t("changeRole")}
+                        </CustomText>
                       </View>
-                      <CustomText
-                        baseFont={12}
-                        fontWeight="700"
-                        color={Colors.white}
-                        numberOfLines={1}
-                        style={styles.changeRoleLabel}
-                      >
-                        {t("changeRole")}
-                      </CustomText>
                       <Ionicons
                         name="chevron-forward"
-                        size={14}
-                        color="rgba(255,255,255,0.92)"
+                        size={18}
+                        color={Colors.primary}
                       />
                     </TouchableOpacity>
                   </View>
@@ -592,12 +609,12 @@ const UserProfile = () => {
               <ServiceInformation information={userDetails?.serviceDetails} />
 
               <JoinWhatsAppGroup
-                groupLink="https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD?mode=gi_t"
+                groupLink={SOCIAL_LINKS.whatsappGroup}
                 title={t("joinWhatsappGroupTitle")}
                 description={t("joinWhatsappGroupDescription")}
                 buttonText={t("joinWhatsappGroupButton")}
               />
-              <FollowInstagram profileLink="https://instagram.com/apnarojgarindia" />
+              <FollowInstagram profileLink={SOCIAL_LINKS.instagram} />
               {userDetails?.employedBy && (
                 <TeamAdminCard admin={userDetails?.employedBy} />
               )}
@@ -655,44 +672,48 @@ const styles = StyleSheet.create({
     color: Colors.white,
     lineHeight: 26,
   },
-  roleRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
+  roleSection: {
     gap: 8,
+    marginTop: 2,
   },
-  rolePill: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 999,
+  roleCaption: {
+    letterSpacing: 0.3,
+  },
+  roleBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  roleBadgeIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
   changeRoleBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: Colors.tertiery,
-    paddingLeft: 8,
-    paddingRight: 10,
-    paddingVertical: 6,
-    borderRadius: 999,
-    maxWidth: "100%",
-    minHeight: 32,
-    shadowColor: "#c44a00",
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    justifyContent: "space-between",
+    backgroundColor: Colors.white,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 12,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 3,
   },
-  changeRoleIconWrap: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+  changeRoleLeft: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.22)",
-  },
-  changeRoleLabel: {
-    letterSpacing: 0.2,
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   actionRow: {
     flexDirection: "row",

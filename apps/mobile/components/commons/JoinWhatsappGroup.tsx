@@ -4,8 +4,8 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Linking,
 } from "react-native";
+import { openExternalLink } from "@/utils/openExternalLink";
 
 interface JoinWhatsAppGroupProps {
   groupLink: string;
@@ -20,13 +20,8 @@ const JoinWhatsAppGroup: React.FC<JoinWhatsAppGroupProps> = ({
   description,
   buttonText,
 }) => {
-  const handleJoinPress = async () => {
-    const supported = await Linking.canOpenURL(groupLink);
-    if (supported) {
-      Linking.openURL(groupLink);
-    } else {
-      console.warn("Cannot open WhatsApp link");
-    }
+  const handleJoinPress = () => {
+    openExternalLink(groupLink);
   };
 
   return (

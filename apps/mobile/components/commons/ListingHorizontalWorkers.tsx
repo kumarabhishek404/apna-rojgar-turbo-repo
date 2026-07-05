@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
     backgroundColor: "#EEF4FF",
-    borderRadius: 999,
+    borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderWidth: 1,
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   morePill: {
     backgroundColor: "#EAF2FF",
-    borderRadius: 999,
+    borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderWidth: 1,

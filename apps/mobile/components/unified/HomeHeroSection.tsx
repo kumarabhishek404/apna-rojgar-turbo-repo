@@ -14,6 +14,7 @@ import { useAtomValue } from "jotai";
 
 import Atoms from "@/app/AtomStore";
 import CustomText from "@/components/commons/CustomText";
+import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
 import homeBannerArt from "../../assets/banners/banner1.png";
 import homeBannerArt2 from "../../assets/banners/banner2.png";
@@ -23,11 +24,16 @@ import homeBannerArt5 from "../../assets/banners/banner5.png";
 import homeBannerArt6 from "../../assets/banners/banner6.png";
 
 const { width: SCREEN_W } = Dimensions.get("window");
-/** Horizontal padding on gradientBlock (22 * 2). */
-const BANNER_HORIZONTAL_INSET = 44;
+/** Matches `contentSurface` horizontal padding on the home dashboard. */
+const HERO_CONTENT_PADDING = 10;
+/** Banner sits slightly wider than greeting / cards below. */
+const BANNER_HORIZONTAL_PADDING = 10;
 /** Banner assets are ~2:1 (e.g. 1774×887). Keep full artwork visible. */
 const BANNER_ASPECT_RATIO = 2;
+const BANNER_HORIZONTAL_INSET = BANNER_HORIZONTAL_PADDING * 2;
 const BANNER_SLIDE_W = SCREEN_W - BANNER_HORIZONTAL_INSET;
+const BANNER_BLEED =
+  HERO_CONTENT_PADDING - BANNER_HORIZONTAL_PADDING;
 const BANNER_IMAGE_H = Math.round(BANNER_SLIDE_W / BANNER_ASPECT_RATIO);
 const BANNER_BOTTOM_MARGIN = 12;
 
@@ -97,13 +103,24 @@ const HomeHeroSection = ({ userDetails }: Props) => {
               {t("homeGreetingHi", { name: displayName })}
             </CustomText>
             <CustomText
-              baseFont={24}
+              baseFont={21}
               fontWeight="700"
-              color="#2B315A"
+              color="#000000"
               textAlign="left"
               style={styles.welcomeLine}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.78}
             >
-              {t("homeWelcomeBack")}
+              <CustomText
+                baseFont={21}
+                fontWeight="700"
+                textAlign="left"
+                color={Colors.primary}
+              >
+                {t("homeWelcomeBrand")}
+              </CustomText>
+              {t("homeWelcomeSuffix")}
             </CustomText>
           </View>
           <TouchableOpacity
@@ -180,7 +197,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   gradientBlock: {
-    paddingHorizontal: 22,
+    paddingHorizontal: HERO_CONTENT_PADDING,
     paddingBottom: 20,
   },
   topRow: {
@@ -191,7 +208,8 @@ const styles = StyleSheet.create({
   },
   greetingBlock: {
     flex: 1,
-    paddingRight: 14,
+    paddingRight: 20,
+    textAlign: "left",
   },
   greetingLine: {
     letterSpacing: 0.1,
@@ -199,8 +217,9 @@ const styles = StyleSheet.create({
   },
   welcomeLine: {
     marginTop: 2,
-    letterSpacing: 0.15,
-    lineHeight: 33,
+    letterSpacing: 0.1,
+    lineHeight: 28,
+    flexShrink: 1,
   },
   bellWrap: {
     position: "relative",
@@ -222,6 +241,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     width: BANNER_SLIDE_W,
     height: BANNER_IMAGE_H,
+    marginHorizontal: -BANNER_BLEED,
     marginBottom: BANNER_BOTTOM_MARGIN,
     overflow: "hidden",
     backgroundColor: "#FFFFFF",

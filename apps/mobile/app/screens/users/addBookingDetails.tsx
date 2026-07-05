@@ -1,13 +1,12 @@
 import { StyleSheet, View } from "react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useEffect } from "react";
 import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
 import { Controller } from "react-hook-form";
-import { WORKTYPES } from "@/constants";
 import { Ionicons } from "@expo/vector-icons";
 import AddLocationAndAddress from "@/components/commons/AddLocationAndAddress";
 import DateField from "@/components/inputs/DateField";
-import { filterSubCategories, isEmptyObject } from "@/constants/functions";
+import { isEmptyObject } from "@/constants/functions";
 import Duration from "@/components/inputs/Duration";
 import TextAreaInputComponent from "@/components/inputs/TextArea";
 import moment from "moment";
@@ -24,12 +23,8 @@ const AddBookingDetails = ({
   watch,
   workerSkills,
 }: any) => {
-  const [location, setLocation] = useState({});
-  const [selectedOption, setSelectedOption] = useState(
-    !isEmptyObject(location) ? "currentLocation" : "address"
-  );
-
   const facilities = watch("facilities");
+  const formLocation = watch("location");
 
   // 🧠 useMemo to optimize dynamic skill transformation
   const dynamicWorkerSkills = useMemo(() => {
@@ -41,13 +36,28 @@ const AddBookingDetails = ({
     );
   }, [workerSkills]);
 
+  useEffect(() => {
+    if (dynamicWorkerSkills.length === 1 && !watch("appliedSkill")?.skill) {
+      setValue("appliedSkill", dynamicWorkerSkills[0], { shouldValidate: true });
+    }
+  }, [dynamicWorkerSkills, setValue, watch]);
+
   const handleCheckboxChange = (key: string) => {
     setValue("facilities", {
       ...facilities,
       [key]: !facilities?.[key],
     });
   };
-  console.log("dynamicWorkerSkills--", dynamicWorkerSkills);
+
+  if (!dynamicWorkerSkills.length) {
+    return (
+      <View style={styles.container}>
+        <CustomHeading textAlign="left" baseFont={14} color={Colors.danger}>
+          {t("noSkillsFound")}
+        </CustomHeading>
+      </View>
+    );
+  }
 
   return (
     <View style={styles?.container}>
@@ -56,7 +66,9 @@ const AddBookingDetails = ({
         name="appliedSkill"
         defaultValue=""
         rules={{
-          required: t("skillIsRequired"),
+          required: t("pleaseFillAllFields"),
+          validate: (value) =>
+            value?.skill ? true : t("pleaseFillAllFields"),
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <RadioSelector
@@ -132,15 +144,14 @@ const AddBookingDetails = ({
       <Controller
         control={control}
         name="noOfWorkers"
-        defaultValue={0}
+        defaultValue={1}
         rules={{
-          required: t("durationIsRequired"),
+          required: t("pleaseFillAllFields"),
           validate: (value) => {
-            if (value <= 0) {
+            if (!value || value <= 0) {
               return t("durationMustBeGreaterThanZero");
-            } else {
-              return true;
             }
+            return true;
           },
         }}
         render={({ field: { onChange, onBlur, value } }) => (
@@ -200,9 +211,13 @@ const AddBookingDetails = ({
               name="address"
               address={value}
               setAddress={onChange}
-              location={location}
-              setLocation={setLocation}
-              selectedOption={selectedOption}
+              location={formLocation || {}}
+              setLocation={(nextLocation: object) =>
+                setValue("location", nextLocation, { shouldValidate: true })
+              }
+              selectedOption={
+                !isEmptyObject(formLocation) ? "currentLocation" : "address"
+              }
               errors={errors}
               style={{ marginTop: 10 }}
             />

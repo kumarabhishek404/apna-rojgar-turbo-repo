@@ -312,11 +312,6 @@ export const generatePromotionOrderId = (userId) => {
   return `promo_${userPart}_${suffix}`;
 };
 
-export const getPromotionAmount = () => {
-  const amount = Number(process.env.SERVICE_PROMOTION_AMOUNT || 100);
-  return Number.isFinite(amount) && amount > 0 ? amount : 100;
-};
-
 export const verifyCashfreeWebhookSignature = ({
   timestamp,
   rawBody,
