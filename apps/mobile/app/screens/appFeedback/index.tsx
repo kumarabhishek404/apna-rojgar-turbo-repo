@@ -20,6 +20,8 @@ import { Platform } from "react-native";
 import ReasoneSelection from "../allFeedback/reasons";
 import ErrorText from "@/components/commons/ErrorText";
 import Atoms from "@/app/AtomStore";
+import { promptForAppReviewAfterPositiveFeedback } from "@/utils/appStoreReview";
+
 const FeedbackForm = () => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
   const [deviceInfo, setDeviceInfo] = useState<any>(null);
@@ -27,6 +29,7 @@ const FeedbackForm = () => {
     control,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm({
     defaultValues: {
       rating: 0,
@@ -59,8 +62,11 @@ const FeedbackForm = () => {
     mutationKey: ["addAppFeedback"],
     mutationFn: (data: any) => USER?.addAppFeedback(data),
     onSuccess: () => {
+      const rating = Number(getValues("rating") || 0);
+      TOAST?.success(t("feedbackSubmittedSuccessfully"));
       router.back();
-      TOAST?.success("Feedback submitted successfully");
+      // Delay so navigation settles; soft prompt uses selected language via t().
+      setTimeout(() => promptForAppReviewAfterPositiveFeedback(rating), 400);
     },
     onError: (error: any) => {
       TOAST?.error(error?.response?.data?.message || "An error occurred");
@@ -68,14 +74,11 @@ const FeedbackForm = () => {
   });
 
   const onSubmit = async (data: any) => {
-    console.log("Submitted Data:", data);
     try {
-      // Call the mutation function with the payload
-      await mutateAddAppFeedback.mutate({
+      await mutateAddAppFeedback.mutateAsync({
         ...data,
         deviceInfo: deviceInfo ?? {},
       });
-      console.log("Feedback submitted successfully!");
     } catch (error) {
       console.error("Error submitting feedback:", error);
     }

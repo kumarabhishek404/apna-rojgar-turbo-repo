@@ -657,5 +657,10 @@
   "subDistrict": "ಉಪಜಿಲ್ಲೆ",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
   "sortTabTopRated": "Trusted",
-  "fetchLocation": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪಡೆಯಿರಿ ಹತ್ತಿರದ {{entity}} ಪಡೆಯಲು"
+  "fetchLocation": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪಡೆಯಿರಿ ಹತ್ತಿರದ {{entity}} ಪಡೆಯಲು",
+  "rateApp": "ಅಪ್ಲಿಕೇಶನ್ ರೇಟ್ ಮಾಡಿ",
+  "rateAppTitle": "ಅಪ್ನಾ ರೋಜ್‌ಗಾರ್ ಇಷ್ಟವಾಯಿತೇ?",
+  "rateAppMessage": "ದಯವಿಟ್ಟು Play Store ನಲ್ಲಿ ನಮಗೆ ರೇಟ್ ಮಾಡಿ. ಹೆಚ್ಚು ಕಾರ್ಮಿಕರು ಮತ್ತು ಉದ್ಯೋಗದಾತರು ನಮ್ಮನ್ನು ಹುಡುಕಲು ಸಹಾಯವಾಗುತ್ತದೆ.",
+  "rateAppNow": "ಈಗ ರೇಟ್ ಮಾಡಿ",
+  "rateAppLater": "ನಂತರ"
 }

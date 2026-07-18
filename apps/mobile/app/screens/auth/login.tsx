@@ -36,6 +36,14 @@ import {
 } from "@/utils/devOtp";
 import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
 
+const isBlankValue = (value: unknown) =>
+  value === undefined || value === null || String(value).trim() === "";
+
+const hasRole = (role: unknown) => !isBlankValue(role);
+
+const hasProfilePicture = (user: Record<string, any>) =>
+  !isBlankValue(user?.profilePicture) || !isBlankValue(user?.profileImage);
+
 export default function Login() {
   APP_CONTEXT?.useApp();
   const { t } = useTranslation();
@@ -140,9 +148,14 @@ export default function Login() {
       //   return;
       // }
 
-      // 2️⃣ Incomplete onboarding
+      const normalizedUser = {
+        ...user,
+        profilePicture: user?.profilePicture || user?.profileImage || "",
+      };
+
+      // 2️⃣ Incomplete onboarding (main details)
       if (!user?.name || !user?.address || !user?.gender || !user?.age) {
-        setUserDetails(user);
+        setUserDetails(normalizedUser);
         router.push({
           pathname: "/screens/auth/register/second",
           params: { userId: user._id },
@@ -150,20 +163,36 @@ export default function Login() {
         return;
       }
 
-      // if (!user.profilePicture) {
-      //   setUserDetails(user);
-      //   router.push({
-      //     pathname: "/screens/auth/register/fifth",
-      //     params: { userId: user._id },
-      //   });
-      //   return;
-      // }
+      // 3️⃣ Role/skills are not completed yet.
+      // The role/skills screen is the source of truth for this onboarding step.
+      if (!hasRole(user?.role)) {
+        setUserDetails(normalizedUser);
+        router.push({
+          pathname: "/screens/auth/register/fourth",
+          params: { userId: user._id },
+        });
+        return;
+      }
 
-      // 3️⃣ Navigate immediately 🚀
-      setUserDetails({ isAuth: true, ...user });
-      router.replace("/(tabs)");
+      // 4️⃣ Route to profile-picture step on every login.
+      // Keep profile photo optional (skip still allowed on that screen).
+      setUserDetails({ isAuth: true, ...normalizedUser });
+      router.push({
+        pathname: "/screens/auth/register/fifth",
+        params: {
+          userId: user._id,
+          role: String(user?.role ?? ""),
+          skills: JSON.stringify(Array.isArray(user?.skills) ? user.skills : []),
+          numberOfWorkersInTeam:
+            user?.role === "MEDIATOR" && user?.numberOfWorkersInTeam != null
+              ? String(user.numberOfWorkersInTeam)
+              : "",
+          fromLogin: "1",
+          profileMissing: hasProfilePicture(user) ? "0" : "1",
+        },
+      });
 
-      // 4️⃣ Fire-and-forget background tasks 🔄
+      // 5️⃣ Fire-and-forget background tasks 🔄
       Promise.allSettled([
         PUSH_NOTIFICATION.registerForPushNotificationsAsync(
           user.notificationConsent,

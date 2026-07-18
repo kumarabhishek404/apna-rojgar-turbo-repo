@@ -951,9 +951,18 @@ function NavbarContent() {
 
           {/* Buttons */}
           <div className="flex items-center gap-4">
-            <Link
-              target="_blank"
+          <Link
               href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
+              className={`hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-300 ${
+                scrolled
+                  ? "text-[#22409a] hover:bg-[#22409a]/10"
+                  : "text-white hover:bg-white/15"
+              }`}
+            >
+              {t("blogs", "Blogs")}
+            </Link>
+            <Link
+              href="/app"
               className={`hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-300 ${
                 scrolled
                   ? "text-[#22409a] hover:bg-[#22409a]/10"
@@ -1140,8 +1149,7 @@ function NavbarContent() {
                 ) : null}
 
                 <Link
-                  target="_blank"
-                  href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
+                  href="/app"
                   className="flex justify-center items-center gap-2 bg-[#22409a] text-white py-3 rounded-lg font-semibold"
                 >
                   {t("installApp", "Install App")}

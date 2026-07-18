@@ -88,8 +88,7 @@ export default function Footer() {
             </p>
 
             <a
-              target="_blank"
-              href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
+              href="/app"
               className="inline-block bg-white text-[#22409a] px-6 py-3 rounded-xl font-semibold text-sm shadow-lg hover:scale-105 transition"
             >
               {t("downloadAndroidApp", "Download Android App")}

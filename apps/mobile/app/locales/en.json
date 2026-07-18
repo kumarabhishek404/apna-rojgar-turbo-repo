@@ -1903,6 +1903,11 @@
 
   "downloadApp": "Download App",
   "playStore": "Get on Play Store",
+  "rateApp": "Rate App",
+  "rateAppTitle": "Enjoying Apna Rojgar?",
+  "rateAppMessage": "Please rate us on the Play Store. It helps more workers and employers find us.",
+  "rateAppNow": "Rate now",
+  "rateAppLater": "Maybe later",
 
   "shareLink": "Share app link",
 

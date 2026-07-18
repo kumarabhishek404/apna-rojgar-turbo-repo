@@ -28,6 +28,7 @@ import BadgeComponent from "./Badge";
 import { removeToken } from "@/utils/authStorage";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import APP_CONTEXT from "@/app/context/locale";
+import { promptForAppReview } from "@/utils/appStoreReview";
 
 const ProfileMenu = ({ disabled }: any) => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
@@ -339,6 +340,17 @@ const ProfileMenu = ({ disabled }: any) => {
         }),
       style: [styles?.menuItem],
       isSuspended: disabled,
+    },
+    {
+      title: t("rateApp"),
+      icon: (
+        <MaterialIcons name="star-rate" size={28} color={Colors?.primary} />
+      ),
+      onPress: () => {
+        void promptForAppReview({ force: true });
+      },
+      style: [styles?.menuItem],
+      isSuspended: false,
     },
     {
       title: t("privacyPolicy"),

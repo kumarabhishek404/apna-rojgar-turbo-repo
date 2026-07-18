@@ -679,5 +679,10 @@
   "subDistrict": "உபமாவட்டம்",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
   "sortTabTopRated": "Trusted",
-  "fetchLocation": "தயவுசெய்து உங்கள் தற்போதைய இடத்தைப் பெறுங்கள் அருகிலுள்ள {{entity}} பெற"
+  "fetchLocation": "தயவுசெய்து உங்கள் தற்போதைய இடத்தைப் பெறுங்கள் அருகிலுள்ள {{entity}} பெற",
+  "rateApp": "ஆப்பை மதிப்பிடுங்கள்",
+  "rateAppTitle": "அப்னா ரோஜ்கார் பிடித்திருக்கிறதா?",
+  "rateAppMessage": "தயவுசெய்து Play Store-ல் எங்களை மதிப்பிடுங்கள். மேலும் தொழிலாளர்களும் முதலாளிகளும் எங்களைக் கண்டுபிடிக்க உதவும்.",
+  "rateAppNow": "இப்போது மதிப்பிடு",
+  "rateAppLater": "பின்னர்"
 }

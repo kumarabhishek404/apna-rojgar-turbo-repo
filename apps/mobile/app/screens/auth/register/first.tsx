@@ -161,6 +161,7 @@ const RegisterScreen: React.FC = () => {
       setMobileNumberExist(exists ? "exist" : "notExist");
 
       const { name, gender, address, age, profilePicture, _id } = user;
+      const role = user?.role;
 
       const isEmpty = (val: any) =>
         val === undefined || val === null || String(val).trim() === "";
@@ -170,6 +171,7 @@ const RegisterScreen: React.FC = () => {
 
       let route: string = "";
       if (missingBasics) route = "/screens/auth/register/second";
+      else if (isEmpty(role)) route = "/screens/auth/register/fourth";
       // else if (isEmpty(password)) route = "/screens/auth/register/third";
       else if (isEmpty(profilePicture)) route = "/screens/auth/register/fifth";
       else route = "/screens/auth/login";

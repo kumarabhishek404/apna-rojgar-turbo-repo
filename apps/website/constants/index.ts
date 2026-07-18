@@ -3,7 +3,11 @@ import Image2 from "../assets/image2.png";
 import Image3 from "../assets/image3.png";
 
 export const APPLINK =
-  "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"; // Replace with your actual app link"
+  "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp";
+
+/** Branded short URL on the website — share this instead of the raw Play Store link. */
+export const APP_PAGE_PATH = "/app";
+export const APP_PAGE_URL = "https://apnarojgarindia.com/app";
 
 export const STETESOFINDIA = [
   { label: "andhrapradesh", value: "andhrapradesh" },

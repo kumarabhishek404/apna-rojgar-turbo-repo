@@ -508,5 +508,10 @@
   "subDistrict": "سب ضلعہ",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
   "sortTabTopRated": "Trusted",
-  "fetchLocation": "कृपया अपना वर्तमान स्थान प्राप्त करें ताकि निकटतम {{entity}} मिल सकें"
+  "fetchLocation": "कृपया अपना वर्तमान स्थान प्राप्त करें ताकि निकटतम {{entity}} मिल सकें",
+  "rateApp": "ایپ ریٹ کٔرِو",
+  "rateAppTitle": "اپنا روزگار پسند آو؟",
+  "rateAppMessage": "مہربٲنی کٔرِتھ Play Store پٮ۪ٹھ أسہ ریٹ کٔرِو۔ ییٚمہ سٲتھی زیادٕہ مزدور تہٕ مالِک أسہ لٔبِہِ ہٮ۪کن۔",
+  "rateAppNow": "وِن ریٹ کٔرِو",
+  "rateAppLater": "پتہٕ"
 }

@@ -13,7 +13,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import USER from "@/app/api/user";
 import { saveToken } from "@/utils/authStorage";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
 import {
   savePendingProfileUpload,
@@ -25,9 +25,15 @@ import Loader from "@/components/commons/Loaders/Loader";
 
 const UploadProfilePictureScreen = () => {
   const insets = useSafeAreaInsets();
-  const { userId: userIdParam, role, skills, numberOfWorkersInTeam } =
-    useLocalSearchParams();
+  const {
+    userId: userIdParam,
+    role,
+    skills,
+    numberOfWorkersInTeam,
+    fromLogin,
+  } = useLocalSearchParams();
   const userId = Array.isArray(userIdParam) ? userIdParam[0] : userIdParam;
+  const userDetails = useAtomValue(Atoms.UserAtom);
   const setUserDetails = useSetAtom(Atoms.UserAtom);
   const [isSavingProfileStep, setIsSavingProfileStep] = useState(false);
   const {
@@ -75,7 +81,13 @@ const UploadProfilePictureScreen = () => {
   const handleProfilePictureSubmit = async (data: any) => {
     try {
       setIsSavingProfileStep(true);
-      const parsedSkills = skills ? JSON.parse(skills as string) : [];
+      const isLoginFlow = String(fromLogin ?? "") === "1";
+      const roleParam = Array.isArray(role) ? role[0] : role;
+      const hasRoleParam =
+        roleParam !== undefined && roleParam !== null && roleParam !== "";
+      const parsedSkills = skills
+        ? JSON.parse(Array.isArray(skills) ? skills[0] : (skills as string))
+        : [];
 
       if (!userId) {
         TOAST?.error(t("somethingWentWrong"));
@@ -101,15 +113,35 @@ const UploadProfilePictureScreen = () => {
           });
       }
 
-      // Save role/skills immediately; profile image uploads in background (with retries).
-      mutationFinishRegistration.mutate({
+      const profileUpdatePayload: Record<string, any> = {
         _id: userId,
-        role,
-        skills: parsedSkills,
-        ...(role === "MEDIATOR" && numberOfWorkersInTeam
-          ? { numberOfWorkersInTeam: Number(numberOfWorkersInTeam) }
-          : {}),
-      });
+      };
+
+      // Registration flow: persist role/skills here.
+      // Login flow: keep existing role/skills untouched unless they are explicitly provided.
+      if (!isLoginFlow || hasRoleParam) {
+        profileUpdatePayload.role = hasRoleParam ? roleParam : userDetails?.role;
+        profileUpdatePayload.skills =
+          Array.isArray(parsedSkills) && parsedSkills.length > 0
+            ? parsedSkills
+            : Array.isArray(userDetails?.skills)
+              ? userDetails.skills
+              : [];
+
+        if (
+          String(profileUpdatePayload.role ?? "").toUpperCase() === "MEDIATOR"
+        ) {
+          const workersInTeam =
+            numberOfWorkersInTeam != null
+              ? Number(numberOfWorkersInTeam)
+              : Number(userDetails?.numberOfWorkersInTeam);
+          if (!Number.isNaN(workersInTeam) && workersInTeam > 0) {
+            profileUpdatePayload.numberOfWorkersInTeam = workersInTeam;
+          }
+        }
+      }
+
+      mutationFinishRegistration.mutate(profileUpdatePayload);
     } catch (error) {
       console.error("Error submitting profile picture:", error);
       TOAST?.error(t("somethingWentWrong"));

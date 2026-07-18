@@ -83,6 +83,7 @@
     "android": {
       "versionCode": 46,
       "package": "com.kumarabhishek404.labourapp",
+      "playStoreUrl": "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/app/adaptive-icon.png",

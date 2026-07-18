@@ -770,5 +770,10 @@
   "checkDetails": "বিবরণ যাচাই করুন",
   "facilities": "সুবিধা",
   "pleaseSelectAProfilePicture": "অনুগ্রহ করে একটি প্রোফাইল ছবি নির্বাচন করুন",
-  "sortTabTopRated": "Trusted"
+  "sortTabTopRated": "Trusted",
+  "rateApp": "অ্যাপ রেট করুন",
+  "rateAppTitle": "আপনা রোজগার পছন্দ হয়েছে?",
+  "rateAppMessage": "অনুগ্রহ করে Play Store-এ আমাদের রেট করুন। এতে আরও শ্রমিক ও নিয়োগকর্তা আমাদের খুঁজে পাবেন।",
+  "rateAppNow": "এখনই রেট করুন",
+  "rateAppLater": "পরে"
 }

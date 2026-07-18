@@ -680,5 +680,10 @@
   "subDistrict": "سب ضلع",
   "completeYourProfileToUnlockAllFeatures": "قابلِ اعتماد بننے اور تمام فیچرز حاصل کرنے کے لیے اپنی پروفائل مکمل کریں!",
   "sortTabTopRated": "قابلِ اعتماد",
-  "fetchLocation": "براہ کرم اپنا موجودہ مقام حاصل کریں تاکہ قریبی {{entity}} حاصل کریں"
+  "fetchLocation": "براہ کرم اپنا موجودہ مقام حاصل کریں تاکہ قریبی {{entity}} حاصل کریں",
+  "rateApp": "ایپ ریٹ کریں",
+  "rateAppTitle": "اپنا روزگار پسند آیا؟",
+  "rateAppMessage": "براہ کرم Play Store پر ہمیں ریٹ کریں۔ اس سے مزید مزدور اور آجر ہمیں تلاش کر سکیں گے۔",
+  "rateAppNow": "ابھی ریٹ کریں",
+  "rateAppLater": "بعد میں"
 }

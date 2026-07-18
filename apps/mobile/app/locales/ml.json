@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "നിങ്ങളുടെ അപേക്ഷ വിജയകരമായി റദ്ദാക്കി",
   "serviceCompletedSuccessfully": "സേവനം വിജയകരമായി പൂർത്തിയാക്കി",
   "workerSelectedSuccessfully": "തൊഴിലാളിയെ വിജയകരമായി തിരഞ്ഞെടുത്തു",
-
   "selected": "തിരഞ്ഞെടുത്തു",
   "proposals": "നിർദ്ദേശങ്ങൾ",
   "select": "തിരഞ്ഞെടുക്കുക",
@@ -177,7 +176,6 @@
   "travelling": "യാത്ര",
   "distance": "ദൂരം",
   "active": "സജീവം",
-
   "upcoming": "വരാനിരിക്കുന്നത്",
   "hiring": "നിയമനം",
   "settings": "ക്രമീകരണങ്ങൾ",
@@ -186,7 +184,6 @@
   "received": "സ്വീകരിച്ചു",
   "accepted": "സ്വീകരിച്ചു",
   "rejected": "നിരസിച്ചു",
-
   "andhrapradesh": "ఆంధ్ర ప్రదేశ్",
   "arunachalpradesh": "അരുണാചൽ പ്രദെശ്",
   "assam": "ആസാം",
@@ -225,12 +222,10 @@
   "ladakh": "ലദാഖ്",
   "jammuandkashmir": "ജമ്മു ആൻഡ് കാശ്മീർ",
   "nctdelhi": "എൻസിടി ദില്ലി",
-
   "india": "ഇന്ത്യ",
   "canada": "കാനഡ",
   "belgium": "ബെൽജിയം",
   "algeria": "അൾജീരിയ",
-
   "faq_how_to_recharge_fastag_question": "ഫാസ്‌റ്റാഗ് എങ്ങനെ റീചാർജ് ചെയ്യാം?",
   "faq_how_to_recharge_fastag_answer": [
     "1. പുതിയ ഫാസ്‌റ്റാഗ് ചേർക്കുക.",
@@ -238,27 +233,22 @@
     "3. റീചാർജ് ബട്ടണിൽ ക്ലിക്കുചെയ്‌ത് തുക നൽകുക.",
     "4. പേയ്‌മെന്റ് രീതി തിരഞ്ഞെടുത്ത് പണമടയ്‌ക്കുക."
   ],
-
   "faq_recharge_different_provider_question": "വ്യത്യസ്‌ത പ്രൊവൈഡറിൽ നിന്ന് എനിക്ക് ഫാസ്‌റ്റാഗുകൾ റീചാർജ് ചെയ്യാൻ കഴിയുമോ?",
   "faq_recharge_different_provider_answer": [
     "അതെ, ആപ്പ് ഉപയോഗിച്ച് നിങ്ങൾക്ക് വ്യത്യസ്ത പ്രൊവൈഡർമാരിൽ നിന്ന് ഫാസ്‌റ്റാഗുകൾ റീചാർജ് ചെയ്യാൻ കഴിയും."
   ],
-
   "faq_recharge_failed_question": "റീചാർജ് പരാജയപ്പെട്ടു, പക്ഷേ അക്കൗണ്ടിൽ നിന്ന് പണം കുറച്ചു?",
   "faq_recharge_failed_answer": [
     "ഞങ്ങളുടെ സപ്പോർട്ട് ടീമുമായി ബന്ധപ്പെടുക, പ്രശ്നം പരിഹരിക്കാൻ ഞങ്ങൾ നിങ്ങളെ സഹായിക്കും."
   ],
-
   "faq_add_card_question": "എളുപ്പമുള്ള റീചാർജിനായി ക്രെഡിറ്റ് അല്ലെങ്കിൽ ഡെബിറ്റ് കാർഡ് എങ്ങനെ ചേർക്കാം?",
   "faq_add_card_answer": [
     "എളുപ്പമുള്ള റീചാർജുകൾക്കായി പേയ്‌മെന്റ് വിഭാഗത്തിന് കീഴിൽ നിങ്ങളുടെ കാർഡ് വിശദാംശങ്ങൾ ചേർക്കാവുന്നതാണ്."
   ],
-
   "faq_view_tolls_question": "ഞാൻ ആപ്പ് ഉപയോഗിക്കാൻ തുടങ്ങുന്നതിനുമുമ്പ് അടച്ച ടോളുകൾ കാണാൻ കഴിയുമോ?",
   "faq_view_tolls_answer": [
     "നിർഭാഗ്യവശാൽ, ആപ്പ് ഉപയോഗിക്കുന്നതിന് മുമ്പ് അടച്ച ടോളുകൾ കാണാൻ കഴിയില്ല."
   ],
-
   "workType": "ജോലിയുടെ തരം",
   "workTitle": "ജോലിയുടെ ശീർഷകം",
   "workSubTitle": "ജോലിയുടെ ഉപശീർഷകം",
@@ -375,7 +365,6 @@
   "enterAValidPassword": "സാധുവായ പാസ്‌വേഡ് നൽകുക",
   "pleaseCheckYourEmail": "ദയവായി നിങ്ങളുടെ ഇമെയിൽ പരിശോധിക്കുക",
   "weHaveSentACodeTo": "ഞങ്ങൾ ഒരു കോഡ് അയച്ചിട്ടുണ്ട്",
-
   "verifyEmailAddress": "ഇമെയിൽ വിലാസം പരിശോധിക്കുക",
   "save": "സംരക്ഷിക്കുക",
   "saveAndVerify": "സംരക്ഷിക്കുക, പരിശോധിക്കുക",
@@ -473,7 +462,6 @@
   "male": "പുരുഷൻ",
   "female": "സ്ത്രീ",
   "other": "മറ്റുള്ളവ",
-
   "alreadyHaveAnAccount": "ഇതിനകം ഒരു അക്കൗണ്ട് ഉണ്ടോ?",
   "dateOfBirth": "ജനന തീയതി",
   "saveAndVerifyButton": "സംരക്ഷിക്കുക, പരിശോധിക്കുക",
@@ -570,7 +558,6 @@
   "receivedDirectBookingRequests": "ലഭിച്ച നേരിട്ടുള്ള ബുക്കിംഗ് അഭ്യർത്ഥനകൾ",
   "bookingsAndRequest": "ബുക്കിംഗുകളും അഭ്യർത്ഥനയും",
   "bookedWorker": "ബുക്ക് ചെയ്ത തൊഴിലാളി",
-
   "allRequests": "എല്ലാ അഭ്യർത്ഥനകളും",
   "allBookings": "എല്ലാ ബുക്കിംഗുകളും",
   "sentRequest": "അയച്ച അഭ്യർത്ഥന",
@@ -681,5 +668,10 @@
   "subDistrict": "ഉപജില്ല",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
   "sortTabTopRated": "Trusted",
-  "fetchLocation": "ദയവായി നിങ്ങളുടെ നിലവിലെ സ്ഥാനം നേടുക അടുത്ത {{entity}} ലഭിക്കാനായി"
+  "fetchLocation": "ദയവായി നിങ്ങളുടെ നിലവിലെ സ്ഥാനം നേടുക അടുത്ത {{entity}} ലഭിക്കാനായി",
+  "rateApp": "ആപ്പ് റേറ്റ് ചെയ്യുക",
+  "rateAppTitle": "അപ്നാ രോജ്ഗാർ ഇഷ്ടപ്പെട്ടോ?",
+  "rateAppMessage": "ദയവായി Play Store-ൽ ഞങ്ങളെ റേറ്റ് ചെയ്യുക. കൂടുതൽ തൊഴിലാളികളും തൊഴിലുടമകളും ഞങ്ങളെ കണ്ടെത്താൻ സഹായിക്കും.",
+  "rateAppNow": "ഇപ്പോൾ റേറ്റ് ചെയ്യുക",
+  "rateAppLater": "പിന്നീട്"
 }

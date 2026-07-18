@@ -5,6 +5,7 @@ import { Download } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/components/LanguageProvider";
 import ShlokBadge from "@/components/ShlokBadge";
+import { APP_PAGE_PATH } from "@/constants";
 
 export default function DownloadApp() {
   const { t } = useLanguage();
@@ -46,8 +47,7 @@ export default function DownloadApp() {
           </p>
 
           <a
-            target="_blank"
-            href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
+            href={APP_PAGE_PATH}
             className="inline-flex items-center gap-3 bg-white text-[#22409a] font-semibold px-8 py-4 rounded-xl shadow-lg hover:scale-105 transition"
           >
             <Download size={20} />

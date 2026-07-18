@@ -680,5 +680,10 @@
   "subDistrict": "उप जिला",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to become Trusted and unlock all features!",
   "sortTabTopRated": "Trusted",
-  "fetchLocation": "कृपया अपना वर्तमान स्थान प्राप्त करें ताकि निकटतम {{entity}} मिल सकें"
+  "fetchLocation": "कृपया अपना वर्तमान स्थान प्राप्त करें ताकि निकटतम {{entity}} मिल सकें",
+  "rateApp": "ऐप रेट करो",
+  "rateAppTitle": "अपना रोजगार पसंद आयो?",
+  "rateAppMessage": "कृपया Play Store पे हमें रेट करो। और मजदूर अर मालिक हमें ढूंढ सके।",
+  "rateAppNow": "अभी रेट करो",
+  "rateAppLater": "बाद में"
 }

@@ -33,6 +33,7 @@ import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
+import { useAppStoreReviewPrompt } from "@/app/hooks/useAppStoreReviewPrompt";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -78,6 +79,11 @@ export default function Layout() {
   useEffect(() => {
     setIsReady(true);
   }, []);
+
+  useAppStoreReviewPrompt(
+    userDetails,
+    isReady && storageHydrated && isSessionValid(userDetails),
+  );
 
   useEffect(() => {
     let cancelled = false;

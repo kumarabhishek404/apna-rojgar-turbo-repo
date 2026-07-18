@@ -1905,6 +1905,11 @@
 
   "downloadApp": "ऐप डाउनलोड करें",
   "playStore": "Play Store से डाउनलोड करें",
+  "rateApp": "ऐप रेट करें",
+  "rateAppTitle": "अपना रोजगार पसंद आया?",
+  "rateAppMessage": "कृपया Play Store पर हमें रेट करें। इससे और मजदूर और नियोक्ता हमें ढूंढ पाएंगे।",
+  "rateAppNow": "अभी रेट करें",
+  "rateAppLater": "बाद में",
   "shareLink": "ऐप लिंक शेयर करें",
 
   "fullDetails": "पूरा विवरण",
