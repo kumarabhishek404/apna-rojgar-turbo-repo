@@ -1,10 +1,7 @@
 import React from "react";
 import { Redirect } from "expo-router";
 
-/**
- * Fallback if `/app` is matched as a normal path (https App Link).
- * Custom-scheme form `apnarojgar://app` is rewritten in `+native-intent.tsx`.
- */
+/** Matched when deep-link path is `app` / `/app`. */
 export default function AppDeepLinkBridge() {
-  return <Redirect href="/(tabs)" />;
+  return <Redirect href="/" />;
 }

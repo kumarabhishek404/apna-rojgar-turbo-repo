@@ -1,20 +1,19 @@
 /**
- * Android App Links for `https://apnarojgarindia.com/app` often arrive as
- * `apnarojgar://app` — Expo treats `app` as the **hostname**, not path `/app`,
- * which previously showed "Unmatched Route".
+ * `https://apnarojgarindia.com/app` often arrives as `apnarojgar://app`.
+ * Expo extracts that as path `"app"`.
  *
- * Rewrite those URLs to the main tabs before Expo Router matches routes.
+ * IMPORTANT: Do NOT return `"/(tabs)"` here — Expo strips it to path `"(tabs)"`,
+ * which is unmatched. Return `"/"` so the home route loads.
  */
 export function redirectSystemPath({
   path,
-  initial: _initial,
 }: {
   path: string;
   initial: boolean;
 }): string {
   try {
     if (isAppDownloadDeepLink(path)) {
-      return "/(tabs)";
+      return "/";
     }
     return path;
   } catch {
@@ -28,49 +27,44 @@ function isAppDownloadDeepLink(raw: string): boolean {
 
   const lower = value.toLowerCase();
 
-  // Bare path forms Expo may pass through.
-  if (lower === "app" || lower === "/app" || lower === "/app/") {
+  // Path forms after Expo extraction: "app", "/app"
+  if (
+    lower === "app" ||
+    lower === "/app" ||
+    lower === "/app/" ||
+    lower === "app/"
+  ) {
     return true;
   }
 
-  // Custom scheme: apnarojgar://app  (hostname = app)
+  // Full custom-scheme / https URLs
   if (
     lower === "apnarojgar://app" ||
     lower.startsWith("apnarojgar://app?") ||
     lower.startsWith("apnarojgar://app/") ||
     lower === "apnarojgar:///app" ||
-    lower.startsWith("apnarojgar:///app?")
+    lower.startsWith("apnarojgar:///app?") ||
+    /(?:^|\/\/)(?:www\.)?apnarojgarindia\.com\/app\/?(?:\?|#|$)/i.test(lower)
   ) {
     return true;
   }
 
-  // Parsed URL forms (https App Link or apnarojgar://app).
   try {
     const href = value.includes("://") ? value : `apnarojgar://${value}`;
     const url = new URL(href);
     const host = (url.hostname || "").toLowerCase();
     const pathname = (url.pathname || "/").replace(/\/+$/, "") || "/";
 
-    // apnarojgar://app  → hostname "app", path "/"
-    if (host === "app" && pathname === "/") {
-      return true;
-    }
-
-    // https://apnarojgarindia.com/app  → path "/app"
+    if (host === "app" && pathname === "/") return true;
+    if (pathname === "/app") return true;
     if (
       (host === "apnarojgarindia.com" || host === "www.apnarojgarindia.com") &&
       pathname === "/app"
     ) {
       return true;
     }
-
-    if (pathname === "/app") {
-      return true;
-    }
   } catch {
-    return /(?:^|\/\/)(?:www\.)?apnarojgarindia\.com\/app\/?(?:\?|#|$)/i.test(
-      lower,
-    );
+    // ignore
   }
 
   return false;

@@ -15,6 +15,7 @@ import { ToastProvider } from "./hooks/toast";
 import { useAppUpdateGuard } from "@/utils/useAppUpdateGuard";
 import ForceUpdateScreen from "@/components/commons/ForceUpdateSection";
 import AnalyticsSession from "@/components/commons/AnalyticsSession";
+import AppDeepLinkHomeRecovery from "@/components/commons/AppDeepLinkHomeRecovery";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const AppNavigator = () => {
               <PaperProvider>
                 <ToastProvider>
                   <AnalyticsSession />
+                  <AppDeepLinkHomeRecovery />
                   <StatusBar style="light" />
 
                   <SafeAreaView

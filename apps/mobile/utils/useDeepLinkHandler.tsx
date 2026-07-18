@@ -6,8 +6,8 @@
  * - `https://apnarojgarindia.com/job/<id>` → `app/job/[id].tsx` → redirects to service details
  * - `https://www.apnarojgarindia.com/job/<id>` → same route resolution
  * - `https://apnarojgarindia.com/screens/service/<id>` → `app/screens/service/[id].tsx`
- * - `https://apnarojgarindia.com/app` → rewritten by `+native-intent` → `/(tabs)`
- *   (arrives as `apnarojgar://app` where `app` is hostname — see `app/+native-intent.tsx`)
+ * - `https://apnarojgarindia.com/app` → `+native-intent` rewrites to `/` (home)
+ *   (must NOT rewrite to `/(tabs)` — that becomes unmatched path `(tabs)`)
  * - `apnarojgar://job/<id>` → `app/job/[id].tsx`
  *
  * Re-exports for share / notifications:
