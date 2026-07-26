@@ -65,7 +65,8 @@ jobs:
           envs: BACKEND_ENV_B64,BACKEND_ENV_PRODUCTION_B64
           script_stop: true
           script: |
-            set -e
+            set -e -o pipefail
+            set -x
             REPO="${{ secrets.EC2_DEPLOY_PATH }}"
             REPO="$(printf '%s' "$REPO" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
             NAME="${{ secrets.EC2_PM2_APP_NAME }}"
@@ -95,16 +96,29 @@ jobs:
             rm -rf "$ENV_BACKUP"
 
             # Cursor is source of truth: write env from GitHub secrets when present
+            # Disable xtrace while writing secrets so values are not printed in CI logs
+            set +x
             if [ -n "${BACKEND_ENV_B64:-}" ]; then
-              echo "$BACKEND_ENV_B64" | base64 -d > "$BACKEND/.env"
+              printf '%s' "$BACKEND_ENV_B64" | base64 -d > "$BACKEND/.env"
               chmod 600 "$BACKEND/.env"
               echo "Wrote $BACKEND/.env from BACKEND_ENV_B64"
             fi
             if [ -n "${BACKEND_ENV_PRODUCTION_B64:-}" ]; then
-              echo "$BACKEND_ENV_PRODUCTION_B64" | base64 -d > "$BACKEND/.env.production"
+              printf '%s' "$BACKEND_ENV_PRODUCTION_B64" | base64 -d > "$BACKEND/.env.production"
               chmod 600 "$BACKEND/.env.production"
               echo "Wrote $BACKEND/.env.production from BACKEND_ENV_PRODUCTION_B64"
             fi
+            set -x
+
+            # Diagnostics: prove files exist without dumping secret values
+            echo "Listing $BACKEND after writing envs:"
+            ls -la "$BACKEND/.env" "$BACKEND/.env.production" 2>&1 || true
+            echo "Env file sizes (bytes):"
+            wc -c "$BACKEND/.env" "$BACKEND/.env.production" 2>&1 || true
+            echo "Env key names only (.env):"
+            grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$BACKEND/.env" | cut -d= -f1 | head -n 40 || true
+            echo "Env key names only (.env.production):"
+            grep -E '^[A-Za-z_][A-Za-z0-9_]*=' "$BACKEND/.env.production" | cut -d= -f1 | head -n 40 || true
 
             if [ ! -f "$BACKEND/.env" ] || [ ! -f "$BACKEND/.env.production" ]; then
               echo "ERROR: Need $BACKEND/.env and $BACKEND/.env.production"
@@ -113,14 +127,32 @@ jobs:
               exit 1
             fi
 
-            # Same lockfile install as local monorepo
-            if command -v pnpm >/dev/null 2>&1; then
-              corepack enable 2>/dev/null || true
-              pnpm install --frozen-lockfile
-            else
-              echo "ERROR: pnpm is required on EC2 (same as Cursor). Install: corepack enable && corepack prepare pnpm@9.15.0 --activate"
-              exit 1
+            # Ensure pnpm is available — auto-enable corepack & prepare pnpm if missing
+            if ! command -v pnpm >/dev/null 2>&1; then
+              echo "pnpm not found — enabling corepack and preparing pnpm@9.15.0..."
+              if command -v corepack >/dev/null 2>&1; then
+                corepack enable || true
+                corepack prepare pnpm@9.15.0 --activate || true
+              elif command -v npm >/dev/null 2>&1; then
+                npm i -g corepack || true
+                corepack enable || true
+                corepack prepare pnpm@9.15.0 --activate || true
+              else
+                echo "ERROR: npm/corepack/pnpm are not available on this host."
+                echo "Install Node 20+ with corepack, then: corepack prepare pnpm@9.15.0 --activate"
+                exit 1
+              fi
             fi
+
+            echo "node: $(node -v 2>/dev/null || echo missing)"
+            echo "pnpm: $(pnpm -v 2>/dev/null || echo missing)"
+            command -v pnpm >/dev/null 2>&1 || {
+              echo "ERROR: pnpm still missing after corepack prepare"
+              exit 1
+            }
+
+            cd "$REPO"
+            pnpm install --frozen-lockfile
 
             cd "$BACKEND"
             # Always the same as local production: ecosystem → npm start → NODE_ENV=production
