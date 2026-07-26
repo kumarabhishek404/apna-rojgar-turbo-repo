@@ -131,17 +131,18 @@ jobs:
             if ! command -v pnpm >/dev/null 2>&1; then
               echo "pnpm not found — enabling corepack and preparing pnpm@9.15.0..."
               if command -v corepack >/dev/null 2>&1; then
-                corepack enable || true
-                corepack prepare pnpm@9.15.0 --activate || true
+                sudo corepack enable || true
+                sudo corepack prepare pnpm@9.15.0 --activate || true
               elif command -v npm >/dev/null 2>&1; then
-                npm i -g corepack || true
-                corepack enable || true
-                corepack prepare pnpm@9.15.0 --activate || true
+                sudo npm i -g corepack || true
+                sudo corepack enable || true
+                sudo corepack prepare pnpm@9.15.0 --activate || true
               else
                 echo "ERROR: npm/corepack/pnpm are not available on this host."
-                echo "Install Node 20+ with corepack, then: corepack prepare pnpm@9.15.0 --activate"
+                echo "Install Node 20+ with corepack, then: sudo corepack prepare pnpm@9.15.0 --activate"
                 exit 1
               fi
+              hash -r 2>/dev/null || true
             fi
 
             echo "node: $(node -v 2>/dev/null || echo missing)"
