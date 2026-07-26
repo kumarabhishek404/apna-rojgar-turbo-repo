@@ -11,6 +11,7 @@ import {
   clearOtpSession,
 } from "../utils/otpSessionCache.js";
 import { isDevOtpBypassEnabled } from "../utils/runtimeMode.js";
+import { userHasAdminAccess } from "../utils/functions.js";
 
 const generateToken = (user) => {
   return jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
@@ -352,7 +353,7 @@ export const handleLogin = async (req, res) => {
     const t0 = performance.now();
     let user = await User.findOne({ mobile })
       .select(
-        "_id name gender mobile address age geoLocation locale skills notificationConsent profilePicture status savedAddresses",
+        "_id name gender mobile address age geoLocation locale skills notificationConsent profilePicture status savedAddresses role",
       )
       .lean();
     const t1 = performance.now();
@@ -417,10 +418,16 @@ export const handleLogin = async (req, res) => {
     const tEnd = performance.now();
     console.log("Total login time:", (tEnd - tStart).toFixed(2), "ms");
 
+    const userPayload =
+      user && typeof user.toObject === "function" ? user.toObject() : user;
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      user,
+      user: {
+        ...userPayload,
+        isAdmin: userHasAdminAccess(userPayload),
+      },
       token,
     });
   } catch (error) {

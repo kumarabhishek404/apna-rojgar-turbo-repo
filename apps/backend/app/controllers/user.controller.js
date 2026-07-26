@@ -10,6 +10,9 @@ import Team from "../models/team.model.js";
 import State from "../models/state.model.js";
 import logError from "../utils/addErrorLog.js";
 import { withTrustedProfileMatch } from "../utils/trustedProfile.js";
+import { userHasAdminAccess } from "../utils/functions.js";
+
+const PUBLIC_ROLES = new Set(["WORKER", "MEDIATOR", "EMPLOYER"]);
 
 // const SECRET = process.env.JWT_SECRET;
 
@@ -72,6 +75,7 @@ export const getMyInfo = async (req, res) => {
         ...user._doc,
         workHistory,
         serviceHistory,
+        isAdmin: userHasAdminAccess(user),
       },
     });
   } catch (error) {
@@ -209,8 +213,19 @@ export const handleUpdateInfo = async (req, res) => {
       age,
       locale,
       savedAddresses,
-      role,
     };
+
+    // Role: public users may only set WORKER/MEDIATOR/EMPLOYER — never self-promote to ADMIN.
+    if (role != null && String(role).trim() !== "") {
+      const nextRole = String(role).toUpperCase().trim();
+      const actorIsAdmin = userHasAdminAccess(req.user);
+      if (PUBLIC_ROLES.has(nextRole)) {
+        updateData.role = nextRole;
+      } else if (nextRole === "ADMIN" && actorIsAdmin) {
+        updateData.role = "ADMIN";
+      }
+      // Invalid / forbidden role values are ignored (keep existing role).
+    }
 
     const parsedGeoLocation = normalizeGeoLocation(geoLocation);
     if (parsedGeoLocation) {

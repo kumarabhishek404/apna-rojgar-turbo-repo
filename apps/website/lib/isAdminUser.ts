@@ -3,15 +3,11 @@ type CandidateUser = {
   mobile?: string | number | null;
 };
 
-const ADMIN_MOBILE_FALLBACK = "6397308499";
-
+/**
+ * Admin UI/API access is role-based only.
+ * Mobile number must not grant admin when role is WORKER / EMPLOYER / etc.
+ */
 export function isAdminUser(user?: CandidateUser | null): boolean {
   if (!user) return false;
-  
-  if (String(user.role || "").toUpperCase() === "ADMIN") return true;
-
-  const adminMobile =
-    process.env.NEXT_PUBLIC_ADMIN_MOBILE?.trim() || ADMIN_MOBILE_FALLBACK;
-  return String(user.mobile || "").trim() === adminMobile;
+  return String(user.role || "").toUpperCase() === "ADMIN";
 }
-

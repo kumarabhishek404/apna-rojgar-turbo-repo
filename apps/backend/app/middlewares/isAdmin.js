@@ -1,8 +1,8 @@
 import logError from "../utils/addErrorLog.js";
+import { userHasAdminAccess } from "../utils/functions.js";
 
 export const isAdmin = async (req, res, next) => {
   try {
-    // Check if user exists in request (should be set by verifyToken middleware)
     if (!req.user) {
       console.log("🚫 [Admin Check] Unauthorized - No user found in request.");
       return res.status(401).json({
@@ -11,10 +11,9 @@ export const isAdmin = async (req, res, next) => {
       });
     }
 
-    // Check if user is ADMIN
-    if (req.user.role !== "ADMIN") {
+    if (!userHasAdminAccess(req.user)) {
       console.log(
-        `🚫 [Admin Check] Access denied for user ${req.user._id} - Not an admin.`
+        `🚫 [Admin Check] Access denied for user ${req.user._id} - Not an admin.`,
       );
       return res.status(403).json({
         success: false,
@@ -23,9 +22,8 @@ export const isAdmin = async (req, res, next) => {
     }
 
     console.log(
-      `✅ [Admin Check] Admin access granted for user ${req.user._id}.`
+      `✅ [Admin Check] Admin access granted for user ${req.user._id}.`,
     );
-    // If user is admin, proceed to next middleware/controller
     next();
   } catch (error) {
     logError(error, req, 500, "middleware - isAdmin");

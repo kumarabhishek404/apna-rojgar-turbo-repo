@@ -9,6 +9,7 @@ import AdminErrorLogsPage from "@/app/webapp/admin/error-logs/page";
 import AdminAnalyticsPage from "@/app/webapp/admin/analytics/page";
 import AdminNotificationsPage from "@/app/webapp/admin/notifications/page";
 import AdminPaidServicesPage from "@/app/webapp/admin/paid-services/page";
+import AdminBlogsPage from "@/app/webapp/admin/blogs/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import Link from "next/link";
@@ -26,8 +27,10 @@ import { motion } from "framer-motion";
 import { apiRequest, clearAuth, getAuth } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { isAdminUser } from "@/lib/isAdminUser";
+import { useConfirmedAdmin } from "@/lib/useConfirmedAdmin";
 import {
   Bell,
+  BookOpenText,
   BriefcaseBusiness,
   ClipboardList,
   Download,
@@ -139,11 +142,11 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
   const isProfileActive = pathname === "/my-profile";
 
   const brandSidebar =
-    "group w-[calc(100%+2rem)] -mx-4 -mt-4 flex min-h-[4.75rem] shrink-0 items-center gap-3 rounded-t-3xl border-b border-slate-200/80 bg-white px-4 py-3.5 transition-colors hover:bg-slate-50/95";
+    "group flex w-[calc(100%+2rem)] -mx-4 -mt-4 min-h-[3.75rem] shrink-0 items-center gap-2.5 rounded-t-3xl border-b border-slate-200/80 bg-white px-4 py-2.5 transition-colors hover:bg-slate-50/95";
   const brandDrawerShell =
-    "flex w-full min-h-[4.75rem] shrink-0 items-stretch overflow-hidden rounded-tr-3xl border-b border-slate-200/80 bg-white pt-[max(1rem,env(safe-area-inset-top,0px))]";
+    "flex w-full min-h-[3.75rem] shrink-0 items-stretch overflow-hidden rounded-tr-3xl border-b border-slate-200/80 bg-white pt-[max(0.5rem,env(safe-area-inset-top,0px))]";
   const brandLinkInner =
-    "group flex min-w-0 flex-1 items-center gap-3 px-4 py-3.5 transition-colors hover:bg-slate-50/95";
+    "group flex min-w-0 flex-1 items-center gap-2.5 px-4 py-2.5 transition-colors hover:bg-slate-50/95";
 
   const navItemBase =
     brandSurface === "drawer"
@@ -159,7 +162,7 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
 
   const brandMark = (
     <>
-      <span className="relative aspect-square h-[2.5rem] w-[2.5rem] shrink-0 overflow-hidden rounded-full bg-transparent">
+      <span className="relative aspect-square h-9 w-9 shrink-0 overflow-hidden rounded-full bg-transparent sm:h-10 sm:w-10">
         <Image
           src={LOGO}
           alt=""
@@ -170,7 +173,7 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
         />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[1.9rem] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#1a2f69] transition-colors group-hover:text-[#22409a]">
+        <p className="truncate whitespace-nowrap text-[1.15rem] font-extrabold leading-none tracking-[-0.03em] text-[#1a2f69] transition-colors group-hover:text-[#22409a] sm:text-[1.35rem]">
           {t("brandName", "Apna Rojgar")}
         </p>
       </div>
@@ -192,10 +195,10 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
           <button
             type="button"
             onClick={onDismiss}
-            className="flex min-w-[3.25rem] cursor-pointer items-center justify-center border-l border-slate-200/70 text-slate-500 transition hover:bg-slate-100 active:bg-slate-200/80"
+            className="flex min-w-[3rem] cursor-pointer items-center justify-center border-l border-slate-200/70 bg-[#22409a] text-white transition hover:bg-[#1a3278] active:bg-[#162a66]"
             aria-label="Close menu"
           >
-            <X size={22} strokeWidth={1.75} />
+            <X size={20} strokeWidth={2.25} />
           </button>
         </div>
       ) : (
@@ -414,6 +417,8 @@ export default function ServicesDashboard() {
   const isAdminPaidServicesView =
     pathname === "/admin/paid-services" ||
     pathname === "/webapp/admin/paid-services";
+  const isAdminBlogsView =
+    pathname === "/admin/blogs" || pathname === "/webapp/admin/blogs";
   const isAllServicesView = pathname === "/all-services" || pathname === "/";
   const isAppliedServiceRoute = pathname === "/applied-service";
   /** Same list chrome (merged toolbar on scroll) for browse + applied jobs. */
@@ -429,7 +434,8 @@ export default function ServicesDashboard() {
   const [userName, setUserName] = useState("User");
   const [userMobile, setUserMobile] = useState("");
   const [userPhoto, setUserPhoto] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, adminChecked, showAdminUi } = useConfirmedAdmin();
+  const showAdminNav = showAdminUi;
   const userInitial = userName.charAt(0).toUpperCase() || "U";
 
   useEffect(() => {
@@ -437,7 +443,7 @@ export default function ServicesDashboard() {
     setUserName(profile.name);
     setUserMobile(profile.mobile);
     setUserPhoto(profile.photo);
-    setIsAdmin(profile.isAdmin);
+    // Admin UI comes only from useConfirmedAdmin (/user/info), never localStorage.
   }, []);
 
   const primaryItems = useMemo(() => {
@@ -458,12 +464,22 @@ export default function ServicesDashboard() {
           href: "/my-work",
           icon: ClipboardList,
         },
-        ...(isAdmin ? [paidServicesItem] : []),
+        ...(showAdminNav ? [paidServicesItem] : []),
         {
           label: t("appliedServices", "Applied Works"),
           href: "/applied-service",
           icon: ClipboardList,
         },
+        // Public tips for regular users (admins manage blogs via /admin/blogs)
+        ...(!showAdminNav
+          ? [
+              {
+                label: t("blogs", "Rojgar Tips"),
+                href: "/rojgar-tips",
+                icon: BookOpenText,
+              } satisfies PrimaryNavItem,
+            ]
+          : []),
         {
           label: t("aboutUs", "About us"),
           href: "/about",
@@ -476,15 +492,16 @@ export default function ServicesDashboard() {
           icon: Download,
         },
     ];
-    if (!isAdmin) return baseItems;
+    if (!showAdminNav) return baseItems;
     return [
       ...baseItems,
+      { label: t("blogs", "Blogs"), href: "/admin/blogs", icon: BookOpenText },
       { label: t("users", "Users"), href: "/admin/users", icon: Users },
       { label: t("errorLogs", "Error Logs"), href: "/admin/error-logs", icon: ShieldAlert },
       { label: t("analytics", "Analytics"), href: "/admin/analytics", icon: ShieldCheck },
       { label: t("notifications", "Notifications"), href: "/admin/notifications", icon: Bell },
     ];
-  }, [t, isAdmin]);
+  }, [t, showAdminNav]);
 
   const bottomItems = useMemo(
     () =>
@@ -495,25 +512,18 @@ export default function ServicesDashboard() {
     [t],
   );
 
+  const isAnyAdminView =
+    isAdminUsersView ||
+    isAdminErrorLogsView ||
+    isAdminAnalyticsView ||
+    isAdminNotificationsView ||
+    isAdminPaidServicesView ||
+    isAdminBlogsView;
+
   useEffect(() => {
-    let mounted = true;
-    apiRequest<{ data?: { role?: string; mobile?: string | number } }>(
-      "/user/info",
-    )
-      .then((res) => {
-        if (!mounted) return;
-        setIsAdmin(
-          isAdminUser({
-            role: res?.data?.role || null,
-            mobile: res?.data?.mobile || null,
-          }),
-        );
-      })
-      .catch(() => undefined);
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    if (!isAnyAdminView || !adminChecked) return;
+    if (!isAdmin) router.replace("/all-services");
+  }, [isAnyAdminView, adminChecked, isAdmin, router]);
 
   useEffect(() => {
     if (mobileNavOpen) closeMobileNav();
@@ -691,6 +701,8 @@ export default function ServicesDashboard() {
                                       ? t("notifications", "Notifications")
                                       : isAdminPaidServicesView
                                         ? t("paidServices", "Paid Services")
+                                        : isAdminBlogsView
+                                          ? t("blogs", "Blogs")
                               : t("allServices")}
                   </h1>
                 </div>
@@ -816,15 +828,27 @@ export default function ServicesDashboard() {
               ) : isSettingsView ? (
                 <SettingsPage />
               ) : isAdminUsersView ? (
-                <AdminUsersPage />
+                showAdminUi ? <AdminUsersPage /> : null
               ) : isAdminErrorLogsView ? (
-                <AdminErrorLogsPage />
+                showAdminUi ? <AdminErrorLogsPage /> : null
               ) : isAdminAnalyticsView ? (
-                <AdminAnalyticsPage />
+                showAdminUi ? <AdminAnalyticsPage /> : null
               ) : isAdminNotificationsView ? (
-                <AdminNotificationsPage />
+                showAdminUi ? <AdminNotificationsPage /> : null
               ) : isAdminPaidServicesView ? (
-                <AdminPaidServicesPage />
+                showAdminUi ? <AdminPaidServicesPage /> : null
+              ) : isAdminBlogsView ? (
+                showAdminUi ? (
+                  <Suspense
+                    fallback={
+                      <div className="rounded-2xl bg-white p-6 text-sm text-slate-500">
+                        Loading blogs...
+                      </div>
+                    }
+                  >
+                    <AdminBlogsPage />
+                  </Suspense>
+                ) : null
               ) : (
                 <Suspense
                   fallback={

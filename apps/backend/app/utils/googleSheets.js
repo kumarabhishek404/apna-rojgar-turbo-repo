@@ -65,6 +65,24 @@ export const SERVICE_SHEET_CONFIG = {
   ],
 };
 
+export const BLOG_QUEUE_HEADERS = [
+  "Title",
+  "Slug",
+  "Excerpt",
+  "Content",
+  "Cover Image URL",
+  "Google Doc ID",
+  "Status",
+  "Posted At",
+  "Error",
+];
+
+export const BLOG_QUEUE_SHEET_CONFIG = {
+  headers: BLOG_QUEUE_HEADERS,
+  tabName: "Blog Queue",
+  dateColumnIndexes: [BLOG_QUEUE_HEADERS.indexOf("Posted At")],
+};
+
 /** @deprecated Use GOOGLE_SHEETS_SPREADSHEET_ID only; kept as fallback for older env. */
 const LEGACY_SERVICES_SPREADSHEET_ID_KEY = "GOOGLE_SHEETS_SERVICES_SPREADSHEET_ID";
 const STATS_SPREADSHEET_ID_KEY = "GOOGLE_SHEETS_SPREADSHEET_ID";
@@ -74,8 +92,28 @@ export const getStatsSpreadsheetId = () =>
   process.env[LEGACY_SERVICES_SPREADSHEET_ID_KEY]?.trim() ||
   "";
 
+export const getBlogSpreadsheetId = () =>
+  process.env.GOOGLE_BLOG_SHEET_ID?.trim() || getStatsSpreadsheetId();
+
+/** Google Doc that holds blog drafts as Document tabs. */
+export const getBlogDocumentId = () => {
+  const raw =
+    process.env.GOOGLE_BLOG_DOC_ID?.trim() ||
+    process.env.GOOGLE_BLOG_DOCUMENT_ID?.trim() ||
+    "";
+  if (!raw) return "";
+  const fromUrl = raw.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+  return fromUrl?.[1] || raw;
+};
+
 export const isGoogleSheetsEnabled = () =>
   process.env.GOOGLE_SHEETS_ENABLED === "true";
+
+export const isGoogleBlogImportEnabled = () =>
+  process.env.GOOGLE_BLOG_IMPORT_ENABLED === "true";
+
+/** @internal shared JWT auth for Sheets / Drive / Docs */
+export const getGoogleAuthClient = () => getAuthClient();
 
 export const getSpreadsheetUrl = (spreadsheetId) =>
   `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
@@ -112,6 +150,7 @@ const getGoogleAuthOptions = () => {
     scopes: [
       "https://www.googleapis.com/auth/spreadsheets",
       "https://www.googleapis.com/auth/drive",
+      "https://www.googleapis.com/auth/documents",
     ],
     transporterOptions,
   };
@@ -356,6 +395,8 @@ const initializeStatsSpreadsheet = async (
   spreadsheetId,
   { shareOnCreate = false } = {},
 ) => {
+  // Only registration + services tabs — never create Blog Queue here.
+  // Blog Queue is initialized only via ensureBlogQueueSpreadsheet when blog import runs.
   await initializeSheetTab(spreadsheetId, REGISTRATION_SHEET_CONFIG);
   await initializeSheetTab(spreadsheetId, SERVICE_SHEET_CONFIG);
 
@@ -365,6 +406,75 @@ const initializeStatsSpreadsheet = async (
       process.env.GOOGLE_SHEETS_SHARE_WITH_EMAIL?.trim(),
     );
   }
+};
+
+export const ensureBlogQueueSpreadsheet = async (existingSpreadsheetId = "") => {
+  if (!isGoogleBlogImportEnabled()) {
+    throw new Error("Google blog import is disabled (GOOGLE_BLOG_IMPORT_ENABLED)");
+  }
+
+  const spreadsheetId =
+    existingSpreadsheetId || getBlogSpreadsheetId() || "";
+
+  if (!spreadsheetId) {
+    throw new Error(
+      "Set GOOGLE_BLOG_SHEET_ID (or GOOGLE_SHEETS_SPREADSHEET_ID) for the Blog Queue sheet",
+    );
+  }
+
+  await initializeSheetTab(spreadsheetId, BLOG_QUEUE_SHEET_CONFIG);
+  return { spreadsheetId, created: false };
+};
+
+export const readSheetRows = async (spreadsheetId, tabName) => {
+  const sheets = await getSheetsClient();
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: getTabRange(tabName, "A:Z"),
+  });
+  return response.data.values || [];
+};
+
+export const updateSheetRowValues = async (
+  spreadsheetId,
+  tabName,
+  rowNumber,
+  values,
+) => {
+  const sheets = await getSheetsClient();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: getTabRange(tabName, `A${rowNumber}`),
+    valueInputOption: "USER_ENTERED",
+    requestBody: { values: [values] },
+  });
+};
+
+/**
+ * Export a Google Doc as plain text. Doc must be shared with the service account.
+ */
+export const exportGoogleDocPlainText = async (docId) => {
+  const drive = await getDriveClient();
+  try {
+    const response = await drive.files.export(
+      {
+        fileId: docId,
+        mimeType: "text/plain",
+      },
+      { responseType: "text" },
+    );
+    return String(response.data || "").trim();
+  } catch (error) {
+    wrapGoogleApiError(error, "Google Doc export");
+  }
+};
+
+export const extractGoogleDocId = (value = "") => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^[a-zA-Z0-9_-]{25,}$/.test(raw)) return raw;
+  const match = raw.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+  return match?.[1] || "";
 };
 
 export const ensureExportSpreadsheet = async (

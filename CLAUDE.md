@@ -51,12 +51,10 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 │       │   ├── cron/
 │       │   └── ...
 │       └── package.json
-│   └── website/                # Next.js + Sanity (npm name: apna-rojgar-website)
+│   └── website/                # Next.js (npm name: apna-rojgar-website)
 │       ├── app/                # App Router pages & layouts
 │       ├── components/
 │       ├── public/
-│       ├── sanity/             # Sanity schemas & lib (CMS)
-│       ├── sanity.config.ts
 │       ├── next.config.ts
 │       └── package.json
 └── packages/
@@ -71,7 +69,7 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 |-----------|----------------------|------|
 | `apps/mobile` | `labour-app` | Expo / React Native client |
 | `apps/backend` | `apna-rojgar-backend` | Express API |
-| `apps/website` | `apna-rojgar-website` | Next.js marketing / web + Sanity studio |
+| `apps/website` | `apna-rojgar-website` | Next.js marketing / web app |
 | `packages/common` | `@repo/common` | Shared types, constants, small pure helpers |
 
 **Rules:**
@@ -150,11 +148,11 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 
 ## 5. WEBSITE (`apps/website` — apna-rojgar-website)
 
-- **Stack**: **Next.js** (App Router under `app/`), **React**, **Tailwind CSS**, **Sanity** (`sanity/`, `sanity.config.ts`, embedded studio route such as `/studio` when configured).
+- **Stack**: **Next.js** (App Router under `app/`), **React**, **Tailwind CSS**. Blogs are served from the Express/MongoDB API (`/api/v1/blogs`).
 - **Entry & config**: `next.config.ts`, `app/layout.tsx`, `app/globals.css`; static assets in **`public/`**.
 - **Scripts** (from repo root via filter): `dev` → `next dev`, `build` → `next build`, `start` → `next start`, `lint`, `clean` (`.next` + `.turbo`).
 - **Env**: use **`.env.local`** (and other Next env files) for keys and public `NEXT_PUBLIC_*` vars — do not commit secrets.
-- Prefer keeping **web-only** UI and CMS config here; share stable constants/types via **`@repo/common`** only when it genuinely benefits both web and mobile/backend.
+- Prefer keeping **web-only** UI here; share stable constants/types via **`@repo/common`** only when it genuinely benefits both web and mobile/backend.
 
 ---
 

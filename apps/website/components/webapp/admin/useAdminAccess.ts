@@ -11,17 +11,18 @@ export function useAdminAccess() {
 
   useEffect(() => {
     let mounted = true;
+    // Stay on "loading" until API confirms — never flash admin UI from cache.
     apiRequest<{ data?: { role?: string; mobile?: string } }>("/user/info")
       .then((res) => {
         if (!mounted) return;
         const ok = isAdminUser(res?.data);
         setStatus(ok ? "allowed" : "denied");
-        if (!ok) router.replace("/webapp/services");
+        if (!ok) router.replace("/all-services");
       })
       .catch(() => {
         if (!mounted) return;
         setStatus("denied");
-        router.replace("/webapp/services");
+        router.replace("/all-services");
       });
     return () => {
       mounted = false;

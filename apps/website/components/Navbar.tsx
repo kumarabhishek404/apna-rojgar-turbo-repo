@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, ChevronDown, Menu, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,6 +20,11 @@ import {
 import { DEV_OTP_PLACEHOLDER, shouldSkipOtpClient } from "@/lib/devOtp";
 import { localizeApiErrorMessage } from "@/lib/i18n";
 import { STATES, WORKERTYPES } from "@/constants";
+import {
+  notifyAuthChanged,
+  OPEN_LOGIN_MODAL_EVENT,
+  type OpenLoginModalDetail,
+} from "@/lib/openLoginModal";
 
 type RegisterRole = "WORKER" | "MEDIATOR" | "EMPLOYER";
 type RegisterSkillItem = { skill: string; pricePerDay: number | null };
@@ -77,6 +82,8 @@ function NavbarContent() {
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  /** When login was opened from in-page actions (e.g. blog like), stay on this URL after auth. */
+  const loginStayOnPageRef = useRef(false);
   const [mobile, setMobile] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSessionId, setOtpSessionId] = useState<string | null>(null);
@@ -197,14 +204,34 @@ function NavbarContent() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    const onOpenLogin = (event: Event) => {
+      const detail = (event as CustomEvent<OpenLoginModalDetail>).detail || {};
+      loginStayOnPageRef.current = Boolean(detail.stayOnPage);
+      setAuthError("");
+      setAuthMessage("");
+      setOtpSessionId(null);
+      setAuthStep("mobile");
+      setMissingProfileFields([]);
+      setProfileMissingFields([]);
+      setShowAddressBuilder(true);
+      setShowLoginModal(true);
+    };
+    window.addEventListener(OPEN_LOGIN_MODAL_EVENT, onOpenLogin);
+    return () => window.removeEventListener(OPEN_LOGIN_MODAL_EVENT, onOpenLogin);
+  }, []);
+
   const showLoginButton = !isLoggedIn;
 
-  const menuItems: Array<{ name: string; link: string }> = [];
+  const menuItems: Array<{ name: string; link: string }> = [
+    { name: t("blogs", "Rojgar Tips"), link: "/rojgar-tips" },
+  ];
 
   const webAppItems = isLoggedIn
     ? [{ name: t("dashboard", "Dashboard"), link: "/all-services" }]
     : [];
   const openLoginModal = () => {
+    loginStayOnPageRef.current = false;
     setAuthError("");
     setAuthMessage("");
     setOtpSessionId(null);
@@ -213,6 +240,16 @@ function NavbarContent() {
     setProfileMissingFields([]);
     setShowAddressBuilder(true);
     setShowLoginModal(true);
+  };
+
+  const finishLoginSuccess = () => {
+    setIsLoggedIn(true);
+    closeLoginModal();
+    const stayOnPage = loginStayOnPageRef.current;
+    loginStayOnPageRef.current = false;
+    notifyAuthChanged({ stayOnPage });
+    if (stayOnPage) return;
+    window.location.href = "/all-services";
   };
 
   const closeLoginModal = () => {
@@ -365,9 +402,7 @@ function NavbarContent() {
 
       if (canEnterDashboard) {
         saveAuth({ user, token });
-        setIsLoggedIn(true);
-        closeLoginModal();
-        window.location.href = "/all-services";
+        finishLoginSuccess();
         return;
       }
 
@@ -859,11 +894,9 @@ function NavbarContent() {
         user: data?.data,
         token: data?.token || registerToken,
       });
-      setIsLoggedIn(true);
       setRegisterToast(t("profileCompletedToast", "Profile completed successfully."));
       window.setTimeout(() => setRegisterToast(""), 2500);
-      closeLoginModal();
-      window.location.href = "/all-services";
+      finishLoginSuccess();
     } catch (error) {
       setAuthError(
         error instanceof Error ? error.message : "Registration failed",
@@ -881,28 +914,27 @@ function NavbarContent() {
   return (
     <>
       <nav
-        className={`-mb-px w-full min-h-[72px] px-6 lg:px-12 flex items-center justify-between sticky top-0 z-50 transition-all duration-300 ${
+        className={`-mb-px sticky top-0 z-50 flex w-full min-h-[64px] items-stretch justify-between gap-3 px-4 transition-all duration-300 sm:px-6 lg:min-h-[72px] lg:px-12 ${
           scrolled
-            ? "py-4 bg-white/90 backdrop-blur-md shadow-md"
-            : "py-0 border-b-2 border-[#22409a] bg-gradient-to-b from-[#23429f] to-[#22409a]"
+            ? "bg-white/95 py-2.5 shadow-sm backdrop-blur-md"
+            : "bg-gradient-to-b from-[#23429f] to-[#22409a] py-0"
         }`}
       >
         {/* Logo */}
         <div
-          className={`flex items-center gap-3 transition-all duration-300 ${
-            scrolled ? "" : "-ml-6 lg:-ml-12 bg-white px-6 lg:px-12 py-4"
+          className={`flex min-w-0 items-center transition-all duration-300 ${
+            scrolled
+              ? ""
+              : "-ml-4 self-stretch bg-white pl-4 pr-4 sm:-ml-6 sm:pl-6 sm:pr-5 lg:-ml-12 lg:pl-12 lg:pr-8"
           }`}
         >
           <Link
             href="/"
-            className="group flex items-center gap-4 cursor-pointer p-0"
+            className="group flex min-w-0 max-w-full items-center gap-2.5 sm:gap-3"
           >
-            {/* Logo */}
             <div
-              className={`flex items-center justify-center transition-all duration-300 ${
-                scrolled
-                  ? "h-10 w-10"
-                  : "h-11 w-11"
+              className={`relative shrink-0 overflow-hidden rounded-full transition-all duration-300 ${
+                scrolled ? "h-9 w-9 sm:h-10 sm:w-10" : "h-10 w-10 sm:h-11 sm:w-11"
               }`}
             >
               <Image
@@ -910,20 +942,15 @@ function NavbarContent() {
                 alt={t("apnaRojgarLogoAlt", "Apna Rojgar Logo")}
                 suppressHydrationWarning
                 className="rounded-full object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
-                width={40}
-                height={40}
+                width={44}
+                height={44}
                 priority
               />
             </div>
 
-            {/* Brand Name */}
             <span
               suppressHydrationWarning
-              className={`text-[2.2rem] font-extrabold leading-none tracking-[-0.02em] transition-all duration-300 ${
-                scrolled
-                  ? "text-[#22409a] group-hover:text-[#1b347d]"
-                  : "text-[#22409a] group-hover:text-[#1b347d]"
-              }`}
+              className="truncate whitespace-nowrap text-[1.35rem] font-extrabold leading-none tracking-[-0.03em] text-[#22409a] transition-colors group-hover:text-[#1b347d] sm:text-[1.65rem] lg:text-[1.85rem]"
             >
               {t("brandName", "Apna Rojgar")}
             </span>
@@ -931,53 +958,60 @@ function NavbarContent() {
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:flex items-center gap-10">
-          <ul
-            className={`flex items-center gap-8 font-medium ${
-              scrolled ? "text-gray-700" : "text-white"
-            }`}
-          >
-            {[...menuItems, ...webAppItems].map((item, i) => (
-              <li key={i}>
-                <Link
-                  href={item.link}
-                  className="hover:text-blue-400 transition"
-                >
-                  {item.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          {/* Buttons */}
-          <div className="flex items-center gap-4">
-          <Link
-              href="https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp"
-              className={`hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-300 ${
-                scrolled
-                  ? "text-[#22409a] hover:bg-[#22409a]/10"
-                  : "text-white hover:bg-white/15"
+        <div className="hidden items-center gap-5 self-center lg:flex">
+          {webAppItems.length > 0 ? (
+            <ul
+              className={`flex items-center gap-5 text-sm font-medium ${
+                scrolled ? "text-gray-700" : "text-white/95"
               }`}
             >
-              {t("blogs", "Blogs")}
-            </Link>
+              {webAppItems.map((item, i) => (
+                <li key={i}>
+                  <Link
+                    href={item.link}
+                    className={`transition ${
+                      scrolled ? "hover:text-[#22409a]" : "hover:text-white"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          <div className="flex items-center gap-2">
+            {menuItems.map((item) => (
+              <Link
+                key={item.link}
+                href={item.link}
+                className={`inline-flex h-10 items-center justify-center px-2.5 text-sm font-semibold whitespace-nowrap transition ${
+                  scrolled
+                    ? "text-[#22409a] hover:text-[#1a3278]"
+                    : "text-white hover:text-white/80"
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
             <Link
               href="/app"
-              className={`hidden sm:inline-flex items-center rounded-full px-3 py-1.5 text-sm font-semibold transition-all duration-300 ${
+              className={`inline-flex h-10 items-center justify-center px-2.5 text-sm font-semibold whitespace-nowrap transition ${
                 scrolled
-                  ? "text-[#22409a] hover:bg-[#22409a]/10"
-                  : "text-white hover:bg-white/15"
-              } animate-pulse`}
+                  ? "text-[#22409a] hover:text-[#1a3278]"
+                  : "text-white hover:text-white/80"
+              }`}
             >
               {t("installApp", "Install App")}
             </Link>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as "en" | "hi")}
-              className={`h-12 min-w-[140px] rounded-lg px-4 text-sm font-medium transition-colors ${
+              aria-label={t("language", "Language")}
+              className={`h-10 min-w-[7.5rem] cursor-pointer rounded-xl border px-3 text-sm font-semibold outline-none transition ${
                 scrolled
-                  ? "border border-gray-300 bg-white text-[#22409a]"
-                  : "border border-white/30 bg-white/10 text-white"
+                  ? "border-[#22409a]/20 bg-white text-[#22409a] hover:bg-[#f5f8ff]"
+                  : "border-white/25 bg-white/10 text-white hover:bg-white/18"
               }`}
             >
               <option value="en" className="text-black">
@@ -991,7 +1025,7 @@ function NavbarContent() {
               <button
                 type="button"
                 onClick={openLoginModal}
-                className="h-12 min-w-[140px] rounded-lg bg-[#FFE492] px-4 font-bold text-[#043873] transition hover:bg-[#ffd966]"
+                className="inline-flex h-10 min-w-[6.5rem] items-center justify-center rounded-xl bg-[#FFE492] px-4 text-sm font-bold text-[#043873] shadow-sm transition hover:bg-[#ffd966]"
               >
                 {t("login")}
               </button>
@@ -1000,10 +1034,14 @@ function NavbarContent() {
               {isLoggedIn ? (
                 <button
                   onClick={() => setDesktopMenuOpen((prev) => !prev)}
-                  className={`rounded-lg p-2 ${scrolled ? "text-[#22409a]" : "text-white"} hover:bg-black/10`}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition ${
+                    scrolled
+                      ? "text-[#22409a] hover:bg-[#22409a]/10"
+                      : "text-white hover:bg-white/15"
+                  }`}
                   aria-label="Open menu"
                 >
-                  <Menu size={22} />
+                  <Menu size={20} />
                 </button>
               ) : null}
               {desktopMenuOpen ? (
@@ -1019,10 +1057,11 @@ function NavbarContent() {
                     </Link>
                   ))}
                   <button
+                    type="button"
                     onClick={() => {
                       clearAuth();
-                      setIsLoggedIn(false);
                       setDesktopMenuOpen(false);
+                      setIsLoggedIn(false);
                       window.location.href = "/";
                     }}
                     className="mt-1 block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-red-600 hover:bg-red-50"
@@ -1037,32 +1076,20 @@ function NavbarContent() {
 
         {/* Mobile Menu Button */}
         <button
+          type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden z-50"
+          className={`z-50 inline-flex h-11 w-11 shrink-0 items-center justify-center self-center rounded-xl transition lg:hidden ${
+            scrolled
+              ? "border border-[#22409a]/15 bg-white text-[#22409a] shadow-sm hover:bg-[#eef3ff]"
+              : "bg-white/15 text-white hover:bg-white/25"
+          }`}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
         >
           {menuOpen ? (
-            <X
-              size={28}
-              className={scrolled ? "text-[#22409a]" : "text-white"}
-            />
+            <X size={22} strokeWidth={2.25} />
           ) : (
-            <div className="flex flex-col gap-1.5">
-              <span
-                className={`w-7 h-1 rounded ${
-                  scrolled ? "bg-[#22409a]" : "bg-white"
-                }`}
-              />
-              <span
-                className={`w-7 h-1 rounded ${
-                  scrolled ? "bg-[#22409a]" : "bg-white"
-                }`}
-              />
-              <span
-                className={`w-7 h-1 rounded ${
-                  scrolled ? "bg-[#22409a]" : "bg-white"
-                }`}
-              />
-            </div>
+            <Menu size={22} strokeWidth={2.25} />
           )}
         </button>
       </nav>
@@ -1089,7 +1116,7 @@ function NavbarContent() {
               className="lg:hidden fixed top-0 left-0 z-40 w-full bg-white shadow-xl"
             >
               <div className="pt-24 pb-10 px-8 flex flex-col gap-6">
-              {[...menuItems, ...webAppItems].map((item, i) => (
+              {webAppItems.map((item, i) => (
                 <Link
                   key={i}
                   href={item.link}
@@ -1099,6 +1126,27 @@ function NavbarContent() {
                   {item.name}
                 </Link>
               ))}
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.link}
+                    href={item.link}
+                    onClick={() => setMenuOpen(false)}
+                    className="inline-flex items-center justify-center rounded-xl border border-[#22409a]/20 bg-[#eef3ff] px-4 py-3 text-sm font-semibold text-[#22409a] transition hover:bg-[#e2eaff]"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Link
+                  href="/app"
+                  onClick={() => setMenuOpen(false)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#22409a]/20 bg-[#eef3ff] px-4 py-3 text-sm font-semibold text-[#22409a] transition hover:bg-[#e2eaff]"
+                >
+                  {t("installApp", "Install App")}
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
 
               <div className="border-t pt-6 flex flex-col gap-4">
                 {isLoggedIn ? (
@@ -1147,14 +1195,6 @@ function NavbarContent() {
                     {t("login")}
                   </button>
                 ) : null}
-
-                <Link
-                  href="/app"
-                  className="flex justify-center items-center gap-2 bg-[#22409a] text-white py-3 rounded-lg font-semibold"
-                >
-                  {t("installApp", "Install App")}
-                  <ArrowRight size={18} />
-                </Link>
 
                 <div className="mt-1 border-t border-gray-200 pt-4">
                   <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">

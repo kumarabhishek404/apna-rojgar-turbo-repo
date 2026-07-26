@@ -22,6 +22,6 @@ db.image = Image;
 db.review = Review;
 db.team = Team;
 
-db.ROLES = ["worker", "employer", "admin"];
+db.ROLES = ["worker", "employer", "mediator", "admin"];
 
 export default db;

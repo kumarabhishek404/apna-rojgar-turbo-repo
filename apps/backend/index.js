@@ -81,6 +81,7 @@ import bookingRoutes from "./app/routes/booking.route.js";
 import appVersionRoutes from "./app/routes/appVersion.route.js";
 import analyticsRoutes from "./app/routes/analytics.route.js";
 import paymentRoutes from "./app/routes/payment.route.js";
+import blogRoutes, { adminBlogRouter } from "./app/routes/blog.route.js";
 
 // ✅ Import cron jobs
 import scheduleNotifiyLiveServiceOfUserSkills from "./app/cron/activeServicesNotification.js";
@@ -88,6 +89,7 @@ import scheduleNotifyUsersWithPendingRequests from "./app/cron/pendingRequestsNo
 import scheduleNotifyUsersForCompletingProfile from "./app/cron/profileCompletionNotification.js";
 import scheduleWeeklyRegistrationsExport from "./app/cron/weeklyRegistrationsExport.js";
 import scheduleWeeklyServicesExport from "./app/cron/weeklyServicesExport.js";
+import scheduleDailyBlogPublish from "./app/cron/dailyBlogPublish.js";
 // import { createIndexes } from "./app/utils/createIndexes.js";
 
 // ✅ Start cron jobs
@@ -96,6 +98,7 @@ scheduleNotifyUsersWithPendingRequests();
 scheduleNotifyUsersForCompletingProfile();
 scheduleWeeklyRegistrationsExport();
 scheduleWeeklyServicesExport();
+scheduleDailyBlogPublish();
 // ✅ Routes middleware
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
@@ -105,6 +108,8 @@ app.use("/api/v1/service", serviceRoutes);
 app.use("/api/v1/mediator", mediatorRoutes);
 app.use("/api/v1/notification", notificationRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/admin/blogs", adminBlogRouter);
+app.use("/api/v1/blogs", blogRoutes);
 app.use("/api/v1/review", reviewRoutes);
 app.use("/api/v1/feedback", appFeedbackRoutes);
 app.use("/api/v1/home", homeRoutes);

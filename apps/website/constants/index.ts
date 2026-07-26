@@ -9,6 +9,15 @@ export const APPLINK =
 export const APP_PAGE_PATH = "/app";
 export const APP_PAGE_URL = "https://apnarojgarindia.com/app";
 
+/** Public tips / articles (no "blog" in the URL). */
+export const ROJGAR_TIPS_PATH = "/rojgar-tips";
+/** @deprecated use ROJGAR_TIPS_PATH */
+export const CAREER_ADVICE_PATH = ROJGAR_TIPS_PATH;
+export const rojgarTipsArticlePath = (slug: string) =>
+  `${ROJGAR_TIPS_PATH}/${String(slug || "").replace(/^\/+|\/+$/g, "")}`;
+/** @deprecated use rojgarTipsArticlePath */
+export const careerAdviceArticlePath = rojgarTipsArticlePath;
+
 export const STETESOFINDIA = [
   { label: "andhrapradesh", value: "andhrapradesh" },
   { label: "arunachalpradesh", value: "arunachalpradesh" },

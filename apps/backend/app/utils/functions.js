@@ -1,11 +1,23 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-const ADMIN_MOBILE = process.env.ADMIN_MOBILE;
+const getAdminMobile = () => String(process.env.ADMIN_MOBILE || "").trim();
 
-// Function to validate if a user is an admin
-export const isAdmin = (mobile) => {
-  return mobile === ADMIN_MOBILE;
+/** True when mobile matches ADMIN_MOBILE env (legacy / bridge). */
+export const isAdminMobile = (mobile) => {
+  const adminMobile = getAdminMobile();
+  if (!adminMobile) return false;
+  return String(mobile || "").trim() === adminMobile;
+};
+
+/** @deprecated Prefer userHasAdminAccess(user). Kept for existing mobile-only checks. */
+export const isAdmin = (mobile) => isAdminMobile(mobile);
+
+/** Admin access: role ADMIN, or ADMIN_MOBILE bridge. */
+export const userHasAdminAccess = (user) => {
+  if (!user) return false;
+  if (String(user.role || "").toUpperCase() === "ADMIN") return true;
+  return isAdminMobile(user.mobile);
 };
 
 // Haversine Distance Function
