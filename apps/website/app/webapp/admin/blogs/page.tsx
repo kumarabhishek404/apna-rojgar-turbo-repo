@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiRequest } from "@/lib/auth";
 import { useAdminAccess } from "@/components/webapp/admin/useAdminAccess";
@@ -28,7 +28,7 @@ const emptyForm: BlogFormState = {
   status: "PUBLISHED",
 };
 
-export default function AdminBlogsPage() {
+function AdminBlogsPageInner() {
   const access = useAdminAccess();
   const searchParams = useSearchParams();
   const editIdFromQuery = searchParams.get("edit") || "";
@@ -405,5 +405,19 @@ export default function AdminBlogsPage() {
         )}
       </div>
     </section>
+  );
+}
+
+export default function AdminBlogsPage() {
+  return (
+    <Suspense
+      fallback={
+        <section className="rounded-2xl bg-white p-6 text-sm text-slate-500">
+          Loading blogs…
+        </section>
+      }
+    >
+      <AdminBlogsPageInner />
+    </Suspense>
   );
 }

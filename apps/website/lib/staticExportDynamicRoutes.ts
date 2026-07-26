@@ -72,3 +72,48 @@ export async function staticExportDynamicParamListAsync(): Promise<{ id: string 
 
   return Array.from(ids).map((id) => ({ id }));
 }
+
+/** Blog / tip article slugs for `generateStaticParams` under static export. */
+export async function staticExportBlogSlugParamListAsync(): Promise<
+  { slug: string }[]
+> {
+  const slugs = new Set<string>();
+  slugs.add(STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID);
+
+  try {
+    const limit = 100;
+    let page = 1;
+    let pages = 1;
+    const base = apiBaseUrlV1();
+
+    do {
+      const url = `${base}/blogs/public/slugs?page=${page}&limit=${limit}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(
+          `[static export] ${url} returned ${res.status}; only placeholder blog paths will be prerendered.`,
+        );
+        break;
+      }
+      const json = (await res.json()) as {
+        success?: boolean;
+        data?: { slugs?: string[]; pages?: number };
+      };
+      for (const slug of json?.data?.slugs || []) {
+        if (slug) slugs.add(slug);
+      }
+      pages =
+        typeof json?.data?.pages === "number" && json.data.pages > 0
+          ? json.data.pages
+          : 1;
+      page += 1;
+    } while (page <= pages);
+  } catch (e) {
+    console.warn(
+      "[static export] Could not fetch blog slugs for generateStaticParams; only placeholder paths will be emitted.",
+      e,
+    );
+  }
+
+  return Array.from(slugs).map((slug) => ({ slug }));
+}
