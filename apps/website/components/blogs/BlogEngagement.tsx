@@ -140,8 +140,19 @@ export default function BlogEngagement({
   const isLoggedIn = Boolean(auth?.token);
   const myUserId = useMemo(() => {
     const user = (auth?.user || {}) as Record<string, unknown>;
-    return typeof user._id === "string" ? user._id : "";
+    const raw = user._id ?? user.id;
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+    if (raw != null && raw !== "") return String(raw);
+    return "";
   }, [auth]);
+
+  const isOwnComment = useCallback(
+    (authorId?: string) => {
+      if (!myUserId || !authorId) return false;
+      return String(authorId) === String(myUserId);
+    },
+    [myUserId],
+  );
 
   const [engagement, setEngagement] = useState<EngagementState>({
     likeCount: initialLikeCount,
@@ -154,6 +165,8 @@ export default function BlogEngagement({
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -425,44 +438,59 @@ export default function BlogEngagement({
     await performSubmitReply(commentId);
   };
 
-  const onDelete = async (commentId: string, parentId?: string) => {
-    if (!getAuth()?.token) return;
-    if (
-      !window.confirm(
-        t("blogDeleteCommentConfirm", "Delete this comment?"),
-      )
-    ) {
+  const startEdit = (commentId: string, body: string) => {
+    if (!getAuth()?.token) {
+      requestLogin({ type: "like" });
       return;
     }
+    setReplyTo(null);
+    setEditingId(commentId);
+    setEditText(body);
+  };
+
+  const onSaveEdit = async (commentId: string, parentId?: string) => {
+    if (!getAuth()?.token) {
+      requestLogin({ type: "like" });
+      return;
+    }
+    const body = editText.trim();
+    if (body.length < 2) return;
     setBusy(true);
     setError("");
     try {
-      const data = await apiRequest<{ data: { commentCount: number } }>(
-        `/blogs/${encodeURIComponent(slug)}/comments/${commentId}`,
-        { method: "DELETE" },
-      );
-      if (parentId) {
-        setComments((prev) =>
-          prev.map((c) =>
-            c._id === parentId
-              ? {
-                  ...c,
-                  replies: (c.replies || []).filter((r) => r._id !== commentId),
-                }
-              : c,
-          ),
-        );
-      } else {
-        setComments((prev) => prev.filter((c) => c._id !== commentId));
+      const data = await apiRequest<{
+        data: { comment: BlogCommentItem & { parentId?: string | null } };
+      }>(`/blogs/${encodeURIComponent(slug)}/comments/${commentId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ body }),
+      });
+      const updated = data?.data?.comment;
+      if (updated) {
+        if (parentId) {
+          setComments((prev) =>
+            prev.map((c) =>
+              c._id === parentId
+                ? {
+                    ...c,
+                    replies: (c.replies || []).map((r) =>
+                      r._id === commentId ? { ...r, body: updated.body } : r,
+                    ),
+                  }
+                : c,
+            ),
+          );
+        } else {
+          setComments((prev) =>
+            prev.map((c) =>
+              c._id === commentId ? { ...c, body: updated.body } : c,
+            ),
+          );
+        }
       }
-      if (data?.data) {
-        setEngagement((prev) => ({
-          ...prev,
-          commentCount: data.data.commentCount,
-        }));
-      }
+      setEditingId(null);
+      setEditText("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not delete");
+      setError(e instanceof Error ? e.message : "Could not update comment");
     } finally {
       setBusy(false);
     }
@@ -553,20 +581,63 @@ export default function BlogEngagement({
                         {formatWhen(comment.createdAt)}
                       </p>
                     </div>
-                    {myUserId && comment.author?._id === myUserId ? (
+                    {isOwnComment(comment.author?._id) ? (
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => void onDelete(comment._id)}
-                        className="text-xs font-semibold text-red-500 hover:underline"
+                        onClick={() => startEdit(comment._id, comment.body)}
+                        className="shrink-0 text-xs font-semibold text-[#22409a] hover:underline"
                       >
-                        {t("delete", "Delete")}
+                        {t("blogEdit", "Edit")}
                       </button>
                     ) : null}
                   </div>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-                    {comment.body}
-                  </p>
+
+                  {editingId === comment._id ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        void onSaveEdit(comment._id);
+                      }}
+                      className="mt-3 space-y-2"
+                    >
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder={t(
+                          "blogEditCommentPlaceholder",
+                          "Edit your comment…",
+                        )}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-[#22409a] focus:ring-2"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={busy || editText.trim().length < 2}
+                          className="rounded-lg bg-[#22409a] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {t("blogSaveEdit", "Save")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditText("");
+                          }}
+                          className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600"
+                        >
+                          {t("cancel", "Cancel")}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                      {comment.body}
+                    </p>
+                  )}
+
                   <div className="mt-3 flex flex-wrap gap-3">
                     <button
                       type="button"
@@ -578,6 +649,7 @@ export default function BlogEngagement({
                           });
                           return;
                         }
+                        setEditingId(null);
                         setReplyTo((prev) =>
                           prev === comment._id ? null : comment._id,
                         );
@@ -641,22 +713,63 @@ export default function BlogEngagement({
                                 {formatWhen(reply.createdAt)}
                               </p>
                             </div>
-                            {myUserId && reply.author?._id === myUserId ? (
+                            {isOwnComment(reply.author?._id) ? (
                               <button
                                 type="button"
                                 disabled={busy}
                                 onClick={() =>
-                                  void onDelete(reply._id, comment._id)
+                                  startEdit(reply._id, reply.body)
                                 }
-                                className="text-xs font-semibold text-red-500 hover:underline"
+                                className="shrink-0 text-xs font-semibold text-[#22409a] hover:underline"
                               >
-                                {t("delete", "Delete")}
+                                {t("blogEdit", "Edit")}
                               </button>
                             ) : null}
                           </div>
-                          <p className="mt-1.5 whitespace-pre-wrap text-sm text-slate-700">
-                            {reply.body}
-                          </p>
+                          {editingId === reply._id ? (
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                void onSaveEdit(reply._id, comment._id);
+                              }}
+                              className="mt-2 space-y-2"
+                            >
+                              <textarea
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                rows={2}
+                                maxLength={2000}
+                                placeholder={t(
+                                  "blogEditCommentPlaceholder",
+                                  "Edit your comment…",
+                                )}
+                                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-[#22409a] focus:ring-2"
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  type="submit"
+                                  disabled={busy || editText.trim().length < 2}
+                                  className="rounded-lg bg-[#22409a] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                                >
+                                  {t("blogSaveEdit", "Save")}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingId(null);
+                                    setEditText("");
+                                  }}
+                                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600"
+                                >
+                                  {t("cancel", "Cancel")}
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <p className="mt-1.5 whitespace-pre-wrap text-sm text-slate-700">
+                              {reply.body}
+                            </p>
+                          )}
                         </li>
                       ))}
                     </ul>

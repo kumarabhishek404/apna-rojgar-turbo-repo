@@ -18,6 +18,7 @@ import {
   recordBlogShare,
   replyBlogComment,
   toggleBlogLike,
+  updateBlogComment,
 } from "../controllers/blogEngagement.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import { optionalAuth } from "../middlewares/optionalAuth.middleware.js";
@@ -41,6 +42,12 @@ router.post(
   verifyToken,
   userStatus,
   replyBlogComment,
+);
+router.patch(
+  "/:slugOrId/comments/:commentId",
+  verifyToken,
+  userStatus,
+  updateBlogComment,
 );
 router.delete(
   "/:slugOrId/comments/:commentId",

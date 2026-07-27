@@ -354,6 +354,77 @@ export const replyBlogComment = async (req, res) => {
   }
 };
 
+export const updateBlogComment = async (req, res) => {
+  try {
+    const blog = await findPublishedBlog(req.params.slugOrId);
+    if (!blog) {
+      return res.status(404).json(new ApiResponse(404, null, "Blog not found"));
+    }
+
+    const commentId = String(req.params.commentId || "").trim();
+    if (!mongoose.isValidObjectId(commentId)) {
+      return res.status(400).json(new ApiResponse(400, null, "Invalid comment id"));
+    }
+
+    const comment = await BlogComment.findOne({
+      _id: commentId,
+      blogId: blog._id,
+      status: "ACTIVE",
+    });
+    if (!comment) {
+      return res.status(404).json(new ApiResponse(404, null, "Comment not found"));
+    }
+
+    const isOwner = String(comment.userId) === String(req.user._id);
+    if (!isOwner) {
+      return res.status(403).json(new ApiResponse(403, null, "Not allowed"));
+    }
+
+    const body = String(req.body?.body || "").trim();
+    if (body.length < 2) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Comment must be at least 2 characters"));
+    }
+    if (body.length > 2000) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Comment is too long"));
+    }
+
+    comment.body = body;
+    await comment.save();
+
+    const populated = await BlogComment.findById(comment._id)
+      .populate("userId", "name profilePicture")
+      .lean();
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          comment: {
+            _id: populated._id.toString(),
+            body: populated.body,
+            createdAt: populated.createdAt,
+            updatedAt: populated.updatedAt,
+            author: mapAuthor(populated.userId),
+            parentId: populated.parentId
+              ? populated.parentId.toString()
+              : null,
+          },
+        },
+        "Comment updated",
+      ),
+    );
+  } catch (error) {
+    logError(error, req, 500, "blogEngagement.controller - updateBlogComment");
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, error.message || "Failed to update comment"));
+  }
+};
+
 export const deleteBlogComment = async (req, res) => {
   try {
     const blog = await findPublishedBlog(req.params.slugOrId);
