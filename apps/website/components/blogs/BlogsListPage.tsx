@@ -100,7 +100,9 @@ export default function BlogsListPage() {
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {blogs.map((blog) => (
-                <Link
+                // Full document navigation so Render can rewrite unknown tip
+                // slugs (published after the last static build) to the shell page.
+                <a
                   key={blog._id}
                   href={rojgarTipsArticlePath(blog.slug)}
                   className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
@@ -147,7 +149,7 @@ export default function BlogsListPage() {
                       {blog.excerpt || blog.content}
                     </p>
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           )}

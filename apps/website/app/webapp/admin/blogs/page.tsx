@@ -377,13 +377,13 @@ function AdminBlogsPageInner() {
                     {blog.slug}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link
+                  <div className="flex flex-wrap gap-2">
+                  <a
                     href={rojgarTipsArticlePath(blog.slug)}
                     className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
                   >
                     View
-                  </Link>
+                  </a>
                   <button
                     type="button"
                     onClick={() => onEdit(blog)}

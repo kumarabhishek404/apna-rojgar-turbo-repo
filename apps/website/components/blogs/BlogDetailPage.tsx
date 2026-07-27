@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { useLanguage } from "@/components/LanguageProvider";
 import { STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID } from "@/lib/staticExportDynamicRoutes";
@@ -42,15 +43,32 @@ function renderBlogBody(content: string) {
   );
 }
 
-export default function BlogDetailPage({ slug }: { slug: string }) {
+function resolveSlugFromPath(pathname: string | null, fallback: string) {
+  const fromPath = (pathname || "").split("/").filter(Boolean).pop() || "";
+  if (fromPath && fromPath !== STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
+    return fromPath;
+  }
+  if (fallback && fallback !== STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
+    return fallback;
+  }
+  return "";
+}
+
+export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
   const { t } = useLanguage();
+  const pathname = usePathname();
   const { showAdminUi } = useConfirmedAdmin();
+  // Prefer the browser URL so Render rewrites to __static.html still load the right post.
+  const slug = useMemo(
+    () => resolveSlugFromPath(pathname, slugProp),
+    [pathname, slugProp],
+  );
   const [blog, setBlog] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!slug || slug === STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
+    if (!slug) {
       setLoading(false);
       setError("Blog not found");
       return;
@@ -58,6 +76,8 @@ export default function BlogDetailPage({ slug }: { slug: string }) {
 
     let mounted = true;
     setLoading(true);
+    setError("");
+    setBlog(null);
     fetchPublishedBlog(slug)
       .then((data) => {
         if (!mounted) return;

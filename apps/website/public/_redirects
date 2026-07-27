@@ -1,0 +1,9 @@
+# Render static rewrites (copied to out/ from public/).
+# Existing prerendered HTML files still win when present; these catch NEW tip URLs
+# published after the last website deploy so they do not 404.
+#
+# 200 = rewrite (URL stays the same in the browser).
+
+/rojgar-tips/*     /rojgar-tips/__static.html     200
+/blogs/*           /blogs/__static.html           200
+/career-advice/*   /career-advice/__static.html   200
