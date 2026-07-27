@@ -17,7 +17,6 @@ export default async function ContractorDetailsRoutePage({
       <Navbar />
       <div className="px-4 py-8">
         <div className="mx-auto max-w-6xl">
-          
           <ContractorDetailView id={id} />
         </div>
       </div>
