@@ -1,18 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import BlogDetailPage from "@/components/blogs/BlogDetailPage";
 import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/components/LanguageProvider";
 import { ROJGAR_TIPS_PATH } from "@/constants";
 import { STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID } from "@/lib/staticExportDynamicRoutes";
 
 /**
  * Static hosts (Render) return this page for unknown tip URLs because
  * `output: "export"` only emits HTML for slugs known at build time.
- * Render does not apply Netlify-style `public/_redirects`, so recover tip
- * detail routes here from the browser pathname.
+ * On that fallback, `usePathname()` is often `/_not-found`, so we must
+ * also read `window.location.pathname` (the real tip URL in the address bar).
  */
 function tipSlugFromPath(pathname: string | null): string | null {
   const parts = (pathname || "").split("/").filter(Boolean);
@@ -30,30 +31,52 @@ function tipSlugFromPath(pathname: string | null): string | null {
   return slug;
 }
 
+function resolveTipSlug(routerPath: string | null): string | null {
+  const fromRouter = tipSlugFromPath(routerPath);
+  if (fromRouter) return fromRouter;
+  if (typeof window === "undefined") return null;
+  return tipSlugFromPath(window.location.pathname);
+}
+
+function TipLoadingScreen() {
+  const { t } = useLanguage();
+  return (
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gradient-to-b from-[#eef3ff] via-white to-[#f8fafc] px-4 pb-16 pt-20 md:pt-24 lg:pt-28">
+        <article className="mx-auto max-w-3xl animate-pulse space-y-4">
+          <div className="h-48 w-full rounded-2xl bg-slate-200/80 md:h-64" />
+          <div className="h-4 w-40 rounded bg-slate-200/80" />
+          <div className="h-8 w-4/5 max-w-xl rounded bg-slate-200/80" />
+          <div className="h-4 w-full rounded bg-slate-200/70" />
+          <div className="h-4 w-11/12 rounded bg-slate-200/70" />
+          <div className="h-4 w-10/12 rounded bg-slate-200/70" />
+          <p className="pt-2 text-sm text-slate-500">
+            {t("loading", "Loading...")}
+          </p>
+        </article>
+      </main>
+    </>
+  );
+}
+
 export default function NotFound() {
   const pathname = usePathname();
-  const tipSlug = useMemo(() => tipSlugFromPath(pathname), [pathname]);
+  const [tipSlug, setTipSlug] = useState<string | null>(() =>
+    tipSlugFromPath(pathname),
+  );
+  const [resolved, setResolved] = useState(() =>
+    Boolean(tipSlugFromPath(pathname)),
+  );
 
   useEffect(() => {
-    // #region agent log
-    fetch("http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "d31d2b",
-      },
-      body: JSON.stringify({
-        sessionId: "d31d2b",
-        runId: "post-fix",
-        hypothesisId: "B",
-        location: "app/not-found.tsx:NotFound",
-        message: "not-found rendered",
-        data: { pathname, tipSlug, recoveringTip: Boolean(tipSlug) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, [pathname, tipSlug]);
+    setTipSlug(resolveTipSlug(pathname));
+    setResolved(true);
+  }, [pathname]);
+
+  if (!resolved) {
+    return <TipLoadingScreen />;
+  }
 
   if (tipSlug) {
     return <BlogDetailPage slug={tipSlug} />;

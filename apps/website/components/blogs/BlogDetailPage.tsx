@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -44,9 +44,20 @@ function renderBlogBody(content: string) {
 }
 
 function resolveSlugFromPath(pathname: string | null, fallback: string) {
-  const fromPath = (pathname || "").split("/").filter(Boolean).pop() || "";
-  if (fromPath && fromPath !== STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
-    return fromPath;
+  const candidates = [pathname];
+  if (typeof window !== "undefined") {
+    candidates.push(window.location.pathname);
+  }
+  for (const path of candidates) {
+    const fromPath = (path || "").split("/").filter(Boolean).pop() || "";
+    if (
+      fromPath &&
+      fromPath !== STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID &&
+      fromPath !== "_not-found" &&
+      !fromPath.endsWith(".html")
+    ) {
+      return fromPath;
+    }
   }
   if (fallback && fallback !== STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID) {
     return fallback;
@@ -58,35 +69,19 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
   const { t } = useLanguage();
   const pathname = usePathname();
   const { showAdminUi } = useConfirmedAdmin();
-  // Prefer the browser URL so Render rewrites to __static.html still load the right post.
-  const slug = useMemo(
-    () => resolveSlugFromPath(pathname, slugProp),
-    [pathname, slugProp],
+  // Prefer the browser URL so static 404 / __static shells still load the right post.
+  const [slug, setSlug] = useState(() =>
+    resolveSlugFromPath(pathname, slugProp),
   );
   const [blog, setBlog] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // #region agent log
-    fetch("http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Debug-Session-Id": "d31d2b",
-      },
-      body: JSON.stringify({
-        sessionId: "d31d2b",
-        runId: "post-fix",
-        hypothesisId: "C",
-        location: "BlogDetailPage.tsx:fetch",
-        message: "blog detail fetch start",
-        data: { slug, pathname, slugProp },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
+    setSlug(resolveSlugFromPath(pathname, slugProp));
+  }, [pathname, slugProp]);
 
+  useEffect(() => {
     if (!slug) {
       setLoading(false);
       setError("Blog not found");
@@ -100,55 +95,10 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
     fetchPublishedBlog(slug)
       .then((data) => {
         if (!mounted) return;
-        // #region agent log
-        fetch(
-          "http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Debug-Session-Id": "d31d2b",
-            },
-            body: JSON.stringify({
-              sessionId: "d31d2b",
-              runId: "post-fix",
-              hypothesisId: "D",
-              location: "BlogDetailPage.tsx:fetchSuccess",
-              message: "blog detail fetch ok",
-              data: { slug, title: data?.title || null },
-              timestamp: Date.now(),
-            }),
-          },
-        ).catch(() => {});
-        // #endregion
         setBlog(data);
       })
       .catch((e) => {
         if (!mounted) return;
-        // #region agent log
-        fetch(
-          "http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Debug-Session-Id": "d31d2b",
-            },
-            body: JSON.stringify({
-              sessionId: "d31d2b",
-              runId: "post-fix",
-              hypothesisId: "D",
-              location: "BlogDetailPage.tsx:fetchError",
-              message: "blog detail fetch failed",
-              data: {
-                slug,
-                error: e instanceof Error ? e.message : String(e),
-              },
-              timestamp: Date.now(),
-            }),
-          },
-        ).catch(() => {});
-        // #endregion
         setError(e instanceof Error ? e.message : "Failed to load blog");
       })
       .finally(() => {
@@ -166,7 +116,17 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
       <main className="min-h-screen bg-gradient-to-b from-[#eef3ff] via-white to-[#f8fafc] px-4 pb-16 pt-20 md:pt-24 lg:pt-28">
         <article className="mx-auto max-w-3xl">
           {loading ? (
-            <p className="text-sm text-slate-500">{t("loading", "Loading...")}</p>
+            <div className="animate-pulse space-y-4">
+              <div className="h-48 w-full rounded-2xl bg-slate-200/80 md:h-64" />
+              <div className="h-4 w-40 rounded bg-slate-200/80" />
+              <div className="h-8 w-4/5 max-w-xl rounded bg-slate-200/80" />
+              <div className="h-4 w-full rounded bg-slate-200/70" />
+              <div className="h-4 w-11/12 rounded bg-slate-200/70" />
+              <div className="h-4 w-10/12 rounded bg-slate-200/70" />
+              <p className="pt-2 text-sm text-slate-500">
+                {t("loading", "Loading...")}
+              </p>
+            </div>
           ) : error || !blog ? (
             <>
               <div className="mb-6">
