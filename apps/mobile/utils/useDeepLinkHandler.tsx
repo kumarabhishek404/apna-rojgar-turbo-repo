@@ -9,8 +9,8 @@
  * - `https://apnarojgarindia.com/app` → `+native-intent` rewrites to `/` (home)
  *   (must NOT rewrite to `/(tabs)` — that becomes unmatched path `(tabs)`)
  * - `apnarojgar://job/<id>` → `app/job/[id].tsx`
- * - Tip/blog URLs (`/rojgar-tips`, `/blogs`, `/career-advice`) → `/screens/rojgar-tips`
- *   (WebView). New App Links no longer claim the whole domain so tip shares open in the browser.
+ * - Tip URLs (`/rojgar-tips`, `/rojgar-tips/<slug>`) → `/screens/rojgar-tips` (WebView).
+ *   New App Links no longer claim the whole domain so tip shares open in the browser.
  *
  * Re-exports for share / notifications:
  */

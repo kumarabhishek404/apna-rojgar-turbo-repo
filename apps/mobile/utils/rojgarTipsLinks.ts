@@ -1,6 +1,7 @@
 /**
  * Canonical website tips URLs (single source of truth with the public site).
  * Mobile opens these in a WebView; does not duplicate blog content.
+ * Only `/rojgar-tips` is supported for deep links (not /blogs or /career-advice).
  */
 export const ROJGAR_TIPS_HOSTS = new Set([
   "apnarojgarindia.com",
@@ -10,7 +11,7 @@ export const ROJGAR_TIPS_HOSTS = new Set([
 export const ROJGAR_TIPS_ORIGIN = "https://www.apnarojgarindia.com" as const;
 export const ROJGAR_TIPS_LIST_PATH = "/rojgar-tips" as const;
 
-const TIP_SECTIONS = new Set(["rojgar-tips", "blogs", "career-advice"]);
+const TIP_SECTION = "rojgar-tips";
 
 export function rojgarTipsListUrl(inApp = true): string {
   const url = `${ROJGAR_TIPS_ORIGIN}${ROJGAR_TIPS_LIST_PATH}`;
@@ -36,7 +37,7 @@ export function withInAppParam(rawUrl: string): string {
   }
 }
 
-/** True when URL/path is a public tip list or article. */
+/** True when URL/path is a `/rojgar-tips` list or article. */
 export function isRojgarTipsPath(raw: string): boolean {
   return Boolean(parseRojgarTipsDeepLink(raw));
 }
@@ -49,6 +50,7 @@ export type RojgarTipsDeepLink = {
 
 /**
  * Parse custom-scheme or https tip URLs / Expo-extracted paths into an in-app target.
+ * Supports only `/rojgar-tips` (e.g. `apnarojgar://rojgar-tips` or `.../rojgar-tips/<slug>`).
  */
 export function parseRojgarTipsDeepLink(
   raw: string,
@@ -58,7 +60,7 @@ export function parseRojgarTipsDeepLink(
 
   const lower = value.toLowerCase();
 
-  // Expo-extracted path forms: "rojgar-tips", "/rojgar-tips/slug", "blogs/slug"
+  // Expo-extracted path forms: "rojgar-tips", "/rojgar-tips/slug"
   const pathOnly = lower
     .replace(/^apnarojgar:\/\//, "")
     .replace(/^https?:\/\/(www\.)?apnarojgarindia\.com/i, "")
@@ -72,12 +74,12 @@ export function parseRojgarTipsDeepLink(
   let section = parts[0];
   let slug: string | undefined = parts[1];
 
-  if (!TIP_SECTIONS.has(section) && parts.length >= 2 && TIP_SECTIONS.has(parts[1])) {
+  if (section !== TIP_SECTION && parts.length >= 2 && parts[1] === TIP_SECTION) {
     section = parts[1];
     slug = parts[2];
   }
 
-  if (!TIP_SECTIONS.has(section)) return null;
+  if (section !== TIP_SECTION) return null;
   if (slug === "__static" || slug?.endsWith(".html")) return null;
 
   if (!slug) {
@@ -91,7 +93,7 @@ export function parseRojgarTipsDeepLink(
   };
 }
 
-/** Expo Router path for tip deep links. */
+/** Expo Router path for tip deep links → in-app WebView screen. */
 export function rojgarTipsAppRoute(rawOrParsed?: string | RojgarTipsDeepLink): string {
   const parsed =
     typeof rawOrParsed === "string" || rawOrParsed === undefined
