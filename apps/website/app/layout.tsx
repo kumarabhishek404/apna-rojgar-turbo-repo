@@ -18,6 +18,7 @@ export const metadata = {
   icons: {
     icon: "/favicon.png",
   },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Apna Rojgar",
     description: "Connecting Workers with Opportunities",
