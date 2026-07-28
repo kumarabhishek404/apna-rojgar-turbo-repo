@@ -4,7 +4,15 @@
  *
  * IMPORTANT: Do NOT return `"/(tabs)"` here — Expo strips it to path `"(tabs)"`,
  * which is unmatched. Return `"/"` so the home route loads.
+ *
+ * Tip / blog URLs are rewritten to the in-app WebView reader so legacy App Links
+ * (pathPrefix `/`) do not land on an unmatched route.
  */
+import {
+  isRojgarTipsPath,
+  rojgarTipsAppRoute,
+} from "../utils/rojgarTipsLinks";
+
 export function redirectSystemPath({
   path,
 }: {
@@ -14,6 +22,9 @@ export function redirectSystemPath({
   try {
     if (isAppDownloadDeepLink(path)) {
       return "/";
+    }
+    if (isRojgarTipsPath(path)) {
+      return rojgarTipsAppRoute(path);
     }
     return path;
   } catch {

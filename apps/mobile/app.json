@@ -112,12 +112,32 @@
             {
               "scheme": "https",
               "host": "apnarojgarindia.com",
-              "pathPrefix": "/"
+              "pathPrefix": "/job"
             },
             {
               "scheme": "https",
               "host": "www.apnarojgarindia.com",
-              "pathPrefix": "/"
+              "pathPrefix": "/job"
+            },
+            {
+              "scheme": "https",
+              "host": "apnarojgarindia.com",
+              "pathPrefix": "/screens/service"
+            },
+            {
+              "scheme": "https",
+              "host": "www.apnarojgarindia.com",
+              "pathPrefix": "/screens/service"
+            },
+            {
+              "scheme": "https",
+              "host": "apnarojgarindia.com",
+              "pathPrefix": "/app"
+            },
+            {
+              "scheme": "https",
+              "host": "www.apnarojgarindia.com",
+              "pathPrefix": "/app"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

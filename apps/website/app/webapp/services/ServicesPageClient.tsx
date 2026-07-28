@@ -176,6 +176,8 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   }, []);
 
   useEffect(() => {
+    if (sortBy !== "nearest") return;
+    if (browserGeo) return;
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -189,7 +191,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       () => undefined,
       { enableHighAccuracy: false, maximumAge: 300_000, timeout: 12_000 },
     );
-  }, []);
+  }, [sortBy, browserGeo]);
 
   useEffect(() => {
     if (!initializedByTab[activeTab]) {

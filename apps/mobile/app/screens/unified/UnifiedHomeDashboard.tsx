@@ -544,6 +544,40 @@ const UnifiedHomeDashboard = () => {
             )}
 
             <View style={styles.sectionGap}>{dashboardSection}</View>
+
+            <TouchableOpacity
+              style={styles.tipsCta}
+              activeOpacity={0.88}
+              onPress={() => router.push("/screens/rojgar-tips")}
+              accessibilityRole="button"
+            >
+              <View style={styles.tipsCtaIcon}>
+                <Ionicons
+                  name="newspaper-outline"
+                  size={22}
+                  color={Colors.primary}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <CustomHeading
+                  textAlign="left"
+                  baseFont={15}
+                  fontWeight="800"
+                  color={HOME_HEADING}
+                >
+                  {t("rojgarTips")}
+                </CustomHeading>
+                <CustomText textAlign="left" baseFont={12} color={Colors.subHeading}>
+                  {t("rojgarTipsHomeCtaSub")}
+                </CustomText>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={Colors.primary}
+              />
+            </TouchableOpacity>
+
             <HomePageLinks />
 
             {workerTeamJoinSection ? (
@@ -613,6 +647,26 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   sectionGap: { marginBottom: 16 },
+  tipsCta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: CTA_SOFT_BG,
+    borderWidth: 1,
+    borderColor: CTA_OUTLINE_BORDER,
+  },
+  tipsCtaIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.white,
+  },
   ctaStack: { gap: 12 },
   ctaRowPair: {
     flexDirection: "row",

@@ -17,6 +17,7 @@ import {
 } from "@/lib/blogBrandLinks";
 import { ROJGAR_TIPS_PATH } from "@/constants";
 import BlogEngagement from "@/components/blogs/BlogEngagement";
+import BlogAppInstallBanner from "@/components/blogs/BlogAppInstallBanner";
 import { useConfirmedAdmin } from "@/lib/useConfirmedAdmin";
 
 function renderBlogBody(content: string) {
@@ -113,7 +114,7 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-[#eef3ff] via-white to-[#f8fafc] px-4 pb-16 pt-20 md:pt-24 lg:pt-28">
+      <main className="min-h-screen bg-gradient-to-b from-[#eef3ff] via-white to-[#f8fafc] px-4 pb-28 pt-20 md:pt-24 lg:pt-28">
         <article className="mx-auto max-w-3xl">
           {loading ? (
             <div className="animate-pulse space-y-4">
@@ -193,6 +194,7 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
           )}
         </article>
       </main>
+      <BlogAppInstallBanner />
     </>
   );
 }

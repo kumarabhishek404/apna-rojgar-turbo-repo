@@ -1,6 +1,10 @@
 import React, { useEffect } from "react";
 import { Redirect, usePathname, useRouter } from "expo-router";
 import * as Linking from "expo-linking";
+import {
+  isRojgarTipsPath,
+  rojgarTipsAppRoute,
+} from "@/utils/rojgarTipsLinks";
 
 function isAppDeepLink(value: string | null | undefined): boolean {
   if (!value) return false;
@@ -16,7 +20,7 @@ function isAppDeepLink(value: string | null | undefined): boolean {
 }
 
 /**
- * Catch unmatched routes. Especially recovers `apnarojgar://app`.
+ * Catch unmatched routes. Recovers `/app` and tip/blog deep links.
  */
 export default function NotFoundScreen() {
   const pathname = usePathname();
@@ -26,6 +30,10 @@ export default function NotFoundScreen() {
     let alive = true;
     void Linking.getInitialURL().then((url) => {
       if (!alive) return;
+      if (isRojgarTipsPath(url || "") || isRojgarTipsPath(pathname || "")) {
+        router.replace(rojgarTipsAppRoute(url || pathname || "") as any);
+        return;
+      }
       if (isAppDeepLink(url) || isAppDeepLink(pathname)) {
         router.replace("/");
       }
@@ -34,6 +42,10 @@ export default function NotFoundScreen() {
       alive = false;
     };
   }, [pathname, router]);
+
+  if (isRojgarTipsPath(pathname || "")) {
+    return <Redirect href={rojgarTipsAppRoute(pathname) as any} />;
+  }
 
   // Always recover to home instead of trapping users on the error screen.
   return <Redirect href="/" />;

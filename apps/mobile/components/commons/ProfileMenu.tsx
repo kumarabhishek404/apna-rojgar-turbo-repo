@@ -314,6 +314,18 @@ const ProfileMenu = ({ disabled }: any) => {
       isSuspended: false,
     },
     {
+      title: t("rojgarTips"),
+      icon: (
+        <Ionicons name="newspaper-outline" size={28} color={Colors.primary} />
+      ),
+      onPress: () =>
+        router?.push({
+          pathname: "/screens/rojgar-tips",
+        }),
+      style: [styles?.menuItem],
+      isSuspended: false,
+    },
+    {
       title: t("tellFriends"),
       icon: <MaterialIcons name="share" size={28} color={Colors?.primary} />,
       onPress: () =>
