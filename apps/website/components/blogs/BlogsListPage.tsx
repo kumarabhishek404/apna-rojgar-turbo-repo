@@ -107,13 +107,13 @@ export default function BlogsListPage() {
                   href={rojgarTipsArticlePath(blog.slug)}
                   className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <div className="relative">
+                  <div className="relative bg-slate-100">
                     {blog.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={blog.coverImageUrl}
                         alt=""
-                        className="h-40 w-full object-cover"
+                        className="h-auto w-full object-contain"
                       />
                     ) : (
                       <div className="flex h-40 items-end bg-gradient-to-br from-[#22409a] to-[#3b6bd4] p-4">

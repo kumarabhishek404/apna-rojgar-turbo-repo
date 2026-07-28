@@ -1,6 +1,11 @@
-# Render static rewrites (copied to out/ from public/).
-# Existing prerendered HTML files still win when present; these catch NEW tip URLs
-# published after the last website deploy so they do not 404.
+# Netlify / Cloudflare Pages style rewrites (copied to out/ from public/).
+# NOTE: Render Static Sites IGNORE this file (they serve it as a static asset).
+# On Render, add the same rules under Dashboard → Redirects/Rewrites:
+#   Source /rojgar-tips/*      → Destination /rojgar-tips/__static.html  (Rewrite)
+#   Source /blogs/*            → Destination /blogs/__static.html        (Rewrite)
+#   Source /career-advice/*    → Destination /career-advice/__static.html (Rewrite)
+# Until those dashboard rules exist, `app/not-found.tsx` recovers tip URLs
+# when the host falls back to 404.html.
 #
 # 200 = rewrite (URL stays the same in the browser).
 

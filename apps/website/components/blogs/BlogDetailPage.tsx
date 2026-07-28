@@ -68,6 +68,25 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // #region agent log
+    fetch("http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Debug-Session-Id": "d31d2b",
+      },
+      body: JSON.stringify({
+        sessionId: "d31d2b",
+        runId: "post-fix",
+        hypothesisId: "C",
+        location: "BlogDetailPage.tsx:fetch",
+        message: "blog detail fetch start",
+        data: { slug, pathname, slugProp },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
+
     if (!slug) {
       setLoading(false);
       setError("Blog not found");
@@ -81,10 +100,55 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
     fetchPublishedBlog(slug)
       .then((data) => {
         if (!mounted) return;
+        // #region agent log
+        fetch(
+          "http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Debug-Session-Id": "d31d2b",
+            },
+            body: JSON.stringify({
+              sessionId: "d31d2b",
+              runId: "post-fix",
+              hypothesisId: "D",
+              location: "BlogDetailPage.tsx:fetchSuccess",
+              message: "blog detail fetch ok",
+              data: { slug, title: data?.title || null },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
         setBlog(data);
       })
       .catch((e) => {
         if (!mounted) return;
+        // #region agent log
+        fetch(
+          "http://127.0.0.1:7525/ingest/43a9946a-cc57-4e2a-9a4b-4a42e3195227",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Debug-Session-Id": "d31d2b",
+            },
+            body: JSON.stringify({
+              sessionId: "d31d2b",
+              runId: "post-fix",
+              hypothesisId: "D",
+              location: "BlogDetailPage.tsx:fetchError",
+              message: "blog detail fetch failed",
+              data: {
+                slug,
+                error: e instanceof Error ? e.message : String(e),
+              },
+              timestamp: Date.now(),
+            }),
+          },
+        ).catch(() => {});
+        // #endregion
         setError(e instanceof Error ? e.message : "Failed to load blog");
       })
       .finally(() => {
@@ -149,7 +213,7 @@ export default function BlogDetailPage({ slug: slugProp }: { slug: string }) {
                 <img
                   src={blog.coverImageUrl}
                   alt=""
-                  className="mb-6 max-h-80 w-full rounded-2xl object-cover"
+                  className="mb-6 h-auto w-full rounded-2xl object-contain"
                 />
               ) : null}
               <p className="text-sm font-medium text-slate-500">
