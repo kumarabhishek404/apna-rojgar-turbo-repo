@@ -7,6 +7,8 @@
     "dev:website": "pnpm --filter apna-rojgar-website dev",
     "dev:backend": "pnpm --filter apna-rojgar-backend dev",
     "dev:mobile": "pnpm --filter labour-app dev",
+    "eas:android:preview": "pnpm --filter labour-app exec eas build --profile preview -p android",
+    "eas:android:production": "pnpm --filter labour-app exec eas build --profile production -p android",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",

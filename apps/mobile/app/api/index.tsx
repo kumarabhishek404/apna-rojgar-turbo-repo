@@ -241,11 +241,18 @@ api.interceptors.response.use(
           typeof errorMessage === "string" && errorMessage.trim()
             ? errorMessage
             : "API server error";
-        void reportError({
-          message: apiMessage,
-          route: error.config?.url || "mobile-api",
-          statusCode: error.response.status,
-        });
+        const route = String(error.config?.url || "");
+        // Auth/OTP failures are logged on the backend with real provider details.
+        // Avoid duplicate noisy CLIENT reports for login OTP send/verify.
+        const isAuthOtpRoute =
+          route.includes("/auth/login") || route.includes("/auth/sms-otp");
+        if (!isAuthOtpRoute) {
+          void reportError({
+            message: apiMessage,
+            route: route || "mobile-api",
+            statusCode: error.response.status,
+          });
+        }
       }
 
       if (

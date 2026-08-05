@@ -4,6 +4,6 @@
  * to unauthenticated marketing endpoints (e.g. website hero).
  */
 export const PUBLIC_STATS_DISPLAY_OFFSET = {
-  totalUsers: 1000,
-  totalServices: 100,
+  totalUsers: 0,
+  totalServices: 0,
 };

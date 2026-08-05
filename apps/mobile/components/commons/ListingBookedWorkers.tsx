@@ -33,21 +33,28 @@ const ListingsBookedWorkers = ({
     }
   });
 
+  const selectedUsers = Array.isArray(item?.selectedUsers)
+    ? item.selectedUsers
+    : [];
+
   let workersList =
     item?.bookingType === "byService"
       ? [
-          ...(item.selectedUsers?.filter(
-            (user: any) => user?.status === "SELECTED"
-          ) || []),
-          ...item.selectedUsers
+          ...selectedUsers.filter((user: any) => user?.status === "SELECTED"),
+          ...selectedUsers
             .filter((user: any) => user?.status === "SELECTED")
             .flatMap((user: any) => user?.workers || []),
         ]
-      : [item?.bookedWorker];
+      : item?.bookedWorker
+        ? [item.bookedWorker]
+        : [];
+
+  // Drop null/undefined rows and nested workers that never populated.
+  workersList = (workersList || []).filter(
+    (worker: any) => worker && typeof worker === "object",
+  );
 
   const firstWorker = workersList?.[0];
-
-  console.log("firstWorker----", firstWorker);
 
   return (
     <View style={styles.container} key={item?._id}>
@@ -80,8 +87,8 @@ const ListingsBookedWorkers = ({
             <View style={styles.workerImagesContainer}>
               {workersList?.slice(0, 5).map((worker: any, index: number) => (
                 <ProfilePicture
-                  key={index}
-                  uri={worker.profilePicture}
+                  key={worker?._id || index}
+                  uri={worker?.profilePicture}
                   style={[styles.workerImage, { left: index * 20 }]}
                 />
               ))}

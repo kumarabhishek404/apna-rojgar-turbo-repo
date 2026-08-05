@@ -42,6 +42,13 @@ function getRegistrationSourceFromRequest(req) {
 function getTwoFactorApiKey() {
   const key = process.env.TWOFACTOR_API_KEY;
   if (key != null && String(key).trim()) return String(key).trim();
+
+  // Legacy fallback (prefer setting TWOFACTOR_API_KEY in env).
+  if (process.env.NODE_ENV === "production") {
+    console.error(
+      "[auth] TWOFACTOR_API_KEY is missing in production. OTP sends may fail.",
+    );
+  }
   return "d0fa8207-0f16-11f0-8b17-0200cd936042";
 }
 
@@ -123,6 +130,73 @@ export const handleRegister = async (req, res) => {
   }
 };
 
+function createAuthError(message, statusCode = 500, code = "AUTH_ERROR") {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  err.code = code;
+  return err;
+}
+
+function mapTwoFactorSendFailure(detail) {
+  const text = String(detail || "").trim();
+  const lower = text.toLowerCase();
+
+  if (!text) {
+    return createAuthError(
+      "Unable to send OTP right now. Please try again.",
+      502,
+      "OTP_SEND_FAILED",
+    );
+  }
+
+  if (
+    lower.includes("insufficient") ||
+    lower.includes("balance") ||
+    lower.includes("credit")
+  ) {
+    return createAuthError(
+      "OTP service is temporarily unavailable. Please try again later.",
+      503,
+      "OTP_PROVIDER_CREDITS",
+    );
+  }
+
+  if (
+    lower.includes("invalid") &&
+    (lower.includes("number") || lower.includes("mobile") || lower.includes("phone"))
+  ) {
+    return createAuthError(
+      "Please enter a valid mobile number.",
+      400,
+      "OTP_INVALID_MOBILE",
+    );
+  }
+
+  if (
+    lower.includes("limit") ||
+    lower.includes("many") ||
+    lower.includes("rate") ||
+    lower.includes("wait")
+  ) {
+    return createAuthError(
+      "Too many OTP requests. Please wait a minute and try again.",
+      429,
+      "OTP_RATE_LIMIT",
+    );
+  }
+
+  // Avoid leaking raw provider payloads to clients when possible.
+  if (text.length > 120 || lower.includes("api key") || lower.includes("apikey")) {
+    return createAuthError(
+      "Unable to send OTP right now. Please try again.",
+      502,
+      "OTP_SEND_FAILED",
+    );
+  }
+
+  return createAuthError(text, 502, "OTP_SEND_FAILED");
+}
+
 const sendOTP = async (mobile) => {
   const phoneKey = normalizePhoneForTwoFactor(mobile);
   console.log("[auth] OTP send raw mobile:", mobile, "→ 2factor phone key:", phoneKey);
@@ -136,25 +210,43 @@ const sendOTP = async (mobile) => {
   }
 
   if (!phoneKey || phoneKey.length < 10) {
-    throw new Error("Invalid mobile number for SMS");
+    throw createAuthError(
+      "Please enter a valid mobile number.",
+      400,
+      "OTP_INVALID_MOBILE",
+    );
   }
 
   const apiKey = getTwoFactorApiKey();
+  if (!apiKey) {
+    throw createAuthError(
+      "OTP service is not configured. Please try again later.",
+      503,
+      "OTP_NOT_CONFIGURED",
+    );
+  }
+
   const template = getTwoFactorTemplateName();
   /** Same shape as original integration: …/SMS/{no}/AUTOGEN/{templateName} */
   const url = `https://2factor.in/API/V1/${apiKey}/SMS/${phoneKey}/AUTOGEN/${template}`;
 
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      timeout: 15000,
+      validateStatus: () => true,
+    });
     const data = response?.data;
-    console.log("[auth] 2factor send response:", data);
+    console.log("[auth] 2factor send response:", {
+      httpStatus: response?.status,
+      data,
+    });
 
     if (!twoFactorResponseOk(data)) {
       const detail =
-        (data && (data.Details || data.Message)) ||
-        JSON.stringify(data || {}) ||
+        (data && (data.Details || data.Message || data.message)) ||
+        (response?.status >= 400 ? `SMS provider HTTP ${response.status}` : null) ||
         "SMS send failed";
-      throw new Error(typeof detail === "string" ? detail : "SMS send failed");
+      throw mapTwoFactorSendFailure(detail);
     }
 
     /** AUTOGEN success: Details = session id for SMS/VERIFY (not VERIFY3/phone/otp). */
@@ -164,8 +256,49 @@ const sendOTP = async (mobile) => {
 
     return data;
   } catch (error) {
-    console.error("Error during mobile number authentication:", error);
-    throw error;
+    console.error("Error during mobile number authentication:", {
+      message: error?.message,
+      code: error?.code,
+      statusCode: error?.statusCode,
+    });
+
+    if (error?.statusCode && error?.code) {
+      throw error;
+    }
+
+    if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
+      throw createAuthError(
+        "OTP service timed out. Please try again.",
+        504,
+        "OTP_TIMEOUT",
+      );
+    }
+
+    if (
+      error?.code === "ENOTFOUND" ||
+      error?.code === "ECONNREFUSED" ||
+      error?.code === "EAI_AGAIN"
+    ) {
+      throw createAuthError(
+        "Unable to reach OTP service. Please try again.",
+        502,
+        "OTP_NETWORK",
+      );
+    }
+
+    if (axios.isAxiosError?.(error) || error?.isAxiosError) {
+      const detail =
+        error.response?.data?.Details ||
+        error.response?.data?.Message ||
+        error.message;
+      throw mapTwoFactorSendFailure(detail);
+    }
+
+    throw createAuthError(
+      "Unable to send OTP right now. Please try again.",
+      502,
+      "OTP_SEND_FAILED",
+    );
   }
 };
 
@@ -200,7 +333,7 @@ const verifyOTP = async (payload) => {
     if (sessionId) {
       /** Official 2factor flow after AUTOGEN (session id from send response Details) */
       const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY/${sessionId}/${otp}`;
-      const response = await axios.get(url);
+      const response = await axios.get(url, { timeout: 15000 });
       data = response?.data;
       console.log("[auth] 2factor VERIFY (session) response:", data);
     } else {
@@ -209,7 +342,7 @@ const verifyOTP = async (payload) => {
        * Uses same normalized key as AUTOGEN send when possible.
        */
       const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY3/${phoneKey}/${otp}`;
-      const response = await axios.get(url);
+      const response = await axios.get(url, { timeout: 15000 });
       data = response?.data;
       console.warn("[auth] 2factor VERIFY3 (legacy, no session) response:", data);
     }
@@ -225,8 +358,24 @@ const verifyOTP = async (payload) => {
     clearOtpSession(phoneKey);
     return data;
   } catch (error) {
-    console.error("Error verifying OTP code:", error);
-    throw error;
+    console.error("Error verifying OTP code:", {
+      message: error?.message,
+      code: error?.code,
+    });
+
+    if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
+      throw createAuthError(
+        "OTP verification timed out. Please try again.",
+        504,
+        "OTP_TIMEOUT",
+      );
+    }
+
+    throw createAuthError(
+      "Unable to verify OTP right now. Please try again.",
+      502,
+      "OTP_VERIFY_FAILED",
+    );
   }
 };
 
@@ -282,12 +431,25 @@ export const handleSmsOtp = async (req, res) => {
       message: "OTP verified",
     });
   } catch (error) {
-    console.error("handleSmsOtp:", error);
-    logError(error, req, 500);
-    return res.status(500).json({
+    console.error("handleSmsOtp:", {
+      message: error?.message,
+      code: error?.code,
+      statusCode: error?.statusCode,
+    });
+
+    const statusCode = Number(error?.statusCode) || 500;
+    const safeMessage =
+      typeof error?.message === "string" && error.message.trim()
+        ? error.message.trim()
+        : "OTP service error";
+
+    logError(error, req, statusCode, "auth.controller - handleSmsOtp");
+
+    return res.status(statusCode).json({
       success: false,
       Status: "Error",
-      message: error?.message || "OTP service error",
+      message: safeMessage,
+      ...(error?.code ? { errorCode: error.code } : {}),
     });
   }
 };
@@ -431,10 +593,33 @@ export const handleLogin = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.error("Login Error:", error);
-    return res.status(500).json({
+    console.error("Login Error:", {
+      message: error?.message,
+      code: error?.code,
+      statusCode: error?.statusCode,
+      stack: error?.stack,
+    });
+
+    const statusCode = Number(error?.statusCode) || 500;
+    const safeMessage =
+      typeof error?.message === "string" &&
+      error.message.trim() &&
+      statusCode < 500
+        ? error.message.trim()
+        : typeof error?.message === "string" &&
+            error.message.trim() &&
+            ["OTP_SEND_FAILED", "OTP_TIMEOUT", "OTP_NETWORK", "OTP_PROVIDER_CREDITS", "OTP_NOT_CONFIGURED"].includes(
+              error?.code,
+            )
+          ? error.message.trim()
+          : "Something went wrong, please try again";
+
+    logError(error, req, statusCode, "auth.controller - handleLogin");
+
+    return res.status(statusCode).json({
       success: false,
-      message: "Something went wrong, please try again",
+      message: safeMessage,
+      ...(error?.code ? { errorCode: error.code } : {}),
     });
   }
 };
