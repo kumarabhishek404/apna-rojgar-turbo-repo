@@ -2,6 +2,7 @@ import express from "express";
 import {
   getAllRequests,
   getAdminAnalyticsEvents,
+  getAdminAnalyticsSummary,
   getAdminErrorLogs,
   getAdminNotifications,
   getAdminPromotionPayments,
@@ -31,6 +32,13 @@ router.get(
   userStatus,
   checkAdmin,
   getAdminAnalyticsEvents
+);
+router.get(
+  "/analytics-summary",
+  verifyToken,
+  userStatus,
+  checkAdmin,
+  getAdminAnalyticsSummary
 );
 router.get(
   "/notifications",

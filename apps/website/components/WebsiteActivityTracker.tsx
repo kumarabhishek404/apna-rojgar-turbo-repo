@@ -1,6 +1,7 @@
 "use client";
 
 import { getAuth } from "@/lib/auth";
+import { isAdminUser } from "@/lib/isAdminUser";
 import {
   WEBSITE_TRACK_EVENT,
   type WebsiteTrackingEventDetail,
@@ -71,8 +72,22 @@ export default function WebsiteActivityTracker() {
     }
   };
 
+  const isAdminSession = () => {
+    const auth = getAuth();
+    const user = (auth?.user || {}) as {
+      role?: string | null;
+      mobile?: string | number | null;
+    };
+    return isAdminUser(user);
+  };
+
   const flush = async () => {
     if (queueRef.current.length === 0) return;
+
+    if (isAdminSession()) {
+      queueRef.current = [];
+      return;
+    }
 
     const events = queueRef.current.splice(0, queueRef.current.length);
     const token = getAuth()?.token;
@@ -106,6 +121,9 @@ export default function WebsiteActivityTracker() {
   };
 
   const enqueue = (name: string, properties?: Record<string, unknown>) => {
+    // Do not count admin activity in our analytics table (or GA mirrors).
+    if (isAdminSession()) return;
+
     const payload = {
       name,
       properties: properties || {},
@@ -124,6 +142,8 @@ export default function WebsiteActivityTracker() {
 
   // ✅ PAGE VIEW TRACKING (IMPORTANT FIX)
   useEffect(() => {
+    if (isAdminSession()) return;
+
     const search = searchParams?.toString() || "";
     const fullPath = `${pathname || "/"}${search ? `?${search}` : ""}`;
 

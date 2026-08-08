@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import AppEvent from "../models/appEvent.model.js";
+import User from "../models/user.model.js";
 import logError from "../utils/addErrorLog.js";
 import { getClientStackHeaders } from "../utils/extractErrorRequestContext.js";
+import { userHasAdminAccess } from "../utils/functions.js";
 
 function parseUserId(req) {
   const raw = req.user?._id;
@@ -48,6 +50,22 @@ export const postBatch = async (req, res) => {
     }
 
     const userId = parseUserId(req);
+
+    // Do not store analytics for admin users (app or website).
+    if (userId) {
+      const user = await User.findById(userId)
+        .select("role mobile")
+        .lean();
+      if (userHasAdminAccess(user)) {
+        return res.status(200).json({
+          ok: true,
+          inserted: 0,
+          skipped: true,
+          reason: "admin",
+        });
+      }
+    }
+
     const now = new Date();
     const ip = clientIp(req);
     const userAgent = req.headers["user-agent"] || null;

@@ -364,6 +364,347 @@ export const getAdminAnalyticsEvents = async (req, res) => {
   }
 };
 
+const SESSION_EVENTS = ["session_start", "app_foreground", "app_background"];
+const VIEW_EVENTS = ["service_view", "profile_view"];
+const CALL_EVENTS = ["call_tap"];
+const CONVERSION_EVENTS = [
+  "service_apply_success",
+  "service_unapply_success",
+  "worker_booking_request_success",
+];
+
+function parseAnalyticsRange(query) {
+  const now = new Date();
+  const toRaw = query?.to ? new Date(String(query.to)) : now;
+  let to = Number.isNaN(toRaw.getTime()) ? now : toRaw;
+
+  let from;
+  if (query?.from) {
+    const fromRaw = new Date(String(query.from));
+    from = Number.isNaN(fromRaw.getTime())
+      ? new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000)
+      : fromRaw;
+  } else {
+    from = new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+  }
+
+  if (from > to) {
+    const swap = from;
+    from = to;
+    to = swap;
+  }
+
+  return { from, to };
+}
+
+function categoryForEventName(eventName) {
+  const name = String(eventName || "");
+  if (SESSION_EVENTS.includes(name)) return "sessions";
+  if (VIEW_EVENTS.includes(name)) return "views";
+  if (CALL_EVENTS.includes(name)) return "calls";
+  if (CONVERSION_EVENTS.includes(name)) return "conversions";
+  if (name.startsWith("web_")) return "web";
+  return "other";
+}
+
+function emptyDailyMap(from, to) {
+  const map = new Map();
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const cursor = new Date(from.getTime());
+  const endMs = to.getTime();
+  // 12h steps so IST calendar days are not skipped near UTC midnight.
+  while (cursor.getTime() <= endMs) {
+    const key = fmt.format(cursor);
+    if (!map.has(key)) map.set(key, { date: key });
+    cursor.setUTCHours(cursor.getUTCHours() + 12);
+  }
+  const endKey = fmt.format(to);
+  if (!map.has(endKey)) map.set(endKey, { date: endKey });
+  return map;
+}
+
+function fillDailySeries(map, eventKeys) {
+  return Array.from(map.values()).map((row) => {
+    const out = { date: row.date };
+    for (const key of eventKeys) {
+      out[key] = Number(row[key] || 0);
+    }
+    return out;
+  });
+}
+
+/**
+ * Chart-ready aggregations over app_events for the admin analytics dashboard.
+ * GET /admin/analytics-summary?from=&to=&platform=
+ */
+export const getAdminAnalyticsSummary = async (req, res) => {
+  try {
+    const { from, to } = parseAnalyticsRange(req.query);
+    const platform = String(req.query.platform || "")
+      .trim()
+      .toLowerCase();
+
+    const match = {
+      serverTimestamp: { $gte: from, $lte: to },
+    };
+    if (["android", "ios", "web"].includes(platform)) {
+      match.platform = platform;
+    }
+
+    const [
+      eventCounts,
+      uniqueStats,
+      dailyByEvent,
+      byPlatform,
+      hourWeekdayRows,
+    ] = await Promise.all([
+      AppEvent.aggregate([
+        { $match: match },
+        { $group: { _id: "$eventName", count: { $sum: 1 } } },
+      ]),
+      AppEvent.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: null,
+            uniqueUsers: { $addToSet: "$userId" },
+            uniqueSessions: { $addToSet: "$sessionId" },
+            totalEvents: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalEvents: 1,
+            uniqueUsers: {
+              $size: {
+                $filter: {
+                  input: "$uniqueUsers",
+                  as: "u",
+                  cond: { $ne: ["$$u", null] },
+                },
+              },
+            },
+            uniqueSessions: {
+              $size: {
+                $filter: {
+                  input: "$uniqueSessions",
+                  as: "s",
+                  cond: {
+                    $and: [{ $ne: ["$$s", null] }, { $ne: ["$$s", ""] }],
+                  },
+                },
+              },
+            },
+          },
+        },
+      ]),
+      AppEvent.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: {
+              date: {
+                $dateToString: {
+                  format: "%Y-%m-%d",
+                  date: "$serverTimestamp",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              eventName: "$eventName",
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      AppEvent.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: "$platform",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      AppEvent.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: {
+              weekday: {
+                $dayOfWeek: {
+                  date: "$serverTimestamp",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+              hour: {
+                $hour: {
+                  date: "$serverTimestamp",
+                  timezone: "Asia/Kolkata",
+                },
+              },
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const countByEvent = {};
+    for (const row of eventCounts) {
+      const name = String(row?._id || "");
+      if (!name) continue;
+      countByEvent[name] = Number(row.count || 0);
+    }
+
+    const uniques = uniqueStats[0] || {
+      totalEvents: 0,
+      uniqueUsers: 0,
+      uniqueSessions: 0,
+    };
+
+    const kpis = {
+      totalEvents: Number(uniques.totalEvents || 0),
+      uniqueUsers: Number(uniques.uniqueUsers || 0),
+      uniqueSessions: Number(uniques.uniqueSessions || 0),
+      sessionStarts: countByEvent.session_start || 0,
+      appForeground: countByEvent.app_foreground || 0,
+      appBackground: countByEvent.app_background || 0,
+      serviceViews: countByEvent.service_view || 0,
+      profileViews: countByEvent.profile_view || 0,
+      callTaps: countByEvent.call_tap || 0,
+      serviceApplies: countByEvent.service_apply_success || 0,
+      serviceUnapplies: countByEvent.service_unapply_success || 0,
+      bookingRequests: countByEvent.worker_booking_request_success || 0,
+    };
+
+    const sessionsMap = emptyDailyMap(from, to);
+    const viewsMap = emptyDailyMap(from, to);
+    const callsMap = emptyDailyMap(from, to);
+    const conversionsMap = emptyDailyMap(from, to);
+
+    for (const row of dailyByEvent) {
+      const date = row?._id?.date;
+      const eventName = String(row?._id?.eventName || "");
+      const count = Number(row?.count || 0);
+      if (!date || !eventName) continue;
+
+      if (SESSION_EVENTS.includes(eventName)) {
+        if (!sessionsMap.has(date)) sessionsMap.set(date, { date });
+        sessionsMap.get(date)[eventName] = count;
+      }
+      if (VIEW_EVENTS.includes(eventName)) {
+        if (!viewsMap.has(date)) viewsMap.set(date, { date });
+        viewsMap.get(date)[eventName] = count;
+      }
+      if (CALL_EVENTS.includes(eventName)) {
+        if (!callsMap.has(date)) callsMap.set(date, { date });
+        callsMap.get(date)[eventName] = count;
+      }
+      if (CONVERSION_EVENTS.includes(eventName)) {
+        if (!conversionsMap.has(date)) conversionsMap.set(date, { date });
+        conversionsMap.get(date)[eventName] = count;
+      }
+    }
+
+    const categoryTotals = {
+      sessions: 0,
+      views: 0,
+      calls: 0,
+      conversions: 0,
+      web: 0,
+      other: 0,
+    };
+    for (const [eventName, count] of Object.entries(countByEvent)) {
+      const cat = categoryForEventName(eventName);
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + count;
+    }
+
+    const byCategory = Object.entries(categoryTotals)
+      .filter(([, count]) => count > 0)
+      .map(([category, count]) => ({ category, count }));
+
+    const platformTotals = { web: 0, android: 0, ios: 0, unknown: 0 };
+    for (const row of byPlatform) {
+      const p = String(row?._id || "").toLowerCase();
+      const count = Number(row?.count || 0);
+      if (p === "web") platformTotals.web = count;
+      else if (p === "android") platformTotals.android = count;
+      else if (p === "ios") platformTotals.ios = count;
+      else platformTotals.unknown += count;
+    }
+
+    // Mongo $dayOfWeek: 1=Sunday … 7=Saturday. Heatmap uses Mon–Sun labels on client.
+    const byHourWeekday = byHourWeekdayRawToSeries(hourWeekdayRows);
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin analytics summary fetched successfully",
+      data: {
+        range: { from: from.toISOString(), to: to.toISOString() },
+        kpis,
+        dailySessions: fillDailySeries(sessionsMap, SESSION_EVENTS),
+        dailyViews: fillDailySeries(viewsMap, VIEW_EVENTS),
+        dailyCalls: fillDailySeries(callsMap, CALL_EVENTS),
+        dailyConversions: fillDailySeries(conversionsMap, CONVERSION_EVENTS),
+        byCategory,
+        byPlatform: Object.entries(platformTotals)
+          .filter(([, count]) => count > 0)
+          .map(([platformName, count]) => ({
+            platform: platformName,
+            count,
+          })),
+        byHourWeekday,
+        byEvent: Object.entries(countByEvent)
+          .map(([eventName, count]) => ({ eventName, count }))
+          .sort((a, b) => b.count - a.count),
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to fetch analytics summary",
+    });
+  }
+};
+
+/** Build Apex heatmap series: one series per weekday (Mon–Sun), data = [hour, count]×24 */
+function byHourWeekdayRawToSeries(rows) {
+  const weekdayOrder = [
+    { mongo: 2, label: "Mon" },
+    { mongo: 3, label: "Tue" },
+    { mongo: 4, label: "Wed" },
+    { mongo: 5, label: "Thu" },
+    { mongo: 6, label: "Fri" },
+    { mongo: 7, label: "Sat" },
+    { mongo: 1, label: "Sun" },
+  ];
+
+  const grid = new Map();
+  for (const w of weekdayOrder) {
+    grid.set(w.mongo, Array.from({ length: 24 }, () => 0));
+  }
+
+  for (const row of rows || []) {
+    const weekday = Number(row?._id?.weekday);
+    const hour = Number(row?._id?.hour);
+    const count = Number(row?.count || 0);
+    if (!grid.has(weekday) || hour < 0 || hour > 23) continue;
+    grid.get(weekday)[hour] = count;
+  }
+
+  return weekdayOrder.map((w) => ({
+    name: w.label,
+    data: grid.get(w.mongo).map((count, hour) => ({ x: String(hour), y: count })),
+  }));
+}
+
 export const getAdminNotifications = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
