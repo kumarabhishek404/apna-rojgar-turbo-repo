@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import PublicHome from "@/components/PublicHome";
 import ServicesDashboard from "@/components/webapp/ServicesDashboard";
-import { getAuth, validateStoredToken } from "@/lib/auth";
+import { checkStoredToken, getAuth } from "@/lib/auth";
 
 export default function Home() {
   const [showDashboard, setShowDashboard] = useState(false);
@@ -16,10 +16,12 @@ export default function Home() {
         if (active) setShowDashboard(false);
         return;
       }
-      const valid = await validateStoredToken();
-      if (active) setShowDashboard(valid);
+      const result = await checkStoredToken();
+      if (!active) return;
+      // unknown (network/5xx): keep dashboard if token exists — don't bounce to public home.
+      setShowDashboard(result === "valid" || result === "unknown");
     };
-    run();
+    void run();
     return () => {
       active = false;
     };

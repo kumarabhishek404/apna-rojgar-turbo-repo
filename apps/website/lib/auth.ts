@@ -118,31 +118,66 @@ function redirectToLoginIfNeeded() {
   window.location.replace("/?login=1");
 }
 
+/** Codes that mean the stored JWT itself is dead — safe to clearAuth(). */
+const CLEAR_SESSION_ERROR_CODES = new Set([
+  "TOKEN_NOT_VALID",
+  "TOKEN_INVALID",
+  "TOKEN_EXPIRED",
+  "JWT_EXPIRED",
+  "JWT_INVALID",
+]);
+
+/**
+ * True only for definite session death (expired/invalid JWT).
+ * Never clear for TOKEN_MISSING / bare "unauthorized" — those often mean the
+ * request omitted Authorization during a hard-refresh race, not a bad token.
+ */
 function isAuthTokenError(responseStatus: number, data: unknown): boolean {
-  if (responseStatus === 401) return true;
-  if (!data || typeof data !== "object") return false;
+  if (!data || typeof data !== "object") {
+    // Bare 401 with empty body — treat as session death only for auth routes.
+    return false;
+  }
 
   const payload = data as {
     errorCode?: unknown;
+    statusText?: unknown;
     message?: unknown;
   };
 
-  const errorCode = typeof payload.errorCode === "string" ? payload.errorCode.toUpperCase() : "";
-  const message = typeof payload.message === "string" ? payload.message.toLowerCase() : "";
+  const errorCode =
+    typeof payload.errorCode === "string" ? payload.errorCode.toUpperCase() : "";
+  const statusText =
+    typeof payload.statusText === "string"
+      ? payload.statusText.toUpperCase()
+      : "";
+  const message =
+    typeof payload.message === "string" ? payload.message.toLowerCase() : "";
 
-  return (
-    errorCode.includes("TOKEN") ||
-    message.includes("token expired") ||
-    message.includes("token invalid") ||
-    message.includes("invalid token") ||
-    message.includes("jwt expired") ||
-    message.includes("unauthorized")
-  );
+  if (errorCode === "TOKEN_MISSING") return false;
+  if (CLEAR_SESSION_ERROR_CODES.has(errorCode)) return true;
+  if (statusText === "TOKENEXPIREDERROR" || statusText === "JSONWEBTOKENERROR") {
+    return true;
+  }
+
+  if (responseStatus === 401 || responseStatus === 400) {
+    return (
+      message.includes("login expired") ||
+      message.includes("token expired") ||
+      message.includes("token invalid") ||
+      message === "invalid token" ||
+      message.includes("jwt expired")
+    );
+  }
+
+  return false;
 }
 
-export async function validateStoredToken() {
+export type TokenValidationResult = "valid" | "invalid" | "unknown";
+
+/** Tri-state token check — network/5xx = unknown (do not wipe local session). */
+export async function checkStoredToken(): Promise<TokenValidationResult> {
   const auth = getAuth();
-  if (!auth?.token) return false;
+  if (!auth?.token) return "invalid";
 
   try {
     const response = await fetch(`${API_BASE_URL}/auth/validate-token`, {
@@ -151,11 +186,35 @@ export async function validateStoredToken() {
         Authorization: `Bearer ${auth.token}`,
       },
     });
-    const data = await response.json();
-    return data?.errorCode === "TOKEN_VALID";
+
+    let data: { errorCode?: string } | null = null;
+    try {
+      data = await response.json();
+    } catch {
+      return "unknown";
+    }
+
+    if (data?.errorCode === "TOKEN_VALID") return "valid";
+    if (
+      data?.errorCode === "TOKEN_NOT_VALID" ||
+      data?.errorCode === "TOKEN_EXPIRED" ||
+      data?.errorCode === "TOKEN_INVALID"
+    ) {
+      return "invalid";
+    }
+    if (response.status >= 500 || data?.errorCode === "SERVER_ERROR") {
+      return "unknown";
+    }
+    // Unexpected shape / network blip — don't destroy the session.
+    return "unknown";
   } catch {
-    return false;
+    return "unknown";
   }
+}
+
+/** @deprecated Prefer checkStoredToken(); true only when explicitly valid. */
+export async function validateStoredToken() {
+  return (await checkStoredToken()) === "valid";
 }
 
 export async function apiRequest<T = unknown>(

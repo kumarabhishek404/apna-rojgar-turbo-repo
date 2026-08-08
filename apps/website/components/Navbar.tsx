@@ -15,7 +15,7 @@ import {
   getAuth,
   loginUser,
   saveAuth,
-  validateStoredToken,
+  checkStoredToken,
 } from "@/lib/auth";
 import { DEV_OTP_PLACEHOLDER, shouldSkipOtpClient } from "@/lib/devOtp";
 import { localizeApiErrorMessage } from "@/lib/i18n";
@@ -185,8 +185,12 @@ function NavbarContent() {
         if (active) setIsLoggedIn(false);
         return;
       }
-      const valid = await validateStoredToken();
-      if (active) setIsLoggedIn(valid);
+      const result = await checkStoredToken();
+      if (!active) return;
+      // On network blips keep the user logged-in if a token is still stored.
+      if (result === "valid") setIsLoggedIn(true);
+      else if (result === "invalid") setIsLoggedIn(false);
+      else setIsLoggedIn(true);
     };
     run();
     return () => {

@@ -13,7 +13,12 @@ export const verifyToken = async (req, res, next) => {
 
     if (!token) {
       console.log("❌ [Auth] No token provided in the request");
-      return res.status(400).json({ message: "Unauthorized Request" });
+      // 401 + explicit code — clients must not treat this like a vague "unauthorized" wipe.
+      return res.status(401).json({
+        success: false,
+        errorCode: "TOKEN_MISSING",
+        message: "Authorization token is required",
+      });
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -24,7 +29,11 @@ export const verifyToken = async (req, res, next) => {
 
     if (!user) {
       console.log("🚫 [Auth] Invalid token: User not found");
-      return res.status(400).json({ message: "Invalid Token" });
+      return res.status(401).json({
+        success: false,
+        errorCode: "TOKEN_NOT_VALID",
+        message: "Invalid Token",
+      });
     }
 
     req.user = user;
@@ -39,12 +48,29 @@ export const verifyToken = async (req, res, next) => {
 
     if (error.name === "TokenExpiredError") {
       console.log("⚠️ [Auth] Token has expired. Not logging the error.");
-      return res.status(401).json({ statusText: "TokenExpiredError", message: "login expired" });
+      return res.status(401).json({
+        success: false,
+        errorCode: "TOKEN_EXPIRED",
+        statusText: "TokenExpiredError",
+        message: "login expired",
+      });
     }
 
     const jwtClientErrors = ["JsonWebTokenError", "NotBeforeError"];
-    const logStatus = jwtClientErrors.includes(error.name) ? 401 : 500;
-    logError(error, req, logStatus, "middleware - verifyToken");
-    return res.status(400).json({ message: "Invalid Token" });
+    if (jwtClientErrors.includes(error.name)) {
+      return res.status(401).json({
+        success: false,
+        errorCode: "TOKEN_NOT_VALID",
+        statusText: error.name,
+        message: "Invalid Token",
+      });
+    }
+
+    logError(error, req, 500, "middleware - verifyToken");
+    return res.status(500).json({
+      success: false,
+      errorCode: "SERVER_ERROR",
+      message: "Server error while verifying token",
+    });
   }
 };
