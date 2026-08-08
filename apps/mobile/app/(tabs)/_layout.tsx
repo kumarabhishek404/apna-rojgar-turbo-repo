@@ -33,7 +33,8 @@ import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
-import { useAppStoreReviewPrompt } from "@/app/hooks/useAppStoreReviewPrompt";
+import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
+import { getMobileEffectiveRole, isMobileAdminUser, normalizeMobileUserSession } from "@/utils/mobileRole";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -99,7 +100,12 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    setRole(userDetails?.role || "");
+    if (isMobileAdminUser(userDetails)) {
+      setUserDetails((prev: any) => normalizeMobileUserSession(prev) ?? prev);
+      return;
+    }
+    const effectiveRole = getMobileEffectiveRole(userDetails);
+    if (effectiveRole) setRole(effectiveRole);
   }, [userDetails]);
 
   useEffect(() => {
@@ -279,18 +285,13 @@ export default function Layout() {
     );
   };
 
-  const isAdmin = userDetails?.isAdmin;
-  const apiRole = String(userDetails?.role ?? "").toUpperCase();
+  const apiRole = getMobileEffectiveRole(userDetails);
 
-  /** Bottom labels match what each tab shows for non-admin users. */
-  const workTabTitleKey = isAdmin
-    ? "teams"
-    : apiRole === "WORKER"
-      ? "tabWork"
-      : "tabNavWorkLabour";
-  const peopleTabTitleKey = isAdmin
-    ? "tabPeople"
-    : apiRole === "MEDIATOR"
+  /** Bottom labels match employer / worker / mediator UX (ADMIN → EMPLOYER). */
+  const workTabTitleKey =
+    apiRole === "WORKER" ? "tabWork" : "tabNavWorkLabour";
+  const peopleTabTitleKey =
+    apiRole === "MEDIATOR"
       ? "tabNavPeopleActiveWork"
       : "tabNavPeopleContractors";
   // Keep bottom-tab labels/icons reactive to language changes.
@@ -334,9 +335,9 @@ export default function Layout() {
                     props={props}
                     path="/(tabs)/"
                     testID="tab-home"
-                    title={isAdmin ? "services" : "tabHome"}
-                    iconName={isAdmin ? "grid-outline" : "home-outline"}
-                    activeIconName={isAdmin ? "grid" : "home"}
+                    title="tabHome"
+                    iconName="home-outline"
+                    activeIconName="home"
                     iconLibrary="Ionicons"
                   />
                 ),
@@ -352,8 +353,8 @@ export default function Layout() {
                     path="/(tabs)/second"
                     testID="tab-work"
                     title={workTabTitleKey}
-                    iconName={isAdmin ? "people-outline" : "briefcase-outline"}
-                    activeIconName={isAdmin ? "people" : "briefcase"}
+                    iconName="briefcase-outline"
+                    activeIconName="briefcase"
                     iconLibrary="Ionicons"
                   />
                 ),
@@ -386,8 +387,8 @@ export default function Layout() {
                     path="/(tabs)/fourth"
                     testID="tab-activity"
                     title="tabActivity"
-                    iconName={isAdmin ? "alert-circle-outline" : "stats-chart-outline"}
-                    activeIconName={isAdmin ? "alert-circle" : "stats-chart"}
+                    iconName="stats-chart-outline"
+                    activeIconName="stats-chart"
                     iconLibrary="Ionicons"
                   />
                 ),

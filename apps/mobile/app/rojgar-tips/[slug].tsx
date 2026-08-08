@@ -1,21 +1,19 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { nativeTipsDetailPath } from "@/utils/blogShare";
 
+/** Deep-link / scheme bridge → native tip detail. */
 export default function RojgarTipsArticleBridge() {
-  const { slug } = useLocalSearchParams<{ slug: string }>();
-  const router = useRouter();
+  const { slug } = useLocalSearchParams<{ slug?: string }>();
 
-  useLayoutEffect(() => {
-    if (slug) {
-      router.replace({
-        pathname: "/screens/rojgar-tips",
-        params: { slug: String(slug) },
-      });
+  useEffect(() => {
+    const value = typeof slug === "string" ? slug.trim() : "";
+    if (value) {
+      router.replace(nativeTipsDetailPath(value) as any);
       return;
     }
-
     router.replace("/screens/rojgar-tips");
-  }, [router, slug]);
+  }, [slug]);
 
   return null;
 }

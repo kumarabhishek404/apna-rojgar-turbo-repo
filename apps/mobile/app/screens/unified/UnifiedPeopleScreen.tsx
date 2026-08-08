@@ -19,6 +19,7 @@ import {
   type ContractorSortId,
   type ServiceSortId,
 } from "@/utils/listingBrowse";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 type ApiRole = "WORKER" | "EMPLOYER" | "MEDIATOR";
 
@@ -33,7 +34,7 @@ const dedupeById = (rows: any[]) =>
 
 const UnifiedPeopleScreen = () => {
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const role = (userDetails?.role || "WORKER") as ApiRole;
+  const role = (getMobileEffectiveRole(userDetails) || "WORKER") as ApiRole;
 
   const showContractors = role === "WORKER" || role === "EMPLOYER";
   const showActiveWorks = role === "MEDIATOR";

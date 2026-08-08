@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "आपका आवेदन सफलतापूर्वक रद्द कर दिया गया",
   "serviceCompletedSuccessfully": "काम सफलतापूर्वक पूर्ण हो गई",
   "workerSelectedSuccessfully": "कर्मचारी सफलतापूर्वक चुना गया",
-
   "active": "فعال",
   "upcoming": "آن والٲے",
   "hiring": "بَھرتی",
@@ -106,7 +105,6 @@
   "received": "وُصول کَرنہٕ آمُت",
   "accepted": "مَنظور کَرنہٕ آمُت",
   "rejected": "مُستَرَد کَرنہٕ آمُت",
-
   "andhrapradesh": "آندھرا پردیش",
   "arunachalpradesh": "ارونچل پردیش",
   "assam": "آسام",
@@ -145,12 +143,10 @@
   "ladakh": "لداخ",
   "jammuandkashmir": "جموں و کشمیر",
   "nctdelhi": "این سی ٹی دہلی",
-
   "india": "ہندوستان",
   "canada": "کینیڈا",
   "belgium": "بیلجیم",
   "algeria": "الجزائر",
-
   "faq_how_to_recharge_fastag_question": "فاسٹیگ کِس طَرٕح ریچارج کَرُن چھُ؟",
   "faq_how_to_recharge_fastag_answer": [
     "1. نَو فاسٹیگ شامِل کَرو۔",
@@ -158,27 +154,22 @@
     "3. ریچارج بٹَن پؠٹھ کلِک کَرو، تہٕ رَقَم دَرٕج کَرو۔",
     "4. ادائیگی ہُنٛد طَریقہ مُنتَخَب کَرو تہٕ ادائیگی کَرو۔"
   ],
-
   "faq_recharge_different_provider_question": "کیا ہَے مؠں مُختَلِف فَراہَم کَرن والَن کھوتہٕ فاسٹیگ ریچارج کَر ہیٚکَن؟",
   "faq_recharge_different_provider_answer": [
     "ہاں، تھَوُن ایپ اِستِمال کَرِتھ مُختَلِف فَراہَم کَرن والَن کھوتہٕ فاسٹیگ ریچارج کَر ہیٚکَو۔"
   ],
-
   "faq_recharge_failed_question": "ریچارج ناکام گَژھُن پَن رَقَم کھاتَس مَنٛز کھوتہٕ کَٹ گَئی؟",
   "faq_recharge_failed_answer": [
     "مِہربانی کَرِتھ سا سپورٹ ٹیٖم سٟتؠ رابِطہ کَرو، تہٕ اس مُشکِل حَل کَرنَس مَنٛز تھَوُن مَدَتھ کَرٕو۔"
   ],
-
   "faq_add_card_question": "آسان ریچارج خٲطرٕ کِرَیڈِٹ یا ڈیبِٹ کارڈ کِس طَرٕح شامِل کَرُن؟",
   "faq_add_card_answer": [
     "تھَوُن آسان ریچارجَن خٲطرٕ ادائیگی ہٕنٛدِس حِصَس تَحت پنُن کارڈ تَفصیلات شامِل کَر ہیٚکَو۔"
   ],
-
   "faq_view_tolls_question": "کیا ہَے مؠں ایپ اِستِمال شُروع کَرنہٕ کھوتہٕ پَہلےٕ ادائیگی کَرنہٕ آمُت ٹول وُچھ ہیٚکَن؟",
   "faq_view_tolls_answer": [
     "بَدقِسمَتی سٟتؠ، ایپ اِستِمال کَرنہٕ کھوتہٕ پَہلےٕ ادائیگی کَرنہٕ آمُت ٹول وُچھنہٕ یِتھ نَہ ہیٚکَن۔"
   ],
-
   "workType": "کٲم ہٕنٛدِس قِسم",
   "workTitle": "کٲم ہٕنٛدِس عنوان",
   "workSubTitle": "کٲم ہٕنٛدِس ذَیل عنوان",
@@ -232,7 +223,6 @@
   "weWouldLoveToGiveYou": "اس تہان پُورٕ تجربہ دینہٕ چاہُن :)",
   "addReview": "نَظَرثانی شامِل کَرو",
   "editReview": "نَظَرثانی سُدھارو",
-
   "enterAValidPassword": "اَکھ مُناسِب پاسورڈ دَرٕج کَرو",
   "pleaseCheckYourEmail": "مِہربانی کَرِتھ تُہار ای میل چیک کَرو",
   "weHaveSentACodeTo": "اس اَکھ کوڈ روانہٕ کَرتھ",
@@ -320,7 +310,6 @@
   "city": "شَہَر",
   "pinCode": "پِن کوڈ",
   "state": "ریاست",
-
   "alreadyHaveAnAccount": "کیا تُہندِس پَہلےٕ کھۄتہٕ اَکھ اکاؤنٹ چھُ؟",
   "dateOfBirth": "جنم دۄہ",
   "saveAndVerifyButton": "محفوظ کَرو تہٕ تَصدیٖق کَرو",
@@ -417,7 +406,6 @@
   "receivedDirectBookingRequests": "مستقیم بکنگ کی درخواستیں موصول ہوئیں",
   "bookingsAndRequest": "بُکنگز تہٕ دَرخواست",
   "bookedWorker": "بُک کَرنہٕ آمُت کٲم کَرن وال",
-
   "allRequests": "تَمام دَرخواستھ",
   "allBookings": "تَمام بُکِنگز",
   "sentRequest": "موکلِتھ دَرخواست",
@@ -513,5 +501,26 @@
   "rateAppTitle": "اپنا روزگار پسند آو؟",
   "rateAppMessage": "مہربٲنی کٔرِتھ Play Store پٮ۪ٹھ أسہ ریٹ کٔرِو۔ ییٚمہ سٲتھی زیادٕہ مزدور تہٕ مالِک أسہ لٔبِہِ ہٮ۪کن۔",
   "rateAppNow": "وِن ریٹ کٔرِو",
-  "rateAppLater": "پتہٕ"
+  "rateAppLater": "پتہٕ",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }

@@ -20,6 +20,8 @@ import {
   type WorkerSortId,
 } from "@/utils/listingBrowse";
 
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
+
 type ApiRole = "WORKER" | "EMPLOYER" | "MEDIATOR";
 
 const dedupeById = (rows: any[]) =>
@@ -34,7 +36,7 @@ const dedupeById = (rows: any[]) =>
 const UnifiedWorkScreen = () => {
   const { locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
-  const role = (userDetails?.role || "WORKER") as ApiRole;
+  const role = (getMobileEffectiveRole(userDetails) || "WORKER") as ApiRole;
   const params = useLocalSearchParams<{ categoryType?: string | string[] }>();
   // Ensure translated text inside nested work lists updates when language changes.
   void locale;

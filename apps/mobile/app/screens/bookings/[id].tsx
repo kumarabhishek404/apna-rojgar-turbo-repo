@@ -55,7 +55,6 @@ const BookingDetails = () => {
   const { refreshUser, isLoading: isRefreshLoading } =
     REFRESH_USER.useRefreshUser();
 
-  const [isAdmin] = useState(userDetails?.isAdmin);
   const resolvedHeaderTitle =
     (typeof title === "string" && title) ||
     (category === "recievedRequests" || category === "sentRequests"
@@ -362,7 +361,6 @@ const BookingDetails = () => {
           category={category}
           booking={booking}
           userDetails={userDetails}
-          isAdmin={isAdmin}
           id={id as string}
           refetch={refetch}
           refreshUser={refreshUser}

@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import USER from "@/app/api/user";
 import TOAST from "@/app/hooks/toast";
 import Atoms from "@/app/AtomStore";
+import { normalizeMobileUserSession } from "@/utils/mobileRole";
 
 interface UserDetails {
   id: string;
@@ -26,7 +27,8 @@ const useRefreshUser = (): UseRefreshUserReturn => {
     try {
       const response = await USER?.getUserInfo();
       if (response?.success) {
-        const freshUser = response.data || {};
+        const freshUser =
+          normalizeMobileUserSession(response.data || {}) || {};
         const nextProfilePicture =
           freshUser?.profilePicture || freshUser?.profileImage || "";
         setUserDetails((prev: Record<string, unknown>) => ({
@@ -41,8 +43,17 @@ const useRefreshUser = (): UseRefreshUserReturn => {
     } catch (error: any) {
       const errorMessage = error?.message || "Error refreshing user details";
       setError(new Error(errorMessage));
-      TOAST?.error(errorMessage);
-      console.error("Error refreshing user details:", error);
+      // Network outages already surface as empty lists; avoid toast spam + duplicate keys.
+      const isNetwork =
+        !error?.response &&
+        (error?.code === "ERR_NETWORK" ||
+          /network/i.test(String(error?.message || "")));
+      if (!isNetwork) {
+        TOAST?.error(errorMessage);
+      } else if (__DEV__) {
+        console.warn("[refreshUser]", errorMessage);
+      }
+      console.warn("Error refreshing user details:", errorMessage);
     } finally {
       setIsLoading(false);
     }

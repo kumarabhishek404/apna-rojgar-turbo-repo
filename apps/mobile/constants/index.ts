@@ -214,35 +214,7 @@ export const EMPLOYER = [
   },
 ];
 
-export const ADMINREQUEST = [
-  {
-    label: "pending",
-    value: "PENDING",
-    iconName: "beach",
-  },
-  {
-    label: "accepted",
-    value: "ACCEPTED",
-    iconName: "city",
-  },
-  {
-    label: "rejected",
-    value: "REJECTED",
-    iconName: "city",
-  },
-  {
-    label: "cancelled",
-    value: "CANCELLED",
-    iconName: "city",
-  },
-];
 
-export const ADMIN_PROMOTION_PAYMENTS = [
-  { label: "all", value: "ALL", iconName: "apps" },
-  { label: "paid", value: "PAID", iconName: "checkmark-circle" },
-  { label: "pending", value: "CREATED", iconName: "time" },
-  { label: "failed", value: "FAILED", iconName: "close-circle" },
-];
 
 export const ALLREQUEST = [
   {
@@ -273,18 +245,6 @@ export const WORKERREQUEST = [
   },
 ];
 
-export const ADMIN_BOOKINGS = [
-  {
-    label: "allBookings",
-    value: "booking",
-    iconName: "city",
-  },
-  {
-    label: "allRequests",
-    value: "request",
-    iconName: "city",
-  },
-];
 
 export const EMPLOYER_BOOKINGS = [
   {

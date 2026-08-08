@@ -43,7 +43,6 @@ interface ServiceActionButtonsProps {
   isMemberLoading: boolean;
   isMemberFetchingNextPage: boolean;
   userDetails: any;
-  isAdmin: boolean;
   isSelected: boolean;
   isMediatorOrSingleWorker: boolean;
   isWorkerBooked: boolean;
@@ -76,7 +75,6 @@ const ServiceActionButtons = ({
   isSelectedWorkerLoading,
   isMemberLoading,
   isMemberFetchingNextPage,
-  isAdmin,
   isSelected,
   isMediatorOrSingleWorker,
   isWorkerBooked,
@@ -331,7 +329,6 @@ const ServiceActionButtons = ({
       //   );
 
       case service.employer !== userDetails?._id &&
-        !isAdmin &&
         service.status === "HIRING":
         return (
           <>
@@ -475,25 +472,6 @@ const ServiceActionButtons = ({
                 textStyle={{ color: Colors?.white }}
               />
             )}
-          </>
-        );
-
-      case isAdmin:
-        return (
-          <>
-            <Button
-              isPrimary={true}
-              title={t("deleteService")}
-              onPress={mutationCancelBookingByEmployer.mutate}
-              style={styles.deleteBtn}
-            />
-            <Button
-              isPrimary={false}
-              title={t("completeService")}
-              onPress={mutationCompleteService.mutate}
-              style={styles.completeBtn}
-              textStyle={{ color: Colors?.white }}
-            />
           </>
         );
 

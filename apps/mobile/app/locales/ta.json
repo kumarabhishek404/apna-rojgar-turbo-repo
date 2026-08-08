@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "உங்கள் விண்ணப்பம் வெற்றிகரமாக ரத்து செய்யப்பட்டது",
   "serviceCompletedSuccessfully": "சேவை வெற்றிகரமாக முடிக்கப்பட்டது",
   "workerSelectedSuccessfully": "தொழிலாளி வெற்றிகரமாக தேர்ந்தெடுக்கப்பட்டார்",
-
   "selected": "தேர்ந்தெடுக்கப்பட்டது",
   "proposals": "முன்மொழிவுகள்",
   "select": "தேர்ந்தெடு",
@@ -185,7 +184,7 @@
   "received": "பெறப்பட்டது",
   "accepted": "ஏற்றுக்கொள்ளப்பட்டது",
   "rejected": "நிராகரிக்கப்பட்டது",
-"andhrapradesh": "ஆந்திரா பிரதேசம்",
+  "andhrapradesh": "ஆந்திரா பிரதேசம்",
   "arunachalpradesh": "அருணாச்சல பிரதேசம்",
   "assam": "ஆசாம்",
   "bihar": "பிபாரை",
@@ -223,12 +222,10 @@
   "ladakh": "லடாக்",
   "jammuandkashmir": "ஜம்மு மற்றும் காஷ்மீர்",
   "nctdelhi": "என்சி டி தில்லி",
-
   "india": "இந்தியா",
   "canada": "கனடா",
   "belgium": "பெல்ஜியம்",
   "algeria": "அல்ஜீரியா",
-
   "faq_how_to_recharge_fastag_question": "ஃபாஸ்டேக்கை எவ்வாறு ரீசார்ஜ் செய்வது?",
   "faq_how_to_recharge_fastag_answer": [
     "1. புதிய ஃபாஸ்டேக்கைச் சேர்க்கவும்.",
@@ -236,27 +233,22 @@
     "3. ரீசார்ஜ் பொத்தானைக் கிளிக் செய்து தொகையை உள்ளிடவும்.",
     "4. கட்டண முறையைத் தேர்ந்தெடுத்து பணம் செலுத்தவும்."
   ],
-
   "faq_recharge_different_provider_question": "வெவ்வேறு வழங்குநர்களிடமிருந்து ஃபாஸ்டேக்குகளை நான் ரீசார்ஜ் செய்ய முடியுமா?",
   "faq_recharge_different_provider_answer": [
     "ஆம், பயன்பாட்டைப் பயன்படுத்தி வெவ்வேறு வழங்குநர்களிடமிருந்து ஃபாஸ்டேக்குகளை ரீசார்ஜ் செய்யலாம்."
   ],
-
   "faq_recharge_failed_question": "ரீசார்ஜ் தோல்வியடைந்தது ஆனால் கணக்கிலிருந்து தொகை கழிக்கப்பட்டதா?",
   "faq_recharge_failed_answer": [
     "எங்கள் ஆதரவு குழுவைத் தொடர்பு கொள்ளவும், சிக்கலைத் தீர்க்க நாங்கள் உங்களுக்கு உதவுவோம்."
   ],
-
   "faq_add_card_question": "எளிதான ரீசார்ஜுக்கு கிரெடிட் அல்லது டெபிட் கார்டை எவ்வாறு சேர்ப்பது?",
   "faq_add_card_answer": [
     "எளிதான ரீசார்ஜுகளுக்கு, கட்டணப் பிரிவின் கீழ் உங்கள் கார்டு விவரங்களைச் சேர்க்கலாம்."
   ],
-
   "faq_view_tolls_question": "பயன்பாட்டைப் பயன்படுத்தத் தொடங்குவதற்கு முன்பு செலுத்தப்பட்ட சுங்கச்சாவடிகளைக் காண முடியுமா?",
   "faq_view_tolls_answer": [
     "துரதிர்ஷ்டவசமாக, பயன்பாட்டைப் பயன்படுத்துவதற்கு முன்பு செலுத்தப்பட்ட சுங்கச்சாவடிகளைக் காண முடியாது."
   ],
-
   "workType": "வேலை வகை",
   "workTitle": "வேலை தலைப்பு",
   "workSubTitle": "வேலை துணைத் தலைப்பு",
@@ -375,7 +367,6 @@
   "weHaveSentACodeTo": "நாங்கள் ஒரு குறியீட்டை அனுப்பியுள்ளோம்",
   "verifyEmailAddress": "மின்னஞ்சல் முகவரியைச் சரிபார்க்கவும்",
   "save": "சேமி",
-
   "saveAndVerify": "சேமித்து சரிபார்க்கவும்",
   "pleaseCheckYourEmailForVerificationCode": "சரிபார்ப்புக் குறியீட்டிற்காக உங்கள் மின்னஞ்சலைச் சரிபார்க்கவும்",
   "pleaseCheckYourEmailForVerificationCodeText": "நாங்கள் ஒரு குறியீட்டை அனுப்பியுள்ளோம்",
@@ -471,7 +462,6 @@
   "male": "ஆண்",
   "female": "பெண்",
   "other": "மற்றவை",
-
   "alreadyHaveAnAccount": "ஏற்கனவே கணக்கு உள்ளதா?",
   "dateOfBirth": "பிறந்த தேதி",
   "saveAndVerifyButton": "சேமித்து சரிபார்க்கவும்",
@@ -568,7 +558,6 @@
   "receivedDirectBookingRequests": "பெறப்பட்ட நேரடி முன்பதிவு கோரிக்கைகள்",
   "bookingsAndRequest": "முன்பதிவுகள் & கோரிக்கை",
   "bookedWorker": "முன்பதிவு செய்யப்பட்ட தொழிலாளி",
-
   "allRequests": "அனைத்து கோரிக்கைகளும்",
   "allBookings": "அனைத்து முன்பதிவுகளும்",
   "sentRequest": "அனுப்பப்பட்ட கோரிக்கை",
@@ -684,5 +673,26 @@
   "rateAppTitle": "அப்னா ரோஜ்கார் பிடித்திருக்கிறதா?",
   "rateAppMessage": "தயவுசெய்து Play Store-ல் எங்களை மதிப்பிடுங்கள். மேலும் தொழிலாளர்களும் முதலாளிகளும் எங்களைக் கண்டுபிடிக்க உதவும்.",
   "rateAppNow": "இப்போது மதிப்பிடு",
-  "rateAppLater": "பின்னர்"
+  "rateAppLater": "பின்னர்",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }

@@ -27,7 +27,6 @@ load_maestro_env() {
   local saved_worker="${WORKER_MOBILE:-}"
   local saved_employer="${EMPLOYER_MOBILE:-}"
   local saved_mediator="${MEDIATOR_MOBILE:-}"
-  local saved_admin="${ADMIN_MOBILE:-}"
 
   if [ -f "$root/.env" ]; then
     set -a
@@ -39,7 +38,6 @@ load_maestro_env() {
   if [ -n "$saved_worker" ]; then export WORKER_MOBILE="$saved_worker"; fi
   if [ -n "$saved_employer" ]; then export EMPLOYER_MOBILE="$saved_employer"; fi
   if [ -n "$saved_mediator" ]; then export MEDIATOR_MOBILE="$saved_mediator"; fi
-  if [ -n "$saved_admin" ]; then export ADMIN_MOBILE="$saved_admin"; fi
 
   export APP_ID="${APP_ID:-com.kumarabhishek404.labourapp}"
   export STAGING_OTP="${STAGING_OTP:-000000}"

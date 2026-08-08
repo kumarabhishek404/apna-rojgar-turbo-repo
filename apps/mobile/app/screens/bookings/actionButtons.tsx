@@ -18,7 +18,6 @@ interface ServiceActionButtonsProps {
   booking: any;
   category: string;
   userDetails: any;
-  isAdmin: boolean;
   id: string;
   refetch: () => void;
   refreshUser: () => void;
@@ -35,7 +34,6 @@ const BookingActionButtons = ({
   category,
   booking,
   userDetails,
-  isAdmin,
   id,
   refetch,
   refreshUser,

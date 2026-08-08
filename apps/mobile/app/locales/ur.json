@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "آپ کی درخواست کامیابی سے منسوخ کر دی گئی",
   "serviceCompletedSuccessfully": "سروس کامیابی سے مکمل ہو گئی",
   "workerSelectedSuccessfully": "مزدور کامیابی سے منتخب ہو گیا",
-
   "selected": "منتخب",
   "proposals": "تجویز",
   "select": "منتخب کریں",
@@ -185,7 +184,6 @@
   "received": "وصول ہوا",
   "accepted": "قبول کیا گیا",
   "rejected": "مسترد کر دیا گیا",
-
   "andhrapradesh": "آندھرا پردیش",
   "arunachalpradesh": "اروناچل پردیش",
   "assam": "آسام",
@@ -224,12 +222,10 @@
   "ladakh": "لداخ",
   "jammuandkashmir": "جموں و کشمیر",
   "nctdelhi": "این سی ٹی دہلی",
-
   "india": "بھارت",
   "canada": "کینیڈا",
   "belgium": "بیلجیم",
   "algeria": "الجزائر",
-
   "faq_how_to_recharge_fastag_question": "فاسٹیگ کو کیسے ریچارج کریں؟",
   "faq_how_to_recharge_fastag_answer": [
     "1. نیا فاسٹیگ شامل کریں۔",
@@ -237,27 +233,22 @@
     "3. ریچارج بٹن پر کلک کریں اور رقم درج کریں۔",
     "4. ادائیگی کا طریقہ منتخب کریں اور ادائیگی کریں۔"
   ],
-
   "faq_recharge_different_provider_question": "کیا میں مختلف فراہم کنندگان سے فاسٹیگز ریچارج کر سکتا ہوں؟",
   "faq_recharge_different_provider_answer": [
     "جی ہاں، آپ ایپ کا استعمال کرتے ہوئے مختلف فراہم کنندگان سے فاسٹیگز ریچارج کر سکتے ہیں۔"
   ],
-
   "faq_recharge_failed_question": "ریچارج ناکام ہو گیا لیکن اکاؤنٹ سے رقم کٹ گئی؟",
   "faq_recharge_failed_answer": [
     "براہ کرم ہماری سپورٹ ٹیم سے رابطہ کریں، اور ہم آپ کو مسئلہ حل کرنے میں مدد کریں گے۔"
   ],
-
   "faq_add_card_question": "آسان ریچارج کے لیے کریڈٹ یا ڈیبٹ کارڈ کیسے شامل کریں؟",
   "faq_add_card_answer": [
     "آپ آسان ریچارج کے لیے ادائیگی کے سیکشن کے تحت اپنے کارڈ کی تفصیلات شامل کر سکتے ہیں۔"
   ],
-
   "faq_view_tolls_question": "کیا میں ایپ استعمال کرنا شروع کرنے سے پہلے ادا کیے گئے ٹولز دیکھ سکتا ہوں؟",
   "faq_view_tolls_answer": [
     "بدقسمتی سے، ایپ استعمال کرنے سے پہلے ادا کیے گئے ٹولز نہیں دیکھے جا سکتے۔"
   ],
-
   "workType": "کام کی قسم",
   "workTitle": "کام کا عنوان",
   "workSubTitle": "کام کا ذیلی عنوان",
@@ -376,7 +367,6 @@
   "weHaveSentACodeTo": "ہم نے ایک کوڈ بھیجا ہے",
   "verifyEmailAddress": "ای میل ایڈریس کی تصدیق کریں",
   "save": "محفوظ کریں",
-
   "saveAndVerify": "محفوظ کریں اور تصدیق کریں",
   "pleaseCheckYourEmailForVerificationCode": "براہ کرم تصدیقی کوڈ کے لیے اپنا ای میل چیک کریں",
   "pleaseCheckYourEmailForVerificationCodeText": "ہم نے ایک کوڈ بھیجا ہے",
@@ -472,7 +462,6 @@
   "male": "مرد",
   "female": "خاتون",
   "other": "دیگر",
-
   "alreadyHaveAnAccount": "کیا پہلے سے اکاؤنٹ موجود ہے؟",
   "dateOfBirth": "تاریخ پیدائش",
   "saveAndVerifyButton": "محفوظ کریں اور تصدیق کریں",
@@ -569,7 +558,6 @@
   "receivedDirectBookingRequests": "موصولہ براہ راست بکنگ کی درخواستیں",
   "bookingsAndRequest": "بکنگز اور درخواست",
   "bookedWorker": "بک کیا گیا ورکر",
-
   "allRequests": "تمام درخواستیں",
   "allBookings": "تمام بکنگز",
   "sentRequest": "بھیجی گئی درخواست",
@@ -685,5 +673,26 @@
   "rateAppTitle": "اپنا روزگار پسند آیا؟",
   "rateAppMessage": "براہ کرم Play Store پر ہمیں ریٹ کریں۔ اس سے مزید مزدور اور آجر ہمیں تلاش کر سکیں گے۔",
   "rateAppNow": "ابھی ریٹ کریں",
-  "rateAppLater": "بعد میں"
+  "rateAppLater": "بعد میں",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }

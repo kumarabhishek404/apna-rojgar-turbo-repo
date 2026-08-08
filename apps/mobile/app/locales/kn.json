@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "ನಿಮ್ಮ ಅರ್ಜಿಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
   "serviceCompletedSuccessfully": "ಸೇವೆಯನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಳಿಸಲಾಗಿದೆ",
   "workerSelectedSuccessfully": "ಕೆಲಸಗಾರರನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ",
-
   "selected": "ಆಯ್ಕೆಯಾಗಿದೆ",
   "proposals": "ಪ್ರಸ್ತಾವನೆಗಳು",
   "select": "ಆಯ್ಕೆ ಮಾಡಿ",
@@ -180,13 +179,11 @@
   "upcoming": "ಮುಂಬರುವ",
   "hiring": "ನೇಮಕಾತಿ",
   "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
-
   "all": "ಎಲ್ಲಾ",
   "sent": "ಕಳುಹಿಸಲಾಗಿದೆ",
   "received": "ಸ್ವೀಕರಿಸಲಾಗಿದೆ",
   "accepted": "ಸ್ವೀಕರಿಸಲಾಗಿದೆ",
   "rejected": "ತಿರಸ್ಕರಿಸಲಾಗಿದೆ",
-
   "andhrapradesh": "ఆంధ్ర ప్రదేశ్",
   "arunachalpradesh": "అరుణాచల్ ప్రదేశ్",
   "assam": "ఆసామ",
@@ -225,12 +222,10 @@
   "ladakh": "లదాఖ్",
   "jammuandkashmir": "జమ్మూ మరియు కాశ్మీర్",
   "nctdelhi": "ఎన్‌సీటీ ఢిల్లీ",
-
   "india": "ಭಾರತ",
   "canada": "ಕೆನಡಾ",
   "belgium": "ಬೆಲ್ಜಿಯಂ",
   "algeria": "ಅಲ್ಜೀರಿಯಾ",
-
   "faq_how_to_recharge_fastag_question": "ಫಾಸ್ಟ್ಯಾಗ್ ಅನ್ನು ಹೇಗೆ ರೀಚಾರ್ಜ್ ಮಾಡುವುದು?",
   "faq_how_to_recharge_fastag_answer": [
     "1. ಹೊಸ ಫಾಸ್ಟ್ಯಾಗ್ ಸೇರಿಸಿ.",
@@ -238,27 +233,22 @@
     "3. ರೀಚಾರ್ಜ್ ಬಟನ್ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ.",
     "4. ಪಾವತಿ ವಿಧಾನವನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಪಾವತಿಸಿ."
   ],
-
   "faq_recharge_different_provider_question": "ನಾನು ವಿಭಿನ್ನ ಪೂರೈಕೆದಾರರಿಂದ ಫಾಸ್ಟ್ಯಾಗ್‌ಗಳನ್ನು ರೀಚಾರ್ಜ್ ಮಾಡಬಹುದೇ?",
   "faq_recharge_different_provider_answer": [
     "ಹೌದು, ನೀವು ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ ವಿಭಿನ್ನ ಪೂರೈಕೆದಾರರಿಂದ ಫಾಸ್ಟ್ಯಾಗ್‌ಗಳನ್ನು ರೀಚಾರ್ಜ್ ಮಾಡಬಹುದು."
   ],
-
   "faq_recharge_failed_question": "ರೀಚಾರ್ಜ್ ವಿಫಲವಾಗಿದೆ ಆದರೆ ಖಾತೆಯಿಂದ ಹಣ ಕಡಿತಗೊಂಡಿದೆಯೇ?",
   "faq_recharge_failed_answer": [
     "ದಯವಿಟ್ಟು ನಮ್ಮ ಬೆಂಬಲ ತಂಡವನ್ನು ಸಂಪರ್ಕಿಸಿ, ಮತ್ತು ಸಮಸ್ಯೆಯನ್ನು ಪರಿಹರಿಸಲು ನಾವು ನಿಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತೇವೆ."
   ],
-
   "faq_add_card_question": "ಸುಲಭ ರೀಚಾರ್ಜ್‌ಗಾಗಿ ಕ್ರೆಡಿಟ್ ಅಥವಾ ಡೆಬಿಟ್ ಕಾರ್ಡ್ ಅನ್ನು ಹೇಗೆ ಸೇರಿಸುವುದು?",
   "faq_add_card_answer": [
     "ಸುಲಭ ರೀಚಾರ್ಜ್‌ಗಳಿಗಾಗಿ ನೀವು ಪಾವತಿಗಳ ವಿಭಾಗದ ಅಡಿಯಲ್ಲಿ ನಿಮ್ಮ ಕಾರ್ಡ್ ವಿವರಗಳನ್ನು ಸೇರಿಸಬಹುದು."
   ],
-
   "faq_view_tolls_question": "ನಾನು ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಲು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಪಾವತಿಸಿದ ಟೋಲ್‌ಗಳನ್ನು ನಾನು ನೋಡಬಹುದೇ?",
   "faq_view_tolls_answer": [
     "ದುರದೃಷ್ಟವಶಾತ್, ಅಪ್ಲಿಕೇಶನ್ ಬಳಸುವ ಮೊದಲು ಪಾವತಿಸಿದ ಟೋಲ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲಾಗುವುದಿಲ್ಲ."
   ],
-
   "workType": "ಕೆಲಸದ ಪ್ರಕಾರ",
   "workTitle": "ಕೆಲಸದ ಶೀರ್ಷಿಕೆ",
   "workSubTitle": "ಕೆಲಸದ ಉಪ ಶೀರ್ಷಿಕೆ",
@@ -372,7 +362,6 @@
   "emailIsRequired": "ಇಮೇಲ್ ಅಗತ್ಯವಿದೆ",
   "passwordIsRequired": "ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ",
   "enterAValidEmailAddress": "ಮಾನ್ಯವಾದ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ",
-
   "enterAValidPassword": "ಮಾನ್ಯವಾದ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ",
   "pleaseCheckYourEmail": "ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇಮೇಲ್ ಪರಿಶೀಲಿಸಿ",
   "weHaveSentACodeTo": "ನಾವು ಕೋಡ್ ಕಳುಹಿಸಿದ್ದೇವೆ",
@@ -473,7 +462,6 @@
   "male": "ಪುರುಷ",
   "female": "ಮಹಿಳೆ",
   "other": "ಇತರೆ",
-
   "enterAValidMobileNumber": "ಮಾನ್ಯವಾದ ಮೊಬೈಲ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ",
   "mobileNumberIsRequired": "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಅಗತ್ಯವಿದೆ",
   "emailAddressIsRequired": "ಇಮೇಲ್ ವಿಳಾಸ ಅಗತ್ಯವಿದೆ",
@@ -546,7 +534,6 @@
   "receivedDirectBookingRequests": "ಸ್ವೀಕೃತ ನೇರ ಬುಕ್ಕಿಂಗ್ ಮನವಿಗಳು",
   "bookingsAndRequest": "ಬುಕಿಂಗ್‌ಗಳು ಮತ್ತು ವಿನಂತಿ",
   "bookedWorker": "ಬುಕ್ ಮಾಡಿದ ಕೆಲಸಗಾರ",
-
   "allRequests": "ಎಲ್ಲಾ ವಿನಂತಿಗಳು",
   "allBookings": "ಎಲ್ಲಾ ಬುಕಿಂಗ್‌ಗಳು",
   "sentRequest": "ಕಳುಹಿಸಿದ ವಿನಂತಿ",
@@ -662,5 +649,26 @@
   "rateAppTitle": "ಅಪ್ನಾ ರೋಜ್‌ಗಾರ್ ಇಷ್ಟವಾಯಿತೇ?",
   "rateAppMessage": "ದಯವಿಟ್ಟು Play Store ನಲ್ಲಿ ನಮಗೆ ರೇಟ್ ಮಾಡಿ. ಹೆಚ್ಚು ಕಾರ್ಮಿಕರು ಮತ್ತು ಉದ್ಯೋಗದಾತರು ನಮ್ಮನ್ನು ಹುಡುಕಲು ಸಹಾಯವಾಗುತ್ತದೆ.",
   "rateAppNow": "ಈಗ ರೇಟ್ ಮಾಡಿ",
-  "rateAppLater": "ನಂತರ"
+  "rateAppLater": "ನಂತರ",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }

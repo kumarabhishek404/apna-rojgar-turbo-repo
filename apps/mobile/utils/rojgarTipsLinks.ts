@@ -93,7 +93,7 @@ export function parseRojgarTipsDeepLink(
   };
 }
 
-/** Expo Router path for tip deep links → in-app WebView screen. */
+/** Expo Router path for tip deep links → native list/detail screens. */
 export function rojgarTipsAppRoute(rawOrParsed?: string | RojgarTipsDeepLink): string {
   const parsed =
     typeof rawOrParsed === "string" || rawOrParsed === undefined
@@ -104,7 +104,7 @@ export function rojgarTipsAppRoute(rawOrParsed?: string | RojgarTipsDeepLink): s
     return "/screens/rojgar-tips";
   }
   if (parsed.kind === "article" && parsed.slug) {
-    return `/screens/rojgar-tips?slug=${encodeURIComponent(parsed.slug)}`;
+    return `/screens/rojgar-tips/${encodeURIComponent(parsed.slug)}`;
   }
   return "/screens/rojgar-tips";
 }

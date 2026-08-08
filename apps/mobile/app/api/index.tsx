@@ -11,7 +11,11 @@ import reportError from "@/utils/reportError";
 import { getApiBaseUrl } from "@/constants/apiBaseUrl";
 
 const eventEmitter = new EventEmitter();
-const API_BASE_URL = getApiBaseUrl();
+
+/** Resolve on each call so Metro/.env changes and emulator rewrites stay fresh. */
+const resolveApiBaseUrl = () => getApiBaseUrl();
+
+let lastNetworkErrorLogAt = 0;
 
 const getHeaders = async (retries = 3, delay = 500) => {
   try {
@@ -37,7 +41,7 @@ const getHeaders = async (retries = 3, delay = 500) => {
 };
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: resolveApiBaseUrl(),
 });
 
 const toFormData = (body: unknown): FormData => {
@@ -126,7 +130,7 @@ const makeFetchFormDataRequest = async (
   const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(`${resolveApiBaseUrl()}${url}`, {
       method,
       headers: mergedHeaders,
       body: formData,
@@ -195,6 +199,7 @@ const makeFormDataRequest = async (
 };
 
 api.interceptors.request.use((config) => {
+  config.baseURL = resolveApiBaseUrl();
   const deviceHeaders = getClientDeviceHeaders();
   Object.assign(config.headers, deviceHeaders);
   return config;
@@ -264,9 +269,18 @@ api.interceptors.response.use(
         router.replace("/(tabs)/fifth");
       }
     } else if (error.request) {
-      console.error("No response received:", error.request);
+      // Avoid dumping the whole XHR object (noisy + leaks JWT headers in logs).
+      const now = Date.now();
+      if (now - lastNetworkErrorLogAt > 4000) {
+        lastNetworkErrorLogAt = now;
+        const method = String(error.config?.method || "GET").toUpperCase();
+        const url = `${error.config?.baseURL || ""}${error.config?.url || ""}`;
+        console.warn(
+          `[API] No response (${method} ${url}): ${error.message || "Network Error"}`,
+        );
+      }
     } else {
-      console.error("Request error:", error.message);
+      console.warn("[API] Request error:", error.message);
     }
     return Promise.reject(error);
   }

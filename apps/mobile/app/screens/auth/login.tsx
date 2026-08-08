@@ -35,6 +35,10 @@ import {
   shouldSkipOtpClient,
 } from "@/utils/devOtp";
 import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
+import {
+  getMobileEffectiveRole,
+  normalizeMobileUserSession,
+} from "@/utils/mobileRole";
 
 const isBlankValue = (value: unknown) =>
   value === undefined || value === null || String(value).trim() === "";
@@ -148,10 +152,13 @@ export default function Login() {
       //   return;
       // }
 
-      const normalizedUser = {
+      const normalizedUser = normalizeMobileUserSession({
         ...user,
         profilePicture: user?.profilePicture || user?.profileImage || "",
-      };
+      })!;
+      const effectiveRole =
+        getMobileEffectiveRole(normalizedUser) ||
+        String(normalizedUser?.role ?? "");
 
       // 2️⃣ Incomplete onboarding (main details)
       if (!user?.name || !user?.address || !user?.gender || !user?.age) {
@@ -181,10 +188,10 @@ export default function Login() {
         pathname: "/screens/auth/register/fifth",
         params: {
           userId: user._id,
-          role: String(user?.role ?? ""),
+          role: String(effectiveRole),
           skills: JSON.stringify(Array.isArray(user?.skills) ? user.skills : []),
           numberOfWorkersInTeam:
-            user?.role === "MEDIATOR" && user?.numberOfWorkersInTeam != null
+            effectiveRole === "MEDIATOR" && user?.numberOfWorkersInTeam != null
               ? String(user.numberOfWorkersInTeam)
               : "",
           fromLogin: "1",
@@ -200,7 +207,10 @@ export default function Login() {
         ),
         syncPendingLocaleToProfile(user._id),
         refreshUser().then((updatedUser) =>
-          setUserDetails({ isAuth: true, ...updatedUser }),
+          setUserDetails({
+            isAuth: true,
+            ...(normalizeMobileUserSession(updatedUser) || updatedUser),
+          }),
         ),
       ]);
     },
@@ -463,6 +473,31 @@ export default function Login() {
                 {/* Registration entry remains intentionally hidden to preserve the existing auth flow. */}
               </View>
             </View>
+            <TouchableOpacity
+              style={styles.blogsLink}
+              activeOpacity={0.85}
+              onPress={() => router.push("/screens/rojgar-tips")}
+              accessibilityRole="button"
+              accessibilityLabel={t("rojgarTips")}
+            >
+              <Ionicons
+                name="newspaper-outline"
+                size={18}
+                color={Colors.white}
+              />
+              <CustomText
+                color={Colors.white}
+                baseFont={14}
+                fontWeight="700"
+              >
+                {t("rojgarTips")}
+              </CustomText>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={Colors.white}
+              />
+            </TouchableOpacity>
             <View style={styles.supportSlot}>
               <ContactSupport />
             </View>
@@ -574,6 +609,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     elevation: 8,
     marginTop: 2,
+  },
+  blogsLink: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+    marginRight: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   supportSlot: {
     marginTop: "auto",

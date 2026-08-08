@@ -1,12 +1,10 @@
-import { useRouter } from "expo-router";
-import { useLayoutEffect } from "react";
+import { useEffect } from "react";
+import { router } from "expo-router";
 
+/** Deep-link / scheme bridge → native tips list. */
 export default function RojgarTipsListBridge() {
-  const router = useRouter();
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     router.replace("/screens/rojgar-tips");
-  }, [router]);
-
+  }, []);
   return null;
 }

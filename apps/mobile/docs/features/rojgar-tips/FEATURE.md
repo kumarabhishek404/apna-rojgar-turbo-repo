@@ -1,18 +1,20 @@
 # Rojgar Tips — Website + In-App
 
+## Goal
+
+**Superseded (2026-08-05)** by `docs/features/native-blogs/` — mobile now uses native list/detail against `/api/v1/blogs`. Website remains SEO share target.
+
+~~Single blog source of truth on the **website**. Mobile app shows the same tips via **WebView**.~~
+
 ## Status
 
 | Phase | Status | Started | Completed |
 |-------|--------|---------|----------|
 | 1 — Requirements | Complete | 2026-07-28 | 2026-07-28 |
 | 2 — Prototyping | Skipped (strategy provided) | — | — |
-| 3 — Implementation | Complete | 2026-07-28 | 2026-07-28 |
-| 4 — Testing | Pending | | |
-| 5 — Documentation | Pending | | |
-
-## Goal
-
-Single blog source of truth on the **website**. Mobile app shows the same tips via **WebView**. External tip links prefer the **browser** (SEO). App Links only claim job/app paths.
+| 3 — Implementation | Superseded by native-blogs | 2026-07-28 | 2026-08-05 |
+| 4 — Testing | — | | |
+| 5 — Documentation | — | | |
 
 ## Key Decisions Log
 

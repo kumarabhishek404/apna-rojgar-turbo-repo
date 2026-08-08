@@ -67,8 +67,6 @@ const ButtonContainer = ({
     mutationCancelBookingRequest,
     mutationRemoveBookedWorker,
     mutationSendRequest,
-    mutationActivateUser,
-    mutationSuspendUser,
     mutationCancelRequest,
     mutationRemoveMemberFromTeam,
   } = useApiCalls(id, refetch);
@@ -220,8 +218,6 @@ const ButtonContainer = ({
           mutationCancelBookingRequest.isPending ||
           mutationRemoveBookedWorker.isPending ||
           mutationSendRequest.isPending ||
-          mutationActivateUser.isPending ||
-          mutationSuspendUser.isPending ||
           mutationCancelRequest.isPending ||
           mutationRemoveMemberFromTeam.isPending ||
           mutationAddBookingRequest?.isPending

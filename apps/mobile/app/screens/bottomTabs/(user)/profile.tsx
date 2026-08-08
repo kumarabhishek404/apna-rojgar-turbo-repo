@@ -46,6 +46,7 @@ import {
   isCoreProfileIncomplete,
   isMediatorProfileIncomplete,
 } from "@/constants/functions";
+import { getMobileEffectiveRole, isMobileAdminUser, normalizeMobileUserSession } from "@/utils/mobileRole";
 
 type TabKey = "overview" | "settings";
 
@@ -89,7 +90,12 @@ const UserProfile = () => {
   const { refreshUser, isLoading } = REFRESH_USER.useRefreshUser();
 
   useEffect(() => {
-    setRole(userDetails?.role || "");
+    if (isMobileAdminUser(userDetails)) {
+      setUserDetails((prev: any) => normalizeMobileUserSession(prev) ?? prev);
+      return;
+    }
+    const effectiveRole = getMobileEffectiveRole(userDetails);
+    if (effectiveRole) setRole(effectiveRole);
   }, [userDetails]);
 
   useEffect(() => {

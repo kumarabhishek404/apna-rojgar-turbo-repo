@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "તમારી અરજી સફળતાપૂર્વક રદ થઈ",
   "serviceCompletedSuccessfully": "સેવા સફળતાપૂર્વક પૂર્ણ થઈ",
   "workerSelectedSuccessfully": "કામદાર સફળતાપૂર્વક પસંદ થયો",
-
   "selected": "પસંદ કરેલ",
   "proposals": "પ્રસ્તાવો",
   "select": "પસંદ કરો",
@@ -175,7 +174,6 @@
   "duration": "સમયગાળો",
   "travelling": "મુસાફરી",
   "distance": "અંતર",
-
   "active": "સક્રિય",
   "upcoming": "આગામી",
   "hiring": "ભાડે રાખવું",
@@ -185,7 +183,6 @@
   "received": "પ્રાપ્ત",
   "accepted": "સ્વીકૃત",
   "rejected": "અસ્વીકૃત",
-
   "andhrapradesh": "આંધ્ર પ્રદેશ",
   "arunachalpradesh": "અરুণાચલ પ્રદેશ",
   "assam": "આસામ",
@@ -224,12 +221,10 @@
   "ladakh": "લદાખ",
   "jammuandkashmir": "જમ્મુ અને કાશ્મીરમાં",
   "nctdelhi": "એનસિટી દિલ્લી",
-
   "india": "ભારત",
   "canada": "કેનેડા",
   "belgium": "બેલ્જિયમ",
   "algeria": "અલ્જેરિયા",
-
   "faq_how_to_recharge_fastag_question": "ફાસ્ટાગને કેવી રીતે રિચાર્જ કરવું?",
   "faq_how_to_recharge_fastag_answer": [
     "1. નવો ફાસ્ટાગ ઉમેરો.",
@@ -237,27 +232,22 @@
     "3. રિચાર્જ બટન પર ક્લિક કરો અને રકમ દાખલ કરો.",
     "4. ચુકવણી પદ્ધતિ પસંદ કરો અને ચુકવણી કરો."
   ],
-
   "faq_recharge_different_provider_question": "શું હું અલગ પ્રદાતા પાસેથી ફાસ્ટાગ રિચાર્જ કરી શકું?",
   "faq_recharge_different_provider_answer": [
     "હા, તમે એપનો ઉપયોગ કરીને અલગ પ્રદાતાઓ પાસેથી ફાસ્ટાગ રિચાર્જ કરી શકો છો."
   ],
-
   "faq_recharge_failed_question": "રિચાર્જ નિષ્ફળ ગયું પરંતુ ખાતામાંથી રકમ કપાઈ ગઈ?",
   "faq_recharge_failed_answer": [
     "કૃપા કરીને અમારી સપોર્ટ ટીમનો સંપર્ક કરો, અને અમે તમને સમસ્યાનું નિરાકરણ લાવવામાં મદદ કરીશું."
   ],
-
   "faq_add_card_question": "સરળ રિચાર્જ માટે ક્રેડિટ અથવા ડેબિટ કાર્ડ કેવી રીતે ઉમેરવું?",
   "faq_add_card_answer": [
     "તમે સરળ રિચાર્જ માટે ચુકવણી વિભાગ હેઠળ તમારા કાર્ડની વિગતો ઉમેરી શકો છો."
   ],
-
   "faq_view_tolls_question": "શું હું એપનો ઉપયોગ કરવાનું શરૂ કરતા પહેલા ચૂકવેલ ટોલ જોઈ શકું?",
   "faq_view_tolls_answer": [
     "કમનસીબે, એપનો ઉપયોગ કરતા પહેલા ચૂકવેલ ટોલ જોઈ શકાતો નથી."
   ],
-
   "workType": "કામનો પ્રકાર",
   "workTitle": "કામનું શીર્ષક",
   "workSubTitle": "કામનું પેટા શીર્ષક",
@@ -371,7 +361,6 @@
   "emailIsRequired": "ઇમેઇલ જરૂરી છે",
   "passwordIsRequired": "પાસવર્ડ જરૂરી છે",
   "enterAValidEmailAddress": "માન્ય ઇમેઇલ સરનામું દાખલ કરો",
-
   "enterAValidPassword": "માન્ય પાસવર્ડ દાખલ કરો",
   "pleaseCheckYourEmail": "કૃપા કરીને તમારો ઇમેઇલ તપાસો",
   "weHaveSentACodeTo": "અમે એક કોડ મોકલ્યો છે",
@@ -473,7 +462,6 @@
   "male": "પુરુષ",
   "female": "સ્ત્રી",
   "other": "અન્ય",
-
   "alreadyHaveAnAccount": "પહેલેથી જ એક ખાતું છે?",
   "dateOfBirth": "જન્મ તારીખ",
   "saveAndVerifyButton": "સાચવો અને ચકાસો",
@@ -570,7 +558,6 @@
   "receivedDirectBookingRequests": "પ્રાપ્ત સીધી બુકિંગની વિનંતીઓ",
   "bookingsAndRequest": "બુકિંગ્સ અને વિનંતી",
   "bookedWorker": "બુક કરેલ કામદાર",
-
   "allRequests": "બધી વિનંતીઓ",
   "allBookings": "બધી બુકિંગ્સ",
   "sentRequest": "મોકલેલી વિનંતી",
@@ -686,5 +673,26 @@
   "rateAppTitle": "અપના રોજગાર ગમ્યું?",
   "rateAppMessage": "કૃપા કરીને Play Store પર અમને રેટ કરો. વધુ મજૂરો અને નોકરીદાતાઓ અમને શોધી શકે.",
   "rateAppNow": "હમણાં રેટ કરો",
-  "rateAppLater": "પછીથી"
+  "rateAppLater": "પછીથી",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }

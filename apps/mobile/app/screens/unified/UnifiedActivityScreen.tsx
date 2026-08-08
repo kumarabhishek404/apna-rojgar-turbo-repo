@@ -28,6 +28,7 @@ import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
 import WORKER from "@/app/api/workers";
 import EMPLOYER from "@/app/api/employer";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 import MEDIATOR from "@/app/api/mediator";
 import PULL_TO_REFRESH from "@/app/hooks/usePullToRefresh";
 import { getToken } from "@/utils/authStorage";
@@ -1003,6 +1004,13 @@ const resolveActivityRole = (
   userDetails: Record<string, unknown> | null | undefined,
   appRole: string,
 ): ApiRole => {
+  const mobileRole = getMobileEffectiveRole(
+    userDetails as { isAdmin?: boolean; role?: string | null },
+  );
+  if (mobileRole === "WORKER" || mobileRole === "EMPLOYER" || mobileRole === "MEDIATOR") {
+    return mobileRole;
+  }
+
   const normalizedAppRole = String(appRole ?? "")
     .toUpperCase()
     .trim();

@@ -96,7 +96,6 @@
   "yourApplicationCancelledSuccessfully": "आपका आवेदन सफलतापूर्वक रद्द कर दिया गया",
   "serviceCompletedSuccessfully": "काम सफलतापूर्वक पूर्ण हो गई",
   "workerSelectedSuccessfully": "कर्मचारी सफलतापूर्वक चुना गया",
-
   "selected": "चुण्यो ग्यो",
   "proposals": "प्रस्ताव",
   "select": "चुणो",
@@ -185,7 +184,6 @@
   "received": "मिल्यो",
   "accepted": "स्वीकार करयो ग्यो",
   "rejected": "मना कर दियो ग्यो",
-
   "andhrapradesh": "आंध्र प्रदेश",
   "arunachalpradesh": "अरुणाचल प्रदेश",
   "assam": "आसाम",
@@ -224,12 +222,10 @@
   "ladakh": "लद्दाख",
   "jammuandkashmir": "जम्मू और कश्मीर",
   "nctdelhi": "एनसीटी दिल्ली",
-
   "india": "भारत",
   "canada": "कनाडा",
   "belgium": "बेल्जियम",
   "algeria": "अल्जीरिया",
-
   "faq_how_to_recharge_fastag_question": "फास्टैग किकर रिचार्ज करणो है?",
   "faq_how_to_recharge_fastag_answer": [
     "1. नवो फास्टैग जोड़ो।",
@@ -237,27 +233,22 @@
     "3. रिचार्ज बटन माथे क्लिक करो अर रकम दर्ज करो।",
     "4. भुगतान विधि चुनो अर भुगतान करो।"
   ],
-
   "faq_recharge_different_provider_question": "काई म्हें अलग-अलग प्रदाता सूं फास्टैग रिचार्ज कर सकूं हूँ?",
   "faq_recharge_different_provider_answer": [
     "हां, थूं ऐप को उपयोग करके अलग-अलग प्रदाता सूं फास्टैग रिचार्ज कर सको हो।"
   ],
-
   "faq_recharge_failed_question": "रिचार्ज असफल हो ग्यो पण खाता सूं पैसा कट ग्या?",
   "faq_recharge_failed_answer": [
     "कृपया म्हारी सपोर्ट टीम सूं संपर्क करो, अर हम थान समस्या को समाधान करबा में मदद करांगा।"
   ],
-
   "faq_add_card_question": "आसान रिचार्ज खातर क्रेडिट या डेबिट कार्ड किकर जोड़णो है?",
   "faq_add_card_answer": [
     "थूं आसान रिचार्ज खातर भुगतान विभाग के तहत थारा कार्ड को विवरण जोड़ सको हो।"
   ],
-
   "faq_view_tolls_question": "काई म्हें ऐप को उपयोग शुरू करण सूं पहलां भुगतान करयोड़ा टोल देख सकूं हूँ?",
   "faq_view_tolls_answer": [
     "बदकिस्मती सूं, ऐप को उपयोग करण सूं पहलां भुगतान करयोड़ा टोल देख्या नीं जा सके।"
   ],
-
   "workType": "काम को प्रकार",
   "workTitle": "काम को शीर्षक",
   "workSubTitle": "काम को उपशीर्षक",
@@ -376,7 +367,6 @@
   "weHaveSentACodeTo": "हमने एक कोड भेज्यो है",
   "verifyEmailAddress": "ईमेल पता सत्यापित करो",
   "save": "सुरक्षित करो",
-
   "saveAndVerify": "सुरक्षित करो और सत्यापित करो",
   "pleaseCheckYourEmailForVerificationCode": "सत्यापन कोड के लिए कृपया थारो ईमेल जाँचो",
   "pleaseCheckYourEmailForVerificationCodeText": "हमने एक कोड भेज्यो है",
@@ -472,7 +462,6 @@
   "male": "पुरुष",
   "female": "महिला",
   "other": "अन्य",
-
   "alreadyHaveAnAccount": "पहलां सूं ही एक खातो है?",
   "dateOfBirth": "जन्म तारीख",
   "saveAndVerifyButton": "सुरक्षित करो और जांचो",
@@ -569,7 +558,6 @@
   "receivedDirectBookingRequests": "प्राप्त सिधी बुकिंग विनती",
   "bookingsAndRequest": "बुकिंग्स और विनती",
   "bookedWorker": "बुक कियो ग्यो कर्मचारी",
-
   "allRequests": "सारी बिनतियाँ",
   "allBookings": "सारी बुकिंग",
   "sentRequest": "भेजी गई बिनती",
@@ -685,5 +673,26 @@
   "rateAppTitle": "अपना रोजगार पसंद आयो?",
   "rateAppMessage": "कृपया Play Store पे हमें रेट करो। और मजदूर अर मालिक हमें ढूंढ सके।",
   "rateAppNow": "अभी रेट करो",
-  "rateAppLater": "बाद में"
+  "rateAppLater": "बाद में",
+  "rojgarTipsSubtitle": "Tips, updates, and stories for workers, employers, and mediators.",
+  "searchBlogs": "Search rojgar tips...",
+  "noBlogsYet": "No articles published yet. Check back soon.",
+  "blogLoadFailed": "Could not load tips. Please try again.",
+  "blogNotFound": "This tip was not found.",
+  "blogLikes": "Likes",
+  "blogComments": "Comments",
+  "blogShare": "Share",
+  "blogSharePrefix": "Read this tip on Apna Rojgar:",
+  "blogWriteComment": "Write a comment...",
+  "blogLoginToComment": "Log in to comment...",
+  "blogPostComment": "Post comment",
+  "blogWriteReply": "Write a reply...",
+  "blogPostReply": "Post reply",
+  "blogReply": "Reply",
+  "blogCommentTooShort": "Comment must be at least 2 characters.",
+  "blogCommentFailed": "Could not save comment.",
+  "blogLikeFailed": "Could not update like.",
+  "blogLoginRequired": "Please log in to like or comment.",
+  "blogNoComments": "No comments yet. Be the first.",
+  "anonymous": "Anonymous"
 }
