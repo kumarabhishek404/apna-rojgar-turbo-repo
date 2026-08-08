@@ -1,5 +1,6 @@
 import TOAST from "@/app/hooks/toast";
 import Colors from "@/constants/Colors";
+import { FEATURE_FLAGS } from "@/constants/featureFlags";
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -116,66 +117,74 @@ const EmailAddressField = ({
         />
       </View>
 
-      {/* {!errors?.[name] && (
-        <Button
-          isPrimary={true}
-          title={t("verifyEmailAddress")}
-          onPress={handleSendOtp}
-        />
-      )} */}
-      <Modal visible={isEmailValid} transparent={true} animationType="slide">
-        <View style={styles.otpContainer}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <CustomHeading baseFont={50}>✉️</CustomHeading>
-              <CustomHeading>{t("pleaseCheckYourEmail")}</CustomHeading>
-              <CustomText>{t("weVeSentACodeTo")}</CustomText>
+      {FEATURE_FLAGS.EMAIL_VERIFICATION ? (
+        <>
+          {/* {!errors?.[name] && (
+            <Button
+              isPrimary={true}
+              title={t("verifyEmailAddress")}
+              onPress={handleSendOtp}
+            />
+          )} */}
+          <Modal
+            visible={isModalVisible}
+            transparent={true}
+            animationType="slide"
+          >
+            <View style={styles.otpContainer}>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <CustomHeading baseFont={50}>✉️</CustomHeading>
+                  <CustomHeading>{t("pleaseCheckYourEmail")}</CustomHeading>
+                  <CustomText>{t("weVeSentACodeTo")}</CustomText>
 
-              <View style={styles.otpform}>
-                {otp?.map((digit: string | undefined, index: any) => (
-                  <TextInput
-                    key={index}
-                    style={styles.otpInput}
-                    keyboardType="numeric"
-                    maxLength={1}
-                    onChangeText={(text) => handleChange(text, index)}
-                    onKeyPress={({ nativeEvent }) => {
-                      return nativeEvent.key === "Backspace"
-                        ? handleBackspace("", index)
-                        : null;
-                    }}
-                    value={digit}
-                    ref={(input) => (inputs.current[index] = input)} // Reference each input
-                  />
-                ))}
-              </View>
+                  <View style={styles.otpform}>
+                    {otp?.map((digit: string | undefined, index: any) => (
+                      <TextInput
+                        key={index}
+                        style={styles.otpInput}
+                        keyboardType="numeric"
+                        maxLength={1}
+                        onChangeText={(text) => handleChange(text, index)}
+                        onKeyPress={({ nativeEvent }) => {
+                          return nativeEvent.key === "Backspace"
+                            ? handleBackspace("", index)
+                            : null;
+                        }}
+                        value={digit}
+                        ref={(input) => (inputs.current[index] = input)}
+                      />
+                    ))}
+                  </View>
 
-              <TouchableOpacity
-                style={styles?.resendContainer}
-                onPress={resendOtp}
-              >
-                <CustomText>{t("didntGetTheCode")}</CustomText>
-                <CustomText color={Colors?.link}>
-                  {t("clickToResend")}
-                </CustomText>
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles?.resendContainer}
+                    onPress={resendOtp}
+                  >
+                    <CustomText>{t("didntGetTheCode")}</CustomText>
+                    <CustomText color={Colors?.link}>
+                      {t("clickToResend")}
+                    </CustomText>
+                  </TouchableOpacity>
 
-              <View style={styles.buttonContainer}>
-                <Button
-                  isPrimary={false}
-                  title={t("cancel")}
-                  onPress={() => setModalVisible(false)}
-                />
-                <Button
-                  isPrimary={true}
-                  title={t("verify")}
-                  onPress={handleVerify}
-                />
+                  <View style={styles.buttonContainer}>
+                    <Button
+                      isPrimary={false}
+                      title={t("cancel")}
+                      onPress={() => setModalVisible(false)}
+                    />
+                    <Button
+                      isPrimary={true}
+                      title={t("verify")}
+                      onPress={handleVerify}
+                    />
+                  </View>
+                </View>
               </View>
             </View>
-          </View>
-        </View>
-      </Modal>
+          </Modal>
+        </>
+      ) : null}
     </KeyboardAvoidingView>
   );
 };

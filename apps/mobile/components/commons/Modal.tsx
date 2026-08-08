@@ -32,13 +32,19 @@ const ModalComponent = ({
           {/* Header */}
           <View style={styles.header}>
             <CustomHeading
+              style={styles.headerTitle}
               baseFont={18}
               color={Colors?.background}
               textAlign="left"
+              numberOfLines={1}
             >
               {title ? title : t("title")}
             </CustomHeading>
-            <TouchableOpacity onPress={onClose}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Entypo name="cross" size={28} color="#FFF" />
             </TouchableOpacity>
           </View>
@@ -106,11 +112,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   header: {
-    // padding: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     backgroundColor: Colors?.primary,
+  },
+  headerTitle: {
+    flex: 1,
+    paddingRight: 4,
+  },
+  closeButton: {
+    flexShrink: 0,
   },
   footer: {
     flexDirection: "row",

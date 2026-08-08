@@ -23,6 +23,24 @@ function generateVerificationCode() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
+/** Strip zero-width / bidi chars that paste from phones into email fields. */
+function normalizeEmailAddress(value) {
+  return String(value || "")
+    .replace(/[\u200B-\u200D\uFEFF\u2060\u00AD]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+function isSmtpAuthError(error) {
+  const msg = String(error?.message || error?.response || "");
+  return (
+    /535-?5\.7\.8/i.test(msg) ||
+    /Username and Password not accepted/i.test(msg) ||
+    /Invalid login/i.test(msg) ||
+    /EAUTH/i.test(String(error?.code || ""))
+  );
+}
+
 function normalizeRegistrationSource(value) {
   if (!value) return null;
   const v = String(value).toLowerCase().trim();
@@ -42,20 +60,14 @@ function getRegistrationSourceFromRequest(req) {
 function getTwoFactorApiKey() {
   const key = process.env.TWOFACTOR_API_KEY;
   if (key != null && String(key).trim()) return String(key).trim();
-
-  // Legacy fallback (prefer setting TWOFACTOR_API_KEY in env).
-  if (process.env.NODE_ENV === "production") {
-    console.error(
-      "[auth] TWOFACTOR_API_KEY is missing in production. OTP sends may fail.",
-    );
-  }
-  return "d0fa8207-0f16-11f0-8b17-0200cd936042";
+  return null;
 }
 
 function getTwoFactorTemplateName() {
   const t = process.env.TWOFACTOR_TEMPLATE_NAME;
   if (t != null && String(t).trim()) return String(t).trim();
-  return "temp1";
+  // Empty = use 2factor default AUTOGEN (no custom template).
+  return "";
 }
 
 /**
@@ -130,11 +142,68 @@ export const handleRegister = async (req, res) => {
   }
 };
 
-function createAuthError(message, statusCode = 500, code = "AUTH_ERROR") {
+function createAuthError(
+  message,
+  statusCode = 500,
+  code = "AUTH_ERROR",
+  providerDetail = null,
+) {
   const err = new Error(message);
   err.statusCode = statusCode;
   err.code = code;
+  if (providerDetail != null) {
+    err.providerDetail = String(providerDetail).slice(0, 300);
+  }
   return err;
+}
+
+function isOtpErrorCode(code) {
+  return typeof code === "string" && code.startsWith("OTP_");
+}
+
+function extractTwoFactorDetail(data, httpStatus) {
+  if (data == null) {
+    return httpStatus >= 400 ? `SMS provider HTTP ${httpStatus}` : "SMS send failed";
+  }
+  if (typeof data === "string") {
+    const trimmed = data.trim();
+    if (!trimmed) return httpStatus >= 400 ? `SMS provider HTTP ${httpStatus}` : "SMS send failed";
+    try {
+      const parsed = JSON.parse(trimmed);
+      return extractTwoFactorDetail(parsed, httpStatus);
+    } catch {
+      return trimmed.slice(0, 300);
+    }
+  }
+  if (typeof data === "object") {
+    const detail = data.Details || data.Message || data.message || data.error;
+    if (detail != null && String(detail).trim()) return String(detail).trim();
+  }
+  return httpStatus >= 400 ? `SMS provider HTTP ${httpStatus}` : "SMS send failed";
+}
+
+function isTwoFactorTemplateFailure(detail) {
+  const lower = String(detail || "").toLowerCase();
+  return (
+    lower.includes("template") ||
+    lower.includes("sender") ||
+    lower.includes("dlt")
+  );
+}
+
+function isTwoFactorNonRetryable(detail) {
+  const lower = String(detail || "").toLowerCase();
+  return (
+    lower.includes("insufficient") ||
+    lower.includes("balance") ||
+    lower.includes("credit") ||
+    lower.includes("limit") ||
+    lower.includes("many") ||
+    lower.includes("rate") ||
+    lower.includes("invalid api") ||
+    lower.includes("api key") ||
+    lower.includes("apikey")
+  );
 }
 
 function mapTwoFactorSendFailure(detail) {
@@ -146,6 +215,7 @@ function mapTwoFactorSendFailure(detail) {
       "Unable to send OTP right now. Please try again.",
       502,
       "OTP_SEND_FAILED",
+      detail,
     );
   }
 
@@ -158,6 +228,21 @@ function mapTwoFactorSendFailure(detail) {
       "OTP service is temporarily unavailable. Please try again later.",
       503,
       "OTP_PROVIDER_CREDITS",
+      detail,
+    );
+  }
+
+  if (
+    lower.includes("invalid api") ||
+    lower.includes("api key") ||
+    lower.includes("apikey") ||
+    lower.includes("unauthorized")
+  ) {
+    return createAuthError(
+      "OTP service is not configured. Please try again later.",
+      503,
+      "OTP_NOT_CONFIGURED",
+      detail,
     );
   }
 
@@ -169,6 +254,7 @@ function mapTwoFactorSendFailure(detail) {
       "Please enter a valid mobile number.",
       400,
       "OTP_INVALID_MOBILE",
+      detail,
     );
   }
 
@@ -182,6 +268,7 @@ function mapTwoFactorSendFailure(detail) {
       "Too many OTP requests. Please wait a minute and try again.",
       429,
       "OTP_RATE_LIMIT",
+      detail,
     );
   }
 
@@ -191,10 +278,64 @@ function mapTwoFactorSendFailure(detail) {
       "Unable to send OTP right now. Please try again.",
       502,
       "OTP_SEND_FAILED",
+      detail,
     );
   }
 
-  return createAuthError(text, 502, "OTP_SEND_FAILED");
+  return createAuthError(
+    "Unable to send OTP right now. Please try again.",
+    502,
+    "OTP_SEND_FAILED",
+    detail,
+  );
+}
+
+function resolveAuthErrorResponse(error) {
+  const statusCode = Number(error?.statusCode) || 500;
+  const code = error?.code;
+  const rawMessage =
+    typeof error?.message === "string" ? error.message.trim() : "";
+
+  if (rawMessage && (statusCode < 500 || isOtpErrorCode(code))) {
+    return {
+      statusCode,
+      message: rawMessage,
+      ...(code ? { errorCode: code } : {}),
+    };
+  }
+
+  return {
+    statusCode,
+    message: "Something went wrong, please try again",
+    ...(code ? { errorCode: code } : {}),
+  };
+}
+
+async function requestTwoFactorAutogen(apiKey, phoneKey, template) {
+  const pathSuffix = template
+    ? `SMS/${phoneKey}/AUTOGEN/${encodeURIComponent(template)}`
+    : `SMS/${phoneKey}/AUTOGEN`;
+  const url = `https://2factor.in/API/V1/${apiKey}/${pathSuffix}`;
+
+  const response = await axios.get(url, {
+    timeout: 15000,
+    validateStatus: () => true,
+  });
+  const data = response?.data;
+  console.log("[auth] 2factor send response:", {
+    httpStatus: response?.status,
+    template: template || "(default)",
+    data,
+  });
+
+  if (twoFactorResponseOk(data)) {
+    return { ok: true, data };
+  }
+
+  return {
+    ok: false,
+    detail: extractTwoFactorDetail(data, response?.status || 0),
+  };
 }
 
 const sendOTP = async (mobile) => {
@@ -227,42 +368,57 @@ const sendOTP = async (mobile) => {
   }
 
   const template = getTwoFactorTemplateName();
-  /** Same shape as original integration: …/SMS/{no}/AUTOGEN/{templateName} */
-  const url = `https://2factor.in/API/V1/${apiKey}/SMS/${phoneKey}/AUTOGEN/${template}`;
 
   try {
-    const response = await axios.get(url, {
-      timeout: 15000,
-      validateStatus: () => true,
-    });
-    const data = response?.data;
-    console.log("[auth] 2factor send response:", {
-      httpStatus: response?.status,
-      data,
-    });
+    /** Prefer custom template when configured; fall back to default AUTOGEN. */
+    const attempts = template ? [template, ""] : [""];
+    let lastDetail = "SMS send failed";
 
-    if (!twoFactorResponseOk(data)) {
-      const detail =
-        (data && (data.Details || data.Message || data.message)) ||
-        (response?.status >= 400 ? `SMS provider HTTP ${response.status}` : null) ||
-        "SMS send failed";
-      throw mapTwoFactorSendFailure(detail);
+    for (let i = 0; i < attempts.length; i += 1) {
+      const attemptTemplate = attempts[i];
+      const result = await requestTwoFactorAutogen(apiKey, phoneKey, attemptTemplate);
+
+      if (result.ok) {
+        const data = result.data;
+        if (data?.Details && String(data.Details) !== "dev-bypass-no-sms") {
+          rememberOtpSession(phoneKey, data.Details);
+        }
+        return data;
+      }
+
+      lastDetail = result.detail || lastDetail;
+
+      // Custom templates are a common break point (unapproved/DLT/name mismatch).
+      // Retry once with default AUTOGEN unless the failure is clearly non-retryable.
+      const canFallback =
+        i < attempts.length - 1 &&
+        Boolean(attemptTemplate) &&
+        !isTwoFactorNonRetryable(lastDetail);
+
+      if (canFallback) {
+        console.warn(
+          "[auth] 2factor templated send failed; retrying without template:",
+          {
+            detail: lastDetail,
+            templateFailed: isTwoFactorTemplateFailure(lastDetail),
+          },
+        );
+        continue;
+      }
+
+      throw mapTwoFactorSendFailure(lastDetail);
     }
 
-    /** AUTOGEN success: Details = session id for SMS/VERIFY (not VERIFY3/phone/otp). */
-    if (data?.Details && String(data.Details) !== "dev-bypass-no-sms") {
-      rememberOtpSession(phoneKey, data.Details);
-    }
-
-    return data;
+    throw mapTwoFactorSendFailure(lastDetail);
   } catch (error) {
     console.error("Error during mobile number authentication:", {
       message: error?.message,
       code: error?.code,
       statusCode: error?.statusCode,
+      providerDetail: error?.providerDetail,
     });
 
-    if (error?.statusCode && error?.code) {
+    if (error?.statusCode && isOtpErrorCode(error?.code)) {
       throw error;
     }
 
@@ -298,6 +454,7 @@ const sendOTP = async (mobile) => {
       "Unable to send OTP right now. Please try again.",
       502,
       "OTP_SEND_FAILED",
+      error?.message,
     );
   }
 };
@@ -435,21 +592,30 @@ export const handleSmsOtp = async (req, res) => {
       message: error?.message,
       code: error?.code,
       statusCode: error?.statusCode,
+      providerDetail: error?.providerDetail,
     });
 
-    const statusCode = Number(error?.statusCode) || 500;
-    const safeMessage =
-      typeof error?.message === "string" && error.message.trim()
-        ? error.message.trim()
-        : "OTP service error";
+    const { statusCode, message, errorCode } = resolveAuthErrorResponse(error);
+    const logMessage = error?.providerDetail
+      ? `${message} | provider: ${error.providerDetail}`
+      : message;
+    const logErr = Object.assign(new Error(logMessage), {
+      stack: error?.stack,
+      code: error?.code,
+      statusCode,
+      providerDetail: error?.providerDetail,
+    });
 
-    logError(error, req, statusCode, "auth.controller - handleSmsOtp");
+    // Expected OTP provider / validation failures — keep in DB, avoid admin spam for 4xx.
+    logError(logErr, req, statusCode, "auth.controller - handleSmsOtp", {
+      skipAdminNotify: statusCode < 500,
+    });
 
     return res.status(statusCode).json({
       success: false,
       Status: "Error",
-      message: safeMessage,
-      ...(error?.code ? { errorCode: error.code } : {}),
+      message,
+      ...(errorCode ? { errorCode } : {}),
     });
   }
 };
@@ -597,41 +763,54 @@ export const handleLogin = async (req, res) => {
       message: error?.message,
       code: error?.code,
       statusCode: error?.statusCode,
+      providerDetail: error?.providerDetail,
       stack: error?.stack,
     });
 
-    const statusCode = Number(error?.statusCode) || 500;
-    const safeMessage =
-      typeof error?.message === "string" &&
-      error.message.trim() &&
-      statusCode < 500
-        ? error.message.trim()
-        : typeof error?.message === "string" &&
-            error.message.trim() &&
-            ["OTP_SEND_FAILED", "OTP_TIMEOUT", "OTP_NETWORK", "OTP_PROVIDER_CREDITS", "OTP_NOT_CONFIGURED"].includes(
-              error?.code,
-            )
-          ? error.message.trim()
-          : "Something went wrong, please try again";
+    const { statusCode, message, errorCode } = resolveAuthErrorResponse(error);
+    const logMessage = error?.providerDetail
+      ? `${message} | provider: ${error.providerDetail}`
+      : message;
+    const logErr = Object.assign(new Error(logMessage), {
+      stack: error?.stack,
+      code: error?.code,
+      statusCode,
+      providerDetail: error?.providerDetail,
+    });
 
-    logError(error, req, statusCode, "auth.controller - handleLogin");
+    // OTP send/verify provider failures are operational — log with real detail.
+    // Skip admin notify for client validation errors (invalid number, rate limit).
+    logError(logErr, req, statusCode, "auth.controller - handleLogin", {
+      skipAdminNotify: statusCode < 500,
+    });
 
     return res.status(statusCode).json({
       success: false,
-      message: safeMessage,
-      ...(error?.code ? { errorCode: error.code } : {}),
+      message,
+      ...(errorCode ? { errorCode } : {}),
     });
   }
 };
 
 export const handleSendEmailVerificationCode = async (req, res) => {
-  const { email } = req.body;
+  const email = normalizeEmailAddress(req.body?.email);
   try {
-    if (!email || typeof email !== "string") {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({
         success: false,
         message: "Invalid email address",
       });
+    }
+
+    const emailUser = String(process.env.EMAIL_USER || "").trim();
+    const emailPass = String(process.env.EMAIL_PASS || "").trim();
+    if (!emailUser || !emailPass) {
+      const configError = new Error(
+        "Email sending is not configured (EMAIL_USER / EMAIL_PASS missing)",
+      );
+      configError.code = "EMAIL_NOT_CONFIGURED";
+      configError.statusCode = 503;
+      throw configError;
     }
 
     const user = await User.findOne({ "email.value": email });
@@ -650,8 +829,8 @@ export const handleSendEmailVerificationCode = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
     });
 
@@ -739,9 +918,13 @@ export const handleSendEmailVerificationCode = async (req, res) => {
 </body>
 </html>`;
 
+    const fromAddress =
+      String(process.env.EMAIL_FROM || "").trim() ||
+      `"Apna Rojgar" <${emailUser}>`;
+
     const mailOptions = {
-      from: '"Abhishek Kumar" <ak7192837@gmail.com>',
-      to: user?.email?.value,
+      from: fromAddress,
+      to: user?.email?.value || email,
       subject: "Your Email Verification Code",
       html: emailBody,
     };
@@ -754,10 +937,30 @@ export const handleSendEmailVerificationCode = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    logError(error, req, 500);
-    res.status(500).json({
+
+    if (isSmtpAuthError(error)) {
+      const authError = new Error(
+        "Email service login failed. Update EMAIL_USER / EMAIL_PASS (Gmail App Password) on the server.",
+      );
+      authError.code = "EMAIL_SMTP_AUTH_FAILED";
+      logError(authError, req, 503);
+      return res.status(503).json({
+        success: false,
+        message:
+          "Unable to send email right now. Please try again later or contact support.",
+        errorCode: "EMAIL_SMTP_AUTH_FAILED",
+      });
+    }
+
+    const statusCode = Number(error?.statusCode) || 500;
+    logError(error, req, statusCode);
+    res.status(statusCode).json({
       success: false,
-      message: "An error occurred while sending the verification code",
+      message:
+        statusCode === 503
+          ? error.message
+          : "An error occurred while sending the verification code",
+      ...(error?.code ? { errorCode: error.code } : {}),
     });
   }
 };

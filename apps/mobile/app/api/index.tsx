@@ -7,8 +7,20 @@ import { router } from "expo-router";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
-import reportError from "@/utils/reportError";
+import reportError, { sanitizeForErrorLog } from "@/utils/reportError";
 import { getApiBaseUrl } from "@/constants/apiBaseUrl";
+
+const parseRequestBodyForLog = (data: unknown) => {
+  if (data == null) return null;
+  if (typeof data === "string") {
+    try {
+      return sanitizeForErrorLog(JSON.parse(data));
+    } catch {
+      return sanitizeForErrorLog(data);
+    }
+  }
+  return sanitizeForErrorLog(data);
+};
 
 const eventEmitter = new EventEmitter();
 const API_BASE_URL = getApiBaseUrl();
@@ -223,10 +235,29 @@ const logout = async () => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response) {
-      const errorMessage = error.response.data.message;
-      const statusText = error.response.data.statusText;
+    const route = String(error.config?.url || "");
+    const method = String(error.config?.method || "get").toUpperCase();
+    const isAuthOtpRoute =
+      route.includes("/auth/login") ||
+      route.includes("/auth/sms-otp") ||
+      route.includes("/auth/register");
+    const requestBody = parseRequestBodyForLog(error.config?.data);
+    const requestUserHint =
+      requestBody && typeof requestBody === "object"
+        ? {
+            mobile:
+              (requestBody as { mobile?: unknown }).mobile != null
+                ? String((requestBody as { mobile?: unknown }).mobile)
+                : null,
+            countryCode:
+              (requestBody as { countryCode?: unknown }).countryCode != null
+                ? String((requestBody as { countryCode?: unknown }).countryCode)
+                : null,
+          }
+        : null;
 
+    if (error.response) {
+      const errorMessage = error.response.data?.message;
       console.log("API Error:", error.response?.data);
 
       if (isAuthApiError(error)) {
@@ -236,23 +267,32 @@ api.interceptors.response.use(
           TOAST.error(t("sessionExpiredPleaseLoginAgain"));
         }
         await logout();
-      } else if (error.response.status >= 500) {
+      } else if (error.response.status >= 500 && !isAuthOtpRoute) {
+        // Auth/OTP 5xx are logged on the backend with provider details — skip CLIENT duplicate.
         const apiMessage =
           typeof errorMessage === "string" && errorMessage.trim()
             ? errorMessage
             : "API server error";
-        const route = String(error.config?.url || "");
-        // Auth/OTP failures are logged on the backend with real provider details.
-        // Avoid duplicate noisy CLIENT reports for login OTP send/verify.
-        const isAuthOtpRoute =
-          route.includes("/auth/login") || route.includes("/auth/sms-otp");
-        if (!isAuthOtpRoute) {
-          void reportError({
-            message: apiMessage,
-            route: route || "mobile-api",
-            statusCode: error.response.status,
-          });
-        }
+        void reportError({
+          message: apiMessage,
+          stack: error?.stack,
+          route: route || "mobile-api",
+          statusCode: error.response.status,
+          errorName: "ApiServerError",
+          errorCode:
+            error.response?.data?.errorCode || error.response?.status || undefined,
+          user: requestUserHint,
+          context: {
+            kind: "api-response",
+            method,
+            url: route,
+            baseURL: error.config?.baseURL || API_BASE_URL,
+            requestBody,
+            responseData: sanitizeForErrorLog(error.response?.data),
+            responseStatus: error.response.status,
+            responseStatusText: error.response.statusText,
+          },
+        });
       }
 
       if (
@@ -265,8 +305,40 @@ api.interceptors.response.use(
       }
     } else if (error.request) {
       console.error("No response received:", error.request);
+      if (!isAuthOtpRoute) {
+        void reportError({
+          message: error?.message || "Network request failed (no response)",
+          stack: error?.stack,
+          route: route || "mobile-api-network",
+          statusCode: 0,
+          errorName: "ApiNetworkError",
+          errorCode: error?.code || "NETWORK_ERROR",
+          user: requestUserHint,
+          context: {
+            kind: "api-network",
+            method,
+            url: route,
+            baseURL: error.config?.baseURL || API_BASE_URL,
+            requestBody,
+            axiosCode: error?.code || null,
+          },
+        });
+      }
     } else {
       console.error("Request error:", error.message);
+      void reportError({
+        message: error?.message || "API request setup failed",
+        stack: error?.stack,
+        route: route || "mobile-api-setup",
+        statusCode: 0,
+        errorName: "ApiRequestSetupError",
+        errorCode: error?.code || undefined,
+        context: {
+          kind: "api-setup",
+          method,
+          url: route,
+        },
+      });
     }
     return Promise.reject(error);
   }

@@ -14,6 +14,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import AUTH from "@/app/api/auth";
 import AddAddressDrawer from "@/app/screens/location/addAddress";
 import { handleCall } from "@/constants/functions";
+import { FEATURE_FLAGS } from "@/constants/featureFlags";
 
 interface UserInfoComponentProps {
   user: any;
@@ -197,7 +198,8 @@ const UserInfoComponent = ({ user, style }: UserInfoComponentProps) => {
             {"  "}
             {user?.email?.value || t("emailNotFound")}{" "}
           </CustomHeading>
-          {user?._id === userDetails?._id &&
+          {FEATURE_FLAGS.EMAIL_VERIFICATION &&
+            user?._id === userDetails?._id &&
             userDetails?.status === "ACTIVE" &&
             user?.email &&
             user?.email?.value &&
@@ -222,22 +224,24 @@ const UserInfoComponent = ({ user, style }: UserInfoComponentProps) => {
         )}
       </View>
 
-      <ModalComponent
-        visible={isModalVisible}
-        content={modalContent}
-        transparent={true}
-        animationType="slide"
-        title={t("verifyEmail")}
-        onClose={() => setModalVisible(false)}
-        primaryButton={{
-          title: t("verify"),
-          action: handleVerifyOtp,
-        }}
-        secondaryButton={{
-          title: t("cancel"),
-          action: () => setModalVisible(false),
-        }}
-      />
+      {FEATURE_FLAGS.EMAIL_VERIFICATION ? (
+        <ModalComponent
+          visible={isModalVisible}
+          content={modalContent}
+          transparent={true}
+          animationType="slide"
+          title={t("verifyEmail")}
+          onClose={() => setModalVisible(false)}
+          primaryButton={{
+            title: t("verify"),
+            action: handleVerifyOtp,
+          }}
+          secondaryButton={{
+            title: t("cancel"),
+            action: () => setModalVisible(false),
+          }}
+        />
+      ) : null}
 
       <AddAddressDrawer
         type="primary"
