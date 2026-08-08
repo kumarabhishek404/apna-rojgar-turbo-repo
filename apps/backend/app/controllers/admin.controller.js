@@ -373,10 +373,28 @@ const CONVERSION_EVENTS = [
   "worker_booking_request_success",
 ];
 
-function parseAnalyticsRange(query) {
+function isAllTimeRange(query) {
+  const range = String(query?.range || "").trim().toLowerCase();
+  const allFlag = String(query?.all || "").trim().toLowerCase();
+  const from = String(query?.from || "").trim().toLowerCase();
+  return range === "all" || allFlag === "true" || allFlag === "1" || from === "all";
+}
+
+async function parseAnalyticsRange(query) {
   const now = new Date();
   const toRaw = query?.to ? new Date(String(query.to)) : now;
   let to = Number.isNaN(toRaw.getTime()) ? now : toRaw;
+
+  if (isAllTimeRange(query)) {
+    const earliest = await AppEvent.findOne({})
+      .sort({ serverTimestamp: 1 })
+      .select("serverTimestamp")
+      .lean();
+    const from = earliest?.serverTimestamp
+      ? new Date(earliest.serverTimestamp)
+      : new Date(to.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return { from, to, all: true };
+  }
 
   let from;
   if (query?.from) {
@@ -394,7 +412,7 @@ function parseAnalyticsRange(query) {
     to = swap;
   }
 
-  return { from, to };
+  return { from, to, all: false };
 }
 
 function categoryForEventName(eventName) {
@@ -429,13 +447,15 @@ function emptyDailyMap(from, to) {
 }
 
 function fillDailySeries(map, eventKeys) {
-  return Array.from(map.values()).map((row) => {
-    const out = { date: row.date };
-    for (const key of eventKeys) {
-      out[key] = Number(row[key] || 0);
-    }
-    return out;
-  });
+  return Array.from(map.values())
+    .map((row) => {
+      const out = { date: row.date };
+      for (const key of eventKeys) {
+        out[key] = Number(row[key] || 0);
+      }
+      return out;
+    })
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
 }
 
 /**
@@ -444,7 +464,7 @@ function fillDailySeries(map, eventKeys) {
  */
 export const getAdminAnalyticsSummary = async (req, res) => {
   try {
-    const { from, to } = parseAnalyticsRange(req.query);
+    const { from, to, all } = await parseAnalyticsRange(req.query);
     const platform = String(req.query.platform || "")
       .trim()
       .toLowerCase();
@@ -646,7 +666,11 @@ export const getAdminAnalyticsSummary = async (req, res) => {
       success: true,
       message: "Admin analytics summary fetched successfully",
       data: {
-        range: { from: from.toISOString(), to: to.toISOString() },
+        range: {
+          from: from.toISOString(),
+          to: to.toISOString(),
+          all: Boolean(all),
+        },
         kpis,
         dailySessions: fillDailySeries(sessionsMap, SESSION_EVENTS),
         dailyViews: fillDailySeries(viewsMap, VIEW_EVENTS),

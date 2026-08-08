@@ -14,6 +14,20 @@ import { notifyMatchedUsersInBackground } from "../../utils/serviceNotificationH
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
+function createHttpError(message, statusCode = 400, code = "BAD_REQUEST") {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  err.code = code;
+  return err;
+}
+
+function getErrorStatusCode(error) {
+  if (Number(error?.statusCode) >= 400) return Number(error.statusCode);
+  if (error?.name === "ValidationError") return 400;
+  if (error?.name === "CastError") return 400;
+  return 500;
+}
+
 export const handleAddService = asyncHandler(async (req, res) => {
   try {
     console.log("Received request body:", req.body);
@@ -26,7 +40,7 @@ export const handleAddService = asyncHandler(async (req, res) => {
 
     const employer = await User.findById(_id);
     if (!employer) {
-      throw new Error("Employer not found");
+      throw createHttpError("Employer not found", 404, "EMPLOYER_NOT_FOUND");
     }
 
     const serviceData = await parseAndValidateRequest(req, employer);
@@ -73,7 +87,10 @@ export const handleAddService = asyncHandler(async (req, res) => {
     notifyMatchedUsersInBackground(service, _id, req);
     processImagesInBackground(service._id, req.files?.images || [], req);
   } catch (error) {
-    await logError(error, req);
+    const statusCode = getErrorStatusCode(error);
+    await logError(error, req, statusCode, "employer.add-service", {
+      skipAdminNotify: statusCode < 500,
+    });
     handleErrorResponse(res, error);
   }
 });
@@ -130,7 +147,10 @@ export const handleUpdateService = async (req, res) => {
       data: updatedService,
     });
   } catch (error) {
-    await logError(error, req);
+    const statusCode = getErrorStatusCode(error);
+    await logError(error, req, statusCode, "employer.update-service", {
+      skipAdminNotify: statusCode < 500,
+    });
     handleErrorResponse(res, error);
   }
 };
@@ -158,7 +178,7 @@ const parseAndValidateRequest = async (req, employerDoc = null) => {
       !duration ||
       !bookingType
     ) {
-      throw new Error("Missing required fields");
+      throw createHttpError("Missing required fields", 400, "MISSING_FIELDS");
     }
 
     // ✅ Parse geoLocation
@@ -203,7 +223,7 @@ const parseAndValidateRequest = async (req, employerDoc = null) => {
       description,
       startDate: new Date(startDate),
       address,
-      requirements: parseRequirements(requirements),
+      requirements: parseAndNormalizeRequirements(requirements),
       facilities: parseFacilities(facilities),
       duration: Number(duration),
       bookingType: String(bookingType),
@@ -217,20 +237,91 @@ const parseAndValidateRequest = async (req, employerDoc = null) => {
 
     return result;
   } catch (error) {
-    await logError(error, req);
+    // Caller logs once — avoid double ErrorLog entries for the same request.
     throw error;
   }
 };
 
-const parseRequirements = (requirements) => {
+/** Daily wage must be at least this amount (₹). */
+const MIN_PAY_PER_DAY = 500;
+
+/**
+ * Parse requirements JSON and reject null/NaN/missing payPerDay before Mongoose.
+ * Empty pay was arriving as null (JSON.stringify(NaN)) and causing 500 ValidationError spam.
+ */
+const parseAndNormalizeRequirements = (requirements) => {
+  let parsed;
   try {
-    return Array.isArray(requirements)
+    parsed = Array.isArray(requirements)
       ? requirements
       : JSON.parse(requirements);
   } catch (error) {
     console.error("Error parsing requirements:", error);
-    throw new Error("Invalid requirements format");
+    throw createHttpError(
+      "Invalid requirements format",
+      400,
+      "INVALID_REQUIREMENTS",
+    );
   }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw createHttpError(
+      "At least one worker requirement is required",
+      400,
+      "REQUIREMENTS_REQUIRED",
+    );
+  }
+
+  return parsed.map((item, index) => {
+    const name = String(item?.name || "").trim();
+    const count = Number(item?.count);
+    const rawPay = item?.payPerDay;
+    const payPerDay =
+      rawPay == null || rawPay === ""
+        ? NaN
+        : typeof rawPay === "number"
+          ? rawPay
+          : Number(String(rawPay).trim());
+
+    if (!name) {
+      throw createHttpError(
+        `Requirement #${index + 1}: worker type is required`,
+        400,
+        "REQUIREMENT_NAME_REQUIRED",
+      );
+    }
+    if (!Number.isFinite(count) || count < 1) {
+      throw createHttpError(
+        `Requirement #${index + 1}: worker count must be at least 1`,
+        400,
+        "REQUIREMENT_COUNT_INVALID",
+      );
+    }
+    if (!Number.isFinite(payPerDay)) {
+      throw createHttpError(
+        `Requirement #${index + 1}: pay per day is required`,
+        400,
+        "PAY_PER_DAY_REQUIRED",
+      );
+    }
+    if (payPerDay < MIN_PAY_PER_DAY) {
+      throw createHttpError(
+        `Requirement #${index + 1}: pay per day must be at least ₹${MIN_PAY_PER_DAY}`,
+        400,
+        "PAY_PER_DAY_TOO_LOW",
+      );
+    }
+
+    return {
+      name,
+      count,
+      payPerDay,
+      food: Boolean(item?.food),
+      living: Boolean(item?.living),
+      pf: Boolean(item?.pf),
+      insurance: Boolean(item?.insurance),
+    };
+  });
 };
 
 const parseFacilities = (facilities) => {
@@ -238,7 +329,11 @@ const parseFacilities = (facilities) => {
     return typeof facilities === "string" ? JSON.parse(facilities) : facilities;
   } catch (error) {
     console.error("Error parsing facilities:", error);
-    throw new Error("Invalid facilities format");
+    throw createHttpError(
+      "Invalid facilities format",
+      400,
+      "INVALID_FACILITIES",
+    );
   }
 };
 
@@ -339,11 +434,19 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 const getServiceById = async (serviceId, employerId) =>
   Service.findOne({ _id: serviceId, employer: employerId });
 
-const handleErrorResponse = (res, error) =>
-  res.status(500).json({
+const handleErrorResponse = (res, error) => {
+  const statusCode = getErrorStatusCode(error);
+  const message =
+    error?.name === "ValidationError"
+      ? error.message || "Invalid service data"
+      : error?.message || "Something went wrong";
+
+  return res.status(statusCode).json({
     success: false,
-    message: error?.message || "Something went wrong",
+    message,
+    ...(error?.code ? { errorCode: error.code } : {}),
   });
+};
 
 const safeParseJSON = (data) => {
   try {

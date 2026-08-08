@@ -35,6 +35,10 @@ import PromotionChoiceModal from "@/components/commons/PromotionChoiceModal";
 import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
 import PAYMENT from "@/app/api/payment";
 import { buildServiceImageUploadParts } from "@/utils/serviceImageUpload";
+import {
+  getRequirementsValidationError,
+  normalizeRequirements,
+} from "@/utils/serviceRequirements";
 
 const AddServiceScreen = () => {
   const queryClient = useQueryClient();
@@ -282,6 +286,13 @@ const AddServiceScreen = () => {
       throw new Error("Required fields are missing");
     }
 
+    const requirementsError = getRequirementsValidationError(requirements);
+    if (requirementsError) {
+      TOAST.error(t(requirementsError));
+      throw new Error(t(requirementsError));
+    }
+    const safeRequirements = normalizeRequirements(requirements);
+
     const imageParts = await buildServiceImageUploadParts(images);
     const finalLocation = await ensureLocation(location, address);
 
@@ -294,7 +305,7 @@ const AddServiceScreen = () => {
       startDate: moment(startDate).format("YYYY-MM-DD"),
       duration: String(duration),
       bookingType: "byService",
-      requirements: JSON.stringify(requirements),
+      requirements: JSON.stringify(safeRequirements),
       facilities: JSON.stringify(facilities),
       promoteSocialMedia: String(promotionChoiceRef.current.promoteSocialMedia),
       ...(promotionChoiceRef.current.promotionOrderId

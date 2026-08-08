@@ -459,6 +459,28 @@ const sendOTP = async (mobile) => {
   }
 };
 
+function isInvalidOrExpiredOtpDetail(detail) {
+  const lower = String(detail || "").toLowerCase();
+  if (!lower) return false;
+  return (
+    lower.includes("otp") ||
+    lower.includes("code") ||
+    lower.includes("session") ||
+    lower.includes("invalid") ||
+    lower.includes("expire") ||
+    lower.includes("mismatch") ||
+    lower.includes("not match") ||
+    lower.includes("incorrect") ||
+    lower.includes("already verified") ||
+    lower.includes("no session")
+  );
+}
+
+/**
+ * Verify OTP with 2factor. Expected failures (wrong/expired OTP) return
+ * `{ Status: "Error" }` so login responds 400 — not OTP_VERIFY_FAILED 502.
+ * Only network/timeouts/true provider outages throw.
+ */
 const verifyOTP = async (payload) => {
   const otp = payload?.otp != null ? String(payload.otp).trim() : "";
   const phoneKey = normalizePhoneForTwoFactor(payload?.mobile);
@@ -477,7 +499,19 @@ const verifyOTP = async (payload) => {
     return { Status: "Error", Details: "Missing mobile or OTP" };
   }
 
+  if (!DEV_OTP_PATTERN.test(otp)) {
+    return { Status: "Error", Details: "OTP must be exactly 6 digits" };
+  }
+
   const apiKey = getTwoFactorApiKey();
+  if (!apiKey) {
+    throw createAuthError(
+      "OTP service is not configured. Please try again later.",
+      503,
+      "OTP_NOT_CONFIGURED",
+    );
+  }
+
   const explicitSession =
     payload?.otpSessionId != null && String(payload.otpSessionId).trim()
       ? String(payload.otpSessionId).trim()
@@ -486,38 +520,75 @@ const verifyOTP = async (payload) => {
 
   try {
     let data;
+    let httpStatus = 0;
 
     if (sessionId) {
       /** Official 2factor flow after AUTOGEN (session id from send response Details) */
-      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY/${sessionId}/${otp}`;
-      const response = await axios.get(url, { timeout: 15000 });
+      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY/${encodeURIComponent(sessionId)}/${encodeURIComponent(otp)}`;
+      const response = await axios.get(url, {
+        timeout: 15000,
+        validateStatus: () => true,
+      });
+      httpStatus = response?.status || 0;
       data = response?.data;
-      console.log("[auth] 2factor VERIFY (session) response:", data);
+      console.log("[auth] 2factor VERIFY (session) response:", {
+        httpStatus,
+        data,
+      });
     } else {
       /**
        * Legacy fallback: VERIFY3 with phone + OTP (older code path).
        * Uses same normalized key as AUTOGEN send when possible.
        */
-      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY3/${phoneKey}/${otp}`;
-      const response = await axios.get(url, { timeout: 15000 });
+      const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY3/${encodeURIComponent(phoneKey)}/${encodeURIComponent(otp)}`;
+      const response = await axios.get(url, {
+        timeout: 15000,
+        validateStatus: () => true,
+      });
+      httpStatus = response?.status || 0;
       data = response?.data;
-      console.warn("[auth] 2factor VERIFY3 (legacy, no session) response:", data);
+      console.warn("[auth] 2factor VERIFY3 (legacy, no session) response:", {
+        httpStatus,
+        data,
+      });
     }
 
-    if (!twoFactorResponseOk(data)) {
+    if (twoFactorResponseOk(data)) {
+      clearOtpSession(phoneKey);
+      return data;
+    }
+
+    const detail = extractTwoFactorDetail(data, httpStatus);
+
+    // Wrong OTP / expired session / client mistakes → soft failure (HTTP 400 upstream).
+    // Do NOT throw OTP_VERIFY_FAILED — that was flooding ErrorLog as 502.
+    if (
+      httpStatus < 500 ||
+      isInvalidOrExpiredOtpDetail(detail) ||
+      !detail ||
+      detail.startsWith("SMS provider HTTP 4")
+    ) {
       return {
         Status: "Error",
-        Details:
-          (data && (data.Details || data.Message)) || "Invalid or expired OTP",
+        Details: detail || "Invalid or expired OTP",
       };
     }
 
-    clearOtpSession(phoneKey);
-    return data;
+    throw createAuthError(
+      "Unable to verify OTP right now. Please try again.",
+      502,
+      "OTP_VERIFY_FAILED",
+      detail,
+    );
   } catch (error) {
+    if (error?.statusCode && isOtpErrorCode(error?.code)) {
+      throw error;
+    }
+
     console.error("Error verifying OTP code:", {
       message: error?.message,
       code: error?.code,
+      statusCode: error?.statusCode,
     });
 
     if (error?.code === "ECONNABORTED" || error?.code === "ETIMEDOUT") {
@@ -528,10 +599,23 @@ const verifyOTP = async (payload) => {
       );
     }
 
+    if (
+      error?.code === "ENOTFOUND" ||
+      error?.code === "ECONNREFUSED" ||
+      error?.code === "EAI_AGAIN"
+    ) {
+      throw createAuthError(
+        "Unable to reach OTP service. Please try again.",
+        502,
+        "OTP_NETWORK",
+      );
+    }
+
     throw createAuthError(
       "Unable to verify OTP right now. Please try again.",
       502,
       "OTP_VERIFY_FAILED",
+      error?.message,
     );
   }
 };
@@ -576,9 +660,10 @@ export const handleSmsOtp = async (req, res) => {
       return res.status(400).json({
         success: false,
         Status: "Error",
+        errorCode: "OTP_INVALID",
         message: isDevOtpBypassEnabled()
           ? "Dev mode: OTP must be exactly 6 digits."
-          : "Invalid or expired OTP",
+          : "Invalid or expired OTP. Please try again.",
       });
     }
 
@@ -606,9 +691,9 @@ export const handleSmsOtp = async (req, res) => {
       providerDetail: error?.providerDetail,
     });
 
-    // Expected OTP provider / validation failures — keep in DB, avoid admin spam for 4xx.
+    // OTP provider noise — log for ops but don't page admin for every failed verify/send.
     logError(logErr, req, statusCode, "auth.controller - handleSmsOtp", {
-      skipAdminNotify: statusCode < 500,
+      skipAdminNotify: statusCode < 500 || isOtpErrorCode(error?.code),
     });
 
     return res.status(statusCode).json({
@@ -665,11 +750,13 @@ export const handleLogin = async (req, res) => {
     const otpResponse = await verifyOTP({ mobile, otp, otpSessionId });
 
     if (otpResponse?.Status !== "Success") {
+      // Expected client failure (wrong/expired OTP) — do not create ErrorLog spam.
       return res.status(400).json({
         success: false,
+        errorCode: "OTP_INVALID",
         message: isDevOtpBypassEnabled()
           ? "Dev mode: OTP must be exactly 6 digits."
-          : "Invalid or expired OTP",
+          : "Invalid or expired OTP. Please try again.",
       });
     }
 
@@ -778,10 +865,9 @@ export const handleLogin = async (req, res) => {
       providerDetail: error?.providerDetail,
     });
 
-    // OTP send/verify provider failures are operational — log with real detail.
-    // Skip admin notify for client validation errors (invalid number, rate limit).
+    // OTP send/verify noise — keep ErrorLog for debugging, skip admin notify spam.
     logError(logErr, req, statusCode, "auth.controller - handleLogin", {
-      skipAdminNotify: statusCode < 500,
+      skipAdminNotify: statusCode < 500 || isOtpErrorCode(error?.code),
     });
 
     return res.status(statusCode).json({

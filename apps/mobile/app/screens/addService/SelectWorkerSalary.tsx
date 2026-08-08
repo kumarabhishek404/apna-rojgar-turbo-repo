@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { t } from "@/utils/translationHelper";
 import ButtonComp from "@/components/inputs/Button";
 import WorkerRequirementSelector from "@/components/inputs/WorkRequirements";
 import Colors from "@/constants/Colors";
+import TOAST from "@/app/hooks/toast";
+import {
+  getRequirementsValidationError,
+  normalizeRequirements,
+} from "@/utils/serviceRequirements";
 
 interface Props {
   type: string;
@@ -21,14 +26,17 @@ export default function AddRequirementsStep({
   onBack,
   onNext,
 }: Props) {
-  const [errorField, setErrorField] = useState({});
-
   const { control, watch, handleSubmit } = useForm({
     defaultValues: { requirements: defaultRequirements },
   });
 
   const submit = (data: any) => {
-    onNext(data.requirements);
+    const errorKey = getRequirementsValidationError(data.requirements);
+    if (errorKey) {
+      TOAST.error(t(errorKey));
+      return;
+    }
+    onNext(normalizeRequirements(data.requirements));
   };
 
   return (

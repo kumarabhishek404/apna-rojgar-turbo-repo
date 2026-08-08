@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import Counter from "@/components/inputs/Counter";
-import Colors from "@/constants/Colors";
 import Button from "@/components/inputs/Button";
 import { filterWorkerTypes } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 import TextInputComponent from "./TextInputWithIcon";
 import { getDynamicWorkerType } from "@/utils/i18n";
+import {
+  MIN_PAY_PER_DAY,
+  parsePayPerDay,
+} from "@/utils/serviceRequirements";
+import TOAST from "@/app/hooks/toast";
 
 interface Props {
   type: string;
@@ -24,7 +28,6 @@ export default function WorkerRequirementSelector({
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [count, setCount] = useState(1);
   const [price, setPrice] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const workerTypes = filterWorkerTypes(type, subType) || [];
 
@@ -36,34 +39,44 @@ export default function WorkerRequirementSelector({
   const openPopup = (worker: any) => {
     setSelectedWorker(worker);
     setCount(1);
-    setPrice("0");
+    setPrice("");
   };
 
   const saveWorker = () => {
+    const payPerDay = parsePayPerDay(price);
+    if (payPerDay == null) {
+      TOAST.error(t("payPerDayIsRequired"));
+      return;
+    }
+    if (payPerDay < MIN_PAY_PER_DAY) {
+      TOAST.error(t("payPerDayMustBeAtLeast500"));
+      return;
+    }
+    if (!Number.isFinite(count) || count < 1) {
+      TOAST.error(t("totalRequiredMustBeGreaterThan0"));
+      return;
+    }
+
     const newData = [
-      ...value,
+      ...(Array.isArray(value) ? value : []),
       {
         name: selectedWorker.value,
         count,
-        payPerDay: parseInt(price),
+        payPerDay,
       },
     ];
     onChange(newData);
     setSelectedWorker(null);
-  };
-
-  const removeWorker = (name: string) => {
-    onChange(value.filter((v) => v.name !== name));
+    setPrice("");
   };
 
   const sentence = (item: any) =>
-    `${item.count} ${getDynamicWorkerType(item?.name, item.count)} ${t("workersNeeded")} ${item.payPerDay ? `₹${item.payPerDay}` : ""} ${
-      item.payPerDay ? t("perDay") : ""
-    }`;
+    `${item.count} ${getDynamicWorkerType(item?.name, item.count)} ${t("workersNeeded")} ${
+      item.payPerDay ? `₹${item.payPerDay}` : ""
+    } ${item.payPerDay ? t("perDay") : ""}`;
 
   return (
     <View style={{ gap: 18 }}>
-      {/* ✅ Selected Workers */}
       {value?.length > 0 && (
         <View>
           <Text style={styles.heading}>{t("selectedWorkers")}</Text>
@@ -81,7 +94,6 @@ export default function WorkerRequirementSelector({
         </View>
       )}
 
-      {/* ✅ Available Workers */}
       <Text style={styles.heading}>{t("tapToAddWorkers")}</Text>
 
       <View style={styles.grid}>
@@ -96,7 +108,6 @@ export default function WorkerRequirementSelector({
         ))}
       </View>
 
-      {/* ✅ POPUP */}
       <Modal visible={!!selectedWorker} transparent animationType="slide">
         <View style={styles.modalBg}>
           <View style={styles.modalBox}>
@@ -110,7 +121,7 @@ export default function WorkerRequirementSelector({
               name="payPerDay"
               label="pricePerDay"
               value={price}
-              placeholder={t("enterPayPerDay")}
+              placeholder={t("enterPayPerDayMin500")}
               type="number"
               onChangeText={setPrice}
               style={{ marginVertical: 30 }}
@@ -135,6 +146,10 @@ export default function WorkerRequirementSelector({
       </Modal>
     </View>
   );
+
+  function removeWorker(name: string) {
+    onChange(value.filter((v) => v.name !== name));
+  }
 }
 
 const styles = StyleSheet.create({

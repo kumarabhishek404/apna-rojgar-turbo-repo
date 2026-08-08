@@ -157,10 +157,16 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       return false;
     }
     const invalidRequirement = createForm.requirements.find(
-      (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
+      (req) =>
+        !req.name ||
+        req.count < 1 ||
+        !req.payPerDay ||
+        Number(req.payPerDay) <= 500,
     );
     if (invalidRequirement) {
-      setCreateIssue("Please complete requirement details (worker, count and pay/day).");
+      setCreateIssue(
+        "Please complete requirement details (worker, count, and pay/day more than ₹500).",
+      );
       return false;
     }
     return true;
@@ -205,10 +211,14 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
     if (
       createStep === 2 &&
       createForm.requirements.some(
-        (req) => !req.name || req.count < 1 || !req.payPerDay || Number(req.payPerDay) <= 0,
+        (req) =>
+          !req.name ||
+          req.count < 1 ||
+          !req.payPerDay ||
+          Number(req.payPerDay) <= 500,
       )
     ) {
-      setCreateIssue("Complete requirement details first.");
+      setCreateIssue("Pay per day must be more than ₹500 for each worker.");
       return;
     }
     if (
@@ -512,7 +522,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                   />
                   <input
                     type="number"
-                    min={1}
+                    min={501}
                     className={fieldClass}
                     value={req.payPerDay}
                     onChange={(e) =>
@@ -522,7 +532,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                         return { ...p, requirements };
                       })
                     }
-                    placeholder={t("pricePerDay")}
+                    placeholder="Pay/day (more than ₹500)"
                   />
                 </div>
               ))}

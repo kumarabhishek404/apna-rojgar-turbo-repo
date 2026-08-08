@@ -26,7 +26,7 @@ export type HeatmapSeries = {
 };
 
 export type AnalyticsSummaryData = {
-  range: { from: string; to: string };
+  range: { from: string; to: string; all?: boolean };
   kpis: AnalyticsKpis;
   dailySessions: DailyPoint[];
   dailyViews: DailyPoint[];

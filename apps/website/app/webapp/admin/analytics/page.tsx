@@ -23,12 +23,17 @@ type AppEvent = {
   userId?: { name?: string; mobile?: string };
 };
 
-type RangePreset = 7 | 30 | 90;
+type RangePreset = 7 | 30 | 90 | "all";
 
-function rangeFromPreset(days: RangePreset) {
-  const to = new Date();
-  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
-  return { from: from.toISOString(), to: to.toISOString() };
+function rangeFromPreset(preset: RangePreset) {
+  const to = new Date().toISOString();
+  if (preset === "all") {
+    return { all: true as const, from: null as string | null, to };
+  }
+  const from = new Date(
+    Date.now() - preset * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  return { all: false as const, from, to };
 }
 
 export default function AdminAnalyticsPage() {
@@ -64,8 +69,12 @@ export default function AdminAnalyticsPage() {
     setSummaryLoading(true);
     setSummaryError("");
     const params = new URLSearchParams();
-    params.set("from", chartRange.from);
     params.set("to", chartRange.to);
+    if (chartRange.all) {
+      params.set("range", "all");
+    } else if (chartRange.from) {
+      params.set("from", chartRange.from);
+    }
     if (platform !== "ALL") params.set("platform", platform.toLowerCase());
 
     apiRequest<{ data?: AnalyticsSummaryData }>(
@@ -78,7 +87,7 @@ export default function AdminAnalyticsPage() {
         ),
       )
       .finally(() => setSummaryLoading(false));
-  }, [access, chartRange.from, chartRange.to, platform]);
+  }, [access, chartRange.all, chartRange.from, chartRange.to, platform]);
 
   useEffect(() => {
     if (access !== "allowed") return;
@@ -145,18 +154,18 @@ export default function AdminAnalyticsPage() {
               Date range
             </label>
             <div className="flex gap-2">
-              {([7, 30, 90] as RangePreset[]).map((days) => (
+              {([7, 30, 90, "all"] as RangePreset[]).map((preset) => (
                 <button
-                  key={days}
+                  key={String(preset)}
                   type="button"
-                  onClick={() => setRangeDays(days)}
-                  className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition ${
-                    rangeDays === days
+                  onClick={() => setRangeDays(preset)}
+                  className={`min-w-[3.25rem] rounded-xl px-3 py-2 text-sm font-medium transition ${
+                    rangeDays === preset
                       ? "bg-[#22409a] text-white"
                       : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
                   }`}
                 >
-                  {days}d
+                  {preset === "all" ? "All" : `${preset}d`}
                 </button>
               ))}
             </div>
