@@ -4,6 +4,14 @@ import db from "../models/index.js";
 import User from "../models/user.model.js";
 import { getNotificationMessage } from "../utils/notificationHelper.js";
 import logError from "../utils/addErrorLog.js";
+import NotificationMetric from "../models/notificationMetric.model.js";
+import {
+  buildNotificationDedupKey,
+  enrichNotificationData,
+  getIstDayStart,
+  getNotificationPolicy,
+  getQuietHoursState,
+} from "../utils/notificationPolicy.js";
 
 let expo = new Expo();
 const Device = db.device;
@@ -14,6 +22,82 @@ const isProd = process.env.NODE_ENV === "production";
  * Local/dev sessions must never send notifications to real users.
  */
 const canDeliverNotifications = () => isProd;
+
+const recordNotificationMetric = async (metric) => {
+  try {
+    await NotificationMetric.create(metric);
+  } catch (error) {
+    console.error("[Notification Metric] Failed to record metric:", error);
+  }
+};
+
+const getValidDevices = async (userId) => {
+  const devices = await Device.find({ userId, isActive: true });
+  return devices.filter((device) => Expo.isExpoPushToken(device.pushToken));
+};
+
+const deliverStoredNotification = async (notification, devices) => {
+  const messages = devices.map((device) => ({
+    to: device.pushToken,
+    sound: notification.priority === "LOW" ? undefined : "default",
+    title: notification.title,
+    body: notification.body,
+    data: {
+      ...(notification.data?.toObject?.() || notification.data || {}),
+      notificationId: String(notification._id),
+    },
+    priority:
+      notification.priority === "URGENT" || notification.priority === "HIGH"
+        ? "high"
+        : "default",
+  }));
+
+  if (messages.length === 0) {
+    notification.status = "FAILED";
+    notification.failureReason = "NO_VALID_PUSH_TOKEN";
+    notification.deliveryAttempts += 1;
+    await notification.save();
+    return { success: false, message: "No valid Expo push tokens found" };
+  }
+
+  const tickets = [];
+  try {
+    for (const chunk of expo.chunkPushNotifications(messages)) {
+      const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+      tickets.push(...ticketChunk);
+    }
+  } catch (error) {
+    notification.status = "FAILED";
+    notification.failureReason = error?.message || "EXPO_SEND_FAILED";
+    notification.deliveryAttempts += 1;
+    await notification.save();
+    return { success: false, message: notification.failureReason };
+  }
+
+  const successfulTickets = tickets.filter((ticket) => ticket.status === "ok");
+  notification.providerTickets = tickets;
+  notification.deliveryAttempts += 1;
+  notification.sentAt = new Date();
+  notification.scheduledFor = null;
+
+  if (successfulTickets.length === 0) {
+    notification.status = "FAILED";
+    notification.failureReason =
+      tickets.find((ticket) => ticket.message)?.message ||
+      "EXPO_PROVIDER_REJECTED";
+    await notification.save();
+    return { success: false, message: notification.failureReason };
+  }
+
+  notification.status = "SENT";
+  notification.failureReason = "";
+  await notification.save();
+  return {
+    success: true,
+    message: "Notification sent successfully",
+    tickets,
+  };
+};
 
 const sendBatchNotifications = async (userIds, messageData, req) => {
   try {
@@ -187,11 +271,11 @@ export const handleRegisterDeviceController = async (req, res) => {
  */
 export const handleSendNotificationController = async (
   userId,
-  // category = null,
   key,
   params = {},
   data = {},
-  req
+  req,
+  options = {},
 ) => {
   try {
     if (!canDeliverNotifications()) {
@@ -204,9 +288,20 @@ export const handleSendNotificationController = async (
       };
     }
 
-    // Fetch user details including notificationConsent
+    const policy = getNotificationPolicy(key);
+    const enrichedData = enrichNotificationData(data);
+    const dedupKey =
+      options.dedupKey || buildNotificationDedupKey(key, enrichedData);
+    const metricBase = {
+      userId,
+      notificationType: key,
+      category: policy.category,
+      dedupKey,
+      source: options.source || "EVENT",
+    };
+
     const user = await User.findById(userId).select(
-      "locale.language status notificationConsent"
+      "locale.language status notificationConsent",
     );
 
     if (!user) {
@@ -218,72 +313,237 @@ export const handleSendNotificationController = async (
       console.log(
         `Skipping notification: User ${userId} is either inactive or has disabled notifications.`
       );
+      await recordNotificationMetric({
+        ...metricBase,
+        event: "SKIPPED",
+        reason:
+          user.status !== "ACTIVE" ? "USER_INACTIVE" : "CONSENT_DISABLED",
+      });
       return {
         success: false,
         message: "User is inactive or has disabled notifications",
       };
     }
 
-    console.log('user---', user);
-    
-
     const language = user?.locale?.language || "hi";
-
-    // Fetch active devices of the user
-    const devices = await Device.find({ userId, isActive: true });
+    const devices = await getValidDevices(userId);
 
     if (devices.length === 0) {
       console.log(`No active devices found for user ${userId}.`);
+      await recordNotificationMetric({
+        ...metricBase,
+        event: "SKIPPED",
+        reason: "NO_VALID_PUSH_TOKEN",
+      });
       return {
         success: false,
         message: "No active devices found",
       };
     }
 
-    // Get localized message
+    if (policy.cooldownHours > 0) {
+      const cooldownBoundary = new Date(
+        Date.now() - policy.cooldownHours * 60 * 60 * 1000,
+      );
+      const existing = await Notification.exists({
+        userId,
+        dedupKey,
+        status: { $in: ["PENDING", "SENT"] },
+        createdAt: { $gte: cooldownBoundary },
+      });
+      if (existing) {
+        await recordNotificationMetric({
+          ...metricBase,
+          event: "SKIPPED",
+          reason: "COOLDOWN_DUPLICATE",
+        });
+        return {
+          success: false,
+          skipped: true,
+          reason: "COOLDOWN",
+          message: "Notification skipped by cooldown policy",
+        };
+      }
+    }
+
+    if (policy.dailyCap > 0) {
+      const sentToday = await Notification.countDocuments({
+        userId,
+        category: policy.category,
+        status: "SENT",
+        createdAt: { $gte: getIstDayStart() },
+      });
+      if (sentToday >= policy.dailyCap) {
+        await recordNotificationMetric({
+          ...metricBase,
+          event: "SKIPPED",
+          reason: "DAILY_CAP",
+        });
+        return {
+          success: false,
+          skipped: true,
+          reason: "DAILY_CAP",
+          message: "Notification skipped by daily cap",
+        };
+      }
+    }
+
     const localizedMessage = getNotificationMessage(key, language, {
       appName: "KAARYA",
       ...params,
     });
 
-    // Save notification in the database
+    if (!localizedMessage?.title || !localizedMessage?.message) {
+      await recordNotificationMetric({
+        ...metricBase,
+        event: "SKIPPED",
+        reason: "MISSING_TEMPLATE",
+      });
+      return {
+        success: false,
+        skipped: true,
+        reason: "MISSING_TEMPLATE",
+        message: `Missing notification template for ${key}`,
+      };
+    }
+
+    const quietHours = policy.respectQuietHours
+      ? getQuietHoursState()
+      : { isQuiet: false, scheduledFor: null };
+    const digestScheduledFor =
+      policy.digestWindowMinutes > 0
+        ? new Date(Date.now() + policy.digestWindowMinutes * 60 * 1000)
+        : null;
+    const scheduledFor = quietHours.scheduledFor || digestScheduledFor;
+
+    if (policy.digestWindowMinutes > 0) {
+      const pendingDigest = await Notification.findOne({
+        userId,
+        category: policy.category,
+        type: key,
+        status: "PENDING",
+        scheduledFor: { $ne: null },
+      }).sort({ createdAt: -1 });
+
+      if (pendingDigest) {
+        const serviceIds = new Set(
+          (pendingDigest.data?.serviceIds || []).map(String),
+        );
+        if (enrichedData.serviceId) {
+          serviceIds.add(String(enrichedData.serviceId));
+          pendingDigest.data.serviceId = enrichedData.serviceId;
+          pendingDigest.data.id = String(enrichedData.serviceId);
+          pendingDigest.data.url = enrichedData.url;
+        }
+        pendingDigest.data.serviceIds = [...serviceIds];
+        pendingDigest.title = localizedMessage.title;
+        pendingDigest.body = localizedMessage.message;
+        await pendingDigest.save();
+
+        return {
+          success: true,
+          queued: true,
+          merged: true,
+          message: "Notification merged into discovery digest",
+          scheduledFor: pendingDigest.scheduledFor,
+        };
+      }
+    }
+
     const notification = await Notification.create({
       userId,
-      // category: category,
+      category: policy.category,
+      priority: policy.priority,
       type: key,
       title: localizedMessage?.title,
       body: localizedMessage?.message,
-      data,
+      data: {
+        ...enrichedData,
+        serviceIds: enrichedData.serviceId ? [enrichedData.serviceId] : [],
+      },
+      dedupKey,
       status: "PENDING",
+      scheduledFor,
+      source: options.source || "EVENT",
     });
 
-    // Prepare push notification messages
-    const messages = devices.map((device) => ({
-      to: device.pushToken,
-      title: localizedMessage?.title,
-      body: localizedMessage?.message,
-      data,
-    }));
-
-    // Send notifications in chunks
-    const chunks = expo.chunkPushNotifications(messages);
-    const tickets = [];
-
-    for (let chunk of chunks) {
-      const ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-      tickets.push(...ticketChunk);
+    if (scheduledFor) {
+      return {
+        success: true,
+        queued: true,
+        message: quietHours.isQuiet
+          ? "Notification queued until quiet hours end"
+          : "Notification queued for discovery digest",
+        scheduledFor,
+      };
     }
 
-    // Update notification status
-    notification.status = "SENT";
-    await notification.save();
-
-    console.log(`Notification sent successfully to user ${userId}.`);
-    return { success: true, message: "Notification sent successfully" };
+    return await deliverStoredNotification(notification, devices);
   } catch (error) {
     logError(error, req, 500);
     throw new Error("Failed to send notification");
   }
+};
+
+/**
+ * Deliver non-critical notifications deferred by quiet-hours policy.
+ */
+export const processQueuedNotifications = async (limit = 100) => {
+  if (!canDeliverNotifications()) {
+    return { processed: 0, sent: 0, failed: 0, skipped: 0 };
+  }
+
+  const queued = await Notification.find({
+    status: "PENDING",
+    scheduledFor: { $ne: null, $lte: new Date() },
+    deliveryAttempts: { $lt: 3 },
+  })
+    .sort({ scheduledFor: 1 })
+    .limit(limit);
+
+  const summary = { processed: queued.length, sent: 0, failed: 0, skipped: 0 };
+
+  for (const notification of queued) {
+    try {
+      const user = await User.findById(notification.userId).select(
+        "status notificationConsent",
+      );
+      if (
+        !user ||
+        user.status !== "ACTIVE" ||
+        user.notificationConsent !== true
+      ) {
+        notification.status = "FAILED";
+        notification.failureReason = "USER_INELIGIBLE";
+        notification.deliveryAttempts += 1;
+        await notification.save();
+        summary.skipped += 1;
+        continue;
+      }
+
+      const devices = await getValidDevices(notification.userId);
+      const result = await deliverStoredNotification(notification, devices);
+      if (result.success) {
+        summary.sent += 1;
+      } else {
+        summary.failed += 1;
+      }
+    } catch (error) {
+      notification.deliveryAttempts += 1;
+      notification.failureReason = error?.message || "DEFERRED_SEND_FAILED";
+      if (notification.deliveryAttempts >= 3) {
+        notification.status = "FAILED";
+        notification.scheduledFor = null;
+      } else {
+        notification.scheduledFor = new Date(Date.now() + 60 * 60 * 1000);
+      }
+      await notification.save();
+      summary.failed += 1;
+      logError(error, null, 500, "cronJob - processQueuedNotifications");
+    }
+  }
+
+  return summary;
 };
 
 export const handlebroadcastNotificationController = async (
@@ -339,7 +599,7 @@ export const handlebroadcastNotificationController = async (
     );
 
     // Send batch notifications
-    return await sendBatchNotifications(devices, message, req);
+    return await sendBatchNotifications(consentedUserIds, message, req);
   } catch (error) {
     logError(error, req, 500);
     throw new Error("Failed to broadcast notification");
@@ -351,14 +611,20 @@ export const getUserNotifications = async (req, res) => {
     const { _id } = req.user;
     const { page = 1, limit = 10 } = req.query;
 
-    const notifications = await Notification.find({ userId: _id })
+    const notifications = await Notification.find({
+      userId: _id,
+      status: "SENT",
+    })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(Number(limit))
       .populate("data.actionBy", "name profilePicture email mobile")
       .populate("data.actionOn", "name profilePicture email mobile");
 
-    const total = await Notification.countDocuments({ userId: _id });
+    const total = await Notification.countDocuments({
+      userId: _id,
+      status: "SENT",
+    });
 
     res.status(200).json({
       success: true,
@@ -384,19 +650,16 @@ export const getUnreadNotificationCount = async (req, res) => {
   try {
     const { _id } = req.user;
 
-    // ✅ Fetch unread notifications for the user
-    const unreadNotifications = await Notification.find({
+    const unreadCount = await Notification.countDocuments({
       userId: _id,
+      status: "SENT",
       read: false,
-    }).sort({ createdAt: -1 }); // Optional: Sort by latest
-
-    const unreadCount = unreadNotifications.length;
+    });
 
     res.status(200).json({
       success: true,
       message: "Unread notifications fetched successfully",
       unreadCount,
-      unreadNotifications, // ✅ Added the unread notifications details
     });
   } catch (error) {
     logError(error, req, 500);
@@ -433,6 +696,21 @@ export const handleUpdateNotificationConsent = async (req, res) => {
       });
     }
 
+    if (!notificationConsent) {
+      await Promise.all([
+        Device.updateMany(
+          { userId: _id, isActive: true },
+          { $set: { isActive: false } },
+        ),
+        recordNotificationMetric({
+          event: "OPT_OUT",
+          reason: "USER_PREFERENCE",
+          userId: _id,
+          source: "EVENT",
+        }),
+      ]);
+    }
+
     res.status(200).json({
       success: true,
       message: `Notification ${
@@ -448,8 +726,31 @@ export const handleUpdateNotificationConsent = async (req, res) => {
   }
 };
 
+export const handleDeactivateDevices = async (req, res) => {
+  try {
+    const { _id } = req.user;
+    const result = await Device.updateMany(
+      { userId: _id, isActive: true },
+      { $set: { isActive: false } },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification devices deactivated successfully",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to deactivate notification devices",
+    });
+  }
+};
+
 export const handleMarkAsReadNotification = async (req, res) => {
   const { notificationIds } = req.body;
+  const userId = req.user?._id;
 
   if (
     !notificationIds ||
@@ -466,7 +767,7 @@ export const handleMarkAsReadNotification = async (req, res) => {
   try {
     // Update the `read` field to true for the given notification IDs
     const result = await Notification.updateMany(
-      { _id: { $in: notificationIds } },
+      { _id: { $in: notificationIds }, userId },
       { $set: { read: true } }
     );
 
@@ -482,6 +783,45 @@ export const handleMarkAsReadNotification = async (req, res) => {
       success: false,
       message: "An error occurred while marking notifications as read.",
       error: error.message,
+    });
+  }
+};
+
+export const handleNotificationOpened = async (req, res) => {
+  try {
+    const { notificationId } = req.body;
+    if (!notificationId) {
+      return res.status(400).json({
+        success: false,
+        message: "notificationId is required",
+      });
+    }
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: notificationId, userId: req.user._id, status: "SENT" },
+      {
+        $set: { read: true, openedAt: new Date() },
+        $inc: { openCount: 1 },
+      },
+      { new: true },
+    );
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification open recorded",
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to record notification open",
     });
   }
 };

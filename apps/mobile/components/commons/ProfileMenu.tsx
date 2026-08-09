@@ -20,6 +20,7 @@ import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import { t } from "@/utils/translationHelper";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
+import NOTIFICATION from "@/app/api/notification";
 import USER from "@/app/api/user";
 import { useMutation } from "@tanstack/react-query";
 import REFRESH_USER from "@/app/hooks/useRefreshUser";
@@ -65,6 +66,7 @@ const ProfileMenu = ({ disabled }: any) => {
         true,
         userDetails?._id
       );
+      await NOTIFICATION.updateNotificationConsent(true);
       setNotificationConsent(true);
       TOAST?.success(t("notificationsEnabled"));
       console.log("Notifications enabled");
@@ -75,6 +77,7 @@ const ProfileMenu = ({ disabled }: any) => {
 
   const unregisterNotification = async () => {
     try {
+      await NOTIFICATION.updateNotificationConsent(false);
       await PUSH_NOTIFICATION?.unregisterPushNotifications();
       TOAST?.success("Notifications disabled");
       console.log("Notifications disabled");

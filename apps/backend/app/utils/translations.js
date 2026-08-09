@@ -37,9 +37,13 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "The Worker Accepted Your Booking Request",
     BOOKING_CANCELLED_BY_USER: "The Worker Cancelled the Booking",
-    NEW_SERVICE_ARRIVED_OF_SKILL: "New work has been live",
-    PENDING_REQUEST_REMINDER: "Pending requests want action",
-    PROFILE_COMPLETION_REMINDER: "Please completed your profile",
+    NEW_SERVICE_ARRIVED_OF_SKILL: "New Work Matching Your Skills",
+    PENDING_REQUEST_REMINDER: "Pending Requests Need Your Response",
+    EMPLOYER_PENDING_APPLICATIONS_REMINDER:
+      "Applicants Waiting for Your Decision",
+    PENDING_DIRECT_BOOKING_REMINDER: "Direct Booking Waiting for Response",
+    PAID_SERVICE_PROMOTION: "Get More Applicants with Paid Promotion",
+    PROFILE_COMPLETION_REMINDER: "Complete Your Profile",
     SYSTEM_ERROR_ALERT: "System Error Alert",
     SELECTED_AS_MEDIATOR: "You Have Been Selected as a Mediator",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR: "You Were Removed as a Mediator",
@@ -91,6 +95,10 @@ export const titles = {
     NEW_SERVICE_ARRIVED_OF_SKILL:
       "आपके कौशल से संबंधित नया काम उपलब्ध हो गया है",
     PENDING_REQUEST_REMINDER: "लंबित अनुरोधों पर कार्रवाई आवश्यक है",
+    EMPLOYER_PENDING_APPLICATIONS_REMINDER:
+      "आवेदक आपके निर्णय की प्रतीक्षा कर रहे हैं",
+    PENDING_DIRECT_BOOKING_REMINDER: "डायरेक्ट बुकिंग का जवाब बाकी है",
+    PAID_SERVICE_PROMOTION: "पेड प्रमोशन से अधिक आवेदन पाएं",
     PROFILE_COMPLETION_REMINDER: "कृपया अपनी प्रोफ़ाइल पूरी करें",
     SYSTEM_ERROR_ALERT: "सिस्टम त्रुटि चेतावनी",
     SELECTED_AS_MEDIATOR: "आपको ठेकेदार के रूप में चुना गया है",
@@ -474,69 +482,75 @@ const messages = {
   en: {
     // User
     PROFILE_ACTIVE:
-      "✅ Hey {{workerName}}, your profile is now active! 🎉 Explore and enjoy all the features of {{appName}}. 🚀",
+      "Your profile is active. You can now access all features in {{appName}}.",
     PROFILE_SUSPEND:
-      "⚠️ Oops! Your profile has been suspended. 💬 Contact support for quick assistance.",
+      "Your profile has been suspended. Contact support if you need assistance.",
 
     // Worker
     GET_AN_TEAM_JOINING_INVITATION_FROM_MEDIATOR:
-      "🤝 Great news, {{workerName}}! You’ve been invited to join {{mediatorName}}’s team. 🚀 Check it out now!",
+      "{{mediatorName}} invited you to join their team. Review and respond to the request.",
     TEAM_JOINING_INVITATION_CANCELLERD_BY_MEDIATOR:
-      "❌ Heads up! {{mediatorName}} has canceled your team joining invitation. 💡 Stay tuned for more opportunities.",
+      "{{mediatorName}} cancelled the invitation to join their team.",
     REMOVED_FROM_TEAM_BY_MEDIATOR:
-      "⚡️ {{workerName}}, you have been removed from {{mediatorName}}’s team. 🌟 Explore more teams and keep growing!",
+      "You were removed from {{mediatorName}}’s team.",
 
     // Mediator
     ACCEPTED_TEAM_JOINING_REQUEST_BY_WORKER:
-      "🎉 Awesome! {{workerName}} has joined your team. 🚀 Let’s achieve great things together!",
+      "{{workerName}} accepted your invitation and joined your team.",
     REJECTED_TEAM_JOINING_REQUEST_BY_WORKER:
-      "❌ Oh no! {{workerName}} has declined your team invitation. 💬 Try again with another offer!",
+      "{{workerName}} declined your team invitation.",
     WOREKR_LEFT_FROM_TEAM:
-      "⚡️ {{workerName}} has left your team. 🚀 Find more talent and keep building strong teams!",
+      "{{workerName}} left your team.",
 
     // Worker & Mediator
     NEW_SERVICE_LIVE:
-      "👋 Hello {{name}}, a new opportunity is here! 🔥 The service {{serviceName}} is now live. 🚀 Apply early and don’t miss out!",
+      "{{serviceName}} is now available. Open the work details to review and apply.",
 
     REJECTED_FROM_SERVICE:
-      "😔 Sorry, {{workerName}}! You were not selected for the service {{serviceName}}. 🌟 More chances are waiting for you!",
+      "Your application for {{serviceName}} was not selected. Explore other matching work.",
     SELECTED_IN_SERVICE:
-      "🎉 Congratulations, {{workerName}}! You’re selected for the service {{serviceName}}. 💪 Let’s get started!",
+      "You were selected for {{serviceName}}. Open the work details for the next steps.",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
-      "⚠️ Update: Your selection for the service {{serviceName}} has been revoked. 💬 Stay tuned for new opportunities!",
+      "Your selection for {{serviceName}} was removed by the employer.",
     SERVICE_CANCELLED_BY_EMPLOYER:
-      "❌ The service {{serviceName}} has been canceled by {{employerName}}. 🔔 Don’t worry, new services are on the way!",
+      "{{employerName}} cancelled {{serviceName}}.",
     SERVICE_COMPLETED_BY_EMPLOYER:
-      "🎉 Congratulations! The service {{serviceName}} has been successfully completed. 🚀 Great job, {{workerName}}!",
+      "{{serviceName}} was marked complete. Thank you for your work.",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER:
-      "📩 You’ve received a booking request for {{serviceName}} from {{employerName}}. ⚡ Respond now to get started!",
+      "{{employerName}} sent you a booking request for {{serviceName}}. Review and respond.",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER:
-      "❌ Heads up! {{employerName}} has canceled the booking request. 💡 Keep exploring more opportunities.",
+      "{{employerName}} cancelled the booking request.",
     BOOKING_CANCELLED_BY_EMPLOYER:
-      "⚡️ {{employerName}} has canceled the booking. 🚀 Stay ready for more work coming your way!",
+      "{{employerName}} cancelled the booking.",
     BOOKING_COMPLETED_BY_EMPLOYER:
-      "🎉 Awesome! {{employerName}} has marked the booking for {{serviceName}} as complete. 💪 Great work!",
+      "{{employerName}} marked {{serviceName}} as complete.",
 
     // Employer
     APPLIED_IN_YOUR_SERVICE:
-      "✨ Awesome! {{workerName}} has applied for your service {{serviceName}}. 🚀 Review and connect now!",
+      "{{workerName}} applied for {{serviceName}}. Review the application.",
     USER_CANCELLED_HIS_SERVICE_SELECTION:
-      "⚡️ Update: {{workerName}} has withdrawn from the service {{serviceName}}. 💡 Search for more talent!",
+      "{{workerName}} withdrew from {{serviceName}}.",
     BOOKING_REQUEST_REJECTED_BY_USER:
-      "❌ Oops! {{workerName}} has declined your booking request. 💬 Try reaching out to other skilled workers.",
+      "{{workerName}} declined your booking request.",
     BOOKING_REQUEST_ACCEPTED_BY_USER:
-      "🎉 Great news! {{workerName}} has accepted your booking request for {{serviceName}}. 🚀 Let the work begin!",
+      "{{workerName}} accepted your booking request for {{serviceName}}.",
     BOOKING_CANCELLED_BY_USER:
-      "⚡️ {{workerName}} has canceled the booking. 💡 Stay tuned for more potential candidates.",
+      "{{workerName}} cancelled the booking.",
 
     // Skill-based Work Notification
     NEW_SERVICE_ARRIVED_OF_SKILL:
-      "🚀 Hey {{workerName}}, a new work matching your skills is here! 💪 Apply now and get hired fast! ⚡️",
+      "New work opportunities match your skills. Open to check pay, location, and requirements.",
     // Pending Request Reminder
     PENDING_REQUEST_REMINDER:
-      "⏳ Hey {{workerName}}, you have pending requests waiting for your action! 🚀 Don’t miss out—respond now! 💬",
+      "You have pending booking or team requests. Review them and respond when ready.",
+    EMPLOYER_PENDING_APPLICATIONS_REMINDER:
+      "{{applicantCount}} applicant(s) are waiting on your work. Review applications and select workers or mediators.",
+    PENDING_DIRECT_BOOKING_REMINDER:
+      "{{employerName}} is waiting for your response on a direct booking. Accept or decline it now.",
+    PAID_SERVICE_PROMOTION:
+      "Promote your work with paid social media push to reach more workers and get applicants faster.",
     PROFILE_COMPLETION_REMINDER:
-      "🚀 Hey {{workerName}}! Your profile is missing these important details: {{missingDetails}} ⚡ Complete them now to unlock the full power of our platform! ✨",
+      "Complete these profile details to improve your visibility: {{missingDetails}}.",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} error at {{route}}: {{errorMessage}}",
     SELECTED_AS_MEDIATOR:
@@ -573,7 +587,7 @@ const messages = {
 
     // Worker
     GET_AN_TEAM_JOINING_INVITATION_FROM_MEDIATOR:
-      "आपको {{mediatorName}} की टीम में शामिल होने का निमंत्रण मिला है।",
+      "{{mediatorName}} ने आपको अपनी टीम में शामिल होने का निमंत्रण भेजा है। अनुरोध देखकर जवाब दें।",
     TEAM_JOINING_INVITATION_CANCELLERD_BY_MEDIATOR:
       "{{mediatorName}} ने आपकी टीम जॉइनिंग का निमंत्रण रद्द कर दिया है।",
     REMOVED_FROM_TEAM_BY_MEDIATOR:
@@ -588,17 +602,17 @@ const messages = {
 
     // Worker & Mediator
     NEW_SERVICE_LIVE:
-      "👋 नमस्ते {{name}}, आपके लिए नया मौका आया है! 🔥 {{serviceName}} का काम अब शुरू हो गया है। 🚀 जल्दी आवेदन करें!",
+      "{{serviceName}} का नया काम उपलब्ध है। जानकारी देखकर आवेदन करें।",
     REJECTED_FROM_SERVICE: "आपको {{serviceName}} काम के लिए नहीं चुना गया है।",
     SELECTED_IN_SERVICE:
-      "बधाई हो! आपको {{serviceName}} काम के लिए चुना गया है।",
+      "आपको {{serviceName}} काम के लिए चुना गया है। अगले चरण के लिए काम की जानकारी खोलें।",
     REMOVE_YOUR_SELECTION_FROM_SERVICE_BY_EMPLOYER:
       "आपका चयन {{serviceName}} काम से हटा दिया गया है।",
     SERVICE_CANCELLED_BY_EMPLOYER: "{{serviceName}} काम रद्द कर दिया गया है।",
     SERVICE_COMPLETED_BY_EMPLOYER:
       "{{serviceName}} काम सफलतापूर्वक पूरा हो गया है।",
     GET_A_BOOKING_INVITATION_FROM_EMPLOYER:
-      "{{employerName}} से {{serviceName}} के लिए बुकिंग अनुरोध प्राप्त हुआ है।",
+      "{{employerName}} ने {{serviceName}} के लिए बुकिंग अनुरोध भेजा है। देखकर जवाब दें।",
     BOOKING_INVITATION_CANCELLED_BY_EMPLOYER:
       "{{employerName}} ने बुकिंग अनुरोध रद्द कर दिया है।",
     BOOKING_CANCELLED_BY_EMPLOYER: "{{employerName}} ने बुकिंग रद्द कर दी है।",
@@ -607,7 +621,7 @@ const messages = {
 
     // Employer
     APPLIED_IN_YOUR_SERVICE:
-      "{{workerName}} ने आपके {{serviceName}} काम के लिए आवेदन किया है।",
+      "{{workerName}} ने आपके {{serviceName}} काम के लिए आवेदन किया है। आवेदन की समीक्षा करें।",
     USER_CANCELLED_HIS_SERVICE_SELECTION:
       "{{workerName}} ने {{serviceName}} काम से नाम वापस ले लिया है।",
     BOOKING_REQUEST_REJECTED_BY_USER:
@@ -616,11 +630,17 @@ const messages = {
       "{{workerName}} ने आपका बुकिंग अनुरोध स्वीकार कर लिया है।",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} ने बुकिंग रद्द कर दी है।",
     NEW_SERVICE_ARRIVED_OF_SKILL:
-      "🚀 Hey {{workerName}}, आपके कौशल से मेल खाने वाला नया काम आ गया है! 💪 अभी आवेदन करें और जल्दी काम पाएं! ⚡️",
+      "आपके कौशल से मेल खाने वाले नए काम उपलब्ध हैं। भुगतान, स्थान और आवश्यकताएँ देखें।",
     PENDING_REQUEST_REMINDER:
-      "⏳ Hey {{workerName}}, आपके पास कुछ लंबित अनुरोध हैं जिन पर आपकी कार्रवाई ज़रूरी है! 🚀 मौका न गंवाएं—अभी जवाब दें! 💬",
+      "आपके कुछ बुकिंग या टीम अनुरोध लंबित हैं। उन्हें देखकर जवाब दें।",
+    EMPLOYER_PENDING_APPLICATIONS_REMINDER:
+      "आपके काम पर {{applicantCount}} आवेदन प्रतीक्षा में हैं। आवेदनों की समीक्षा कर मजदूर या ठेकेदार चुनें।",
+    PENDING_DIRECT_BOOKING_REMINDER:
+      "{{employerName}} डायरेक्ट बुकिंग के जवाब का इंतज़ार कर रहे हैं। अभी स्वीकार या अस्वीकार करें।",
+    PAID_SERVICE_PROMOTION:
+      "पेड सोशल मीडिया प्रमोशन से अपने काम को और मजदूरों तक पहुँचाएँ और जल्दी आवेदन पाएँ।",
     PROFILE_COMPLETION_REMINDER:
-      "🚀 Hey {{workerName}}! आपकी प्रोफ़ाइल में ये ज़रूरी जानकारियाँ गायब हैं: {{missingDetails}} ⚡ इन्हें अभी पूरा करें और हमारे प्लेटफ़ॉर्म की पूरी ताक़त अनलॉक करें! ✨",
+      "अपनी प्रोफ़ाइल बेहतर दिखाने के लिए ये जानकारी पूरी करें: {{missingDetails}}।",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} पर {{route}} में त्रुटि: {{errorMessage}}",
     SELECTED_AS_MEDIATOR:

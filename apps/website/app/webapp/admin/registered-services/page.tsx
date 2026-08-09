@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, IndianRupee } from "lucide-react";
 import { apiRequest } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useAdminAccess } from "@/components/webapp/admin/useAdminAccess";
@@ -131,6 +131,57 @@ function stringValue(value: unknown) {
   if (value == null) return "-";
   const normalized = String(value).trim();
   return normalized || "-";
+}
+
+/** CamelCase / snake_case → Title Case when no locale entry exists. */
+function humanizeKey(value: string) {
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/** Resolve i18n label for work type / skill / status keys (same pattern as service details). */
+function localizedLabel(
+  t: (key: string, fallback?: string) => string,
+  value?: string | null,
+) {
+  if (value == null) return "-";
+  const raw = String(value).trim();
+  if (!raw || raw === "-") return "-";
+
+  const exact = t(raw, "");
+  if (exact) return exact;
+
+  const lower = raw.toLowerCase();
+  if (lower !== raw) {
+    const viaLower = t(lower, "");
+    if (viaLower) return viaLower;
+  }
+
+  return humanizeKey(raw);
+}
+
+function localizedSkillList(
+  t: (key: string, fallback?: string) => string,
+  value?: string | null,
+) {
+  if (!value || value === "-") return "-";
+  return value
+    .split(",")
+    .map((part) => localizedLabel(t, part.trim()))
+    .join(", ");
+}
+
+function isPaidService(service: AdminService) {
+  const promo = service.socialMediaPromotion;
+  if (!promo) return false;
+  return (
+    String(promo.status || "").toUpperCase() === "PAID" ||
+    (promo.enabled === true && Number(promo.amount || 0) > 0)
+  );
 }
 
 function resolveEmployer(service: AdminService): AdminEmployer | null {
@@ -386,8 +437,8 @@ export default function AdminRegisteredServicesPage() {
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none ring-[#22409a] focus:ring-2"
             >
               <option value="ALL">{t("all", "All types")}</option>
-              <option value="byService">byService</option>
-              <option value="direct">direct</option>
+              <option value="byService">{t("byService", "Applied In Work")}</option>
+              <option value="direct">{t("direct", "Direct Booking")}</option>
             </select>
           </div>
           <div className="flex items-end">
@@ -427,6 +478,7 @@ export default function AdminRegisteredServicesPage() {
               <tbody>
                 {rows.map((service) => {
                   const employer = resolveEmployer(service);
+                  const paid = isPaidService(service);
                   return (
                     <tr
                       key={service._id}
@@ -456,22 +508,38 @@ export default function AdminRegisteredServicesPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-semibold text-[#22409a]">
-                        {service.jobID || "-"}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-[#22409a]">
+                            {service.jobID || "-"}
+                          </span>
+                          {paid ? (
+                            <span
+                              className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-[0_2px_8px_rgba(245,158,11,0.55)] ring-2 ring-amber-200"
+                              title={t("paidService", "Paid service")}
+                              aria-label={t("paidService", "Paid service")}
+                            >
+                              <IndianRupee size={14} strokeWidth={2.75} />
+                            </span>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-slate-800">
-                          {service.type || "-"}
+                          {localizedLabel(t, service.type)}
                         </p>
                         <p className="text-xs text-slate-500">
-                          {service.subType || service.bookingType || "-"}
+                          {localizedLabel(
+                            t,
+                            service.subType || service.bookingType,
+                          )}
                         </p>
                       </td>
                       <td className="px-4 py-3">
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(service.status)}`}
                         >
-                          {service.status || "-"}
+                          {localizedLabel(t, service.status)}
                         </span>
                       </td>
                       <td
@@ -557,6 +625,7 @@ function ServiceDetailsModal({
   const employer = resolveEmployer(service);
   const worker = resolveWorker(service);
   const applicants = getApplicants(service);
+  const paid = isPaidService(service);
 
   return (
     <div
@@ -573,17 +642,30 @@ function ServiceDetailsModal({
       >
         <div className="flex items-start justify-between border-b border-slate-200 p-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">
-              {service.type || t("registeredServicesDetails", "Service details")}
-              {service.subType ? (
-                <span className="font-semibold text-slate-500">
-                  {" "}
-                  · {service.subType}
+            <div className="flex flex-wrap items-center gap-2">
+              {paid ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                  <IndianRupee size={12} strokeWidth={2.5} />
+                  {t("paidService", "Paid service")}
                 </span>
               ) : null}
-            </h3>
-            <p className="text-xs text-slate-500">
+              <h3 className="text-lg font-bold text-slate-800">
+                {service.type
+                  ? localizedLabel(t, service.type)
+                  : t("registeredServicesDetails", "Service details")}
+                {service.subType ? (
+                  <span className="font-semibold text-slate-500">
+                    {" "}
+                    · {localizedLabel(t, service.subType)}
+                  </span>
+                ) : null}
+              </h3>
+            </div>
+            <p className="mt-1 text-xs text-slate-500">
               {t("jobId", "Job ID")}: {service.jobID || "-"} · ID: {service._id}
+              {paid && service.socialMediaPromotion?.amount
+                ? ` · ₹${service.socialMediaPromotion.amount}`
+                : ""}
             </p>
           </div>
           <button
@@ -596,144 +678,7 @@ function ServiceDetailsModal({
         </div>
 
         <div className="max-h-[calc(92vh-84px)] overflow-y-auto p-4">
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-3">
-              <SectionTitle title={t("serviceInformation", "Work information")} />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <CopyableDetail
-                  title={t("jobId", "Job ID")}
-                  value={stringValue(service.jobID)}
-                />
-                <CopyableDetail
-                  title={t("status", "Status")}
-                  value={stringValue(service.status)}
-                />
-                <CopyableDetail
-                  title={t("workType", "Work type")}
-                  value={stringValue(service.type)}
-                />
-                <CopyableDetail
-                  title={t("workSubType", "Work subtype")}
-                  value={stringValue(service.subType)}
-                />
-                <CopyableDetail
-                  title={t("bookingType", "Booking type")}
-                  value={stringValue(service.bookingType)}
-                />
-                <CopyableDetail
-                  title={t("duration", "Duration (days)")}
-                  value={stringValue(service.duration)}
-                />
-                <CopyableDetail
-                  title={t("startDate", "Start date")}
-                  value={formatDate(service.startDate)}
-                />
-                <CopyableDetail
-                  title={t("endDate", "End date")}
-                  value={formatDate(service.endDate)}
-                />
-                <CopyableDetail
-                  title={t("address", "Address")}
-                  value={stringValue(service.address)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("description", "Description")}
-                  value={stringValue(service.description)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("serviceId", "Work ID")}
-                  value={stringValue(service._id)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("createdAt", "Created at")}
-                  value={formatDate(service.createdAt)}
-                />
-                <CopyableDetail
-                  title={t("updatedAt", "Updated at")}
-                  value={formatDate(service.updatedAt)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <SectionTitle title={t("employerDetails", "Employer details")} />
-              {employer ? (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <CopyableDetail
-                    title={t("name", "Name")}
-                    value={stringValue(employer.name)}
-                  />
-                  <CopyableDetail
-                    title={t("mobileNumber", "Mobile")}
-                    value={stringValue(employer.mobile)}
-                  />
-                  <CopyableDetail
-                    title={t("role", "Role")}
-                    value={stringValue(employer.role)}
-                  />
-                  <CopyableDetail
-                    title={t("status", "Status")}
-                    value={stringValue(employer.status)}
-                  />
-                  <CopyableDetail
-                    title={t("address", "Address")}
-                    value={stringValue(employer.address)}
-                    className="sm:col-span-2"
-                  />
-                  <CopyableDetail
-                    title={t("email", "Email")}
-                    value={stringValue(employer.email?.value)}
-                  />
-                  <CopyableDetail
-                    title={t("registrationSource", "Registration source")}
-                    value={stringValue(employer.registrationSource)}
-                  />
-                  <CopyableDetail
-                    title={t("userId", "User ID")}
-                    value={stringValue(employer._id)}
-                    className="sm:col-span-2"
-                  />
-                </div>
-              ) : (
-                <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                  {typeof service.employer === "string"
-                    ? `${t("employerId", "Employer ID")}: ${service.employer}`
-                    : t("unknownUser", "Unknown user")}
-                </p>
-              )}
-
-              {worker ? (
-                <div className="mt-4 space-y-3">
-                  <SectionTitle
-                    title={t("bookedWorker", "Booked worker")}
-                  />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <CopyableDetail
-                      title={t("name", "Name")}
-                      value={stringValue(worker.name)}
-                    />
-                    <CopyableDetail
-                      title={t("mobileNumber", "Mobile")}
-                      value={stringValue(worker.mobile)}
-                    />
-                    <CopyableDetail
-                      title={t("role", "Role")}
-                      value={stringValue(worker.role)}
-                    />
-                    <CopyableDetail
-                      title={t("address", "Address")}
-                      value={stringValue(worker.address)}
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="mt-4 space-y-3">
+          <div className="mb-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <SectionTitle
                 title={t("applicants", "Applicants (workers / mediators)")}
@@ -795,11 +740,11 @@ function ServiceDetailsModal({
                           </td>
                           <td className="px-3 py-2.5">
                             <span className="rounded-full bg-[#eef3ff] px-2 py-0.5 text-xs font-semibold text-[#22409a]">
-                              {row.role}
+                              {localizedLabel(t, row.role)}
                             </span>
                           </td>
                           <td className="max-w-[10rem] break-words px-3 py-2.5 text-slate-700">
-                            {row.skill}
+                            {localizedSkillList(t, row.skill)}
                           </td>
                           <td className="whitespace-nowrap px-3 py-2.5 text-slate-700">
                             <div className="flex items-center gap-1.5">
@@ -827,7 +772,7 @@ function ServiceDetailsModal({
                             <span
                               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(row.status)}`}
                             >
-                              {row.status}
+                              {localizedLabel(t, row.status)}
                             </span>
                           </td>
                         </tr>
@@ -837,6 +782,143 @@ function ServiceDetailsModal({
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="grid gap-4 xl:grid-cols-2">
+            <div className="space-y-3">
+              <SectionTitle title={t("serviceInformation", "Work information")} />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <CopyableDetail
+                  title={t("jobId", "Job ID")}
+                  value={stringValue(service.jobID)}
+                />
+                <CopyableDetail
+                  title={t("status", "Status")}
+                  value={localizedLabel(t, service.status)}
+                />
+                <CopyableDetail
+                  title={t("workType", "Work type")}
+                  value={localizedLabel(t, service.type)}
+                />
+                <CopyableDetail
+                  title={t("workSubType", "Work subtype")}
+                  value={localizedLabel(t, service.subType)}
+                />
+                <CopyableDetail
+                  title={t("bookingType", "Booking type")}
+                  value={localizedLabel(t, service.bookingType)}
+                />
+                <CopyableDetail
+                  title={t("duration", "Duration (days)")}
+                  value={stringValue(service.duration)}
+                />
+                <CopyableDetail
+                  title={t("startDate", "Start date")}
+                  value={formatDate(service.startDate)}
+                />
+                <CopyableDetail
+                  title={t("endDate", "End date")}
+                  value={formatDate(service.endDate)}
+                />
+                <CopyableDetail
+                  title={t("address", "Address")}
+                  value={stringValue(service.address)}
+                  className="sm:col-span-2"
+                />
+                <CopyableDetail
+                  title={t("description", "Description")}
+                  value={stringValue(service.description)}
+                  className="sm:col-span-2"
+                />
+                <CopyableDetail
+                  title={t("serviceId", "Work ID")}
+                  value={stringValue(service._id)}
+                  className="sm:col-span-2"
+                />
+                <CopyableDetail
+                  title={t("createdAt", "Created at")}
+                  value={formatDate(service.createdAt)}
+                />
+                <CopyableDetail
+                  title={t("updatedAt", "Updated at")}
+                  value={formatDate(service.updatedAt)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <SectionTitle title={t("employerDetails", "Employer details")} />
+              {employer ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <CopyableDetail
+                    title={t("name", "Name")}
+                    value={stringValue(employer.name)}
+                  />
+                  <CopyableDetail
+                    title={t("mobileNumber", "Mobile")}
+                    value={stringValue(employer.mobile)}
+                  />
+                  <CopyableDetail
+                    title={t("role", "Role")}
+                    value={localizedLabel(t, employer.role)}
+                  />
+                  <CopyableDetail
+                    title={t("status", "Status")}
+                    value={localizedLabel(t, employer.status)}
+                  />
+                  <CopyableDetail
+                    title={t("address", "Address")}
+                    value={stringValue(employer.address)}
+                    className="sm:col-span-2"
+                  />
+                  <CopyableDetail
+                    title={t("email", "Email")}
+                    value={stringValue(employer.email?.value)}
+                  />
+                  <CopyableDetail
+                    title={t("registrationSource", "Registration source")}
+                    value={localizedLabel(t, employer.registrationSource)}
+                  />
+                  <CopyableDetail
+                    title={t("userId", "User ID")}
+                    value={stringValue(employer._id)}
+                    className="sm:col-span-2"
+                  />
+                </div>
+              ) : (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                  {typeof service.employer === "string"
+                    ? `${t("employerId", "Employer ID")}: ${service.employer}`
+                    : t("unknownUser", "Unknown user")}
+                </p>
+              )}
+
+              {worker ? (
+                <div className="mt-4 space-y-3">
+                  <SectionTitle
+                    title={t("bookedWorker", "Booked worker")}
+                  />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <CopyableDetail
+                      title={t("name", "Name")}
+                      value={stringValue(worker.name)}
+                    />
+                    <CopyableDetail
+                      title={t("mobileNumber", "Mobile")}
+                      value={stringValue(worker.mobile)}
+                    />
+                    <CopyableDetail
+                      title={t("role", "Role")}
+                      value={localizedLabel(t, worker.role)}
+                    />
+                    <CopyableDetail
+                      title={t("address", "Address")}
+                      value={stringValue(worker.address)}
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className="mt-4 grid gap-4 xl:grid-cols-2">
@@ -873,11 +955,14 @@ function ServiceDetailsModal({
                 />
                 <CopyableDetail
                   title="Upload status"
-                  value={stringValue(service.uploadStatus)}
+                  value={localizedLabel(t, service.uploadStatus)}
                 />
                 <CopyableDetail
                   title="Promotion status"
-                  value={stringValue(service.socialMediaPromotion?.status)}
+                  value={localizedLabel(
+                    t,
+                    service.socialMediaPromotion?.status,
+                  )}
                 />
               </div>
               <DetailBlock title="Geo location" data={service.geoLocation} />

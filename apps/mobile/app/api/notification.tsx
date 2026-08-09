@@ -83,7 +83,29 @@ const markAsReadNotification = async (payload: any) => {
   }
 };
 
-const updateNotificationConsent = () => {};
+const updateNotificationConsent = async (notificationConsent: boolean) => {
+  const data = await API_CLIENT.makePutRequest(
+    "/notification/update-consent",
+    { notificationConsent },
+  );
+  return data?.data;
+};
+
+const deactivateDevices = async () => {
+  const data = await API_CLIENT.makePutRequest(
+    "/notification/deactivate-devices",
+    {},
+  );
+  return data?.data;
+};
+
+const markNotificationOpened = async (notificationId: string) => {
+  if (!notificationId) return null;
+  const data = await API_CLIENT.makePutRequest("/notification/opened", {
+    notificationId,
+  });
+  return data?.data;
+};
 
 const NOTIFICATION = {
   registerDevice,
@@ -91,6 +113,8 @@ const NOTIFICATION = {
   fetchUnreadNotificationsCount,
   markAsReadNotification,
   updateNotificationConsent,
+  deactivateDevices,
+  markNotificationOpened,
 };
 
 export default NOTIFICATION;

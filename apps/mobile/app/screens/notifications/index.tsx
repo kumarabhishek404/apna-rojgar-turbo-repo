@@ -31,6 +31,7 @@ import RippleDot from "@/components/commons/RippleDot";
 import NotificationPlaceholder from "@/components/commons/LoadingPlaceholders/NotificationPlaceholder";
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import APP_LOGO from "@/assets/app/notification.png";
+import { openNotificationData } from "@/utils/notificationNavigation";
 
 const NotificationScreen = () => {
   const queryClient = useQueryClient();
@@ -156,8 +157,33 @@ const NotificationScreen = () => {
     setVisibleNotificationIds(new Set(newVisibleIds));
   }, [notifications]); // Trigger this effect every time notifications change after a refetch
 
+  const handleNotificationPress = async (item: any) => {
+    if (!item?.read && item?._id) {
+      mutationMarkAsReadMutation.mutate({ notificationIds: [item._id] });
+      setNotifications((current) =>
+        current.map((notification) =>
+          notification?._id === item._id
+            ? { ...notification, read: true }
+            : notification,
+        ),
+      );
+    }
+    if (item?._id) {
+      void NOTIFICATION.markNotificationOpened(item._id).catch((openError) =>
+        console.warn("Could not record notification open:", openError),
+      );
+    }
+    await openNotificationData(item?.data);
+  };
+
   const renderNotification = ({ item }: any) => (
-    <View style={styles?.notificationItem}>
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => void handleNotificationPress(item)}
+      style={styles?.notificationItem}
+      accessibilityRole="button"
+      accessibilityLabel={`${item?.title || t("notifications")}. ${item?.body || ""}`}
+    >
       <View
         style={{
           width: "100%",
@@ -188,7 +214,7 @@ const NotificationScreen = () => {
           <CustomText textAlign="left">{item?.body}</CustomText>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const RequestPermission = () => (

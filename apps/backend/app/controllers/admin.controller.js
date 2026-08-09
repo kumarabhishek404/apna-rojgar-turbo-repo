@@ -3,6 +3,7 @@ import Request from "../models/request.model.js";
 import ErrorLog from "../models/errors.model.js";
 import AppEvent from "../models/appEvent.model.js";
 import Notification from "../models/notification.model.js";
+import NotificationMetric from "../models/notificationMetric.model.js";
 import Payment from "../models/payment.model.js";
 import Service from "../models/service.model.js";
 import Invitation from "../models/invitation.model.js";
@@ -856,7 +857,16 @@ export const getAdminNotifications = async (req, res) => {
   }
 
   try {
-    const [total, notifications, notificationStats] = await Promise.all([
+    const [
+      total,
+      notifications,
+      notificationStats,
+      optedOutUsers,
+      sentLast24h,
+      duplicateSkipsLast24h,
+      capSkipsLast24h,
+      optOutsLast24h,
+    ] = await Promise.all([
       Notification.countDocuments(query),
       Notification.find(query)
         .sort({ createdAt: -1 })
@@ -865,7 +875,9 @@ export const getAdminNotifications = async (req, res) => {
         .populate("userId", "name mobile role status profilePicture")
         .populate("data.actionBy", "name mobile role profilePicture")
         .populate("data.actionOn", "name mobile role profilePicture")
-        .select("userId category type title body status read data createdAt updatedAt"),
+        .select(
+          "userId category priority type title body status read openedAt openCount data scheduledFor sentAt failureReason deliveryAttempts source createdAt updatedAt",
+        ),
       Notification.aggregate([
         { $match: query },
         {
@@ -883,17 +895,51 @@ export const getAdminNotifications = async (req, res) => {
             unread: {
               $sum: { $cond: [{ $eq: ["$read", false] }, 1, 0] },
             },
+            opened: {
+              $sum: { $cond: [{ $ne: ["$openedAt", null] }, 1, 0] },
+            },
           },
         },
       ]),
+      User.countDocuments({ notificationConsent: false }),
+      Notification.countDocuments({
+        status: "SENT",
+        sentAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }),
+      NotificationMetric.countDocuments({
+        event: "SKIPPED",
+        reason: "COOLDOWN_DUPLICATE",
+        createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }),
+      NotificationMetric.countDocuments({
+        event: "SKIPPED",
+        reason: "DAILY_CAP",
+        createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }),
+      NotificationMetric.countDocuments({
+        event: "OPT_OUT",
+        createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }),
     ]);
 
+    const sent = notificationStats?.[0]?.sent || 0;
+    const failed = notificationStats?.[0]?.failed || 0;
+    const opened = notificationStats?.[0]?.opened || 0;
     const stats = {
       total,
-      sent: notificationStats?.[0]?.sent || 0,
+      sent,
       pending: notificationStats?.[0]?.pending || 0,
-      failed: notificationStats?.[0]?.failed || 0,
+      failed,
       unread: notificationStats?.[0]?.unread || 0,
+      opened,
+      sentLast24h,
+      optedOutUsers,
+      duplicateSkipsLast24h,
+      capSkipsLast24h,
+      optOutsLast24h,
+      deliveryRate:
+        sent + failed > 0 ? Math.round((sent / (sent + failed)) * 1000) / 10 : 0,
+      openRate: sent > 0 ? Math.round((opened / sent) * 1000) / 10 : 0,
     };
 
     res.status(200).json({

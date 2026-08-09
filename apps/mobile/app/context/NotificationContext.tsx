@@ -10,8 +10,9 @@ import * as Notifications from "expo-notifications";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
 import { useAtomValue, useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
-import * as Linking from "expo-linking";
-import { getServiceDetailsDeepLink } from "@/utils/serviceDeepLink";
+import NotificationBanner from "@/components/commons/InAppNotificationBanner";
+import { openNotificationData } from "@/utils/notificationNavigation";
+import NOTIFICATION from "@/app/api/notification";
 
 interface NotificationContextType {
   expoPushToken: string | null;
@@ -51,7 +52,6 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const notificationConsent = useAtomValue(Atoms?.NotificationConsentAtom);
 
   useEffect(() => {
-    // Register push notifications
     if (userDetails?.isAuth && userDetails?._id) {
       PUSH_NOTIFICATION?.registerForPushNotificationsAsync(
         notificationConsent,
@@ -61,8 +61,13 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
         (error: React.SetStateAction<Error | null>) => setError(error),
       );
     }
+  }, [
+    notificationConsent,
+    userDetails?.isAuth,
+    userDetails?._id,
+  ]);
 
-    // Add notification listeners
+  useEffect(() => {
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         console.log("🔔 Notification Received: ", notification);
@@ -78,22 +83,13 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
         );
 
         const data = response?.notification?.request?.content?.data;
-
-        console.log("📦 Notification Data:", data);
-
-        // ✅ Case 1: Direct deep link
-        if (data?.url && typeof data?.url === "string") {
-          Linking.openURL(data.url);
-          return;
+        if (typeof data?.notificationId === "string") {
+          void NOTIFICATION.markNotificationOpened(data.notificationId).catch(
+            (openError) =>
+              console.warn("Could not record notification open:", openError),
+          );
         }
-
-        // ✅ Case 2: Manual fallback (if no url)
-        if (data?.type === "JOB" && data?.id) {
-          Linking.openURL(getServiceDetailsDeepLink(String(data.id)));
-          return;
-        }
-
-        console.log("⚠️ No valid navigation data in notification");
+        void openNotificationData(data);
       });
 
     // Cleanup listeners on unmount
@@ -105,13 +101,34 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
         responseListener.current.remove();
       }
     };
-  }, [notificationConsent]);
+  }, [setHasNewNotification]);
+
+  const notificationContent = notification?.request?.content;
 
   return (
     <NotificationContext.Provider
       value={{ expoPushToken, notification, error }}
     >
       {children}
+      {notificationContent ? (
+        <NotificationBanner
+          key={notification.request.identifier}
+          title={notificationContent.title}
+          body={notificationContent.body}
+          onClose={() => setNotification(null)}
+          onPress={async () => {
+            if (typeof notificationContent.data?.notificationId === "string") {
+              void NOTIFICATION.markNotificationOpened(
+                notificationContent.data.notificationId,
+              ).catch((openError) =>
+                console.warn("Could not record notification open:", openError),
+              );
+            }
+            await openNotificationData(notificationContent.data);
+            setNotification(null);
+          }}
+        />
+      ) : null}
     </NotificationContext.Provider>
   );
 };

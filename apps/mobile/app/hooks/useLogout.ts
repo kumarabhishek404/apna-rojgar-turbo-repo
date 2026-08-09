@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import Atoms from "@/app/AtomStore";
 import { removeToken } from "@/utils/authStorage";
+import NOTIFICATION from "@/app/api/notification";
 
 interface UseLogoutReturn {
   logout: () => Promise<void>;
@@ -24,6 +25,15 @@ const useLogout = (): UseLogoutReturn => {
     setError(null);
 
     try {
+      try {
+        await NOTIFICATION.deactivateDevices();
+      } catch (notificationError) {
+        // Logout must continue even when the device cleanup request is offline.
+        console.warn(
+          "Could not deactivate notification devices during logout:",
+          notificationError,
+        );
+      }
       await AsyncStorage.removeItem("user");
       await removeToken();
 

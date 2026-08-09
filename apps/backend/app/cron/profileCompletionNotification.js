@@ -30,7 +30,7 @@ const notifyIncompleteProfiles = async () => {
         const missingFields = getMissingFields(user);
 
         if (missingFields.length > 0) {
-          handleSendNotificationController(
+          const result = await handleSendNotificationController(
             user._id,
             getEnglishTitles()?.PROFILE_COMPLETION_REMINDER,
             {
@@ -41,12 +41,14 @@ const notifyIncompleteProfiles = async () => {
               actionBy: null,
               actionOn: user._id,
             },
+            null,
+            { source: "CRON" },
           );
 
           console.log(
-            `✅ [Cron] Notification sent to ${user.name} (${user._id})`,
+            `${result?.success ? "✅" : "⏭️"} [Cron] Profile reminder ${result?.queued ? "queued" : result?.success ? "sent" : "skipped"} for ${user.name} (${user._id})`,
           );
-          notifiedUsers++;
+          if (result?.success) notifiedUsers++;
         }
       } catch (error) {
         logError(error, null, 500, "cronJob - notifyUsersForCompletingProfile");

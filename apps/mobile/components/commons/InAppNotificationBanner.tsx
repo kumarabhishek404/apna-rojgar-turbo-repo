@@ -13,7 +13,7 @@ import Colors from "@/constants/Colors";
 
 const { width } = Dimensions.get("window");
 
-const NotificationBanner = ({ title, body, onClose }: any) => {
+const NotificationBanner = ({ title, body, onClose, onPress }: any) => {
   const [visible, setVisible] = useState(true);
   const translateY = useRef(new Animated.Value(-100)).current;
 
@@ -54,7 +54,12 @@ const NotificationBanner = ({ title, body, onClose }: any) => {
     <Animated.View
       style={[styles.bannerContainer, { transform: [{ translateY }] }]}
     >
-      <View style={styles.contentContainer}>
+      <TouchableOpacity
+        activeOpacity={onPress ? 0.85 : 1}
+        disabled={!onPress}
+        onPress={onPress}
+        style={styles.contentContainer}
+      >
         <Ionicons
           name="notifications-outline"
           size={24}
@@ -64,10 +69,15 @@ const NotificationBanner = ({ title, body, onClose }: any) => {
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{body}</Text>
         </View>
-        <TouchableOpacity onPress={hideBanner}>
+        <TouchableOpacity
+          onPress={(event) => {
+            event.stopPropagation();
+            hideBanner();
+          }}
+        >
           <Ionicons name="close" size={24} color={Colors.secondary} />
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 };
