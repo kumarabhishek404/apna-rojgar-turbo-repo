@@ -1,6 +1,8 @@
 import express from "express";
 import {
   getAllRequests,
+  getAdminAllServices,
+  getAdminDirectRequests,
   getAdminAnalyticsEvents,
   getAdminAnalyticsSummary,
   getAdminErrorLogs,
@@ -57,11 +59,27 @@ router.get(
 );
 
 router.get(
+  "/direct-requests",
+  verifyToken,
+  userStatus,
+  checkAdmin,
+  getAdminDirectRequests
+);
+
+router.get(
   "/promotion-payments",
   verifyToken,
   userStatus,
   checkAdmin,
   getAdminPromotionPayments
+);
+
+router.get(
+  "/all-services",
+  verifyToken,
+  userStatus,
+  checkAdmin,
+  getAdminAllServices
 );
 
 export default router;

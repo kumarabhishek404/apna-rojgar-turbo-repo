@@ -75,9 +75,24 @@ export default function AdminErrorLogsPage() {
   return (
     <section className="space-y-4">
       <div className="rounded-2xl bg-gradient-to-r from-rose-700 to-orange-600 p-6 text-white shadow-sm">
-        <h1 className="text-2xl font-bold">Error Logs</h1>
-        <p className="mt-1 text-sm text-rose-100">System errors from backend `ErrorLog` model.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Error Logs</h1>
+            <p className="mt-1 text-sm text-rose-100">
+              System errors from backend `ErrorLog` model.
+            </p>
+          </div>
+          <div className="rounded-2xl border border-white/25 bg-white/15 px-4 py-3 text-right backdrop-blur-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-rose-100">
+              Total errors
+            </p>
+            <p className="mt-0.5 text-3xl font-bold tabular-nums leading-none">
+              {loading && page === 1 && !total ? "…" : total}
+            </p>
+          </div>
+        </div>
       </div>
+
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="grid gap-3 md:grid-cols-4">
           <div className="md:col-span-2">
@@ -156,10 +171,6 @@ export default function AdminErrorLogsPage() {
         ) : null}
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
-        Loaded <span className="font-semibold text-slate-800">{logs.length}</span>
-        {total ? ` of ${total}` : ""} logs
-      </div>
       {loadingMore ? (
         <p className="text-center text-sm text-slate-500">Loading more logs...</p>
       ) : null}

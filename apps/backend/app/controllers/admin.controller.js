@@ -4,6 +4,8 @@ import ErrorLog from "../models/errors.model.js";
 import AppEvent from "../models/appEvent.model.js";
 import Notification from "../models/notification.model.js";
 import Payment from "../models/payment.model.js";
+import Service from "../models/service.model.js";
+import Invitation from "../models/invitation.model.js";
 import { getPromotionPaymentStats } from "../utils/payment.service.js";
 import { handleSendNotificationController } from "./notification.controller.js";
 import { exportWeeklyRegistrations } from "../cron/weeklyRegistrationsExport.js";
@@ -237,6 +239,105 @@ export const getAllRequests = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+/**
+ * GET /admin/direct-requests
+ * Employer → worker/mediator direct booking invitations (Invitation model).
+ */
+export const getAdminDirectRequests = async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
+  const skip = (page - 1) * limit;
+  const status = String(req.query.status || "ALL").trim().toUpperCase();
+  const receiverRole = String(req.query.role || "ALL").trim().toUpperCase();
+  const search = String(req.query.search || "").trim();
+
+  const query = {};
+  if (status && status !== "ALL") query.status = status;
+
+  try {
+    if (search) {
+      const matchingUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { mobile: { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+      const ids = matchingUsers.map((u) => u._id);
+      query.$or = [
+        { employer: { $in: ids } },
+        { bookedWorker: { $in: ids } },
+        { address: { $regex: search, $options: "i" } },
+        { "appliedSkill.skill": { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (receiverRole && receiverRole !== "ALL") {
+      const receivers = await User.find({ role: receiverRole }).select("_id");
+      query.bookedWorker = { $in: receivers.map((u) => u._id) };
+    }
+
+    const [total, invitations, statusStats] = await Promise.all([
+      Invitation.countDocuments(query),
+      Invitation.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate(
+          "employer",
+          "name mobile role address profilePicture email status registrationSource",
+        )
+        .populate(
+          "bookedWorker",
+          "name mobile role address profilePicture email status registrationSource skills",
+        ),
+      Invitation.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const stats = {
+      total,
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+      cancelled: 0,
+      removed: 0,
+      left: 0,
+    };
+    statusStats.forEach((entry) => {
+      const key = String(entry?._id || "").toLowerCase();
+      if (Object.prototype.hasOwnProperty.call(stats, key)) {
+        stats[key] = entry.count;
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Direct booking requests fetched successfully",
+      data: invitations,
+      stats,
+      pagination: {
+        page,
+        pages: Math.ceil(total / limit) || 1,
+        total,
+        limit,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to fetch direct requests",
     });
   }
 };
@@ -812,6 +913,116 @@ export const getAdminNotifications = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to fetch notifications",
+    });
+  }
+};
+
+/**
+ * GET /admin/all-services
+ * Paginated list of every registered Service with employer details populated.
+ */
+export const getAdminAllServices = async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
+  const skip = (page - 1) * limit;
+  const status = String(req.query.status || "ALL").trim().toUpperCase();
+  const bookingType = String(req.query.bookingType || "ALL").trim();
+  const search = String(req.query.search || "").trim();
+
+  const query = {};
+  if (status && status !== "ALL") query.status = status;
+  if (bookingType && bookingType !== "ALL") query.bookingType = bookingType;
+
+  try {
+    if (search) {
+      const matchingEmployers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { mobile: { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+
+      query.$or = [
+        { jobID: { $regex: search, $options: "i" } },
+        { type: { $regex: search, $options: "i" } },
+        { subType: { $regex: search, $options: "i" } },
+        { address: { $regex: search, $options: "i" } },
+        { employer: { $in: matchingEmployers.map((user) => user._id) } },
+      ];
+    }
+
+    const [total, services, statusStats, promotionCount] = await Promise.all([
+      Service.countDocuments(query),
+      Service.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate(
+          "employer",
+          "name mobile role address profilePicture status registrationSource email",
+        )
+        .populate(
+          "bookedWorker",
+          "name mobile role address profilePicture",
+        )
+        .populate({
+          path: "appliedUsers.user",
+          select: "name mobile role address profilePicture",
+        })
+        .populate({
+          path: "appliedUsers.workers.worker",
+          select: "name mobile role address profilePicture",
+        }),
+      Service.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      Service.countDocuments({
+        ...query,
+        "socialMediaPromotion.enabled": true,
+      }),
+    ]);
+
+    const stats = {
+      total,
+      hiring: 0,
+      completed: 0,
+      cancelled: 0,
+      pending: 0,
+      rejected: 0,
+      promoted: promotionCount,
+    };
+    statusStats.forEach((entry) => {
+      const key = String(entry?._id || "").toUpperCase();
+      if (key === "HIRING") stats.hiring = entry.count;
+      else if (key === "COMPLETED") stats.completed = entry.count;
+      else if (key === "CANCELLED") stats.cancelled = entry.count;
+      else if (key === "PENDING") stats.pending = entry.count;
+      else if (key === "REJECTED") stats.rejected = entry.count;
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "All services fetched successfully",
+      data: services,
+      stats,
+      pagination: {
+        page,
+        pages: Math.ceil(total / limit) || 1,
+        total,
+        limit,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to fetch services",
     });
   }
 };

@@ -963,28 +963,20 @@ function NavbarContent() {
 
         {/* Desktop Menu */}
         <div className="hidden items-center gap-5 self-center lg:flex">
-          {webAppItems.length > 0 ? (
-            <ul
-              className={`flex items-center gap-5 text-sm font-medium ${
-                scrolled ? "text-gray-700" : "text-white/95"
-              }`}
-            >
-              {webAppItems.map((item, i) => (
-                <li key={i}>
-                  <Link
-                    href={item.link}
-                    className={`transition ${
-                      scrolled ? "hover:text-[#22409a]" : "hover:text-white"
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
           <div className="flex items-center gap-2">
+            {webAppItems.map((item) => (
+              <Link
+                key={item.link}
+                href={item.link}
+                className={`inline-flex h-10 items-center justify-center px-2.5 text-sm font-semibold whitespace-nowrap transition ${
+                  scrolled
+                    ? "text-[#22409a] hover:text-[#1a3278]"
+                    : "text-white hover:text-white/80"
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
             {menuItems.map((item) => (
               <Link
                 key={item.link}
@@ -1120,18 +1112,17 @@ function NavbarContent() {
               className="lg:hidden fixed top-0 left-0 z-40 w-full bg-white shadow-xl"
             >
               <div className="pt-24 pb-10 px-8 flex flex-col gap-6">
-              {webAppItems.map((item, i) => (
-                <Link
-                  key={i}
-                  href={item.link}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-lg font-medium text-gray-700 hover:text-[#22409a]"
-                >
-                  {item.name}
-                </Link>
-              ))}
-
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {webAppItems.map((item) => (
+                  <Link
+                    key={item.link}
+                    href={item.link}
+                    onClick={() => setMenuOpen(false)}
+                    className="inline-flex items-center justify-center rounded-xl border border-[#22409a]/20 bg-[#eef3ff] px-4 py-3 text-sm font-semibold text-[#22409a] transition hover:bg-[#e2eaff]"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
                 {menuItems.map((item) => (
                   <Link
                     key={item.link}

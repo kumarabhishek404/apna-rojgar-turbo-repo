@@ -9,6 +9,8 @@ import AdminErrorLogsPage from "@/app/webapp/admin/error-logs/page";
 import AdminAnalyticsPage from "@/app/webapp/admin/analytics/page";
 import AdminNotificationsPage from "@/app/webapp/admin/notifications/page";
 import AdminPaidServicesPage from "@/app/webapp/admin/paid-services/page";
+import AdminRegisteredServicesPage from "@/app/webapp/admin/registered-services/page";
+import AdminDirectRequestsPage from "@/app/webapp/admin/direct-requests/page";
 import AdminBlogsPage from "@/app/webapp/admin/blogs/page";
 import ServicesToolbarFilters from "@/components/services/ServicesToolbarFilters";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
@@ -34,6 +36,8 @@ import {
   BriefcaseBusiness,
   ClipboardList,
   Download,
+  Layers,
+  Send,
   ShieldAlert,
   ShieldCheck,
   Users,
@@ -107,7 +111,8 @@ function readAuthProfile(): AuthProfile {
 const DashboardSidebarContent = memo(function DashboardSidebarContent({
   pathname,
   router,
-  primaryItems,
+  userNavItems,
+  adminNavItems,
   bottomItems,
   userPhoto,
   userName,
@@ -122,7 +127,8 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
 }: {
   pathname: string;
   router: ReturnType<typeof useRouter>;
-  primaryItems: PrimaryNavItem[];
+  userNavItems: PrimaryNavItem[];
+  adminNavItems: PrimaryNavItem[];
   bottomItems: BottomNavItem[];
   userPhoto: string;
   userName: string;
@@ -159,6 +165,51 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
     whileTap: { scale: 0.985 },
     transition: { duration: 0.16, ease: "easeOut" as const },
   };
+  const sectionLabelClass =
+    "mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white/45";
+
+  const renderNavItems = (items: PrimaryNavItem[]) =>
+    items.map((item) => {
+      const Icon = item.icon;
+      if (item.external) {
+        return (
+          <motion.div key={item.href} {...navMotion}>
+            <a
+              href={item.href}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onNavigate}
+              className={navInactive}
+            >
+              <Icon
+                size={18}
+                className="shrink-0 text-white/75"
+                strokeWidth={1.75}
+              />
+              <span>{item.label}</span>
+            </a>
+          </motion.div>
+        );
+      }
+
+      const active = isPrimaryNavActive(pathname, item.href);
+      return (
+        <motion.div key={item.href} {...navMotion}>
+          <Link
+            href={item.href}
+            onClick={onNavigate}
+            className={active ? navActive : navInactive}
+          >
+            <Icon
+              size={18}
+              className={`shrink-0 ${active ? "text-[#22409a]" : "text-white/80"}`}
+              strokeWidth={1.75}
+            />
+            <span>{item.label}</span>
+          </Link>
+        </motion.div>
+      );
+    });
 
   const brandMark = (
     <>
@@ -255,49 +306,20 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
       <nav
         className={`flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden ${isDrawer ? "touch-pan-y overscroll-y-contain px-4" : ""}`}
       >
-        <div className="space-y-0.5">
-          {primaryItems.map((item) => {
-            const Icon = item.icon;
-            if (item.external) {
-              return (
-                <motion.div key={item.label} {...navMotion}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={onNavigate}
-                    className={navInactive}
-                  >
-                    <Icon
-                      size={18}
-                      className="shrink-0 text-white/75"
-                      strokeWidth={1.75}
-                    />
-                    <span>{item.label}</span>
-                  </a>
-                </motion.div>
-              );
-            }
-
-            const active = isPrimaryNavActive(pathname, item.href);
-            return (
-              <motion.div key={item.label} {...navMotion}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  className={active ? navActive : navInactive}
-                >
-                  <Icon
-                    size={18}
-                    className={`shrink-0 ${active ? "text-[#22409a]" : "text-white/80"}`}
-                    strokeWidth={1.75}
-                  />
-                  <span>{item.label}</span>
-                </Link>
-              </motion.div>
-            );
-          })}
+        <div>
+          <p className={sectionLabelClass}>{t("userSection", "User")}</p>
+          <div className="space-y-0.5">{renderNavItems(userNavItems)}</div>
         </div>
+
+        {adminNavItems.length > 0 ? (
+          <div className="mt-4">
+            <div
+              className={`mb-3 h-px shrink-0 bg-gradient-to-r from-transparent via-white/15 to-transparent ${dividerInset}`}
+            />
+            <p className={sectionLabelClass}>{t("adminSection", "Admin")}</p>
+            <div className="space-y-0.5">{renderNavItems(adminNavItems)}</div>
+          </div>
+        ) : null}
 
         <div
           className={`my-4 h-px shrink-0 bg-gradient-to-r from-transparent via-white/15 to-transparent ${dividerInset}`}
@@ -417,6 +439,12 @@ export default function ServicesDashboard() {
   const isAdminPaidServicesView =
     pathname === "/admin/paid-services" ||
     pathname === "/webapp/admin/paid-services";
+  const isAdminRegisteredServicesView =
+    pathname === "/admin/registered-services" ||
+    pathname === "/webapp/admin/registered-services";
+  const isAdminDirectRequestsView =
+    pathname === "/admin/direct-requests" ||
+    pathname === "/webapp/admin/direct-requests";
   const isAdminBlogsView =
     pathname === "/admin/blogs" || pathname === "/webapp/admin/blogs";
   const isAllServicesView = pathname === "/all-services" || pathname === "/";
@@ -446,60 +474,77 @@ export default function ServicesDashboard() {
     // Admin UI comes only from useConfirmedAdmin (/user/info), never localStorage.
   }, []);
 
-  const primaryItems = useMemo(() => {
-    const paidServicesItem: PrimaryNavItem = {
-      label: t("paidServices", "Paid Services"),
-      href: "/admin/paid-services",
-      icon: IndianRupee,
-    };
-
-    const baseItems: PrimaryNavItem[] = [
-        {
-          label: t("allServices", "All Works"),
-          href: "/all-services",
-          icon: BriefcaseBusiness,
-        },
-        {
-          label: t("myServices", "My Works"),
-          href: "/my-work",
-          icon: ClipboardList,
-        },
-        ...(showAdminNav ? [paidServicesItem] : []),
-        {
-          label: t("appliedServices", "Applied Works"),
-          href: "/applied-service",
-          icon: ClipboardList,
-        },
-        // Public tips for regular users (admins manage blogs via /admin/blogs)
-        ...(!showAdminNav
-          ? [
-              {
-                label: t("blogs", "Rojgar Tips"),
-                href: "/rojgar-tips",
-                icon: BookOpenText,
-              } satisfies PrimaryNavItem,
-            ]
-          : []),
-        {
-          label: t("aboutUs", "About us"),
-          href: "/about",
-          icon: Info,
-        },
-        {
-          label: t("installApp", "Install App"),
-          href: "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
-          external: true,
-          icon: Download,
-        },
-    ];
-    if (!showAdminNav) return baseItems;
+  const userNavItems = useMemo((): PrimaryNavItem[] => {
     return [
-      ...baseItems,
+      {
+        label: t("allServices", "All Works"),
+        href: "/all-services",
+        icon: BriefcaseBusiness,
+      },
+      {
+        label: t("myServices", "My Works"),
+        href: "/my-work",
+        icon: ClipboardList,
+      },
+      {
+        label: t("appliedServices", "Applied Works"),
+        href: "/applied-service",
+        icon: ClipboardList,
+      },
+      {
+        label: t("blogs", "Rojgar Tips"),
+        href: "/rojgar-tips",
+        icon: BookOpenText,
+      },
+      {
+        label: t("aboutUs", "About us"),
+        href: "/about",
+        icon: Info,
+      },
+      {
+        label: t("installApp", "Install App"),
+        href: "https://play.google.com/store/apps/details?id=com.kumarabhishek404.labourapp",
+        external: true,
+        icon: Download,
+      },
+    ];
+  }, [t]);
+
+  const adminNavItems = useMemo((): PrimaryNavItem[] => {
+    if (!showAdminNav) return [];
+    return [
+      {
+        label: t("paidServices", "Paid Services"),
+        href: "/admin/paid-services",
+        icon: IndianRupee,
+      },
       { label: t("blogs", "Blogs"), href: "/admin/blogs", icon: BookOpenText },
       { label: t("users", "Users"), href: "/admin/users", icon: Users },
-      { label: t("errorLogs", "Error Logs"), href: "/admin/error-logs", icon: ShieldAlert },
-      { label: t("analytics", "Analytics"), href: "/admin/analytics", icon: ShieldCheck },
-      { label: t("notifications", "Notifications"), href: "/admin/notifications", icon: Bell },
+      {
+        label: t("registeredServices", "Services"),
+        href: "/admin/registered-services",
+        icon: Layers,
+      },
+      {
+        label: t("directRequests", "Direct Requests"),
+        href: "/admin/direct-requests",
+        icon: Send,
+      },
+      {
+        label: t("errorLogs", "Error Logs"),
+        href: "/admin/error-logs",
+        icon: ShieldAlert,
+      },
+      {
+        label: t("analytics", "Analytics"),
+        href: "/admin/analytics",
+        icon: ShieldCheck,
+      },
+      {
+        label: t("notifications", "Notifications"),
+        href: "/admin/notifications",
+        icon: Bell,
+      },
     ];
   }, [t, showAdminNav]);
 
@@ -518,6 +563,8 @@ export default function ServicesDashboard() {
     isAdminAnalyticsView ||
     isAdminNotificationsView ||
     isAdminPaidServicesView ||
+    isAdminRegisteredServicesView ||
+    isAdminDirectRequestsView ||
     isAdminBlogsView;
 
   useEffect(() => {
@@ -603,7 +650,8 @@ export default function ServicesDashboard() {
     () => ({
       pathname,
       router,
-      primaryItems,
+      userNavItems,
+      adminNavItems,
       bottomItems,
       userPhoto,
       userName,
@@ -616,7 +664,8 @@ export default function ServicesDashboard() {
     [
       pathname,
       router,
-      primaryItems,
+      userNavItems,
+      adminNavItems,
       bottomItems,
       userPhoto,
       userName,
@@ -701,8 +750,12 @@ export default function ServicesDashboard() {
                                       ? t("notifications", "Notifications")
                                       : isAdminPaidServicesView
                                         ? t("paidServices", "Paid Services")
-                                        : isAdminBlogsView
-                                          ? t("blogs", "Blogs")
+                                        : isAdminRegisteredServicesView
+                                          ? t("registeredServices", "Services")
+                                          : isAdminDirectRequestsView
+                                            ? t("directRequests", "Direct Requests")
+                                            : isAdminBlogsView
+                                              ? t("blogs", "Blogs")
                               : t("allServices")}
                   </h1>
                 </div>
@@ -837,6 +890,10 @@ export default function ServicesDashboard() {
                 showAdminUi ? <AdminNotificationsPage /> : null
               ) : isAdminPaidServicesView ? (
                 showAdminUi ? <AdminPaidServicesPage /> : null
+              ) : isAdminRegisteredServicesView ? (
+                showAdminUi ? <AdminRegisteredServicesPage /> : null
+              ) : isAdminDirectRequestsView ? (
+                showAdminUi ? <AdminDirectRequestsPage /> : null
               ) : isAdminBlogsView ? (
                 showAdminUi ? (
                   <Suspense
