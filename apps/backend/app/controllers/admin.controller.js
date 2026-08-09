@@ -895,15 +895,20 @@ export const getAdminNotifications = async (req, res) => {
             unread: {
               $sum: { $cond: [{ $eq: ["$read", false] }, 1, 0] },
             },
-            // Count unique opens only among successfully sent notifications.
-            // `$ne: [field, null]` is unreliable (can match missing/null fields).
+            // Unique opens among SENT notifications.
+            // Prefer openedAt (tap/open tracking); fall back to read for legacy inbox views.
             opened: {
               $sum: {
                 $cond: [
                   {
                     $and: [
                       { $eq: ["$status", "SENT"] },
-                      { $eq: [{ $type: "$openedAt" }, "date"] },
+                      {
+                        $or: [
+                          { $eq: [{ $type: "$openedAt" }, "date"] },
+                          { $eq: ["$read", true] },
+                        ],
+                      },
                     ],
                   },
                   1,

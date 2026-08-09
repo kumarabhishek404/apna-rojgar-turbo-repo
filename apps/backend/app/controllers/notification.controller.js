@@ -765,10 +765,24 @@ export const handleMarkAsReadNotification = async (req, res) => {
   }
 
   try {
-    // Update the `read` field to true for the given notification IDs
+    // Mark read and stamp first-open time for inbox visibility tracking.
     const result = await Notification.updateMany(
-      { _id: { $in: notificationIds }, userId },
-      { $set: { read: true } }
+      { _id: { $in: notificationIds }, userId, status: "SENT" },
+      [
+        {
+          $set: {
+            read: true,
+            openedAt: { $ifNull: ["$openedAt", "$$NOW"] },
+            openCount: {
+              $cond: [
+                { $eq: [{ $type: "$openedAt" }, "date"] },
+                { $ifNull: ["$openCount", 0] },
+                { $add: [{ $ifNull: ["$openCount", 0] }, 1] },
+              ],
+            },
+          },
+        },
+      ],
     );
 
     res.status(200).json({
@@ -797,12 +811,18 @@ export const handleNotificationOpened = async (req, res) => {
       });
     }
 
+    // First open stamps openedAt; later opens only bump openCount.
     const notification = await Notification.findOneAndUpdate(
       { _id: notificationId, userId: req.user._id, status: "SENT" },
-      {
-        $set: { read: true, openedAt: new Date() },
-        $inc: { openCount: 1 },
-      },
+      [
+        {
+          $set: {
+            read: true,
+            openedAt: { $ifNull: ["$openedAt", "$$NOW"] },
+            openCount: { $add: [{ $ifNull: ["$openCount", 0] }, 1] },
+          },
+        },
+      ],
       { new: true },
     );
 
