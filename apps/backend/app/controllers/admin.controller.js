@@ -895,8 +895,21 @@ export const getAdminNotifications = async (req, res) => {
             unread: {
               $sum: { $cond: [{ $eq: ["$read", false] }, 1, 0] },
             },
+            // Count unique opens only among successfully sent notifications.
+            // `$ne: [field, null]` is unreliable (can match missing/null fields).
             opened: {
-              $sum: { $cond: [{ $ne: ["$openedAt", null] }, 1, 0] },
+              $sum: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ["$status", "SENT"] },
+                      { $eq: [{ $type: "$openedAt" }, "date"] },
+                    ],
+                  },
+                  1,
+                  0,
+                ],
+              },
             },
           },
         },
@@ -925,6 +938,8 @@ export const getAdminNotifications = async (req, res) => {
     const sent = notificationStats?.[0]?.sent || 0;
     const failed = notificationStats?.[0]?.failed || 0;
     const opened = notificationStats?.[0]?.opened || 0;
+    const rawOpenRate =
+      sent > 0 ? Math.round((opened / sent) * 1000) / 10 : 0;
     const stats = {
       total,
       sent,
@@ -939,7 +954,8 @@ export const getAdminNotifications = async (req, res) => {
       optOutsLast24h,
       deliveryRate:
         sent + failed > 0 ? Math.round((sent / (sent + failed)) * 1000) / 10 : 0,
-      openRate: sent > 0 ? Math.round((opened / sent) * 1000) / 10 : 0,
+      // Unique opens cannot exceed sent notifications.
+      openRate: Math.min(100, rawOpenRate),
     };
 
     res.status(200).json({
