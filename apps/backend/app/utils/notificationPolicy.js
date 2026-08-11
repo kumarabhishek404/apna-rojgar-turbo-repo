@@ -31,6 +31,8 @@ const PROMO_TYPES = new Set(["PAID_SERVICE_PROMOTION"]);
 const URGENT_TYPES = new Set([
   "PROFILE_SUSPEND",
   "SYSTEM_ERROR_ALERT",
+  "ADMIN_NEW_USER_ALERT",
+  "ADMIN_NEW_SERVICE_ALERT",
   "SERVICE_CANCELLED",
   "SERVICE_CANCELLED_BY_EMPLOYER",
   "SERVICE_DIRECT_BOOKING_CANCELLED_BY_EMPLOYER",
@@ -105,7 +107,11 @@ export const getNotificationPolicy = (type) => {
     };
   }
 
-  if (normalizedType === "SYSTEM_ERROR_ALERT") {
+  if (
+    normalizedType === "SYSTEM_ERROR_ALERT" ||
+    normalizedType === "ADMIN_NEW_USER_ALERT" ||
+    normalizedType === "ADMIN_NEW_SERVICE_ALERT"
+  ) {
     return {
       category: NOTIFICATION_CATEGORIES.SYSTEM,
       priority: NOTIFICATION_PRIORITIES.URGENT,

@@ -302,4 +302,18 @@ export const ACTIVE_NOTIFICATIONS: ActiveNotificationItem[] = [
     trigger: "Immediate (throttled)",
     category: "System",
   },
+  {
+    key: "ADMIN_NEW_USER_ALERT",
+    title: "New user registered",
+    audience: "Admin",
+    trigger: "Immediate",
+    category: "System",
+  },
+  {
+    key: "ADMIN_NEW_SERVICE_ALERT",
+    title: "New service created",
+    audience: "Admin",
+    trigger: "Immediate",
+    category: "System",
+  },
 ];

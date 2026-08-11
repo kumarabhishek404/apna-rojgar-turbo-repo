@@ -1,5 +1,46 @@
 import mongoose, { Schema } from "mongoose";
 
+/**
+ * Nested notification payload.
+ * IMPORTANT: `type` is a Mongoose reserved key — must use `{ type: String }`,
+ * otherwise Mongoose treats the whole `data` path as a String and rejects objects.
+ */
+const notificationDataSchema = new Schema(
+  {
+    actionBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    actionOn: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Service",
+    },
+    serviceIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Service",
+      },
+    ],
+    invitationId: {
+      type: Schema.Types.ObjectId,
+      ref: "Invitation",
+    },
+    requestId: {
+      type: Schema.Types.ObjectId,
+      ref: "Request",
+    },
+    url: { type: String },
+    type: { type: String },
+    id: { type: String },
+    notificationId: { type: String },
+  },
+  { _id: false },
+);
+
 const notificationSchema = new mongoose.Schema(
   {
     userId: {
@@ -46,35 +87,8 @@ const notificationSchema = new mongoose.Schema(
       required: true,
     },
     data: {
-      actionBy: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-      actionOn: {
-        type: Schema.Types.ObjectId,
-        ref: "User", // Reference to the user who is the subject of the action
-      },
-      serviceId: {
-        type: Schema.Types.ObjectId,
-        ref: "Service",
-      },
-      serviceIds: [
-        {
-          type: Schema.Types.ObjectId,
-          ref: "Service",
-        },
-      ],
-      invitationId: {
-        type: Schema.Types.ObjectId,
-        ref: "Invitation",
-      },
-      requestId: {
-        type: Schema.Types.ObjectId,
-        ref: "Request",
-      },
-      url: String,
-      type: String,
-      id: String,
+      type: notificationDataSchema,
+      default: () => ({}),
     },
     dedupKey: {
       type: String,
@@ -127,7 +141,7 @@ const notificationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 notificationSchema.index({

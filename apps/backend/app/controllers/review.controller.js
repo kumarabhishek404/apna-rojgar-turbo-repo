@@ -1,10 +1,15 @@
+import mongoose from "mongoose";
 import db from "../models/index.js";
 import logError from "../utils/addErrorLog.js";
 const User = db.user;
 const Review = db.review;
 
-async function updateAverageRating(userId) {
+async function updateAverageRating(userId, req = null) {
   try {
+    if (!mongoose.isValidObjectId(String(userId))) {
+      return;
+    }
+
     const reviews = await Review.find({ reviewee: userId });
     const user = await User.findById(userId);
 
@@ -26,7 +31,9 @@ async function updateAverageRating(userId) {
 
     await user.save();
   } catch (error) {
-    logError(error, req, 500);
+    logError(error, req, 500, "review.updateAverageRating", {
+      skipAdminNotify: error?.message === "User not found",
+    });
     console.error("Error updating average rating:", error);
   }
 }
@@ -41,6 +48,13 @@ export const handleAddUserReview = async (req, res) => {
   );
 
   try {
+    if (!mongoose.isValidObjectId(String(userId))) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user id",
+      });
+    }
+
     if (!rating || !ratingType || !comment) {
       console.log("[ERROR] Rating not provided");
       return res.status(400).json({
@@ -74,7 +88,7 @@ export const handleAddUserReview = async (req, res) => {
       comment,
     });
 
-    await updateAverageRating(userId);
+    await updateAverageRating(userId, req);
 
     return res.status(200).json({
       success: true,
@@ -82,8 +96,11 @@ export const handleAddUserReview = async (req, res) => {
       data: review,
     });
   } catch (error) {
-    logError(error, req, 500);
-    return res.status(400).json({
+    const statusCode = error?.name === "CastError" ? 400 : 500;
+    logError(error, req, statusCode, "review.add", {
+      skipAdminNotify: statusCode < 500,
+    });
+    return res.status(statusCode).json({
       success: false,
       message: error?.message || "Something went wrong while adding the review",
     });
@@ -120,7 +137,7 @@ export const handleUpdateUserReview = async (req, res) => {
     review.ratingType = ratingType;
     await review.save();
 
-    await updateAverageRating(userId);
+    await updateAverageRating(userId, req);
 
     return res.status(200).json({
       success: true,
@@ -128,8 +145,11 @@ export const handleUpdateUserReview = async (req, res) => {
       data: review,
     });
   } catch (error) {
-    logError(error, req, 500);
-    res.status(500).json({
+    const statusCode = error?.name === "CastError" ? 400 : 500;
+    logError(error, req, statusCode, "review.update", {
+      skipAdminNotify: statusCode < 500,
+    });
+    res.status(statusCode).json({
       success: false,
       message: error?.message || "Error updating review",
     });
@@ -153,7 +173,7 @@ export const handleDeleteUserReview = async (req, res) => {
       });
     }
 
-    await updateAverageRating(userId);
+    await updateAverageRating(userId, req);
 
     return res.status(200).json({
       success: true,
@@ -176,6 +196,13 @@ export const getAllUserReviews = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "User ID is missing",
+    });
+  }
+
+  if (!mongoose.isValidObjectId(String(userId))) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user id",
     });
   }
 
@@ -204,10 +231,16 @@ export const getAllUserReviews = async (req, res) => {
       },
     });
   } catch (error) {
-    logError(error, req, 500);
-    return res.status(500).json({
+    const statusCode = error?.name === "CastError" ? 400 : 500;
+    logError(error, req, statusCode, "review.list", {
+      skipAdminNotify: statusCode < 500,
+    });
+    return res.status(statusCode).json({
       success: false,
-      message: "Server error occurred while fetching user reviews",
+      message:
+        statusCode === 400
+          ? "Invalid user id"
+          : "Server error occurred while fetching user reviews",
     });
   }
 };

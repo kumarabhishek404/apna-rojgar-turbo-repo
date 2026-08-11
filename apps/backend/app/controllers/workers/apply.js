@@ -125,8 +125,21 @@ export const handleApplyToService = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Successfully applied to the service." });
   } catch (error) {
-    logError(error, req, 400);
-    res.status(400).json({ success: false, message: error.message });
+    const message = error?.message || "Failed to apply";
+    const isBusinessError =
+      /already applied|cannot apply|not in a hiring|Workers list is required|Skills mapping|do not have the required|Skill is missing|Invalid requirement|team member/i.test(
+        message,
+      );
+    const statusCode = isBusinessError || error?.statusCode === 400 ? 400 : 500;
+
+    // Business-rule rejects should not spam admin alerts / 500 metrics.
+    if (!isBusinessError) {
+      await logError(error, req, statusCode, "worker.apply", {
+        skipAdminNotify: statusCode < 500,
+      });
+    }
+
+    res.status(statusCode).json({ success: false, message });
   }
 };
 
@@ -265,7 +278,6 @@ const applyAsMediator = async (
     );
   } catch (error) {
     console.error("❌ Error in applyAsMediator:", error.message);
-    logError(error, req);
     throw error;
   }
 };
@@ -334,7 +346,6 @@ const applyAsWorker = async (user, service, skillsList, req) => {
 
     notifyEmployerApplied(user, service, req);
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };
@@ -364,7 +375,6 @@ const applyAsContractor = async (user, service, skillsList, manpower, req) => {
 
     notifyEmployerApplied(user, service, req);
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };
@@ -413,7 +423,6 @@ const checkServiceAvailability = async (
 
     return service;
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };
@@ -426,7 +435,6 @@ const validateUserSkills = async (userId, requiredSkills, req) => {
       requiredSkills.includes(skill.skill.toLowerCase()),
     );
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };
@@ -438,7 +446,6 @@ const validateUserHasSpecificSkill = async (userId, skillName, req) => {
     const needle = String(skillName).toLowerCase().trim();
     return user.skills.some((s) => String(s.skill).toLowerCase().trim() === needle);
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };
@@ -461,7 +468,6 @@ const getWorkersWithValidSkills = async (workers, requiredSkills, req) => {
       })
       .filter(Boolean);
   } catch (error) {
-    logError(error, req);
     throw error;
   }
 };

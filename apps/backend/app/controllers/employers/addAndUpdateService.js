@@ -10,6 +10,7 @@ import { handleSendNotificationController } from "../notification.controller.js"
 import Payment from "../../models/payment.model.js";
 import { syncPromotionPaymentByOrderId, linkPaymentToService } from "../../utils/payment.service.js";
 import { notifyMatchedUsersInBackground } from "../../utils/serviceNotificationHelpers.js";
+import { notifyAdminsOfNewService } from "../../utils/notifyAdmins.js";
 
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
@@ -76,6 +77,11 @@ export const handleAddService = asyncHandler(async (req, res) => {
     }
 
     await updateUserStats(employer._id, "SERVICE_CREATED");
+
+    // Fire-and-forget admin alert — keep create response fast.
+    void notifyAdminsOfNewService(service, employer).catch((notifyError) => {
+      console.error("[AddService] Admin new-service notify failed:", notifyError);
+    });
 
     res.status(201).json({
       success: true,

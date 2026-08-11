@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import logError from "../utils/addErrorLog.js";
+import { notifyAdminsOfNewUser } from "../utils/notifyAdmins.js";
 import { performance } from "perf_hooks";
 import axios from "axios";
 
@@ -120,6 +121,11 @@ export const handleRegister = async (req, res) => {
     });
 
     await user.save();
+
+    // Fire-and-forget admin alert — do not delay registration response.
+    void notifyAdminsOfNewUser(user).catch((notifyError) => {
+      console.error("[Register] Admin new-user notify failed:", notifyError);
+    });
 
     const token = generateToken(user);
 
@@ -781,6 +787,10 @@ export const handleLogin = async (req, res) => {
         mobile,
         status: "ACTIVE",
         registrationSource,
+      });
+
+      void notifyAdminsOfNewUser(user).catch((notifyError) => {
+        console.error("[Login] Admin new-user notify failed:", notifyError);
       });
     }
 

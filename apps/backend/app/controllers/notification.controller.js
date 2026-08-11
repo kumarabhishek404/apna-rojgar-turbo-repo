@@ -1,4 +1,5 @@
 import { Expo } from "expo-server-sdk";
+import mongoose from "mongoose";
 import Notification from "../models/notification.model.js";
 import db from "../models/index.js";
 import User from "../models/user.model.js";
@@ -22,6 +23,38 @@ const isProd = process.env.NODE_ENV === "production";
  * Local/dev sessions must never send notifications to real users.
  */
 const canDeliverNotifications = () => isProd;
+
+const toObjectIdOrNull = (value) => {
+  if (value == null || value === "") return null;
+  if (value instanceof mongoose.Types.ObjectId) return value;
+  const asString = String(value);
+  return mongoose.isValidObjectId(asString)
+    ? new mongoose.Types.ObjectId(asString)
+    : null;
+};
+
+const sanitizeNotificationData = (data = {}) => {
+  const serviceId = toObjectIdOrNull(data.serviceId);
+  const serviceIds = Array.isArray(data.serviceIds)
+    ? data.serviceIds.map(toObjectIdOrNull).filter(Boolean)
+    : serviceId
+      ? [serviceId]
+      : [];
+
+  return {
+    actionBy: toObjectIdOrNull(data.actionBy),
+    actionOn: toObjectIdOrNull(data.actionOn),
+    serviceId,
+    serviceIds,
+    invitationId: toObjectIdOrNull(data.invitationId),
+    requestId: toObjectIdOrNull(data.requestId),
+    url: data.url ? String(data.url) : undefined,
+    type: data.type ? String(data.type) : undefined,
+    id: data.id != null ? String(data.id) : undefined,
+    notificationId:
+      data.notificationId != null ? String(data.notificationId) : undefined,
+  };
+};
 
 const recordNotificationMetric = async (metric) => {
   try {
@@ -289,7 +322,9 @@ export const handleSendNotificationController = async (
     }
 
     const policy = getNotificationPolicy(key);
-    const enrichedData = enrichNotificationData(data);
+    const enrichedData = sanitizeNotificationData(
+      enrichNotificationData(data),
+    );
     const dedupKey =
       options.dedupKey || buildNotificationDedupKey(key, enrichedData);
     const metricBase = {
@@ -459,7 +494,12 @@ export const handleSendNotificationController = async (
       body: localizedMessage?.message,
       data: {
         ...enrichedData,
-        serviceIds: enrichedData.serviceId ? [enrichedData.serviceId] : [],
+        serviceIds:
+          enrichedData.serviceIds?.length > 0
+            ? enrichedData.serviceIds
+            : enrichedData.serviceId
+              ? [enrichedData.serviceId]
+              : [],
       },
       dedupKey,
       status: "PENDING",
@@ -480,8 +520,27 @@ export const handleSendNotificationController = async (
 
     return await deliverStoredNotification(notification, devices);
   } catch (error) {
-    logError(error, req, 500);
-    throw new Error("Failed to send notification");
+    const isValidation = error?.name === "ValidationError";
+    const isProvider =
+      /Expo responded|ECONNRESET|ETIMEDOUT|ENOTFOUND/i.test(
+        error?.message || "",
+      );
+    const identifier =
+      options.source === "CRON"
+        ? `cron - notification:${key}`
+        : "notification.send";
+
+    await logError(error, req, isValidation || isProvider ? 502 : 500, identifier, {
+      skipAdminNotify: isValidation || isProvider,
+      context: { notificationKey: key, userId: String(userId) },
+    });
+
+    // Return instead of throwing so cron callers do not double-log a wrapper error.
+    return {
+      success: false,
+      message: error?.message || "Failed to send notification",
+      reason: isValidation ? "VALIDATION" : isProvider ? "PROVIDER" : "ERROR",
+    };
   }
 };
 

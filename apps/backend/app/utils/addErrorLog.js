@@ -49,6 +49,21 @@ const logError = async (
   identifier = "Unknown Identifier",
   options = {},
 ) => {
+  const message = String(error?.message || "");
+  const isClientAuthNoise =
+    /invalid signature|jwt malformed|jwt must be provided|invalid token|token expired|login expired/i.test(
+      message,
+    ) ||
+    ["JsonWebTokenError", "TokenExpiredError", "NotBeforeError"].includes(
+      error?.name,
+    );
+
+  // Stale/wrong tokens are expected client issues — do not flood ErrorLog/admin.
+  if (isClientAuthNoise) {
+    console.warn("[ErrorLog] Skipped client auth noise:", message);
+    return;
+  }
+
   const {
     source = "backend",
     componentStack,

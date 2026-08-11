@@ -45,6 +45,8 @@ export const titles = {
     PAID_SERVICE_PROMOTION: "Get More Applicants with Paid Promotion",
     PROFILE_COMPLETION_REMINDER: "Complete Your Profile",
     SYSTEM_ERROR_ALERT: "System Error Alert",
+    ADMIN_NEW_USER_ALERT: "New User Registered",
+    ADMIN_NEW_SERVICE_ALERT: "New Service Created",
     SELECTED_AS_MEDIATOR: "You Have Been Selected as a Mediator",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR: "You Were Removed as a Mediator",
     SERVICE_COMPLETED: "The Work Was Completed",
@@ -101,6 +103,8 @@ export const titles = {
     PAID_SERVICE_PROMOTION: "पेड प्रमोशन से अधिक आवेदन पाएं",
     PROFILE_COMPLETION_REMINDER: "कृपया अपनी प्रोफ़ाइल पूरी करें",
     SYSTEM_ERROR_ALERT: "सिस्टम त्रुटि चेतावनी",
+    ADMIN_NEW_USER_ALERT: "नया उपयोगकर्ता पंजीकृत",
+    ADMIN_NEW_SERVICE_ALERT: "नई सेवा बनाई गई",
     SELECTED_AS_MEDIATOR: "आपको ठेकेदार के रूप में चुना गया है",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:
       "आपको ठेकेदार की भूमिका से हटा दिया गया है",
@@ -553,6 +557,10 @@ const messages = {
       "Complete these profile details to improve your visibility: {{missingDetails}}.",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} error at {{route}}: {{errorMessage}}",
+    ADMIN_NEW_USER_ALERT:
+      "New user registered: {{userName}} ({{mobile}}). Source: {{registrationSource}}.",
+    ADMIN_NEW_SERVICE_ALERT:
+      "{{employerName}} created {{serviceName}} ({{jobID}}). Open to review the work.",
     SELECTED_AS_MEDIATOR:
       "🎉 You have been selected as a Mediator for {{serviceName}}! 👥 {{workersCount}} workers are connected with you. 🤝 Please stay active to support them effectively.",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:
@@ -643,6 +651,10 @@ const messages = {
       "अपनी प्रोफ़ाइल बेहतर दिखाने के लिए ये जानकारी पूरी करें: {{missingDetails}}।",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} पर {{route}} में त्रुटि: {{errorMessage}}",
+    ADMIN_NEW_USER_ALERT:
+      "नया उपयोगकर्ता पंजीकृत: {{userName}} ({{mobile}}). स्रोत: {{registrationSource}}.",
+    ADMIN_NEW_SERVICE_ALERT:
+      "{{employerName}} ने {{serviceName}} ({{jobID}}) बनाया है। समीक्षा के लिए खोलें।",
     SELECTED_AS_MEDIATOR:
       "🎉 आपको {{serviceName}} के लिए ठेकेदार चुना गया है। 👥 {{workersCount}} मजदूर आपके साथ जुड़े हैं। 🤝 कृपया उनकी मदद के लिए सक्रिय रहें।",
     REMOVE_YOUR_SELECTION_AS_MEDIATOR:

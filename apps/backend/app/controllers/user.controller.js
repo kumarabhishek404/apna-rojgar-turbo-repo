@@ -842,12 +842,44 @@ export const getUsersOnRole = async (req, res) => {
     const listMatch =
       sortBy === "trusted_profiles" ? withTrustedProfileMatch(match) : match;
 
+    const normalizeNearPoint = (raw) => {
+      if (!raw) return null;
+      let candidate = raw;
+      if (typeof candidate === "string") {
+        try {
+          candidate = JSON.parse(candidate);
+        } catch {
+          return null;
+        }
+      }
+      // Legacy docs sometimes stored [lng, lat] directly.
+      if (Array.isArray(candidate) && candidate.length === 2) {
+        const lng = Number(candidate[0]);
+        const lat = Number(candidate[1]);
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+        return { type: "Point", coordinates: [lng, lat] };
+      }
+      if (!candidate || typeof candidate !== "object") return null;
+      const coordinates = Array.isArray(candidate.coordinates)
+        ? candidate.coordinates.map((value) => Number(value))
+        : null;
+      if (
+        !coordinates ||
+        coordinates.length !== 2 ||
+        !Number.isFinite(coordinates[0]) ||
+        !Number.isFinite(coordinates[1])
+      ) {
+        return null;
+      }
+      return { type: "Point", coordinates };
+    };
+
     // Aggregation pipeline
     const pipeline = [];
     const shouldSortNearest = sortBy === "nearest";
+    const nearPoint = normalizeNearPoint(loggedInUser?.geoLocation);
     // Trusted tab must include users without geo — do not use $geoNear for trusted_profiles.
-    const shouldUseGeoNear =
-      loggedInUser?.geoLocation && (distance || shouldSortNearest);
+    const shouldUseGeoNear = nearPoint && (distance || shouldSortNearest);
 
     if (shouldUseGeoNear) {
       const maxDistanceKm =
@@ -860,7 +892,7 @@ export const getUsersOnRole = async (req, res) => {
       pipeline.push({
         $geoNear: {
           key: "geoLocation",
-          near: loggedInUser.geoLocation,
+          near: nearPoint,
           distanceField: "distance",
           maxDistance: maxDistanceKm * 1000,
           spherical: true,
