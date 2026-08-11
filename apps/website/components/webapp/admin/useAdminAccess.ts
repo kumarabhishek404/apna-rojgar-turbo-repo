@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiRequest, getAuth } from "@/lib/auth";
+import { apiRequest, getAuth, redirectToLoginIfNeeded } from "@/lib/auth";
 import { isAdminUser } from "@/lib/isAdminUser";
 
 export function useAdminAccess() {
@@ -14,10 +14,16 @@ export function useAdminAccess() {
   useEffect(() => {
     let mounted = true;
 
-    const deny = () => {
+    const denyNonAdmin = () => {
       if (!mounted) return;
       setStatus("denied");
       router.replace("/all-services");
+    };
+
+    const denyUnauthenticated = () => {
+      if (!mounted) return;
+      setStatus("denied");
+      redirectToLoginIfNeeded();
     };
 
     const run = async () => {
@@ -27,7 +33,7 @@ export function useAdminAccess() {
 
       const auth = getAuth();
       if (!auth?.token) {
-        deny();
+        denyUnauthenticated();
         return;
       }
 
@@ -46,7 +52,7 @@ export function useAdminAccess() {
           await new Promise((r) => setTimeout(r, 400));
           if (!mounted) return;
           if (!getAuth()?.token) {
-            deny();
+            denyUnauthenticated();
             return;
           }
           const res = await attempt();
@@ -55,7 +61,11 @@ export function useAdminAccess() {
           setStatus(ok ? "allowed" : "denied");
           if (!ok) router.replace("/all-services");
         } catch {
-          deny();
+          if (!getAuth()?.token) {
+            denyUnauthenticated();
+            return;
+          }
+          denyNonAdmin();
         }
       }
     };

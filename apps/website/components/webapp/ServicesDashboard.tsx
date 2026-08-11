@@ -26,7 +26,7 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { apiRequest, clearAuth, getAuth } from "@/lib/auth";
+import { apiRequest, clearAuth, getAuth, redirectToLoginIfNeeded } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { isAdminUser } from "@/lib/isAdminUser";
 import { useConfirmedAdmin } from "@/lib/useConfirmedAdmin";
@@ -246,7 +246,7 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
           <button
             type="button"
             onClick={onDismiss}
-            className="flex min-w-[3rem] cursor-pointer items-center justify-center border-l border-slate-200/70 bg-[#22409a] text-white transition hover:bg-[#1a3278] active:bg-[#162a66]"
+            className="flex min-w-[3rem] cursor-pointer items-center justify-center bg-white text-[#22409a] transition hover:bg-slate-50 active:bg-slate-100"
             aria-label="Close menu"
           >
             <X size={20} strokeWidth={2.25} />
@@ -375,7 +375,7 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
                     onClick={() => {
                       onNavigate?.();
                       clearAuth();
-                      router.push("/");
+                      window.location.assign("/");
                     }}
                     className={`${navItemBase} w-full text-left text-red-200 hover:bg-red-500/20 hover:text-red-50`}
                   >
@@ -472,6 +472,13 @@ export default function ServicesDashboard() {
     setUserMobile(profile.mobile);
     setUserPhoto(profile.photo);
     // Admin UI comes only from useConfirmedAdmin (/user/info), never localStorage.
+  }, []);
+
+  // Dashboard shell requires a session — send expired/cleared users to home + login.
+  useEffect(() => {
+    if (!getAuth()?.token) {
+      redirectToLoginIfNeeded();
+    }
   }, []);
 
   const userNavItems = useMemo((): PrimaryNavItem[] => {
@@ -573,8 +580,9 @@ export default function ServicesDashboard() {
   }, [isAnyAdminView, adminChecked, isAdmin, router]);
 
   useEffect(() => {
-    if (mobileNavOpen) closeMobileNav();
-  }, [pathname, mobileNavOpen, closeMobileNav]);
+    // Close drawer only when the route changes — not when it opens.
+    closeMobileNav();
+  }, [pathname, closeMobileNav]);
 
   useEffect(() => {
     if (!mobileNavOpen) return;

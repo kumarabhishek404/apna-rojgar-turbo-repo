@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { checkStoredToken, clearAuth, getAuth } from "@/lib/auth";
+import {
+  checkStoredToken,
+  clearAuth,
+  getAuth,
+  redirectToLoginIfNeeded,
+} from "@/lib/auth";
 
 /**
  * On hard refresh, confirm the stored JWT is still valid.
@@ -25,15 +30,8 @@ export default function AuthBootstrap() {
       }
 
       // result === "invalid"
-      if (typeof window === "undefined") return;
       clearAuth();
-      const publicPaths = new Set(["/", "/register"]);
-      if (publicPaths.has(window.location.pathname)) return;
-      const inFlight =
-        window.sessionStorage.getItem("auth_redirect_in_flight") === "1";
-      if (inFlight) return;
-      window.sessionStorage.setItem("auth_redirect_in_flight", "1");
-      window.location.replace("/?login=1");
+      redirectToLoginIfNeeded();
     };
     void run();
   }, []);
