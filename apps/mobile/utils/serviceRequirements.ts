@@ -62,3 +62,13 @@ export function getRequirementsValidationError(
 
   return null;
 }
+
+/** Field-level check while the employer types pay per day. Empty is not an error until save. */
+export function getPayPerDayFieldError(value: unknown): string | null {
+  const raw = value == null ? "" : String(value).trim();
+  if (!raw) return null;
+  const pay = parsePayPerDay(raw);
+  if (pay == null) return "payPerDayShouldBeInNumber";
+  if (pay < MIN_PAY_PER_DAY) return "payPerDayMustBeAtLeast500";
+  return null;
+}

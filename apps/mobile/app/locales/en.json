@@ -443,6 +443,7 @@
   "payPerDayMustBeGreaterThan500": "Pay per day must be at least ₹500",
   "payPerDayMustBeAtLeast500": "Pay per day must be at least ₹500",
   "enterPayPerDayMin500": "Enter pay per day (at least ₹500)",
+  "payPerDayMinHint": "Minimum ₹{{amount}} per day. You cannot add this work with a lower wage.",
   "totalRequiredMustBeGreaterThan0": "Total required must be greater than 0",
   "ratePerDay": "Rate per day",
   "search": "Search",
@@ -1560,7 +1561,7 @@
   "locationTipText": "Workers decide quickly based on distance and start date. Clear info gets faster responses.",
 
   "hireWorkersTitle": "Hire workers",
-  "hireWorkersSubtitle": "Choose workers, set salary and quantity.",
+  "hireWorkersSubtitle": "Choose workers, set salary (minimum ₹500/day) and quantity.",
   "salaryTipTitle": "Tip to get faster applicants",
   "salaryTipText": "Pay at least ₹500 per day. Higher and fair salary attracts workers faster.",
   "enterValidSalary": "Enter valid daily salary",

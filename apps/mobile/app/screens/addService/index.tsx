@@ -349,6 +349,13 @@ const AddServiceScreen = () => {
         imageCount: images.length,
       });
 
+      const requirementsError = getRequirementsValidationError(requirements);
+      if (requirementsError) {
+        TOAST.error(t(requirementsError));
+        throw new Error(t(requirementsError));
+      }
+      const safeRequirements = normalizeRequirements(requirements);
+
       const formData: any = new FormData();
 
       const imageParts = await buildServiceImageUploadParts(images);
@@ -376,7 +383,7 @@ const AddServiceScreen = () => {
       formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
       formData.append("duration", String(duration));
       formData.append("bookingType", "byService");
-      formData.append("requirements", JSON.stringify(requirements));
+      formData.append("requirements", JSON.stringify(safeRequirements));
       formData.append("facilities", JSON.stringify(facilities));
 
       const response: any = await EMPLOYER?.editService(formData);

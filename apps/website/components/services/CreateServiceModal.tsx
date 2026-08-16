@@ -161,11 +161,11 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         !req.name ||
         req.count < 1 ||
         !req.payPerDay ||
-        Number(req.payPerDay) <= 500,
+        Number(req.payPerDay) < 500,
     );
     if (invalidRequirement) {
       setCreateIssue(
-        "Please complete requirement details (worker, count, and pay/day more than ₹500).",
+        "Please complete requirement details (worker, count, and pay/day at least ₹500).",
       );
       return false;
     }
@@ -215,10 +215,10 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
           !req.name ||
           req.count < 1 ||
           !req.payPerDay ||
-          Number(req.payPerDay) <= 500,
+          Number(req.payPerDay) < 500,
       )
     ) {
-      setCreateIssue("Pay per day must be more than ₹500 for each worker.");
+      setCreateIssue("Pay per day must be at least ₹500 for each worker.");
       return;
     }
     if (
@@ -520,20 +520,31 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                     }
                     placeholder={t("count")}
                   />
-                  <input
-                    type="number"
-                    min={501}
-                    className={fieldClass}
-                    value={req.payPerDay}
-                    onChange={(e) =>
-                      setCreateForm((p) => {
-                        const requirements = [...p.requirements];
-                        requirements[idx] = { ...requirements[idx], payPerDay: e.target.value };
-                        return { ...p, requirements };
-                      })
-                    }
-                    placeholder="Pay/day (more than ₹500)"
-                  />
+                  <div>
+                    <input
+                      type="number"
+                      min={500}
+                      className={fieldClass}
+                      value={req.payPerDay}
+                      onChange={(e) =>
+                        setCreateForm((p) => {
+                          const requirements = [...p.requirements];
+                          requirements[idx] = { ...requirements[idx], payPerDay: e.target.value };
+                          return { ...p, requirements };
+                        })
+                      }
+                      placeholder="Pay/day (min ₹500)"
+                    />
+                    <p
+                      className={`mt-1 text-xs ${
+                        req.payPerDay !== "" && Number(req.payPerDay) < 500
+                          ? "font-semibold text-red-600"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      Minimum ₹500 per day
+                    </p>
+                  </div>
                 </div>
               ))}
               <button
