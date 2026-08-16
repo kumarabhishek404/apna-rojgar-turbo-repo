@@ -14,7 +14,6 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
-import USER from "@/app/api/user";
 import { useForm, Controller } from "react-hook-form";
 import TextInputComponent from "@/components/inputs/TextInputWithIcon";
 import CustomHeading from "@/components/commons/CustomHeading";
@@ -35,10 +34,7 @@ import {
   shouldSkipOtpClient,
 } from "@/utils/devOtp";
 import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
-import {
-  getMobileEffectiveRole,
-  normalizeMobileUserSession,
-} from "@/utils/mobileRole";
+import { isStoredAdminRole } from "@/utils/mobileRole";
 
 const isBlankValue = (value: unknown) =>
   value === undefined || value === null || String(value).trim() === "";
@@ -152,17 +148,14 @@ export default function Login() {
       //   return;
       // }
 
-      const normalizedUser = normalizeMobileUserSession({
+      const sessionUser = {
         ...user,
         profilePicture: user?.profilePicture || user?.profileImage || "",
-      })!;
-      const effectiveRole =
-        getMobileEffectiveRole(normalizedUser) ||
-        String(normalizedUser?.role ?? "");
+      };
 
       // 2️⃣ Incomplete onboarding (main details)
       if (!user?.name || !user?.address || !user?.gender || !user?.age) {
-        setUserDetails(normalizedUser);
+        setUserDetails(sessionUser);
         router.push({
           pathname: "/screens/auth/register/second",
           params: { userId: user._id },
@@ -171,9 +164,9 @@ export default function Login() {
       }
 
       // 3️⃣ Role/skills are not completed yet.
-      // The role/skills screen is the source of truth for this onboarding step.
-      if (!hasRole(user?.role)) {
-        setUserDetails(normalizedUser);
+      // ADMIN already has a platform role — skip picker so we never overwrite it on login.
+      if (!hasRole(user?.role) && !isStoredAdminRole(user)) {
+        setUserDetails(sessionUser);
         router.push({
           pathname: "/screens/auth/register/fourth",
           params: { userId: user._id },
@@ -181,19 +174,13 @@ export default function Login() {
         return;
       }
 
-      // 4️⃣ Route to profile-picture step on every login.
-      // Keep profile photo optional (skip still allowed on that screen).
-      setUserDetails({ isAuth: true, ...normalizedUser });
+      // 4️⃣ Profile-picture step on every login (photo optional).
+      // Do not pass role/skills — that step must not persist EMPLOYER over ADMIN.
+      setUserDetails({ isAuth: true, ...sessionUser });
       router.push({
         pathname: "/screens/auth/register/fifth",
         params: {
           userId: user._id,
-          role: String(effectiveRole),
-          skills: JSON.stringify(Array.isArray(user?.skills) ? user.skills : []),
-          numberOfWorkersInTeam:
-            effectiveRole === "MEDIATOR" && user?.numberOfWorkersInTeam != null
-              ? String(user.numberOfWorkersInTeam)
-              : "",
           fromLogin: "1",
           profileMissing: hasProfilePicture(user) ? "0" : "1",
         },
@@ -209,7 +196,7 @@ export default function Login() {
         refreshUser().then((updatedUser) =>
           setUserDetails({
             isAuth: true,
-            ...(normalizeMobileUserSession(updatedUser) || updatedUser),
+            ...(updatedUser || {}),
           }),
         ),
       ]);

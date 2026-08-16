@@ -10,6 +10,7 @@ function normalizeExplicitRole(role: unknown): AppUserRole | null {
   const r = String(role ?? "")
     .toUpperCase()
     .trim();
+  if (r === "ADMIN") return "EMPLOYER";
   if (r === "WORKER" || r === "MEDIATOR" || r === "EMPLOYER") return r;
   return null;
 }

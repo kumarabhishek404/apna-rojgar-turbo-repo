@@ -29,6 +29,7 @@ import { removeToken } from "@/utils/authStorage";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import APP_CONTEXT from "@/app/context/locale";
 import { promptForAppReview } from "@/utils/appStoreReview";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 const ProfileMenu = ({ disabled }: any) => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
@@ -39,7 +40,8 @@ const ProfileMenu = ({ disabled }: any) => {
     Atoms?.NotificationConsentAtom
   );
   const { logout } = USE_LOGOUT.useLogout();
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const mutationDeactivateAccount = useMutation({
     mutationKey: ["updateProfile"],

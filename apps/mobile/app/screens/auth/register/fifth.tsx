@@ -117,9 +117,9 @@ const UploadProfilePictureScreen = () => {
         _id: userId,
       };
 
-      // Registration flow: persist role/skills here.
-      // Login flow: keep existing role/skills untouched unless they are explicitly provided.
-      if (!isLoginFlow || hasRoleParam) {
+      // Registration: persist role/skills. Login: never send role — ADMIN must stay ADMIN
+      // until the user explicitly changes it from Profile.
+      if (!isLoginFlow) {
         profileUpdatePayload.role = hasRoleParam ? roleParam : userDetails?.role;
         profileUpdatePayload.skills =
           Array.isArray(parsedSkills) && parsedSkills.length > 0

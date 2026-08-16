@@ -50,8 +50,9 @@ const CATEGORY_ICON_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const UnifiedHomeDashboard = () => {
-  const { role, locale } = APP_CONTEXT.useApp();
+  const { role: contextRole, locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
   const {
     data: servicesRes,
     isLoading: loadingServices,
@@ -589,7 +590,7 @@ const UnifiedHomeDashboard = () => {
               <View style={styles.sectionGap}>{categorySection}</View>
             ) : null}
 
-            {getMobileEffectiveRole(userDetails) !== "EMPLOYER" ? (
+            {role !== "EMPLOYER" ? (
               <View style={styles.sectionGap}>{servicesSection}</View>
             ) : null}
             <View style={styles.sectionGap}>{workersSection}</View>

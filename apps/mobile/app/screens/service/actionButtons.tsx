@@ -32,6 +32,7 @@ import { handleCall } from "@/constants/functions";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import APP_CONTEXT from "@/app/context/locale";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents } from "@/utils/analyticsEvents";
 
@@ -103,7 +104,8 @@ const ServiceActionButtons = ({
   const [selectedSkill, setSelectedSkill] = useState("");
   const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
   const [isAddSkill, setIsAddSkill] = useState(false);
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const hasUsersAppliedOrSelected =
     service?.appliedUsers?.some((user: any) => user.status === "PENDING") ||

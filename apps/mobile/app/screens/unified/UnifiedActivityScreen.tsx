@@ -1005,7 +1005,7 @@ const resolveActivityRole = (
   appRole: string,
 ): ApiRole => {
   const mobileRole = getMobileEffectiveRole(
-    userDetails as { isAdmin?: boolean; role?: string | null },
+    userDetails as { role?: string | null },
   );
   if (mobileRole === "WORKER" || mobileRole === "EMPLOYER" || mobileRole === "MEDIATOR") {
     return mobileRole;

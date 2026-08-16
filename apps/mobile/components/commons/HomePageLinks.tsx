@@ -8,6 +8,7 @@ import CustomText from "./CustomText";
 import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
 import APP_CONTEXT from "@/app/context/locale";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 type AssetKey = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
@@ -34,7 +35,8 @@ const APNA_ASSETS: Record<AssetKey, ImageSourcePropType> = {
 
 const HomePageLinks = () => {
   const userDetails: any = useAtomValue(Atoms?.UserAtom);
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const ROLE_CONFIG: Record<
     string,

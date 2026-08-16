@@ -20,12 +20,11 @@ import {
 import Colors from "@/constants/Colors";
 import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import Atoms from "../AtomStore";
 import NOTIFICATION from "../api/notification";
 import ExitConfirmationModal from "@/components/commons/ExitPopup";
 import UserProfile from "../screens/bottomTabs/(user)/profile";
-import API_CLIENT from "../api";
 import { getToken } from "@/utils/authStorage";
 import { uploadPendingProfileImage } from "@/utils/backgroundImageUpload";
 import REFRESH_USER from "../hooks/useRefreshUser";
@@ -34,7 +33,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
 import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
-import { getMobileEffectiveRole, isMobileAdminUser, normalizeMobileUserSession } from "@/utils/mobileRole";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
+import useUnreadNotificationsHandler from "../hooks/useInAppNotifications";
+import triggerLocalNotification from "@/utils/triggerLocalNotification";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -69,13 +70,18 @@ export default function Layout() {
 
   const [, setNotificationCount]: any = useAtom(Atoms.notificationCount);
   const pathname = usePathname();
-  const [userDetails, setUserDetails] = useAtom(Atoms.UserAtom);
+  const userDetails = useAtomValue(Atoms.UserAtom);
 
   const [showExitModal, setShowExitModal] = useState(false);
+  const [unreadNotificationPayload, setUnreadNotificationPayload] = useState<any>(null);
   const history = useRef<string[]>([]);
   const [isReady, setIsReady] = useState(false);
   const [storageHydrated, setStorageHydrated] = useState(false);
   const { refreshUser } = REFRESH_USER.useRefreshUser();
+  useUnreadNotificationsHandler(
+    unreadNotificationPayload,
+    triggerLocalNotification,
+  );
 
   useEffect(() => {
     setIsReady(true);
@@ -100,10 +106,6 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    if (isMobileAdminUser(userDetails)) {
-      setUserDetails((prev: any) => normalizeMobileUserSession(prev) ?? prev);
-      return;
-    }
     const effectiveRole = getMobileEffectiveRole(userDetails);
     if (effectiveRole) setRole(effectiveRole);
   }, [userDetails]);
@@ -117,18 +119,21 @@ export default function Layout() {
     const fetchUnreadNotifications = async () => {
       if (!shouldPollNotifications) {
         setNotificationCount(0);
+        setUnreadNotificationPayload(null);
         return;
       }
 
       const token = await getToken();
       if (!token) {
         setNotificationCount(0);
+        setUnreadNotificationPayload(null);
         return;
       }
 
       try {
         const data = await NOTIFICATION.fetchUnreadNotificationsCount();
         setNotificationCount(data?.unreadCount || 0);
+        setUnreadNotificationPayload(data);
       } catch (error: unknown) {
         if (!isAuthApiError(error)) {
           console.error("Error fetching notifications:", error);
@@ -143,6 +148,7 @@ export default function Layout() {
       intervalId = setInterval(fetchUnreadNotifications, POLLING_INTERVAL);
     } else {
       setNotificationCount(0);
+      setUnreadNotificationPayload(null);
     }
 
     return () => {
@@ -287,7 +293,7 @@ export default function Layout() {
 
   const apiRole = getMobileEffectiveRole(userDetails);
 
-  /** Bottom labels match employer / worker / mediator UX (ADMIN → EMPLOYER). */
+  /** Bottom labels match worker / employer / mediator UX (stored ADMIN uses employer labels). */
   const workTabTitleKey =
     apiRole === "WORKER" ? "tabWork" : "tabNavWorkLabour";
   const peopleTabTitleKey =

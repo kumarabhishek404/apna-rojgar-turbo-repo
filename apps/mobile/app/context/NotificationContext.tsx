@@ -12,6 +12,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import Atoms from "@/app/AtomStore";
 import * as Linking from "expo-linking";
 import { getServiceDetailsDeepLink } from "@/utils/serviceDeepLink";
+import { openNotificationTarget } from "@/utils/openNotificationTarget";
 
 interface NotificationContextType {
   expoPushToken: string | null;
@@ -77,7 +78,9 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
           JSON.stringify(response, null, 2),
         );
 
-        const data = response?.notification?.request?.content?.data;
+        const data = response?.notification?.request?.content?.data as
+          | Record<string, any>
+          | undefined;
 
         console.log("📦 Notification Data:", data);
 
@@ -87,9 +90,15 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
           return;
         }
 
-        // ✅ Case 2: Manual fallback (if no url)
+        // ✅ Case 2: Job deep link
         if (data?.type === "JOB" && data?.id) {
           Linking.openURL(getServiceDetailsDeepLink(String(data.id)));
+          return;
+        }
+
+        // ✅ Case 3: Backend notification payload (all roles, including admin)
+        if (data?.serviceId || data?.type) {
+          openNotificationTarget({ type: data.type, data });
           return;
         }
 

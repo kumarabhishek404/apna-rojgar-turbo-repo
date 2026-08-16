@@ -77,7 +77,6 @@
   "testimonials": "समीक्षाएँ",
   "companySuccess": "कंपनी सफलता",
   "viewDetails": "विवरण देखें",
-
   "workerAddedToFavourites": "मज़दूर को पसंदीदा में जोड़ा गया",
   "workerRemovedFromFavourites": "मज़दूर को पसंदीदा से हटाया गया",
   "mediatorAddedToFavourites": "ठेकेदार को पसंदीदा में जोड़ा गया",
@@ -93,7 +92,6 @@
   "yourApplicationCancelledSuccessfully": "आपका आवेदन सफलतापूर्वक रद्द कर दिया गया",
   "serviceCompletedSuccessfully": "काम सफलतापूर्वक पूर्ण हो गई",
   "workerSelectedSuccessfully": "मज़दूर को सफलतापूर्वक चुना गया",
-
   "selected": "चयनित",
   "proposals": "प्रस्ताव",
   "select": "चयन करें",
@@ -146,18 +144,15 @@
   "dhaanPitai": "धान पिटाई",
   "alooBuwai": "आलू बुवाई",
   "bazraaKatai": "बाजरा काटाई",
-
   "help": "सहायता",
   "editService": "काम संपादित करें",
   "addService": "काम जोड़ें",
   "addNeed": "काम जोड़ें",
   "myProfile": "प्रोफ़ाइल",
-
   "titleDescription": "शीर्षक और विवरण",
   "addressDate": "पता और तिथि",
   "requirements": "काम",
   "images": "चित्र",
-
   "name": "नाम",
   "contacts": "संपर्क",
   "skills": "कौशल",
@@ -169,19 +164,16 @@
   "travelling": "लाने ले जाने",
   "distance": "दूरी",
   "settings": "सेटिंग्स",
-
   "active": "सक्रिय",
   "upcoming": "आगामी",
   "hiring": "भर्ती",
   "suspended": "विलंबित",
   "disabled": "अक्षम",
-
   "all": "सभी",
   "sent": "भेजे गए",
   "received": "प्राप्त",
   "accepted": "स्वीकृत",
   "rejected": "अस्वीकृत",
-
   "andhrapradesh": "आंध्र प्रदेश",
   "arunachalpradesh": "अरुणाचल प्रदेश",
   "assam": "असम",
@@ -220,12 +212,10 @@
   "ladakh": "लद्दाख",
   "jammuandkashmir": "जम्मू और कश्मीर",
   "nctdelhi": "एनसीटी दिल्ली",
-
   "india": "भारत",
   "canada": "कनाडा",
   "belgium": "बेल्जियम",
   "algeria": "अल्जीरिया",
-
   "faq_how_to_recharge_fastag_question": "फास्टैग को कैसे रिचार्ज करें?",
   "faq_how_to_recharge_fastag_answer": [
     "1. नया फास्टैग जोड़ें।",
@@ -233,32 +223,27 @@
     "3. रिचार्ज बटन पर क्लिक करें, और राशि दर्ज करें।",
     "4. भुगतान विधि चुनें और भुगतान करें।"
   ],
-
   "faq_recharge_different_provider_question": "क्या मैं विभिन्न प्रदाताओं के फास्टैग को रिचार्ज कर सकता हूँ?",
   "faq_recharge_different_provider_answer": [
     "हाँ, आप इस ऐप का उपयोग करके विभिन्न प्रदाताओं के फास्टैग को रिचार्ज कर सकते हैं।"
   ],
-
   "faq_recharge_failed_question": "रिचार्ज विफल हो गया, लेकिन खाते से राशि कट गई?",
   "faq_recharge_failed_answer": [
     "कृपया हमारे समर्थन टीम से संपर्क करें, हम इस समस्या को हल करने में आपकी सहायता करेंगे।"
   ],
-
   "faq_add_card_question": "आसान रिचार्ज के लिए क्रेडिट या डेबिट कार्ड कैसे जोड़ें?",
   "faq_add_card_answer": [
     "आसान रिचार्ज के लिए आप भुगतान अनुभाग में अपने कार्ड विवरण जोड़ सकते हैं।"
   ],
-
   "faq_view_tolls_question": "क्या मैं ऐप का उपयोग शुरू करने से पहले किए गए टोल देख सकता हूँ?",
   "faq_view_tolls_answer": [
     "क्षमा करें, ऐप का उपयोग शुरू करने से पहले किए गए टोल देखे नहीं जा सकते।"
   ],
-
   "workType": "काम का प्रकार",
   "workSubType": "काम का उप प्रकार",
   "workTypeIsRequired": "काम का प्रकार जरूरी है",
   "workSubTypeIsRequired": "काम का उप प्रकार जरूरी है",
-  "selectWorkSubType": "काम का उप प्रकार चुनें",
+  "selectWorkSubType": "काम का प्रकार चुनें",
   "workRequirements": "काम",
   "workRequirementAddPayHint": "स्पष्टता के लिए मूल्य जोड़ें (वैकल्पिक)",
   "currentLocation": "वर्तमान स्थान",
@@ -278,7 +263,6 @@
   "saveAndNext": "सहेजें और आगे बढ़ें",
   "count": "संख्या",
   "esi_pf": "ईएसआई/पीएफ",
-
   "pendingApprovalHeading": "प्रोफ़ाइल अनुमोदन लंबित",
   "pendingApprovalMessage": "आपकी प्रोफ़ाइल वर्तमान में समीक्षा के अधीन है। सभी सुविधाओं तक पहुँचने से पहले अनुमोदन आवश्यक है।",
   "inactiveHeading": "खाता बंद",
@@ -292,11 +276,9 @@
   "reviewAddedSuccessfully": "समीक्षा सफलतापूर्वक जोड़ी गई",
   "reviewEditedSuccessfully": "समीक्षा सफलतापूर्वक संपादित की गई",
   "reviewDeletedSuccessfully": "समीक्षा सफलतापूर्वक हटाई गई",
-
   "selectWorkers": "अपनी टीम से सदस्य चुनें",
-  "selectedWorkers": "चुने गए सदस्य",
+  "selectedWorkers": "चुने हुए मजदूर",
   "startAConversation": "एक बातचीत शुरू करें",
-
   "howWouldYouRate": "आप इस मज़दूर के साथ अपना अनुभव कैसे मानते हैं?",
   "whatDidYouLike": "आपने सबसे ज्यादा क्या पसंद किया?",
   "feedbackIsRequired": "प्रतिक्रिया आवश्यक है",
@@ -314,7 +296,6 @@
   "qualityOfWork": "काम की गुणवत्ता",
   "cleanliness": "साफ़ रहना",
   "overallExperience": "कुल अनुभव",
-
   "collectionPlaces": "संग्रह स्थान",
   "extraFacilities": "अतिरिक्त सुविधाएं",
   "teamCollection": "टीम संग्रह",
@@ -370,7 +351,7 @@
   "pleaseCheckYourEmail": "कृपया अपना ईमेल देखें",
   "weHaveSentACodeTo": "हमने एक कोड दें है",
   "verifyEmailAddress": "ईमेल पता सत्यापित करें",
-  "save": "सहेजें",
+  "save": "सेव करें",
   "saveAndVerify": "सहेजें और सत्यापित करें",
   "pleaseCheckYourEmailForVerificationCode": "कृपया अपना ईमेल देखें जिसमें सत्यापन कोड है",
   "pleaseCheckYourEmailForVerificationCodeText": "हमने एक कोड दें है",
@@ -535,8 +516,6 @@
   "profileUpdatedSuccessfully": "प्रोफ़ाइल सफलतापूर्वक अपडेट हो गया",
   "fetched": "प्राप्त",
   "from": "से",
-  "adminSettings": "अधिकारी सेटिंग्स",
-  "adminSettingsSubHeading": "अधिकारी सेटिंग्स",
   "userManagement": "उपयोगकर्ता प्रबंधन",
   "manageUsers": "उपयोगकर्ता प्रबंधन",
   "roles": "भूमिकाएं",
@@ -602,7 +581,6 @@
   "userActivated": "उपयोगकर्ता सफलतापूर्वक सक्रिय हो गया",
   "bookMediator": "मिडिएटर को बुक करें",
   "loggedInSuccessfully": "सफलतापूर्वक लॉग इन हो चुका है!",
-
   "homeConstruction": "घर निर्माण",
   "roofPainter": "छत पेंटर",
   "pleaseSelectWorkTypeAndSubTypeFirst": "कृपया पहले काम का प्रकार और उप प्रकार चुनें",
@@ -632,12 +610,6 @@
   "cashfreeSandboxTitle": "टेस्ट मोड — सैंडबॉक्स भुगतान",
   "cashfreeSandboxUpiHint": "सैंडबॉक्स में असली UPI ID और QR स्कैन काम नहीं करते। Cashfree पेज पर Pay by UPI ID खोलें और testsuccess@gocash के बगल में Use टैप करें, या इसे मैन्युअली टाइप करें।",
   "cashfreeSandboxCardHint": "या Cards चुनें: 4706131211212123, expiry 03/2028, CVV 123, OTP 111000।",
-  "adminPromotionPayments": "प्रमोशन भुगतान",
-  "adminPromotionPaidCount": "भुगतान किए",
-  "adminPromotionTotalAmount": "कुल राशि",
-  "adminPromotionServicesCount": "प्रमोटेड काम",
-  "adminPromotionServicePending": "काम अभी लिंक नहीं — भुगतान पोस्टिंग से पहले मिला।",
-  "adminPromotionEmpty": "प्रमोशन भुगतान",
   "orderId": "ऑर्डर ID",
   "jobId": "जॉब ID",
   "viewService": "काम देखें",
@@ -713,11 +685,9 @@
   "completeProfileRoleHint": "काम देने वाला, मज़दूर या ठेकेदार चुनने के लिए प्रोफ़ाइल पर रोल स्विचर का उपयोग करें।",
   "completeProfilePhotoHint": "प्रोफ़ाइल के लिए अपनी साफ़ तस्वीर चुनें।",
   "pleaseFetchNearestWorkers": "कृपया निकटतम मज़दूरों को पाने के लिए अपना वर्तमान स्थान प्राप्त करें",
-
   "doWork": "मैं काम करना चाहता हूँ",
   "beMediator": "मैं ठेकेदार बनना चाहता हूँ",
   "giveWork": "मैं काम देना चाहता हूँ",
-
   "restoreSerivceText": "आप अपनी काम फिर से बहाल कर सकते हैं और भर्ती शुरू कर सकते हैं।",
   "workTitle": "काम का शीर्षक",
   "workSubTitle": "काम का उपशीर्षक",
@@ -783,7 +753,6 @@
   "checkDetails": "विवरण सत्यापित करें",
   "facilities": "सुविधाएं",
   "pleaseSelectAProfilePicture": "कृपया एक प्रोफ़ाइल चित्र चुनें",
-
   "profileInformation": "प्रोफ़ाइल जानकारी",
   "otherInformation": "अन्य जानकारी",
   "profileSuspended": "प्रोफ़ाइल निलंबित",
@@ -817,7 +786,6 @@
   "chooseImages": "छवियाँ चुनें",
   "notAddedAnyImage": "कोई छवि नहीं जोड़ी गई",
   "enterWorkDescription": "काम का विवरण दर्ज करें",
-
   "January": "जनवरी",
   "February": "फरवरी",
   "March": "मार्च",
@@ -830,7 +798,6 @@
   "October": "अक्टूबर",
   "November": "नवंबर",
   "December": "दिसंबर",
-
   "servicePost": "काम पोस्ट",
   "facilitiesProvidedByEmployer": "मालिक द्वारा प्रदान की गई सुविधाएँ",
   "facilitiesSectionHint": "खाना, रहना, आवागमन और ईएसआई/पीएफ — इस काम के लिए हाँ या नहीं एक ही जगह देखें।",
@@ -898,7 +865,6 @@
   "PRESENT": "उपस्थित",
   "ABSENT": "अनुपस्थित",
   "HALF-DAY": "आधा दिन",
-
   "more": "और",
   "browseJobs": "काम खोजें",
   "browseWorkers": "मजदूर खोजें",
@@ -909,9 +875,7 @@
   "Thursday": "गुरुवार",
   "Friday": "शुक्रवार",
   "Saturday": "शनिवार",
-
   "requirementsOfTheService": "काम",
-
   "ago": "पहले",
   "days": "दिन",
   "day": "दिन",
@@ -927,13 +891,11 @@
   "minutes": "मिनट",
   "second": "सेकंड",
   "seconds": "सेकंड",
-
   "removeFromService": "काम छोड़ें",
   "showAllWorkers": "सभी मज़दूरों को दिखाएँ",
   "profileUpdated": "प्रोफ़ाइल अपडेट की गई",
   "searchWorkerName": "मज़दूर के नाम से खोजें",
   "searchWorkerSkill": "मज़दूर के कौशल से खोजें",
-
   "enableTitle": "सूचनाएं सक्षम करें",
   "disableTitle": "सूचनाएं अक्षम करें",
   "enableMessage": "क्या आप इस ऐप के लिए सूचनाएं चालू करना चाहते हैं?",
@@ -947,7 +909,6 @@
   "youHaveUnsavedChanges": "आपके पास असहेजित परिवर्तन हैं। छोड़ने से पहले क्या आप सहेजना चाहेंगे?",
   "areYouAMediator": "यदि आप एक ठेकेदार हैं, तो कृपया 'स्किप' बटन पर क्लिक करें और आगे बढ़ें।",
   "skip": "स्किप",
-
   "headerTitle": "ऐप साझा करें",
   "shareMessage": "इस शानदार ऐप को देखें: {{appLink}}",
   "shareHeading": "हमारा ऐप अपने परिवार के साथ साझा करें",
@@ -963,7 +924,6 @@
   "deactivate": "निष्क्रिय करें",
   "paginationText": "{{totalData}} में से {{totalFetchedData}} {{type}} प्राप्त",
   "and": "और",
-
   "selected_worker_types": "चयनित मज़दूर प्रकार",
   "selected_worker_help": "अपने काम के लिए जरूरी मज़दूर प्रकार चुनें",
   "no_workers_selected": "अभी तक कोई मज़दूर नहीं चुना गया।",
@@ -1019,7 +979,6 @@
   "generalFeedback": "सामान्य प्रतिक्रिया",
   "attendanceUpdatedSuccessfully": "उपस्थिति सफलतापूर्वक अपडेट की गई।",
   "noOptionsAvailable": "कोई विकल्प उपलब्ध नहीं है।",
-
   "noLongerUsing": "अब इस काम/प्लेटफ़ॉर्म की आवश्यकता नहीं है",
   "betterAlternative": "एक बेहतर विकल्प मिल गया",
   "privacyConcerns": "गोपनीयता को लेकर चिंताएं",
@@ -1027,10 +986,8 @@
   "difficultyUsing": "प्लेटफ़ॉर्म का उपयोग करने में कठिनाई",
   "securityConcerns": "खाते की सुरक्षा को लेकर चिंता",
   "personalReasons": "व्यक्तिगत कारण",
-
   "selectReason": "कृपया अपना खाता हटाने का कारण चुनें।",
   "confirmationMessage": "आप अपना खाता स्थायी रूप से हटाना चाहते हैं। यह क्रिया अपरिवर्तनीय है और आपके सभी डेटा की हानि होगी।",
-
   "writeReason": "इस खाते को हटाने का कारण लिखें",
   "pleaseWriteReason": "कृपया अपना कारण लिखें।",
   "fullExperience": "हम आपको पूरा अनुभव देना चाहेंगे :)",
@@ -1049,7 +1006,6 @@
   "addedAddressLabel": "जोड़ा गया पता",
   "addedAddressSaveHint": "यह आपका नया जोड़ा गया पता है। इसे save करने के लिए \"पता सुरक्षित करें\" बटन दबाएं।",
   "addAddressManually": "पता स्वयं जोड़ें!",
-
   "createPassword": "4-अंकीय पासवर्ड बनाएं",
   "createPasswordNote": "कृपया इस पासवर्ड को न भूलें",
   "confirmPasswordNote": "कृपया पासवर्ड फिर से लिखें",
@@ -1058,20 +1014,17 @@
   "enterFullPassword": "कृपया पूरा पासवर्ड दर्ज करें",
   "associatedWorkers": "{{count}} संबंधित मज़दूर",
   "getStarted": "शुरू करें",
-
   "title1": "शीर्षक 1",
   "title2": "शीर्षक 2",
   "title3": "शीर्षक 3",
   "text1": "पाठ 1",
   "text2": "पाठ 2",
   "text3": "पाठ 3",
-
   "callMediator": "ठेकेदार को कॉल करें",
   "startFrom": "{{date}}, {{day}} से शुरू",
   "endOn": "{{date}}, {{day}} को समाप्त",
   "date": "{{date}}, {{day}}",
   "dateRange": "{{startDate}} से {{endDate}} तक",
-
   "bookingRequests": "अनुरोध",
   "applications": "आवेदन",
   "yourBookings": "आपकी बुकिंग्स",
@@ -1092,39 +1045,32 @@
   "showDetails": "विवरण दिखाएं",
   "show": "दिखाएं",
   "showApplicationsDetails": "आवेदन दिखाएं",
-  "remove": "हटाएं",
+  "remove": "हटाने के लिए टैप करें",
   "noMembersAvailableForThisSkill": "इस कौशल के लिए कोई सदस्य उपलब्ध नहीं है",
   "applyAsMediator": "ठेकेदार के रूप में आवेदन करें",
-
   "verificationTitle": "सत्यापन",
   "enterMobileTitle": "मोबाइल नंबर दर्ज करें",
   "otpTitle": "कोड दर्ज करें",
-
   "verificationDescription1": "हम आपके फ़ोन नंबर पर एक बार का पासवर्ड (OTP) भेजेंगे",
   "verificationDescription2": "आपको एसएमएस के माध्यम से एक कोड प्राप्त होगा",
   "enterMobileSubtext": "कृपया जारी रखने के लिए अपना 10-अंकीय मोबाइल नंबर दर्ज करें",
   "otpSubtext": "अपने नंबर पर भेजे गए 6-अंकीय कोड को दर्ज करें",
   "invalidOtpSubtext": "कोड नहीं मिला? फिर से भेजें",
-
   "mobileNumberPlaceholder": "अपना फ़ोन नंबर दर्ज करें",
   "otpPlaceholder": "कोड दर्ज करें",
-
   "sendOtp": "कोड भेजें",
   "resendOtp": "कोड दोबारा भेजें",
   "resendOtpIn": "कोड दोबारा भेजें {{seconds}} सेकंड में",
-
   "mobileRequired": "मोबाइल नंबर आवश्यक है",
   "mobileInvalid": "कृपया 10-अंकीय मान्य मोबाइल नंबर दर्ज करें",
   "otpRequired": "कोड आवश्यक है",
   "otpInvalid": "कृपया 6-अंकीय मान्य कोड दर्ज करें",
-
   "checkingMobile": "मोबाइल नंबर की जाँच हो रही है...",
   "otpSentSuccess": "कोड सफलतापूर्वक भेजा गया",
   "otpSentFail": "कोड भेजने में विफल",
   "verifyingOtp": "कोड सत्यापित किया जा रहा है...",
   "otpVerified": "कोड सफलतापूर्वक सत्यापित",
   "otpInvalidMessage": "अमान्य कोड",
-
   "resetYourPassword": "अपना पासवर्ड रीसेट करें",
   "resetPasswordDescription": "कृपया अपना पंजीकृत मोबाइल नंबर दर्ज करें। हम आपको एक कोड भेजेंगे।",
   "otpSentSuccessfully": "कोड सफलतापूर्वक भेजा गया!",
@@ -1142,7 +1088,6 @@
   "pleaseEnterYourPersonalDetailsToContinue": "कृपया जारी रखने के लिए अपने व्यक्तिगत विवरण दर्ज करें।",
   "listenAboutService": "काम के बारे में सुनें",
   "speakingAndClose": "बोल रहा है... इसे बंद करें",
-
   "leaveWithoutSaving": "बिना सहेजे छोड़ें?",
   "areYouWantLeave": "क्या आप वाकई छोड़ना चाहते हैं? कोई भी बिना सहेजा गया परिवर्तन खो जाएगा।",
   "stay": "रहें",
@@ -1153,135 +1098,256 @@
   "notAdded": "जोड़ा नहीं गया",
   "applyByMediator": "ठेकेदार द्वारा आवेदन किया गया",
   "askToMediator": "ठेकेदार को कॉल करें",
-
   "farmingWork": "खेती का काम",
   "fieldPreparation": "खेत की तैयारी",
   "cropCare": "फसल की देखभाल",
   "harvestWork": "कटाई का काम",
   "farmSupport": "खेत सहयोग",
-
   "shopWork": "दुकान का काम",
   "shopStaff": "दुकान स्टाफ",
   "shopLogistics": "लोडिंग और डिलीवरी",
   "shopBusiness": "व्यापार सहयोग",
-
   "homeMaintenance": "घर का काम",
   "houseHelp": "घर का सहायक",
   "homeRepair": "मरम्मत का काम",
-
   "constructionWork": "निर्माण कार्य",
   "mistriWork": "मिस्त्री कार्य",
   "siteStaff": "साइट स्टाफ",
-
   "animalWork": "पशु पालन काम",
   "dairyWork": "डेयरी काम",
-
   "driverJobs": "ड्राइवर नौकरी",
   "vehicleDrivers": "वाहन ड्राइवर",
   "heavyDrivers": "भारी मशीन ड्राइवर",
-
   "factoryJobs": "फैक्ट्री का काम",
   "factoryStaff": "फैक्ट्री स्टाफ",
   "factoryOffice": "ऑफिस स्टाफ",
   "factoryLoading": "लोडिंग काम",
-
   "electricalRepair": "इलेक्ट्रिकल और मशीन रिपेयर",
   "applianceRepair": "मशीन रिपेयर",
   "wiringWork": "वायरिंग काम",
   "wiring": "वायरिंग सेटअप",
-
   "generalLabour": "जनरल मजदूरी",
   "dailyLabour": "दैनिक मजदूरी",
-
-  "jutai": { "singular": "जुताई मजदूर", "plural": "जुताई मजदूर" },
-  "bueai": { "singular": "बुआई मजदूर", "plural": "बुआई मजदूर" },
-  "sichai": { "singular": "सिंचाई मजदूर", "plural": "सिंचाई मजदूर" },
-  "khad": { "singular": "खाद डालने वाला", "plural": "खाद डालने वाले" },
-  "chidkaab": { "singular": "छिड़काव मजदूर", "plural": "छिड़काव मजदूर" },
-
+  "jutai": {
+    "singular": "जुताई मजदूर",
+    "plural": "जुताई मजदूर"
+  },
+  "bueai": {
+    "singular": "बुआई मजदूर",
+    "plural": "बुआई मजदूर"
+  },
+  "sichai": {
+    "singular": "सिंचाई मजदूर",
+    "plural": "सिंचाई मजदूर"
+  },
+  "khad": {
+    "singular": "खाद डालने वाला",
+    "plural": "खाद डालने वाले"
+  },
+  "chidkaab": {
+    "singular": "छिड़काव मजदूर",
+    "plural": "छिड़काव मजदूर"
+  },
   "niraiGudai": {
     "singular": "निराई गुड़ाई मजदूर",
     "plural": "निराई गुड़ाई मजदूर"
   },
-  "dekhbhal": { "singular": "फसल देखभाल मजदूर", "plural": "फसल देखभाल मजदूर" },
-  "rakhwali": { "singular": "फसल रखवाली", "plural": "फसल रखवाली" },
-
-  "katai": { "singular": "कटाई मजदूर", "plural": "कटाई मजदूर" },
-  "thresing": { "singular": "थ्रेसिंग मजदूर", "plural": "थ्रेसिंग मजदूर" },
+  "dekhbhal": {
+    "singular": "फसल देखभाल मजदूर",
+    "plural": "फसल देखभाल मजदूर"
+  },
+  "rakhwali": {
+    "singular": "फसल रखवाली",
+    "plural": "फसल रखवाली"
+  },
+  "katai": {
+    "singular": "कटाई मजदूर",
+    "plural": "कटाई मजदूर"
+  },
+  "thresing": {
+    "singular": "थ्रेसिंग मजदूर",
+    "plural": "थ्रेसिंग मजदूर"
+  },
   "harvesting": {
     "singular": "हार्वेस्टिंग मजदूर",
     "plural": "हार्वेस्टिंग मजदूर"
   },
-  "dulai": { "singular": "ढुलाई मजदूर", "plural": "ढुलाई मजदूर" },
-  "binai": { "singular": "बिनाई मजदूर", "plural": "बिनाई मजदूर" },
-  "chhatai": { "singular": "छंटाई मजदूर", "plural": "छंटाई मजदूर" },
-  "taarBandi": { "singular": "तारबंदी मजदूर", "plural": "तारबंदी मजदूर" },
-
-  "shopHelper": { "singular": "दुकान सहायक", "plural": "दुकान सहायक" },
-  "cashier": { "singular": "कैशियर", "plural": "कैशियर" },
+  "dulai": {
+    "singular": "ढुलाई मजदूर",
+    "plural": "ढुलाई मजदूर"
+  },
+  "binai": {
+    "singular": "बिनाई मजदूर",
+    "plural": "बिनाई मजदूर"
+  },
+  "chhatai": {
+    "singular": "छंटाई मजदूर",
+    "plural": "छंटाई मजदूर"
+  },
+  "taarBandi": {
+    "singular": "तारबंदी मजदूर",
+    "plural": "तारबंदी मजदूर"
+  },
+  "shopHelper": {
+    "singular": "दुकान सहायक",
+    "plural": "दुकान सहायक"
+  },
+  "cashier": {
+    "singular": "कैशियर",
+    "plural": "कैशियर"
+  },
   "computerOperator": {
     "singular": "कंप्यूटर ऑपरेटर",
     "plural": "कंप्यूटर ऑपरेटर"
   },
-  "accountant": { "singular": "अकाउंटेंट", "plural": "अकाउंटेंट" },
-  "palledar": { "singular": "पल्लेदार", "plural": "पल्लेदार" },
-  "packer": { "singular": "पैकर", "plural": "पैकर" },
-  "deliveryBoy": { "singular": "डिलीवरी बॉय", "plural": "डिलीवरी बॉय" },
-  "recovery": { "singular": "रिकवरी कर्मचारी", "plural": "रिकवरी कर्मचारी" },
+  "accountant": {
+    "singular": "अकाउंटेंट",
+    "plural": "अकाउंटेंट"
+  },
+  "palledar": {
+    "singular": "पल्लेदार",
+    "plural": "पल्लेदार"
+  },
+  "packer": {
+    "singular": "पैकर",
+    "plural": "पैकर"
+  },
+  "deliveryBoy": {
+    "singular": "डिलीवरी बॉय",
+    "plural": "डिलीवरी बॉय"
+  },
+  "recovery": {
+    "singular": "रिकवरी कर्मचारी",
+    "plural": "रिकवरी कर्मचारी"
+  },
   "marketing": {
     "singular": "मार्केटिंग कर्मचारी",
     "plural": "मार्केटिंग कर्मचारी"
   },
-
-  "maid": { "singular": "मेड", "plural": "मेड" },
-  "gardener": { "singular": "माली", "plural": "माली" },
+  "maid": {
+    "singular": "मेड",
+    "plural": "मेड"
+  },
+  "gardener": {
+    "singular": "माली",
+    "plural": "माली"
+  },
   "securityGuard": {
     "singular": "सिक्योरिटी गार्ड",
     "plural": "सिक्योरिटी गार्ड"
   },
-  "driver": { "singular": "ड्राइवर", "plural": "ड्राइवर" },
-  "generalHelper": { "singular": "सामान्य सहायक", "plural": "सामान्य सहायक" },
-
-  "plumber": { "singular": "प्लंबर", "plural": "प्लंबर" },
-  "electrician": { "singular": "इलेक्ट्रीशियन", "plural": "इलेक्ट्रीशियन" },
-  "painter": { "singular": "पेंटर", "plural": "पेंटर" },
-  "carpenter": { "singular": "बढ़ई", "plural": "बढ़ई" },
-  "mistri": { "singular": "मिस्त्री", "plural": "मिस्त्री" },
-  "beldaar": { "singular": "बेलदार", "plural": "बेलदार" },
+  "driver": {
+    "singular": "ड्राइवर",
+    "plural": "ड्राइवर"
+  },
+  "generalHelper": {
+    "singular": "सामान्य सहायक",
+    "plural": "सामान्य सहायक"
+  },
+  "plumber": {
+    "singular": "प्लंबर",
+    "plural": "प्लंबर"
+  },
+  "electrician": {
+    "singular": "इलेक्ट्रीशियन",
+    "plural": "इलेक्ट्रीशियन"
+  },
+  "painter": {
+    "singular": "पेंटर",
+    "plural": "पेंटर"
+  },
+  "carpenter": {
+    "singular": "बढ़ई",
+    "plural": "बढ़ई"
+  },
+  "mistri": {
+    "singular": "मिस्त्री",
+    "plural": "मिस्त्री"
+  },
+  "beldaar": {
+    "singular": "बेलदार",
+    "plural": "बेलदार"
+  },
   "lowVoltageTech": {
     "singular": "लो वोल्टेज टेक्नीशियन",
     "plural": "लो वोल्टेज टेक्नीशियन"
   },
-
-  "tileMistri": { "singular": "टाइल मिस्त्री", "plural": "टाइल मिस्त्री" },
-  "brickMistri": { "singular": "ईंट मिस्त्री", "plural": "ईंट मिस्त्री" },
+  "tileMistri": {
+    "singular": "टाइल मिस्त्री",
+    "plural": "टाइल मिस्त्री"
+  },
+  "brickMistri": {
+    "singular": "ईंट मिस्त्री",
+    "plural": "ईंट मिस्त्री"
+  },
   "plasterMistri": {
     "singular": "प्लास्टर मिस्त्री",
     "plural": "प्लास्टर मिस्त्री"
   },
-  "mason": { "singular": "मेसन", "plural": "मेसन" },
-  "helperLabour": { "singular": "हेल्पर मज़दूर", "plural": "हेल्पर मज़दूर" },
-  "barBender": { "singular": "बार बेंडर", "plural": "बार बेंडर" },
+  "mason": {
+    "singular": "मेसन",
+    "plural": "मेसन"
+  },
+  "helperLabour": {
+    "singular": "हेल्पर मज़दूर",
+    "plural": "हेल्पर मज़दूर"
+  },
+  "barBender": {
+    "singular": "बार बेंडर",
+    "plural": "बार बेंडर"
+  },
   "scaffoldingMistri": {
     "singular": "स्कैफोल्डिंग मिस्त्री",
     "plural": "स्कैफोल्डिंग मिस्त्री"
   },
-  "shuttering": { "singular": "शटरिंग मजदूर", "plural": "शटरिंग मजदूर" },
-  "steelFixer": { "singular": "स्टील फिक्सर", "plural": "स्टील फिक्सर" },
-  "welder": { "singular": "वेल्डर", "plural": "वेल्डर" },
-  "pipeWelder": { "singular": "पाइप वेल्डर", "plural": "पाइप वेल्डर" },
-  "ducting": { "singular": "डक्टिंग मजदूर", "plural": "डक्टिंग मजदूर" },
-  "beldaarConstruction": { "singular": "बेलदार", "plural": "बेलदारों" },
-  "storeKeeper": { "singular": "स्टोर कीपर", "plural": "स्टोर कीपर" },
-  "supervisor": { "singular": "सुपरवाइजर", "plural": "सुपरवाइजर" },
-  "foreman": { "singular": "फोरमैन", "plural": "फोरमैन" },
-  "fitter": { "singular": "फिटर", "plural": "फिटर" },
-
+  "shuttering": {
+    "singular": "शटरिंग मजदूर",
+    "plural": "शटरिंग मजदूर"
+  },
+  "steelFixer": {
+    "singular": "स्टील फिक्सर",
+    "plural": "स्टील फिक्सर"
+  },
+  "welder": {
+    "singular": "वेल्डर",
+    "plural": "वेल्डर"
+  },
+  "pipeWelder": {
+    "singular": "पाइप वेल्डर",
+    "plural": "पाइप वेल्डर"
+  },
+  "ducting": {
+    "singular": "डक्टिंग मजदूर",
+    "plural": "डक्टिंग मजदूर"
+  },
+  "beldaarConstruction": {
+    "singular": "बेलदार",
+    "plural": "बेलदारों"
+  },
+  "storeKeeper": {
+    "singular": "स्टोर कीपर",
+    "plural": "स्टोर कीपर"
+  },
+  "supervisor": {
+    "singular": "सुपरवाइजर",
+    "plural": "सुपरवाइजर"
+  },
+  "foreman": {
+    "singular": "फोरमैन",
+    "plural": "फोरमैन"
+  },
+  "fitter": {
+    "singular": "फिटर",
+    "plural": "फिटर"
+  },
   "veterinary": {
     "singular": "पशु चिकित्सक सहायक",
     "plural": "पशु चिकित्सक सहायक"
   },
-  "milking": { "singular": "दूध निकालने वाला", "plural": "दूध निकालने वाले" },
+  "milking": {
+    "singular": "दूध निकालने वाला",
+    "plural": "दूध निकालने वाले"
+  },
   "animalFeeder": {
     "singular": "पशु चारा देने वाला",
     "plural": "पशु चारा देने वाले"
@@ -1290,22 +1356,42 @@
     "singular": "पशु साफ करने वाला",
     "plural": "पशु साफ करने वाले"
   },
-
-  "truckDriver": { "singular": "ट्रक ड्राइवर", "plural": "ट्रक ड्राइवर" },
-  "carDriver": { "singular": "कार ड्राइवर", "plural": "कार ड्राइवर" },
+  "truckDriver": {
+    "singular": "ट्रक ड्राइवर",
+    "plural": "ट्रक ड्राइवर"
+  },
+  "carDriver": {
+    "singular": "कार ड्राइवर",
+    "plural": "कार ड्राइवर"
+  },
   "tractorDriver": {
     "singular": "ट्रैक्टर ड्राइवर",
     "plural": "ट्रैक्टर ड्राइवर"
   },
-  "bikeDriver": { "singular": "बाइक ड्राइवर", "plural": "बाइक ड्राइवर" },
-  "busDriver": { "singular": "बस ड्राइवर", "plural": "बस ड्राइवर" },
+  "bikeDriver": {
+    "singular": "बाइक ड्राइवर",
+    "plural": "बाइक ड्राइवर"
+  },
+  "busDriver": {
+    "singular": "बस ड्राइवर",
+    "plural": "बस ड्राइवर"
+  },
   "ambulanceDriver": {
     "singular": "एंबुलेंस ड्राइवर",
     "plural": "एंबुलेंस ड्राइवर"
   },
-  "tempoDriver": { "singular": "टेम्पो ड्राइवर", "plural": "टेम्पो ड्राइवर" },
-  "jcbDriver": { "singular": "जेसीबी ड्राइवर", "plural": "जेसीबी ड्राइवर" },
-  "craneDriver": { "singular": "क्रेन ड्राइवर", "plural": "क्रेन ड्राइवर" },
+  "tempoDriver": {
+    "singular": "टेम्पो ड्राइवर",
+    "plural": "टेम्पो ड्राइवर"
+  },
+  "jcbDriver": {
+    "singular": "जेसीबी ड्राइवर",
+    "plural": "जेसीबी ड्राइवर"
+  },
+  "craneDriver": {
+    "singular": "क्रेन ड्राइवर",
+    "plural": "क्रेन ड्राइवर"
+  },
   "forkliftDriver": {
     "singular": "फोर्कलिफ्ट ड्राइवर",
     "plural": "फोर्कलिफ्ट ड्राइवर"
@@ -1314,24 +1400,38 @@
     "singular": "रोड रोलर ड्राइवर",
     "plural": "रोड रोलर ड्राइवर"
   },
-  "rmcDriver": { "singular": "आरएमसी ड्राइवर", "plural": "आरएमसी ड्राइवर" },
-  "loaderDriver": { "singular": "लोडर ड्राइवर", "plural": "लोडर ड्राइवर" },
+  "rmcDriver": {
+    "singular": "आरएमसी ड्राइवर",
+    "plural": "आरएमसी ड्राइवर"
+  },
+  "loaderDriver": {
+    "singular": "लोडर ड्राइवर",
+    "plural": "लोडर ड्राइवर"
+  },
   "combineDriver": {
     "singular": "कम्बाइन ड्राइवर",
     "plural": "कम्बाइन ड्राइवर"
   },
-  "hydraDriver": { "singular": "हाइड्रा ड्राइवर", "plural": "हाइड्रा ड्राइवर" },
-
+  "hydraDriver": {
+    "singular": "हाइड्रा ड्राइवर",
+    "plural": "हाइड्रा ड्राइवर"
+  },
   "factoryHelper": {
     "singular": "फैक्ट्री हेल्पर",
     "plural": "फैक्ट्री हेल्पर"
   },
-  "operator": { "singular": "मशीन ऑपरेटर", "plural": "मशीन ऑपरेटर" },
+  "operator": {
+    "singular": "मशीन ऑपरेटर",
+    "plural": "मशीन ऑपरेटर"
+  },
   "maintenance": {
     "singular": "मेंटेनेंस कर्मचारी",
     "plural": "मेंटेनेंस कर्मचारी"
   },
-  "janitor": { "singular": "सफाई कर्मचारी", "plural": "सफाई कर्मचारी" },
+  "janitor": {
+    "singular": "सफाई कर्मचारी",
+    "plural": "सफाई कर्मचारी"
+  },
   "factorySupervisor": {
     "singular": "फैक्ट्री सुपरवाइजर",
     "plural": "फैक्ट्री सुपरवाइजर"
@@ -1352,73 +1452,88 @@
     "singular": "डेटा एंट्री ऑपरेटर",
     "plural": "डेटा एंट्री ऑपरेटर"
   },
-  "gateKeeper": { "singular": "गेट कीपर", "plural": "गेट कीपर" },
+  "gateKeeper": {
+    "singular": "गेट कीपर",
+    "plural": "गेट कीपर"
+  },
   "factoryPalledar": {
     "singular": "फैक्ट्री पल्लेदार",
     "plural": "फैक्ट्री पल्लेदार"
   },
-
-  "acMechanic": { "singular": "एसी मैकेनिक", "plural": "एसी मैकेनिक" },
-  "fridgeMechanic": { "singular": "फ्रिज मैकेनिक", "plural": "फ्रिज मैकेनिक" },
+  "acMechanic": {
+    "singular": "एसी मैकेनिक",
+    "plural": "एसी मैकेनिक"
+  },
+  "fridgeMechanic": {
+    "singular": "फ्रिज मैकेनिक",
+    "plural": "फ्रिज मैकेनिक"
+  },
   "washingMachineMechanic": {
     "singular": "वॉशिंग मशीन मैकेनिक",
     "plural": "वॉशिंग मशीन मैकेनिक"
   },
-  "coolerMechanic": { "singular": "कूलर मैकेनिक", "plural": "कूलर मैकेनिक" },
-  "geyserMechanic": { "singular": "गीजर मैकेनिक", "plural": "गीजर मैकेनिक" },
-  "tvMechanic": { "singular": "टीवी मैकेनिक", "plural": "टीवी मैकेनिक" },
+  "coolerMechanic": {
+    "singular": "कूलर मैकेनिक",
+    "plural": "कूलर मैकेनिक"
+  },
+  "geyserMechanic": {
+    "singular": "गीजर मैकेनिक",
+    "plural": "गीजर मैकेनिक"
+  },
+  "tvMechanic": {
+    "singular": "टीवी मैकेनिक",
+    "plural": "टीवी मैकेनिक"
+  },
   "inverterMechanic": {
     "singular": "इन्वर्टर मैकेनिक",
     "plural": "इन्वर्टर मैकेनिक"
   },
-  "motorMechanic": { "singular": "मोटर मैकेनिक", "plural": "मोटर मैकेनिक" },
-
-  "generalLabourer": { "singular": "मजदूर", "plural": "मजदूर" },
-  "palledarGeneral": { "singular": "पल्लेदार", "plural": "पल्लेदार" },
-
+  "motorMechanic": {
+    "singular": "मोटर मैकेनिक",
+    "plural": "मोटर मैकेनिक"
+  },
+  "generalLabourer": {
+    "singular": "मजदूर",
+    "plural": "मजदूर"
+  },
+  "palledarGeneral": {
+    "singular": "पल्लेदार",
+    "plural": "पल्लेदार"
+  },
   "noInternetTitle": "इंटरनेट कनेक्शन नहीं है",
   "noInternetSubtitle": "कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें",
   "noInternetRetry": "फिर से प्रयास करें",
   "noInternetConnectAdmin": "प्रशासन से संपर्क करें",
-
   "notificationsEnabled": "सूचनाएँ सक्षम हैं",
   "savedAddresses": "सहेजे गए पते",
   "notFoundAnySavedAddress": "कोई सहेजा गया पता नहीं मिला",
   "fetchCurrentLocation": "वर्तमान स्थान प्राप्त करें",
   "additionalDetails": "अतिरिक्त विवरण",
   "enterAdditionalDetails": "अतिरिक्त विवरण दर्ज करें",
-
   "youHaveAppliedSuccessfully": "आपने इस काम के लिए सफलतापूर्वक आवेदन किया है",
   "youAppliedWithTheseMembers": "आपने इन सदस्यों के साथ आवेदन किया है",
   "youAppliedIndividually": "आपने व्यक्तिगत रूप से आवेदन किया है",
   "youAppliedByMediator": "आपने ठेकेदार के माध्यम से आवेदन किया है",
   "appliedSkill": "आवेदन किया गया कौशल",
   "yourAppliedSkill": "आपका आवेदन किया गया कौशल",
-
   "moreThanOneWorkers": "एक से अधिक मजदूर",
   "multipleSkills": "कई कौशल",
   "requestToActivateAccountButton": "खाता सक्रिय करने का अनुरोध करें",
-
   "userAddedSuccessfully": "उपयोगकर्ता सफलतापूर्वक जोड़ा गया",
   "userDetailsAddedSuccessfully": "उपयोगकर्ता विवरण सफलतापूर्वक जोड़े गए",
   "userRoleAddedSuccessfully": "उपयोगकर्ता की भूमिका सफलतापूर्वक जोड़ी गई",
   "profilePictureAddedSuccessfully": "प्रोफ़ाइल चित्र सफलतापूर्वक जोड़ा गया",
-
   "voiceCallMayBeCome": "OTP आपको वॉइस कॉल के ज़रिए भी मिल सकता है।",
-
   "updateAvailable": "अपडेट उपलब्ध है",
   "newVersionIsAvailable": "एक नया संस्करण उपलब्ध है। ऐप फिर से शुरू किया जा रहा है...",
   "restart": "फिर से शुरू करें",
-
   "age": "उम्र",
   "enterYourAge": "अपनी उम्र दर्ज करें",
   "ageIsRequired": "उम्र आवश्यक है",
-
   "aadhaarNumber": "आधार नंबर",
   "enterYourAadhaarNumber": "अपना आधार नंबर दर्ज करें",
   "aadhaarIsRequired": "आधार नंबर आवश्यक है",
   "aadhaarMustBe12Digits": "आधार नंबर 12 अंकों का होना चाहिए",
-
   "required": "यह ज़रूरी है",
   "noSkill": "कोई कौशल नहीं",
   "lessThanOneDay": "{{duration}} दिन से कम",
@@ -1427,25 +1542,20 @@
   "joinWhatsappGroupTitle": "WhatsApp ग्रुप से जुड़ें",
   "joinWhatsappGroupDescription": "नए काम की जानकारी, जरूरी सूचना और अपडेट सीधे WhatsApp पर पाएं।",
   "joinWhatsappGroupButton": "ग्रुप जॉइन करें",
-
   "updateRequired": "ऐप अपडेट करना ज़रूरी है",
   "updateNow": "अभी अपडेट करें",
   "forceUpdateMessage": "ऐप का नया रूप आ गया है। काम चालू रखने के लिए ऐप अपडेट करें।",
-
   "add": "काम जोड़ें",
   "talkDirect": "सीधे बात करें",
   "listingCall": "कॉल",
-
   "instaTitle": "Instagram (इंस्टाग्राम) पर हमें फॉलो करें",
   "instaDescription": "रोज़ाना अपडेट, रील्स, जॉब पोस्ट और महत्वपूर्ण जानकारी इंस्टाग्राम पर पाएं।",
   "instaButtonText": "Instagram फॉलो करें",
-
   "supportTitle": "Login / Registration में मदद चाहिए?",
   "supportSubtitle": "👉 तुरंत हमसे संपर्क करें",
   "callUs": "Call करें",
   "whatsappUs": "WhatsApp करें",
   "supportWhatsappMessage": "नमस्ते, मुझे ऐप में लॉगिन/रजिस्ट्रेशन में मदद चाहिए",
-
   "allServicesSubHeading": "पास के काम देखें और अभी आवेदन करें। 🚀",
   "workersListSubHeading": "अपने आस-पास भरोसेमंद मजदूर ढूंढें और तुरंत काम पर रखें 👷‍♂️",
   "workersListCountBadge": "{{count}} मजदूर",
@@ -1465,13 +1575,11 @@
   "refresh": "फिर से लोड करें",
   "serviceListPullHint": "सूची ताज़ा करने के लिए नीचे खींचें",
   "serviceListCountBadge": "{{count}} खुले",
-
   "fetchLocation": "मेरी लोकेशन लें",
   "locationNotFound": "लोकेशन नहीं मिल पाई",
   "locationSaved": "लोकेशन सेव हो गई ✅",
   "locationError": "लोकेशन लेने में समस्या हुई",
   "chooseFromFollowing": "नीचे दिए गए विकल्पों में से चुनें",
-
   "yourRole": "आप क्या करना चाहते हैं?",
   "changeRole": "अपना रोल बदलें",
   "currentRole": "वर्तमान भूमिका",
@@ -1485,30 +1593,19 @@
   "employerSubtitle": "काम पोस्ट करें",
   "mediator": "ठेकेदार",
   "mediatorSubtitle": "मजदूर और मालिक को जोड़ें",
-
   "workTypeTitle": "आप किस प्रकार का काम पोस्ट करना चाहते हैं?",
   "workTypeSubtitle": "सही श्रेणी चुनें ताकि सही मजदूर जल्दी आपका काम देख सकें।",
   "workTypeHint": "इससे आपके आसपास के मजदूर आपका काम पहले देख पाएंगे।",
   "workTypeRequired": "कृपया काम की श्रेणी चुनें",
-
   "workSubTypeTitle": "काम का सही प्रकार चुनें",
   "workSubTypeSubtitle": "बताएं कि आपको किस काम के लिए मजदूर चाहिए।",
   "workSubTypeHint": "इससे सही और अनुभवी मजदूर आपसे जल्दी संपर्क करेंगे।",
-  "selectWorkSubType": "काम का प्रकार चुनें",
   "workSubTypeRequired": "कृपया काम की उप-श्रेणी चुनें",
-  "back": "वापस",
   "nextContinue": "अगला चरण",
-
-  "selectedWorkers": "चुने हुए मजदूर",
   "tapToAddWorkers": "मजदूर जोड़ने के लिए टैप करें",
   "enterDetailsFor": "जानकारी भरें",
   "workersNeeded": "मजदूर चाहिए",
-  "perDay": "प्रति दिन",
   "enterPayPerDay": "प्रति दिन मजदूरी दर्ज करें",
-  "remove": "हटाने के लिए टैप करें",
-  "save": "सेव करें",
-  "cancel": "रद्द करें",
-
   "addWorkPhotos": "काम की फोटो जोड़ें",
   "workPhotosGuide": "फोटो से मजदूर काम को बेहतर समझते हैं। आप अधिकतम 3 फोटो अपलोड कर सकते हैं।",
   "tips": "सुझाव",
@@ -1517,23 +1614,19 @@
   "tipOptional": "फोटो वैकल्पिक हैं लेकिन ज्यादा रिस्पॉन्स मिलते हैं",
   "maxThreeImages": "आप अधिकतम 3 फोटो अपलोड कर सकते हैं",
   "postWork": "काम पोस्ट करें",
-
   "extraBenefits": "अतिरिक्त सुविधाएँ जोड़ें",
   "benefitsHelpYou": "सुविधाएँ देने से ज्यादा मजदूर आकर्षित होते हैं।",
   "proTip": "सुझाव",
   "benefitsIncreaseChances": "खाना, रहने या यात्रा की सुविधा वाले काम पर 2 गुना ज्यादा रिस्पॉन्स मिलता है।",
-
   "jobDetailsTitle": "काम की जानकारी दें",
   "jobDetailsSubtitle": "काम कितने दिन का है और क्या करना होगा — यह बताएं।",
   "describeWorkExample": "उदाहरण: घर पेंट करने के लिए 2 पेंटर चाहिए। दीवार की तैयारी और पेंटिंग करनी होगी। उपकरण दिए जाएंगे।",
   "whatToWrite": "क्या लिखें?",
   "descriptionTips": "काम का प्रकार, उपकरण, जगह और जरूरी निर्देश जरूर लिखें।",
-
   "whereAndWhenTitle": "काम की जगह और शुरू होने की तारीख",
   "whereAndWhenSubtitle": "काम कहाँ है और कब शुरू होगा — यह बताएं।",
   "locationTipTitle": "यह क्यों जरूरी है?",
   "locationTipText": "मजदूर दूरी और तारीख देखकर जल्दी फैसला लेते हैं। सही जानकारी से जल्दी जवाब मिलता है।",
-
   "hireWorkersTitle": "मजदूर जोड़ें",
   "hireWorkersSubtitle": "मजदूर चुनें, संख्या और दिहाड़ी तय करें",
   "salaryTipTitle": "जल्दी मजदूर पाने का तरीका",
@@ -1542,9 +1635,7 @@
   "enterWorkerCount": "मजदूरों की संख्या दर्ज करें",
   "numberOfWorkersInTeam": "टीम में मजदूरों की संख्या",
   "completeMediatorProfile": "ठेकेदार प्रोफाइल पूरी करें",
-
   "selectWorkLocation": "काम कहाँ करवाना है?",
-
   "reviewYourWorkPost": "अपना काम पोस्ट करने से पहले जाँच लें",
   "reviewBeforeSubmitHint": "काम पोस्ट करने से पहले सभी जानकारी ध्यान से देख लें।",
   "reviewWorkPostSubtitle": "काम पोस्ट करने से पहले अंतिम जाँच कर लें।",
@@ -1562,57 +1653,43 @@
   "notIncluded": "शामिल नहीं",
   "notAddedYet": "अभी नहीं जोड़ा गया",
   "step": "स्टेप",
-
   "food": "खाना मिलेगा",
   "living": "रहने की जगह मिलेगी",
   "travel": "आने-जाने का खर्च मिलेगा",
-
   "discoverWorkers": "आपके आस-पास के मजदूर",
   "discoverWorkersSubHeading": "ये मजदूर आपके आस-पास उपलब्ध हैं। आप उनका प्रोफाइल देख सकते हैं और आसानी से काम के लिए बुला सकते हैं।",
-
   "myActivityHeading": "मेरी गतिविधियाँ (मजदूर)",
   "myActivityTitle": "गतिविधियाँ",
   "myWorkHeaderGuide": "यहाँ देखें किसने आपको काम के लिए बुलाया है और आपने कहाँ आवेदन किया है। जल्दी काम पाने के लिए रिक्वेस्ट स्वीकार करें।",
-
   "tabReceivedWorkTitle": "काम के बुलावे",
   "tabReceivedWorkSubtitle": "काम देने वाले ने आपको बुलाया",
-
   "tabAppliedWorkTitle": "मेरे आवेदन",
   "tabAppliedWorkSubtitle": "जिन कामों में आपने आवेदन किया",
-
   "noReceivedRequestsTitle": "अभी कोई काम का बुलावा नहीं आया",
   "noReceivedRequestsSubtitle": "जब काम देने वाले को आपका प्रोफाइल पसंद आएगा, वे यहाँ रिक्वेस्ट भेजेंगे।",
   "noReceivedRequestsCTA": "प्रोफाइल पूरा करें",
-
   "noAppliedServicesTitle": "आपने अभी तक किसी काम में आवेदन नहीं किया",
   "noAppliedServicesSubtitle": "पास के काम खोजें और आवेदन करें ताकि आपको काम मिलना शुरू हो सके।",
   "noAppliedServicesCTA": "काम खोजें",
-
   "ctaCompleteProfileStep1": "अपनी स्किल जोड़ें",
   "ctaCompleteProfileStep2": "काम की फोटो जोड़ें",
   "ctaCompleteProfileStep3": "अपनी लोकेशन सेट करें",
-
   "ctaFindWorkStep1": "सर्च खोलें",
   "ctaFindWorkStep2": "पास के काम चुनें",
   "ctaFindWorkStep3": "आवेदन करने वाला बटन दबाएँ",
-
   "myWorkDashboard": "मेरा काम (मजदूर)",
   "myWorkTitle": "मेरा काम",
   "myWorkDashboardSub": "यहाँ आपको मिला हुआ और आने वाला काम दिखेगा।",
   "workTip": "समय पर काम पूरा करने से आपको और काम मिलेंगे।",
-
   "noWorkYet": "अभी तक कोई काम नहीं मिला",
   "findWork": "काम ढूंढें",
-
   "myEmployerDashboard": "बुक किए गए कामगार",
   "employerActivityTitle": "मेरी गतिविधियाँ (काम देने वाला)",
   "employerWorkHeaderGuide": "अपने पोस्ट किए गए काम और सर्विसेस को यहां ट्रैक करें।",
-
   "tabSentRequestsTitle": "भेजे गए अनुरोध",
   "tabSentRequestsSubtitle": "वर्कर्स को भेजे गए रिक्वेस्ट देखें",
   "tabCreatedServicesTitle": "मेरे बनाए गए काम",
   "tabCreatedServicesSubtitle": "आपकी बनाई गई सर्विसेस की लिस्ट",
-
   "noSentRequestsTitle": "कोई भेजे गए अनुरोध नहीं",
   "noSentRequestsSubtitle": "अभी आपने किसी वर्कर को रिक्वेस्ट नहीं भेजी है।",
   "noCreatedServicesTitle": "कोई बनाया गया काम नहीं",
@@ -1620,20 +1697,15 @@
   "noBookedWorkersTitle": "कोई बुक किया मजदूर नहीं",
   "noBookedWorkersMessage": "आपने अभी तक कोई मजदूर बुक नहीं किया। मजदूर ब्राउज़ करें।",
   "noCreatedServicesSubtitle": "अभी आपने कोई सर्विस बनाई नहीं है।",
-
   "employerCtaCompleteProfileStep1": "अपनी प्रोफ़ाइल पूरी करें",
   "employerCtaCompleteProfileStep2": "वर्कर्स को रिक्वेस्ट भेजें",
   "employerCtaCompleteProfileStep3": "रिक्वेस्ट का जवाब ट्रैक करें",
-
   "employerCtaCreateServiceStep1": "नई सर्विस बनाएं",
   "employerCtaCreateServiceStep2": "सर्विस विवरण भरें",
   "employerCtaCreateServiceStep3": "वर्कर्स को उपलब्ध कराएं",
-
   "createNewService": "नया काम जोड़ें",
-
   "employerBookingHeaderGuide": "अपने बनाए गए सर्विसेस और बुक किए गए वर्कर्स को यहां ट्रैक करें।",
   "employerTip": "आपकी सर्विसेस और अनुरोध को समय पर प्रबंधित करें।",
-
   "mediatorActivityTitle": "मेरी गतिविधियाँ (ठेकेदार)",
   "mediatorWorkHeaderGuide": "टीम जॉइनिंग अनुरोध और आपने आवेदन की गई सर्विसेस को ट्रैक करें।",
   "tabTeamJoiningRequestsTitle": "टीम जॉइनिंग अनुरोध",
@@ -1651,13 +1723,11 @@
   "mediatorStepApplyService": "सर्विस के लिए आवेदन करें",
   "mediatorStepTrackService": "सर्विस स्टेटस ट्रैक करें",
   "mediatorCTAApplyService": "अभी आवेदन करें",
-
   "myMediatorDashboard": "मेरा डैशबोर्ड (ठेकेदार)",
   "mediatorDashboardGuide": "यहाँ आप उन सभी कामों को देख सकते हैं जहाँ आपने ठेकेदार के रूप में आवेदन किया है। अपने चुने हुए कामों को आसानी से प्रबंधित और ट्रैक करें।",
   "mediatorTip": "सुझाव: सक्रिय रूप से आवेदन करें और अपनी प्रोफ़ाइल अपडेट रखें ताकि ठेकेदार के रूप में चयन होने की संभावना बढ़ सके।",
   "noMediatorServicesTitle": "अभी तक कोई काम असाइन नहीं हुआ",
   "exploreServices": "उपलब्ध काम देखें",
-
   "customerServiceAssistant": {
     "singular": "ग्राहक काम सहायक",
     "plural": "ग्राहक काम सहायक"
@@ -1706,10 +1776,8 @@
     "singular": "पानी वितरण मजदूर",
     "plural": "पानी वितरण मजदूर"
   },
-
   "uploadImages": "काम की तस्वीरें अपलोड करें",
   "addNewWork": "नया काम जोड़ें",
-
   "skipAndContinue": "छोड़ें और आगे बढ़ें",
   "profilePictureOptional": "फोटो लगाना जरूरी नहीं है। चाहें तो इस चरण को छोड़ सकते हैं।",
   "addProfilePhotoTitle": "आपकी प्रोफ़ाइल फोटो",
@@ -1731,7 +1799,6 @@
   "profilePhotoTryDifferent": "दूसरी फोटो चुनें",
   "profilePhotoLooksGood": "अगर ठीक लगे तो नीचे हरा बटन दबाकर आगे बढ़ें।",
   "profilePhotoCameraDeniedHelp": "कोई दिक्कत नहीं — गैलरी से फोटो चुन सकते हैं।",
-
   "tabHome": "होम",
   "tabWork": "काम",
   "tabPeople": "लोग",
@@ -1749,13 +1816,10 @@
   "tabBookedServices": "बुकिंग",
   "tabHiringActivity": "भर्ती",
   "tabTeamRequests": "टीम",
-
   "activeWorkHeading": "सक्रिय काम",
-
   "tabNavWorkLabour": "मजदूर",
   "tabNavPeopleContractors": "ठेकेदार",
   "tabNavPeopleActiveWork": "काम",
-
   "activityBadgeApplied": "आवेदन",
   "activityBadgeSelected": "चयनित",
   "activitySectionApplied": "आवेदन और चयनित काम",
@@ -1772,7 +1836,6 @@
   "activitySectionTeamMembers": "आपकी टीम",
   "activitySectionTeamMembersSub": "आपकी प्रोफ़ाइल से जुड़े मजदूर",
   "activitySectionBookedMedSub": "जहाँ आप बुक हैं — गिनती में आवेदन और चयन दिखेंगे",
-
   "activityTabMyWork": "मेरा काम",
   "activityTabSent": "भेजे",
   "activityTabInvites": "निमंत्रण",
@@ -1789,39 +1852,33 @@
   "activityBookingRequestsHintWorker": "आपको भेजे गए सीधे बुकिंग अनुरोध देखें",
   "activityBookingRequestsHintEmployer": "आपके द्वारा भेजे गए सीधे बुकिंग अनुरोध देखें",
   "activityBookingRequestsHintMediator": "भेजे और प्राप्त सीधे बुकिंग अनुरोध देखें",
-
   "activityTabWorkerJobsTitle": "मेरे काम",
   "activityTabWorkerJobsHint": "आवेदन और चयन",
   "activityTabWorkerSentTitle": "भेजे अनुरोध",
   "activityTabWorkerSentHint": "टीम में शामिल होने के लिए",
   "activityTabWorkerInvitesTitle": "निमंत्रण",
   "activityTabWorkerInvitesHint": "मध्यस्थों से",
-
   "activityTabMedAppliedTitle": "आवेदित काम",
   "activityTabMedAppliedHint": "ठेकेदार के रूप में",
   "activityTabMedTeamTitle": "मेरी टीम",
   "activityTabMedTeamHint": "सदस्य और मजदूर",
   "activityTabMedBookedTitle": "बुक किए मजदूर",
   "activityTabMedBookedHint": "सेवाओं पर बुकिंग",
-
   "activityTabWorkerAppliedTitle": "आवेदन और चयन",
   "activityTabWorkerAppliedHint": "जिन सेवाओं के लिए आवेदन किया या चुने गए",
   "activityTabWorkerBookingTitle": "बुकिंग अनुरोध",
   "activityTabWorkerBookingHint": "काम देने वाले जो आपको काम पर बुलाते हैं",
-
   "homeTeamSectionTitle": "टीम में शामिल होना",
   "homeTeamInvitesTitle": "मध्यस्थों के निमंत्रण",
   "homeTeamInvitesSubtitle": "टीम में शामिल होने के अनुरोध देखें",
   "homeTeamBrowseTitle": "ठेकेदार खोजें",
   "homeTeamBrowseSubtitle": "लोग ब्राउज़ करें और जॉइन अनुरोध भेजें",
-
   "activityEmptyLineApplied": "अभी कुछ नहीं। जब आप किसी काम के लिए आवेदन करेंगे या चुने जाएँगे, वह यहाँ दिखेगा। काम ढूँढने के लिए वर्क टैब खोलें।",
   "activityEmptyLineBookingInvites": "अभी कोई बुकिंग अनुरोध नहीं। जब कोई काम देने वाला आपको काम के लिए बुलाएगा, वह यहाँ दिखेगा।",
   "activityEmptyLineSent": "कोई आउटगोइंग अनुरोध नहीं।",
   "activityEmptyLineInvites": "ठेकेदारों से कोई निमंत्रण नहीं।",
   "activityEmptyLineTeam": "अभी टीम में कोई नहीं।",
   "activityEmptyLineBooked": "अभी कोई बुकिंग नहीं।",
-
   "searchListPlaceholderWorkers": "मजदूर खोजें…",
   "searchListPlaceholderContractors": "ठेकेदार खोजें…",
   "searchListPlaceholderServices": "काम खोजें…",
@@ -1835,7 +1892,6 @@
   "sortTabEsiPf": "ESI / PF",
   "noSearchMatches": "आपकी खोज या फ़िल्टर से मेल खाते परिणाम",
   "noTrustedProfiles": "अभी कोई विश्वसनीय प्रोफ़ाइल नहीं। यहाँ दिखने के लिए नाम, फ़ोटो, पता, मोबाइल और कौशल पूरे करें।",
-
   "homeGreetingHi": "नमस्ते {{name}},",
   "homeWelcomeBrand": "Apna Rojgar",
   "homeWelcomeSuffix": " में आपका स्वागत है",
@@ -1845,7 +1901,6 @@
   "homeBannerTitle": "बहुत बढ़िया!",
   "homeBannerSubline": "आप अपना रोज़गार के साथ",
   "homeBannerDays": "{{count}} दिन से जुड़े हैं",
-
   "whatsapp": "व्हाट्सऐप",
   "instagram": "इंस्टाग्राम",
   "completeProfileTitle": "अपनी प्रोफाइल पूरी करें",
@@ -1859,44 +1914,36 @@
   "myAppliedWorks": "मेरे आवेदन किए गए काम",
   "myBookedWorkers": "मेरे बुक किए गए मजदूर",
   "myActivity": "मेरी गतिविधि",
-
   "dashboard": {
     "worker": {
       "heroTitle": "उपलब्ध काम",
       "heroSubtitle": "आपके आस-पास के काम",
-
       "applied": "आवेदन किए गए काम",
       "bookings": "मेरी बुकिंग",
       "contractors": "ठेकेदार",
       "activity": "मेरी गतिविधि",
-
       "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
       "bookingsDesc": "आपकी कन्फर्म बुकिंग देखें",
       "contractorsDesc": "अपने आस-पास के ठेकेदार खोजें",
       "activityDesc": "अपनी हाल की गतिविधि देखें"
     },
-
     "employer": {
       "heroTitle": "मेरे डाले गए काम",
       "heroSubtitle": "अपने काम को मैनेज करें",
-
       "postWork": "नया काम जोड़ें",
       "bookedWorkers": "बुक किए गए मजदूर",
       "contractors": "ठेकेदार",
       "workers": "मजदूर",
       "activity": "मेरी गतिविधि",
-
       "postWorkDesc": "नया काम पोस्ट करें",
       "bookedWorkersDesc": "जिन मजदूरों को आपने रखा है उन्हें देखें",
       "contractorsDesc": "उपलब्ध ठेकेदार खोजें",
       "workersDesc": "मजदूर खोजें और काम पर रखें",
       "activityDesc": "अपने काम की गतिविधि देखें"
     },
-
     "mediator": {
       "heroTitle": "उपलब्ध काम",
       "heroSubtitle": "आपके आस-पास के काम",
-
       "myPostedJobs": "मेरे पोस्ट किए गए काम",
       "myPostedJobsDesc": "आपके पोस्ट किए गए काम देखें",
       "postWork": "नया काम पोस्ट करें",
@@ -1905,7 +1952,6 @@
       "team": "आपकी टीम",
       "workers": "मजदूर",
       "activity": "मेरी गतिविधि",
-
       "postWorkDesc": "नया काम पोस्ट करें और मैनेज करें",
       "appliedDesc": "जिन कामों के लिए आपने आवेदन किया है",
       "selectedDesc": "चुने गए मजदूर देखें",
@@ -1915,19 +1961,15 @@
     }
   },
   "connectTitle": "हमसे जुड़ें",
-
   "whatsappSub": "हमारे ग्रुप से जुड़ें",
-
   "threads": "थ्रेड्स",
   "linkedin": "लिंक्डइन",
   "facebook": "फेसबुक",
   "website": "वेबसाइट",
-
   "followUs": "हमें फॉलो करें",
   "connect": "हमसे जुड़ें",
   "likePage": "पेज लाइक करें",
   "visit": "वेबसाइट देखें",
-
   "downloadApp": "ऐप डाउनलोड करें",
   "playStore": "Play Store से डाउनलोड करें",
   "rateApp": "ऐप रेट करें",
@@ -1936,11 +1978,9 @@
   "rateAppNow": "अभी रेट करें",
   "rateAppLater": "बाद में",
   "shareLink": "ऐप लिंक शेयर करें",
-
   "fullDetails": "पूरा विवरण",
   "decidePriceWhileBooking": "बुकिंग के दौरान मूल्य निर्धारित करें",
   "irrigation": "सिंचाई",
-
   "privacyPolicyIntro": "अपना रोज़गार (“हम”, “हमारा”) एक डिजिटल प्लेटफ़ॉर्म संचालित करता है जो भारत भर में कामगारों, काम देने वालों (employer) और मध्यस्थों (mediator) को वैध दैनिक मजदूरी और कुशल काम के लिए जोड़ता है। यह गोपनीयता नीति बताती है कि हम आपकी जानकारी कब, क्यों और कैसे एकत्र करते और सुरक्षित रखते हैं।",
   "privacyPolicyLastUpdated": "अंतिम अपडेट: 4 जुलाई 2026",
   "privacySection1Title": "1. हम कौन-सी जानकारी एकत्र करते हैं",
@@ -1961,7 +2001,6 @@
   "privacySection8Body": "अपना रोज़गार उन उपयोगकर्ताओं के लिए है जो भारत में कानूनी रूप से काम करने योग्य हैं और कम से कम 18 वर्ष के हैं। हम जानबूझकर बच्चों से व्यक्तिगत जानकारी एकत्र नहीं करते। यदि किसी नाबालिग का खाता हो, तो कृपया हमें सूचित करें।",
   "privacySection9Title": "9. बदलाव और संपर्क",
   "privacySection9Body": "हम समय-समय पर इस नीति को अपडेट कर सकते हैं। महत्वपूर्ण बदलाव ऐप या वेबसाइट पर बताए जाएंगे। प्रश्न या अनुरोध के लिए संपर्क करें: info@apnarojgarindia.com, +91 6397308499। पता: जलेसर, एटा, उत्तर प्रदेश – 207302, भारत।",
-
   "termsAndConditionsIntro": "अपना रोज़गार में आपका स्वागत है। खाता बनाकर या ऐप का उपयोग करके आप इन नियमों और शर्तों से सहमत होते हैं। अपना रोज़गार कामगारों, काम देने वालों और मध्यस्थों को वैध काम के अवसरों से जोड़ता है। यदि आप सहमत नहीं हैं, तो कृपया प्लेटफ़ॉर्म का उपयोग न करें।",
   "termsAndConditionsLastUpdated": "अंतिम अपडेट: 4 जुलाई 2026",
   "termsSection1Title": "1. अपना रोज़गार के बारे में",
@@ -1984,7 +2023,6 @@
   "termsSection9Body": "नियम, कानून या समुदाय दिशानिर्देशों के उल्लंघन या अन्य उपयोगकर्ताओं/प्लेटफ़ॉर्म के लिए जोखिम पर हम चेतावनी, प्रतिबंध, निलंबन या खाता समाप्त कर सकते हैं। आप ऐप या सहायता से संपर्क करके खाता निष्क्रिय/हटा सकते हैं।",
   "termsSection10Title": "10. लागू कानून और संपर्क",
   "termsSection10Body": "ये नियम भारत के कानूनों द्वारा शासित हैं। विवादों का निपटारा उत्तर प्रदेश, भारत की सक्षम अदालतों के अधिकार क्षेत्र में होगा, जब तक अन्यथा कानून न कहे। सहायता: info@apnarojgarindia.com, +91 6397308499, www.apnarojgarindia.com।",
-
   "teamRequestsGuideReceived": "ठेकेदार (mediator) द्वारा टीम में शामिल होने का निमंत्रण यहाँ दिखेगा। स्वीकार या अस्वीकार करें।",
   "teamRequestsGuideSent": "आपके द्वारा कामगारों को भेजे गए टीम जॉइन अनुरोध यहाँ दिखेंगे। लंबित अनुरोध रद्द भी कर सकते हैं।",
   "teamRequestsEmptyReceivedTitle": "अभी कोई निमंत्रण नहीं",

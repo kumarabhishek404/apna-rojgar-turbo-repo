@@ -31,6 +31,7 @@ import RippleDot from "@/components/commons/RippleDot";
 import NotificationPlaceholder from "@/components/commons/LoadingPlaceholders/NotificationPlaceholder";
 import GradientWrapper from "@/components/commons/GradientWrapper";
 import APP_LOGO from "@/assets/app/notification.png";
+import { openNotificationTarget } from "@/utils/openNotificationTarget";
 
 const NotificationScreen = () => {
   const queryClient = useQueryClient();
@@ -157,7 +158,13 @@ const NotificationScreen = () => {
   }, [notifications]); // Trigger this effect every time notifications change after a refetch
 
   const renderNotification = ({ item }: any) => (
-    <View style={styles?.notificationItem}>
+    <TouchableOpacity
+      style={styles?.notificationItem}
+      activeOpacity={0.85}
+      onPress={() =>
+        openNotificationTarget({ type: item?.type, data: item?.data })
+      }
+    >
       <View
         style={{
           width: "100%",
@@ -188,7 +195,7 @@ const NotificationScreen = () => {
           <CustomText textAlign="left">{item?.body}</CustomText>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const RequestPermission = () => (

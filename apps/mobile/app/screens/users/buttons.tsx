@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import APP_CONTEXT from "@/app/context/locale";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents } from "@/utils/analyticsEvents";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 const { width } = Dimensions.get("window");
 
@@ -31,7 +32,8 @@ const ButtonContainer = ({
   isWorkerBooked,
 }: any) => {
   const userDetails = useAtomValue(Atoms?.UserAtom);
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const {
     control,

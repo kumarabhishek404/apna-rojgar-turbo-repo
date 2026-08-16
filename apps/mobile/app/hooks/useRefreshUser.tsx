@@ -3,7 +3,6 @@ import { useAtom } from "jotai";
 import USER from "@/app/api/user";
 import TOAST from "@/app/hooks/toast";
 import Atoms from "@/app/AtomStore";
-import { normalizeMobileUserSession } from "@/utils/mobileRole";
 
 interface UserDetails {
   id: string;
@@ -27,8 +26,7 @@ const useRefreshUser = (): UseRefreshUserReturn => {
     try {
       const response = await USER?.getUserInfo();
       if (response?.success) {
-        const freshUser =
-          normalizeMobileUserSession(response.data || {}) || {};
+        const freshUser = response.data || {};
         const nextProfilePicture =
           freshUser?.profilePicture || freshUser?.profileImage || "";
         setUserDetails((prev: Record<string, unknown>) => ({

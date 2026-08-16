@@ -1,18 +1,19 @@
 import * as Notifications from "expo-notifications";
 
+/** Local (in-app) alert — used for all roles, including admin using employer UI. */
 const triggerLocalNotification = async (
   title: string,
   body: string,
-  data: Record<string, any> = {}
+  data: Record<string, unknown> = {},
 ) => {
   await Notifications.scheduleNotificationAsync({
     content: {
       title,
       body,
       sound: true,
-      data: { ...data, isLocal: true }, // Mark as local to avoid re-triggering
+      data: { ...data, isLocal: true },
     },
-    trigger: null, // Immediate trigger
+    trigger: null,
   });
 };
 
