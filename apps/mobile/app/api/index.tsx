@@ -304,26 +304,8 @@ api.interceptors.response.use(
         router.replace("/(tabs)/fifth");
       }
     } else if (error.request) {
-      console.error("No response received:", error.request);
-      if (!isAuthOtpRoute) {
-        void reportError({
-          message: error?.message || "Network request failed (no response)",
-          stack: error?.stack,
-          route: route || "mobile-api-network",
-          statusCode: 0,
-          errorName: "ApiNetworkError",
-          errorCode: error?.code || "NETWORK_ERROR",
-          user: requestUserHint,
-          context: {
-            kind: "api-network",
-            method,
-            url: route,
-            baseURL: error.config?.baseURL || API_BASE_URL,
-            requestBody,
-            axiosCode: error?.code || null,
-          },
-        });
-      }
+      // Device/offline (ERR_NETWORK) — not a server 500. Do not report.
+      console.warn("No response received:", error?.code || error?.message);
     } else {
       console.error("Request error:", error.message);
       void reportError({

@@ -5,6 +5,7 @@ import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import Loader from "@/components/commons/Loaders/Loader";
 import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
+import { getApiErrorMessage } from "@/utils/apiError";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, Stack, useFocusEffect, useNavigation } from "expo-router";
 import { useAtom } from "jotai";
@@ -98,6 +99,7 @@ const AddServiceScreen = () => {
 
   const mutationAddService = useMutation({
     mutationKey: [addService?._id ? "editService" : "addService"],
+    retry: false,
     mutationFn: () =>
       addService?._id ? handleEditSubmit(addService?._id) : handleSubmit(),
     onSuccess: async (data: any) => {
@@ -155,8 +157,10 @@ const AddServiceScreen = () => {
       });
 
       TOAST?.error(
-        err?.response?.data?.message ||
-          (addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed")),
+        getApiErrorMessage(
+          err,
+          addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed"),
+        ),
       );
     },
     onSettled: () => {

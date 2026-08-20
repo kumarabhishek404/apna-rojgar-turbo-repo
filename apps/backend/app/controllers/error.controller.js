@@ -47,7 +47,9 @@ export const reportClientError = async (req, res) => {
       "unknown-screen";
     const stack = String(body.stack || "").trim() || "No stack available";
     const componentStack = String(body.componentStack || "").trim() || undefined;
-    const statusCode = Number(body.statusCode) || 500;
+    const parsedStatus = Number(body.statusCode);
+    const statusCode =
+      Number.isFinite(parsedStatus) && parsedStatus >= 0 ? parsedStatus : 500;
     const errorName = body.errorName != null ? String(body.errorName) : null;
     const errorCode =
       body.errorCode != null && String(body.errorCode).trim()

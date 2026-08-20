@@ -29,8 +29,19 @@ export function logRuntimeMode(port) {
     : "live 2factor SMS";
   const cashfree = getCashfreeEnvLabel();
 
+  const twoFactorKey = String(process.env.TWOFACTOR_API_KEY || "").trim();
+  const twoFactorLabel = twoFactorKey
+    ? `2factor key set (${twoFactorKey.length} chars)`
+    : "TWOFACTOR_API_KEY missing";
+
   console.log(`🚀 API running on port ${port} in ${process.env.NODE_ENV} mode`);
-  console.log(`🔐 OTP: ${otpLabel} | Cashfree: ${cashfree}`);
+  console.log(`🔐 OTP: ${otpLabel} | ${twoFactorLabel} | Cashfree: ${cashfree}`);
+
+  if (process.env.NODE_ENV === "production" && !twoFactorKey) {
+    console.error(
+      "❌ TWOFACTOR_API_KEY is empty in production. Login OTP will fail until the live 2factor.in key is set in .env.production.",
+    );
+  }
 
   if (process.env.NODE_ENV === "production" && isDevOtpBypassEnabled()) {
     console.error(

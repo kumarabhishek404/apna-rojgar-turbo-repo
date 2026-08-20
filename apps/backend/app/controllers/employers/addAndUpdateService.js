@@ -94,9 +94,11 @@ export const handleAddService = asyncHandler(async (req, res) => {
     processImagesInBackground(service._id, req.files?.images || [], req);
   } catch (error) {
     const statusCode = getErrorStatusCode(error);
-    await logError(error, req, statusCode, "employer.add-service", {
-      skipAdminNotify: statusCode < 500,
-    });
+    if (statusCode >= 500) {
+      await logError(error, req, statusCode, "employer.add-service", {
+        skipAdminNotify: false,
+      });
+    }
     handleErrorResponse(res, error);
   }
 });
@@ -154,9 +156,11 @@ export const handleUpdateService = async (req, res) => {
     });
   } catch (error) {
     const statusCode = getErrorStatusCode(error);
-    await logError(error, req, statusCode, "employer.update-service", {
-      skipAdminNotify: statusCode < 500,
-    });
+    if (statusCode >= 500) {
+      await logError(error, req, statusCode, "employer.update-service", {
+        skipAdminNotify: false,
+      });
+    }
     handleErrorResponse(res, error);
   }
 };

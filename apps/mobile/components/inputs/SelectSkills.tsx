@@ -81,8 +81,14 @@ const SkillsSelector = ({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors: priceErrors },
   } = useForm({ defaultValues: { pricePerDay: "" } });
+  const watchedPay = watch("pricePerDay");
+  const canSaveSkillPay =
+    !isPricePerDayNeeded ||
+    (getPayPerDayFieldError(watchedPay) == null &&
+      String(watchedPay || "").trim() !== "");
 
   const handleSelect = (skill: any) => {
     if (selectedInterests.length >= 5) {
@@ -332,6 +338,7 @@ const SkillsSelector = ({
           primaryButton={{
             title: isEditMode ? t("updateSkillPrice") : t("addSkillPrice"),
             action: handleSubmit(handleAddSkill),
+            disabled: !canSaveSkillPay,
           }}
           secondaryButton={{
             title: t("cancel"),

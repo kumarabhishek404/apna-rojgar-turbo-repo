@@ -16,6 +16,45 @@ const API_BASE_URL =
 
 const reportedKeys = new Set<string>();
 
+function isNoiseError({
+  message,
+  errorName,
+  errorCode,
+  statusCode,
+}: {
+  message: string;
+  errorName?: string;
+  errorCode?: string | number;
+  statusCode?: number;
+}) {
+  const text = `${message} ${errorName || ""} ${errorCode || ""}`;
+  if (
+    /ChunkLoadError|Loading chunk|Failed to load chunk|dynamically imported module/i.test(
+      text,
+    )
+  ) {
+    return true;
+  }
+  if (
+    /ERR_NETWORK|Network Error|Failed to fetch|Load failed|networkerror/i.test(
+      text,
+    )
+  ) {
+    return true;
+  }
+  if (
+    Number(statusCode) === 0 ||
+    String(errorCode) === "ERR_NETWORK" ||
+    String(errorCode) === "NETWORK_ERROR"
+  ) {
+    return true;
+  }
+  if (/PAY_PER_DAY_TOO_LOW|pay per day must be at least/i.test(text)) {
+    return true;
+  }
+  return false;
+}
+
 function sanitize(value: unknown, depth = 0): unknown {
   if (value == null) return value;
   if (depth > 5) return "[max-depth]";
@@ -49,6 +88,16 @@ export async function reportError({
   }
 
   const safeMessage = String(message || "Unknown error").trim() || "Unknown error";
+  if (
+    isNoiseError({
+      message: safeMessage,
+      errorName,
+      errorCode,
+      statusCode,
+    })
+  ) {
+    return;
+  }
   const dedupeKey = `${route || window.location.pathname}:${statusCode}:${safeMessage}`.slice(
     0,
     220,

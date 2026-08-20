@@ -165,12 +165,15 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
     );
     if (invalidRequirement) {
       setCreateIssue(
-        "Please complete requirement details (worker, count, and pay/day at least ₹500).",
+        t(
+          "payPerDayMustBeAtLeast500",
+          "Pay per day must be at least ₹500 for each worker.",
+        ),
       );
       return false;
     }
     return true;
-  }, [canCreate, createForm]);
+  }, [canCreate, createForm, t]);
 
   const runServerVerify = useCallback(async () => {
     if (!canCreate || createStep !== 6) return;
@@ -191,9 +194,20 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         headers: auth?.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
         body: fd,
       });
-      const data = (await response.json()) as { success?: boolean; message?: string };
+      const data = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+        errorCode?: string;
+      };
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Verification failed");
+        if (data?.errorCode === "PAY_PER_DAY_TOO_LOW") {
+          throw new Error(t("payPerDayMustBeAtLeast500"));
+        }
+        throw new Error(
+          data?.message
+            ? localizeApiErrorMessage(data.message)
+            : t("serviceCreateFailed", "Verification failed"),
+        );
       }
       setServerVerifyStatus("ok");
       setShowPromotionModal(true);
@@ -201,7 +215,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       setServerVerifyStatus("error");
       setCreateIssue(e instanceof Error ? e.message : "Verification failed");
     }
-  }, [canCreate, createStep, validateBeforeSubmit]);
+  }, [canCreate, createStep, validateBeforeSubmit, t]);
 
   const onCreateNext = () => {
     if (createStep === 1 && (!createForm.type || !createForm.subType)) {
@@ -218,7 +232,12 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
           Number(req.payPerDay) < 500,
       )
     ) {
-      setCreateIssue("Pay per day must be at least ₹500 for each worker.");
+      setCreateIssue(
+        t(
+          "payPerDayMustBeAtLeast500",
+          "Pay per day must be at least ₹500 for each worker.",
+        ),
+      );
       return;
     }
     if (
@@ -272,6 +291,9 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       });
       const data = await response.json();
       if (!response.ok || data?.success === false) {
+        if (data?.errorCode === "PAY_PER_DAY_TOO_LOW") {
+          throw new Error(t("payPerDayMustBeAtLeast500"));
+        }
         throw new Error(
           data?.message?.trim()
             ? localizeApiErrorMessage(String(data.message))
@@ -533,7 +555,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                           return { ...p, requirements };
                         })
                       }
-                      placeholder="Pay/day (min ₹500)"
+                      placeholder={t("payPerDayMinPlaceholder", "Pay/day (min ₹500)")}
                     />
                     <p
                       className={`mt-1 text-xs ${
@@ -542,7 +564,9 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                           : "text-slate-500"
                       }`}
                     >
-                      Minimum ₹500 per day
+                      {req.payPerDay !== "" && Number(req.payPerDay) < 500
+                        ? t("payPerDayMustBeAtLeast500")
+                        : t("payPerDayMinHint")}
                     </p>
                   </div>
                 </div>
@@ -684,7 +708,17 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
             <button
               type="button"
               onClick={onCreateNext}
-              className="group rounded-xl bg-gradient-to-r from-[#22409a] via-[#2c4fba] to-[#3154bf] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.35)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2847ab]"
+              disabled={
+                createStep === 2 &&
+                createForm.requirements.some(
+                  (req) =>
+                    !req.name ||
+                    req.count < 1 ||
+                    !req.payPerDay ||
+                    Number(req.payPerDay) < 500,
+                )
+              }
+              className="group rounded-xl bg-gradient-to-r from-[#22409a] via-[#2c4fba] to-[#3154bf] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.35)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2847ab] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <span className="inline-flex items-center gap-2">
                 {t("next")}

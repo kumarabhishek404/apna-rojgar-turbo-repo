@@ -5,6 +5,7 @@ import {
   mergeDeviceSnapshots,
 } from "./extractErrorRequestContext.js";
 import notifyAdminOnError from "./notifyAdminOnError.js";
+import { shouldSkipErrorLog } from "./skipErrorLog.js";
 
 const MAX_CONTEXT_CHARS = 20000;
 
@@ -75,6 +76,19 @@ const logError = async (
     errorName = null,
     errorCode = null,
   } = options;
+
+  if (
+    shouldSkipErrorLog({
+      error,
+      statusCode,
+      errorCode,
+      errorName,
+      message,
+    })
+  ) {
+    console.warn("[ErrorLog] Skipped expected/client noise:", message);
+    return;
+  }
 
   try {
     const httpMethods = ["GET", "POST", "PUT", "DELETE", "PATCH"];
