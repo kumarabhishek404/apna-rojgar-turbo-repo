@@ -24,6 +24,7 @@ import ShowDuration from "./ShowDuration";
 import ShowFacilities from "./ShowFacilities";
 import { getServiceJobId } from "@/utils/serviceJobId";
 import { isServicePromoted } from "@/utils/servicePromotion";
+import { isListingFeatureActive } from "@/utils/serviceListingFeature";
 import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
 import PAYMENT from "@/app/api/payment";
 import TOAST from "@/app/hooks/toast";
@@ -49,6 +50,7 @@ const ListingsServices = React.memo(({ item }: any) => {
   const canPromoteLater =
     isOwnService && item?.status === "HIRING" && !isServicePromoted(item);
   const promoted = isServicePromoted(item);
+  const featured = isListingFeatureActive(item);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("blur", () => {
@@ -214,6 +216,14 @@ const ListingsServices = React.memo(({ item }: any) => {
                   </CustomText>
                 </View>
               )}
+              {featured ? (
+                <View style={styles.featuredBadgeOnHero} pointerEvents="none">
+                  <Ionicons name="star" size={13} color="#92400E" />
+                  <CustomText baseFont={11} fontWeight="800" color="#92400E">
+                    {t("featuredBadge")}
+                  </CustomText>
+                </View>
+              ) : null}
 
               {userDetails?._id === item?.employer &&
                 item?.bookingType === "byService" && (
@@ -599,6 +609,21 @@ const styles = StyleSheet.create({
   },
   promotionBadgeUnpaid: {
     backgroundColor: "#FEF3C7",
+    borderColor: "#FCD34D",
+  },
+  featuredBadgeOnHero: {
+    position: "absolute",
+    bottom: 10,
+    left: 8,
+    zIndex: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
     borderColor: "#FCD34D",
   },
   promotedInfoStrip: {

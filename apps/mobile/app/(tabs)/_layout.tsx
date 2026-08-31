@@ -33,7 +33,8 @@ import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
-import { useAppStoreReviewPrompt } from "@/app/hooks/useAppStoreReviewPrompt";
+import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
+import SaathiSpeakFab from "@/components/commons/SaathiSpeakFab";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -280,6 +281,11 @@ export default function Layout() {
   };
 
   const isAdmin = userDetails?.isAdmin;
+  const showMainTabs = !(
+    userDetails &&
+    !userDetails?.token &&
+    userDetails?.status !== "ACTIVE"
+  );
   const apiRole = String(userDetails?.role ?? "").toUpperCase();
 
   /** Bottom labels match what each tab shows for non-admin users. */
@@ -305,11 +311,7 @@ export default function Layout() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.white }}>
       <View style={styles.container}>
-        {userDetails &&
-        !userDetails?.token &&
-        userDetails?.status !== "ACTIVE" ? (
-          <UserProfile />
-        ) : (
+        {showMainTabs ? (
           <Tabs
             key={`tabs-${locale}`}
             screenOptions={{
@@ -411,7 +413,13 @@ export default function Layout() {
               }}
             />
           </Tabs>
+        ) : (
+          <UserProfile />
         )}
+
+        {showMainTabs && !isAdmin ? (
+          <SaathiSpeakFab bottomOffset={tabBarHeight + 10} />
+        ) : null}
 
         <ExitConfirmationModal
           visible={showExitModal}

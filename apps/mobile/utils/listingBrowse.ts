@@ -1,4 +1,5 @@
 import { getDistanceBetweenLocations } from "@/utils/searchFilters";
+import { isListingFeatureActive } from "@/utils/serviceListingFeature";
 
 type GeoLike = { coordinates?: unknown } | null | undefined;
 
@@ -239,24 +240,34 @@ export function applyServiceBrowse(
     copy = copy.filter((s) => serviceHasFacility(s, "esi_pf"));
   }
 
+  const featuredRank = (s: any) => (isListingFeatureActive(s) ? 1 : 0);
+
   if (sortId === "nearest") {
     copy.sort((a, b) => {
+      const fa = featuredRank(b) - featuredRank(a);
+      if (fa !== 0) return fa;
       const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
       const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
       return da - db;
     });
   } else if (sortId === "latest") {
     copy.sort((a, b) => {
+      const fa = featuredRank(b) - featuredRank(a);
+      if (fa !== 0) return fa;
       const ta = new Date(a?.createdAt ?? 0).getTime();
       const tb = new Date(b?.createdAt ?? 0).getTime();
       return tb - ta;
     });
   } else if (sortId === "more_salary") {
-    copy.sort(
-      (a, b) => getServiceMaxDailyPay(b) - getServiceMaxDailyPay(a),
-    );
+    copy.sort((a, b) => {
+      const fa = featuredRank(b) - featuredRank(a);
+      if (fa !== 0) return fa;
+      return getServiceMaxDailyPay(b) - getServiceMaxDailyPay(a);
+    });
   } else {
     copy.sort((a, b) => {
+      const fa = featuredRank(b) - featuredRank(a);
+      if (fa !== 0) return fa;
       const da = distanceKm(userLoc, a) ?? Number.POSITIVE_INFINITY;
       const db = distanceKm(userLoc, b) ?? Number.POSITIVE_INFINITY;
       return da - db;

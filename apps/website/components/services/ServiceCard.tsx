@@ -3,13 +3,13 @@
 import Image from "next/image";
 import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Clock, MapPin } from "lucide-react";
+import { Clock, MapPin, Loader2, Megaphone, Star } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { formatRelativePosted } from "@/lib/formatRelativePosted";
 import type { GeoPoint } from "@/lib/serviceDistance";
 import { formatDistanceLabel } from "@/lib/serviceDistance";
 import { isServicePromoted, type SocialMediaPromotion } from "@/lib/servicePromotion";
-import { Loader2, Megaphone } from "lucide-react";
+import { isListingFeatureActive, type ListingFeature } from "@/lib/serviceListingFeature";
 
 export type ServiceItem = {
   _id: string;
@@ -31,6 +31,7 @@ export type ServiceItem = {
   geoLocation?: GeoPoint | null;
   employer?: string | { _id?: string };
   socialMediaPromotion?: SocialMediaPromotion | null;
+  listingFeature?: ListingFeature | null;
 };
 
 const KNOWN_FACILITY_KEYS = new Set(["food", "living", "travelling", "esi_pf"]);
@@ -202,6 +203,7 @@ function ServiceCardComponent({
   const distanceLabel =
     resolvedDistanceKm != null ? formatDistanceLabel(resolvedDistanceKm) : "";
   const promoted = isServicePromoted(service);
+  const featured = isListingFeatureActive(service);
 
   const openDetails = () => onViewDetails(service._id);
 
@@ -252,6 +254,14 @@ function ServiceCardComponent({
               <span className="min-w-0 truncate">
                 {formatRelativePosted(service.createdAt, language)}
               </span>
+            </span>
+          </div>
+        ) : null}
+        {featured ? (
+          <div className="absolute bottom-2 left-2 z-10">
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-900 shadow-sm">
+              <Star className="h-3 w-3 fill-amber-500 text-amber-500" aria-hidden />
+              {t("featuredBadge", "Featured")}
             </span>
           </div>
         ) : null}

@@ -26,6 +26,7 @@ import { resolveServiceDistanceKm } from "@/lib/serviceDistance";
 import { trackWebsiteEvent } from "@/lib/websiteTracking";
 import { getPromotionConfig } from "@/lib/payment";
 import { isServicePromoted } from "@/lib/servicePromotion";
+import { isListingFeatureActive } from "@/lib/serviceListingFeature";
 import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 
 type UserInfo = {
@@ -254,8 +255,11 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   );
   const ordered = useMemo(() => {
     const items = [...filtered];
+    const featuredRank = (s: ServiceItem) => (isListingFeatureActive(s) ? 1 : 0);
     if (sortBy === "nearest") {
       items.sort((a, b) => {
+        const fa = featuredRank(b) - featuredRank(a);
+        if (fa !== 0) return fa;
         const da = typeof a.distance === "number" ? a.distance : Number.POSITIVE_INFINITY;
         const db = typeof b.distance === "number" ? b.distance : Number.POSITIVE_INFINITY;
         return da - db;
@@ -263,12 +267,16 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       return items;
     }
     if (sortBy === "more") {
-      items.sort(
-        (a, b) => (b.requirements?.length || 0) - (a.requirements?.length || 0),
-      );
+      items.sort((a, b) => {
+        const fa = featuredRank(b) - featuredRank(a);
+        if (fa !== 0) return fa;
+        return (b.requirements?.length || 0) - (a.requirements?.length || 0);
+      });
       return items;
     }
     items.sort((a, b) => {
+      const fa = featuredRank(b) - featuredRank(a);
+      if (fa !== 0) return fa;
       const at = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const bt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return bt - at;

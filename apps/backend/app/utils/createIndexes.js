@@ -46,6 +46,10 @@ export const createIndexes = async () => {
     // ----- SERVICE INDEXES -----
     console.log("Creating Service indexes...");
     await Service.collection.createIndex({ employer: 1 }, { background: true });
+    await Service.collection.createIndex(
+      { "listingFeature.enabled": 1, "listingFeature.expiresAt": 1 },
+      { background: true },
+    );
     // no need to index _id
 
     // ----- TEAM INDEXES -----

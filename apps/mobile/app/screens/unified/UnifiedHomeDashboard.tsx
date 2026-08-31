@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
 import HomeHeroSection from "@/components/unified/HomeHeroSection";
+import FeaturedServicesSlider from "@/components/unified/FeaturedServicesSlider";
 import CustomHeading from "@/components/commons/CustomHeading";
 import CustomText from "@/components/commons/CustomText";
 import ListingHorizontalWorkers from "@/components/commons/ListingHorizontalWorkers";
@@ -543,6 +544,10 @@ const UnifiedHomeDashboard = () => {
               </View>
             )}
 
+            {role === "WORKER" || role === "MEDIATOR" ? (
+              <FeaturedServicesSlider services={serviceList} />
+            ) : null}
+
             <View style={styles.sectionGap}>{dashboardSection}</View>
 
             <TouchableOpacity
@@ -609,7 +614,7 @@ const UnifiedHomeDashboard = () => {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#EEF4FF" },
-  scroll: { paddingBottom: 24, paddingHorizontal: 16, paddingTop: 0 },
+  scroll: { paddingBottom: 88, paddingHorizontal: 16, paddingTop: 0 },
   contentSurface: {
     backgroundColor: "#EEF4FF",
     marginHorizontal: -16,

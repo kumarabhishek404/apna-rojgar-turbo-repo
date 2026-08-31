@@ -1,15 +1,15 @@
-import i18n from "./i18n";
+import i18n, { humanizeI18nValue } from "./i18n";
 
 export const t = (key: string, options?: object): string =>
-  i18n.t(key, options);
+  humanizeI18nValue(i18n.t(key, options), key);
 
 /**
  * Bilingual label helper for rural/low-literacy UX: shows Hindi + English together.
  * Falls back gracefully when a key is missing in either locale.
  */
 export const tBi = (key: string, options?: object): string => {
-  const hi = i18n.t(key, { ...(options || {}), locale: "hi" });
-  const en = i18n.t(key, { ...(options || {}), locale: "en" });
+  const hi = humanizeI18nValue(i18n.t(key, { ...(options || {}), locale: "hi" }), "");
+  const en = humanizeI18nValue(i18n.t(key, { ...(options || {}), locale: "en" }), "");
 
   if (!hi && !en) return "";
   if (!hi) return String(en);

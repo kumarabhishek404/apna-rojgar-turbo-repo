@@ -301,6 +301,18 @@ const ProfileMenu = ({ disabled }: any) => {
       isSuspended: false,
     },
     {
+      title: t("saathiTitle"),
+      icon: (
+        <Ionicons name="mic-outline" size={28} color={Colors.primary} />
+      ),
+      onPress: () =>
+        router?.push({
+          pathname: "/screens/rojgarSaathi",
+        }),
+      style: [styles?.menuItem],
+      isSuspended: false,
+    },
+    {
       title: t("support"),
       icon: (
         <MaterialIcons name="support-agent" size={28} color={Colors?.primary} />
