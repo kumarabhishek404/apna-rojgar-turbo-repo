@@ -49,15 +49,45 @@ export const SERVICE_EXPORT_HEADERS = [
 
 export const STATS_SPREADSHEET_TITLE = "Apna Rojgar Stats";
 
-export const REGISTRATION_SHEET_CONFIG = {
+const REGISTRATION_DATE_COLUMN_INDEXES = [
+  REGISTRATION_EXPORT_HEADERS.indexOf("Registration Date"),
+];
+
+const registrationSheetConfig = (tabName) => ({
   headers: REGISTRATION_EXPORT_HEADERS,
-  tabName: "Weekly Registrations",
-  dateColumnIndexes: [REGISTRATION_EXPORT_HEADERS.indexOf("Registration Date")],
+  tabName,
+  dateColumnIndexes: REGISTRATION_DATE_COLUMN_INDEXES,
+});
+
+export const REGISTRATION_EXPORT_ROLES = ["EMPLOYER", "WORKER", "MEDIATOR"];
+
+export const REGISTRATION_ROLE_SHEET_CONFIGS = {
+  EMPLOYER: registrationSheetConfig("Registrations - Employers"),
+  WORKER: registrationSheetConfig("Registrations - Workers"),
+  MEDIATOR: registrationSheetConfig("Registrations - Mediators"),
 };
+
+/** Combined tab from the pre-role-split export. Deleted on first role-split run. */
+export const LEGACY_COMBINED_REGISTRATION_TAB = "Weekly Registrations";
+
+const LEGACY_REGISTRATION_TAB_NAMES = [LEGACY_COMBINED_REGISTRATION_TAB];
+
+/** Old tab titles → current titles. Existing sheets are renamed in place. */
+const LEGACY_TAB_RENAMES = [
+  ["Weekly Registrations - Employers", "Registrations - Employers"],
+  ["Weekly Registrations - Workers", "Registrations - Workers"],
+  ["Weekly Registrations - Mediators", "Registrations - Mediators"],
+  ["Weekly Registrations Mediators", "Registrations - Mediators"],
+  ["Weekly Services", "Services"],
+];
+
+/** @deprecated Combined tab is no longer used. Role tabs live in REGISTRATION_ROLE_SHEET_CONFIGS. */
+export const REGISTRATION_SHEET_CONFIG =
+  REGISTRATION_ROLE_SHEET_CONFIGS.WORKER;
 
 export const SERVICE_SHEET_CONFIG = {
   headers: SERVICE_EXPORT_HEADERS,
-  tabName: "Weekly Services",
+  tabName: "Services",
   dateColumnIndexes: [
     SERVICE_EXPORT_HEADERS.indexOf("Created Date"),
     SERVICE_EXPORT_HEADERS.indexOf("Start Date"),
@@ -391,13 +421,88 @@ const initializeSheetTab = async (spreadsheetId, sheetConfig) => {
   );
 };
 
+export const deleteSheetTabIfExists = async (spreadsheetId, tabName) => {
+  const tabs = await getSpreadsheetTabs(spreadsheetId);
+  const tab = findTabByName(tabs, tabName);
+  if (!tab || tabs.length <= 1) return false;
+
+  await batchUpdateSpreadsheet(spreadsheetId, [
+    { deleteSheet: { sheetId: tab.properties.sheetId } },
+  ]);
+  return true;
+};
+
+const renameSheetTab = async (spreadsheetId, fromName, toName) => {
+  if (fromName === toName) return "same";
+
+  const tabs = await getSpreadsheetTabs(spreadsheetId);
+  const fromTab = findTabByName(tabs, fromName);
+  if (!fromTab) return "missing";
+  if (findTabByName(tabs, toName)) return "target_exists";
+
+  await batchUpdateSpreadsheet(spreadsheetId, [
+    {
+      updateSheetProperties: {
+        properties: {
+          sheetId: fromTab.properties.sheetId,
+          title: toName,
+        },
+        fields: "title",
+      },
+    },
+  ]);
+  return "renamed";
+};
+
+export const renameLegacySheetTabs = async (spreadsheetId) => {
+  for (const [fromName, toName] of LEGACY_TAB_RENAMES) {
+    const result = await renameSheetTab(spreadsheetId, fromName, toName);
+    if (result === "renamed") {
+      console.log(`✏️ [Sheets] Renamed "${fromName}" → "${toName}"`);
+    } else if (result === "target_exists") {
+      const deleted = await deleteSheetTabIfExists(spreadsheetId, fromName);
+      if (deleted) {
+        console.log(`🗑️ [Sheets] Removed leftover tab "${fromName}"`);
+      }
+    }
+  }
+};
+
+const clearSheetDataRows = async (spreadsheetId, tabName) => {
+  const sheets = await getSheetsClient();
+  await sheets.spreadsheets.values.clear({
+    spreadsheetId,
+    range: getTabRange(tabName, "A2:ZZ"),
+  });
+};
+
+export const migrateRegistrationSheetsToRoles = async (spreadsheetId) => {
+  await renameLegacySheetTabs(spreadsheetId);
+
+  for (const tabName of LEGACY_REGISTRATION_TAB_NAMES) {
+    const deleted = await deleteSheetTabIfExists(spreadsheetId, tabName);
+    if (deleted) {
+      console.log(`🗑️ [Sheets] Removed legacy tab "${tabName}"`);
+    }
+  }
+
+  for (const config of Object.values(REGISTRATION_ROLE_SHEET_CONFIGS)) {
+    await initializeSheetTab(spreadsheetId, config);
+    await clearSheetDataRows(spreadsheetId, config.tabName);
+  }
+};
+
 const initializeStatsSpreadsheet = async (
   spreadsheetId,
   { shareOnCreate = false } = {},
 ) => {
-  // Only registration + services tabs — never create Blog Queue here.
+  // Role registration tabs + services — never create Blog Queue here.
   // Blog Queue is initialized only via ensureBlogQueueSpreadsheet when blog import runs.
-  await initializeSheetTab(spreadsheetId, REGISTRATION_SHEET_CONFIG);
+  await renameLegacySheetTabs(spreadsheetId);
+
+  for (const config of Object.values(REGISTRATION_ROLE_SHEET_CONFIGS)) {
+    await initializeSheetTab(spreadsheetId, config);
+  }
   await initializeSheetTab(spreadsheetId, SERVICE_SHEET_CONFIG);
 
   if (shareOnCreate) {

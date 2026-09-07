@@ -215,8 +215,9 @@ const scheduleWeeklyServicesExport = () => {
     return;
   }
 
+  // Every day at 05:05 IST — staggered after registrations to avoid Sheets API contention
   cron.schedule(
-    "0 10 * * 5",
+    "5 5 * * *",
     async () => {
       console.log("⏰ [Cron] Running weeklyServicesExport...");
       try {
@@ -228,6 +229,10 @@ const scheduleWeeklyServicesExport = () => {
     {
       timezone: "Asia/Kolkata",
     },
+  );
+
+  console.log(
+    "✅ [Cron] Services export scheduled (05:05 Asia/Kolkata daily)",
   );
 };
 

@@ -1180,6 +1180,7 @@ export const handleExportRegistrations = async (req, res) => {
         spreadsheetId: result.spreadsheetId,
         rowsExported: result.rowsExported,
         spreadsheetUrl: result.spreadsheetUrl,
+        byRole: result.byRole,
       },
     });
   } catch (error) {
