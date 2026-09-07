@@ -220,6 +220,7 @@ const sendNotification = (userId, service, type, workersCount = null, req) => {
     {
       actionBy: service?.employer?._id,
       actionOn: userId,
+      serviceId: service?._id,
     },
     req,
   );

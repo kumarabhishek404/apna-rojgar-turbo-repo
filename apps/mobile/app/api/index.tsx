@@ -23,7 +23,11 @@ const parseRequestBodyForLog = (data: unknown) => {
 };
 
 const eventEmitter = new EventEmitter();
-const API_BASE_URL = getApiBaseUrl();
+
+/** Resolve on each call so Metro/.env changes and emulator rewrites stay fresh. */
+const resolveApiBaseUrl = () => getApiBaseUrl();
+
+let lastNetworkErrorLogAt = 0;
 
 const getHeaders = async (retries = 3, delay = 500) => {
   try {
@@ -49,7 +53,7 @@ const getHeaders = async (retries = 3, delay = 500) => {
 };
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: resolveApiBaseUrl(),
 });
 
 const toFormData = (body: unknown): FormData => {
@@ -138,7 +142,7 @@ const makeFetchFormDataRequest = async (
   const timeoutId = setTimeout(() => controller.abort(), FORM_DATA_TIMEOUT_MS);
 
   try {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(`${resolveApiBaseUrl()}${url}`, {
       method,
       headers: mergedHeaders,
       body: formData,
@@ -207,6 +211,7 @@ const makeFormDataRequest = async (
 };
 
 api.interceptors.request.use((config) => {
+  config.baseURL = resolveApiBaseUrl();
   const deviceHeaders = getClientDeviceHeaders();
   Object.assign(config.headers, deviceHeaders);
   return config;

@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["deep-links-sharing", "functionality", "all", "automated"]
 ---
 # TC-DLNK-002: Universal link https://apnarojgarindia.com/job/id opens app

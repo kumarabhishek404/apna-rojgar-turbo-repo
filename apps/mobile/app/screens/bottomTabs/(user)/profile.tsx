@@ -46,6 +46,7 @@ import {
   isCoreProfileIncomplete,
   isMediatorProfileIncomplete,
 } from "@/constants/functions";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 type TabKey = "overview" | "settings";
 
@@ -56,7 +57,6 @@ const ROLE_META: Record<string, { emoji: string; color: string; bg: string }> = 
 };
 
 const UserProfile = () => {
-  APP_CONTEXT?.useApp();
   const [userDetails, setUserDetails] = useAtom(Atoms?.UserAtom);
   const { role, setRole } = APP_CONTEXT.useApp();
   const [selectedTab, setSelectedTab] = useState<TabKey>("overview");
@@ -89,7 +89,8 @@ const UserProfile = () => {
   const { refreshUser, isLoading } = REFRESH_USER.useRefreshUser();
 
   useEffect(() => {
-    setRole(userDetails?.role || "");
+    const effectiveRole = getMobileEffectiveRole(userDetails);
+    if (effectiveRole) setRole(effectiveRole);
   }, [userDetails]);
 
   useEffect(() => {
@@ -199,7 +200,10 @@ const UserProfile = () => {
           ...userDetails,
           role: updatedUser.role,
         });
+        const nextRole = getMobileEffectiveRole(updatedUser);
+        if (nextRole) setRole(nextRole);
       }
+      TOAST?.success(t("profileUpdatedSuccessfully"));
     },
     onError: (error) => {
       console.error("Error updating role: ", error);
@@ -379,7 +383,8 @@ const UserProfile = () => {
     }
   };
 
-  const roleMeta = ROLE_META[role] ?? ROLE_META["WORKER"];
+  const uiRole = getMobileEffectiveRole(userDetails) || role;
+  const roleMeta = ROLE_META[uiRole] ?? ROLE_META["EMPLOYER"];
 
   return (
     <>
@@ -396,11 +401,16 @@ const UserProfile = () => {
 
       {/* Role-change modal */}
       <RoleSwitcher
-        currentRole={role}
+        currentRole={
+          uiRole === "WORKER" || uiRole === "EMPLOYER" || uiRole === "MEDIATOR"
+            ? uiRole
+            : "EMPLOYER"
+        }
         onChangeRole={(newRole: any) => {
+          setRoleModalVisible(false);
+          if (newRole === uiRole) return;
           setRole(newRole);
           mutationUpdateRole.mutate(newRole);
-          setRoleModalVisible(false);
         }}
         externalVisible={roleModalVisible}
         onExternalClose={() => setRoleModalVisible(false)}
@@ -495,7 +505,7 @@ const UserProfile = () => {
                         color={Colors.white}
                         textAlign="left"
                       >
-                        {t(role?.toLowerCase() || "worker")}
+                        {t(uiRole?.toLowerCase() || "employer")}
                       </CustomText>
                     </View>
 
