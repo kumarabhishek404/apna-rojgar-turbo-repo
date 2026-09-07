@@ -33,6 +33,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
 import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
+import SaathiSpeakFab from "@/components/commons/SaathiSpeakFab";
 import { getMobileEffectiveRole } from "@/utils/mobileRole";
 import useUnreadNotificationsHandler from "../hooks/useInAppNotifications";
 import triggerLocalNotification from "@/utils/triggerLocalNotification";
@@ -312,11 +313,7 @@ export default function Layout() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.white }}>
       <View style={styles.container}>
-        {userDetails &&
-        !userDetails?.token &&
-        userDetails?.status !== "ACTIVE" ? (
-          <UserProfile />
-        ) : (
+        {showMainTabs ? (
           <Tabs
             key={`tabs-${locale}`}
             screenOptions={{
@@ -418,7 +415,13 @@ export default function Layout() {
               }}
             />
           </Tabs>
+        ) : (
+          <UserProfile />
         )}
+
+        {showMainTabs && !isAdmin ? (
+          <SaathiSpeakFab bottomOffset={tabBarHeight + 10} />
+        ) : null}
 
         <ExitConfirmationModal
           visible={showExitModal}

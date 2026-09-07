@@ -117,13 +117,16 @@ const HomeHeroSection = ({ userDetails }: Props) => {
                 fontWeight="700"
                 textAlign="left"
                 color={Colors.primary}
+                style={styles.welcomeBrand}
               >
                 {t("homeWelcomeBrand")}
               </CustomText>
-              {t("homeWelcomeSuffix")}
+              {" "}
+              {String(t("homeWelcomeSuffix") || "").trim()}
             </CustomText>
           </View>
-          <TouchableOpacity
+          <View style={styles.headerActions}>
+            <TouchableOpacity
             onPress={onNotifications}
             style={styles.bellWrap}
             accessibilityRole="button"
@@ -132,7 +135,8 @@ const HomeHeroSection = ({ userDetails }: Props) => {
           >
             <Ionicons name="notifications-outline" size={26} color="#3F4F82" />
             {notificationCount > 0 ? <View style={styles.bellDot} /> : null}
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.bannerCard}>
@@ -208,8 +212,13 @@ const styles = StyleSheet.create({
   },
   greetingBlock: {
     flex: 1,
-    paddingRight: 20,
+    paddingRight: 12,
     textAlign: "left",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   greetingLine: {
     letterSpacing: 0.1,
@@ -220,6 +229,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
     lineHeight: 28,
     flexShrink: 1,
+  },
+  welcomeBrand: {
+    paddingRight: 6,
   },
   bellWrap: {
     position: "relative",

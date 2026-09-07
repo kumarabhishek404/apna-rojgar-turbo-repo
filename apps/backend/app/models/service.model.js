@@ -124,6 +124,14 @@ const serviceSchema = new mongoose.Schema(
       },
       paidAt: { type: Date },
     },
+    /** Admin-controlled pin on the in-app work list. Expires at `expiresAt`. */
+    listingFeature: {
+      enabled: { type: Boolean, default: false },
+      days: { type: Number, default: 0 },
+      startsAt: { type: Date },
+      expiresAt: { type: Date },
+      featuredBy: { type: Schema.Types.ObjectId, ref: "User" },
+    },
     facilities: {
       food: { type: Boolean, default: false },
       living: { type: Boolean, default: false },
@@ -230,6 +238,11 @@ const serviceSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+serviceSchema.index({
+  "listingFeature.enabled": 1,
+  "listingFeature.expiresAt": 1,
+});
 
 const Service = mongoose.model("Service", serviceSchema);
 

@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Copy, IndianRupee } from "lucide-react";
+import { Check, Copy, IndianRupee, Star } from "lucide-react";
 import { apiRequest } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useAdminAccess } from "@/components/webapp/admin/useAdminAccess";
 import InfiniteScrollSentinel from "@/components/webapp/admin/InfiniteScrollSentinel";
+import { isListingFeatureActive } from "@/lib/serviceListingFeature";
 
 type AdminPerson = {
   _id?: string;
@@ -74,6 +75,13 @@ type AdminService = {
     amount?: number;
     paidAt?: string;
   };
+  listingFeature?: {
+    enabled?: boolean;
+    days?: number;
+    startsAt?: string;
+    expiresAt?: string;
+    featuredBy?: string;
+  };
   geoLocation?: unknown;
   appliedSkill?: unknown;
   employer?: AdminEmployer | string;
@@ -90,6 +98,7 @@ type ServiceStats = {
   pending?: number;
   rejected?: number;
   promoted?: number;
+  featured?: number;
 };
 
 const STATUS_FILTERS = [
@@ -380,13 +389,17 @@ export default function AdminRegisteredServicesPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
         <StatCard label={t("total", "Total")} value={String(stats.total ?? 0)} />
         <StatCard label="Hiring" value={String(stats.hiring ?? 0)} />
         <StatCard label="Completed" value={String(stats.completed ?? 0)} />
         <StatCard label="Cancelled" value={String(stats.cancelled ?? 0)} />
         <StatCard label="Pending" value={String(stats.pending ?? 0)} />
         <StatCard label="Promoted" value={String(stats.promoted ?? 0)} />
+        <StatCard
+          label={t("featuredServices", "Featured")}
+          value={String(stats.featured ?? 0)}
+        />
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -479,6 +492,7 @@ export default function AdminRegisteredServicesPage() {
                 {rows.map((service) => {
                   const employer = resolveEmployer(service);
                   const paid = isPaidService(service);
+                  const featured = isListingFeatureActive(service);
                   return (
                     <tr
                       key={service._id}
@@ -520,6 +534,15 @@ export default function AdminRegisteredServicesPage() {
                               aria-label={t("paidService", "Paid service")}
                             >
                               <IndianRupee size={14} strokeWidth={2.75} />
+                            </span>
+                          ) : null}
+                          {featured ? (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 ring-1 ring-amber-200"
+                              title={t("featuredBadge", "Featured")}
+                            >
+                              <Star size={12} className="fill-amber-500 text-amber-500" />
+                              {t("featuredBadge", "Featured")}
                             </span>
                           ) : null}
                         </div>
@@ -597,6 +620,29 @@ export default function AdminRegisteredServicesPage() {
         <ServiceDetailsModal
           service={selectedService}
           onClose={() => setSelectedService(null)}
+          onListingFeatureUpdated={(listingFeature) => {
+            if (!listingFeature) return;
+            const wasActive = isListingFeatureActive(selectedService);
+            const nextService = { ...selectedService, listingFeature };
+            const nowActive = isListingFeatureActive(nextService);
+            setSelectedService(nextService);
+            setRows((prev) =>
+              prev.map((row) =>
+                row._id === selectedService._id
+                  ? { ...row, listingFeature }
+                  : row,
+              ),
+            );
+            if (wasActive !== nowActive) {
+              setStats((prev) => ({
+                ...prev,
+                featured: Math.max(
+                  0,
+                  (prev.featured ?? 0) + (nowActive ? 1 : -1),
+                ),
+              }));
+            }
+          }}
           t={t}
         />
       ) : null}
@@ -616,16 +662,21 @@ function StatCard({ label, value }: { label: string; value: string }) {
 function ServiceDetailsModal({
   service,
   onClose,
+  onListingFeatureUpdated,
   t,
 }: {
   service: AdminService;
   onClose: () => void;
+  onListingFeatureUpdated: (
+    listingFeature: AdminService["listingFeature"],
+  ) => void;
   t: (key: string, fallback?: string) => string;
 }) {
   const employer = resolveEmployer(service);
   const worker = resolveWorker(service);
   const applicants = getApplicants(service);
   const paid = isPaidService(service);
+  const featured = isListingFeatureActive(service);
 
   return (
     <div
@@ -647,6 +698,12 @@ function ServiceDetailsModal({
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                   <IndianRupee size={12} strokeWidth={2.5} />
                   {t("paidService", "Paid service")}
+                </span>
+              ) : null}
+              {featured ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                  <Star size={12} className="fill-amber-500 text-amber-500" />
+                  {t("featuredBadge", "Featured")}
                 </span>
               ) : null}
               <h3 className="text-lg font-bold text-slate-800">
@@ -678,6 +735,12 @@ function ServiceDetailsModal({
         </div>
 
         <div className="max-h-[calc(92vh-84px)] overflow-y-auto p-4">
+          <ListingFeaturePanel
+            service={service}
+            onUpdated={onListingFeatureUpdated}
+            t={t}
+          />
+
           <div className="mb-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <SectionTitle
@@ -985,6 +1048,185 @@ function ServiceDetailsModal({
             </pre>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+const FEATURE_DAY_PRESETS = [3, 7, 15, 30] as const;
+
+function ListingFeaturePanel({
+  service,
+  onUpdated,
+  t,
+}: {
+  service: AdminService;
+  onUpdated: (listingFeature: AdminService["listingFeature"]) => void;
+  t: (key: string, fallback?: string) => string;
+}) {
+  const currentlyActive = isListingFeatureActive(service);
+  const [enabled, setEnabled] = useState(currentlyActive);
+  const [days, setDays] = useState(
+    Number(service.listingFeature?.days) > 0
+      ? Number(service.listingFeature?.days)
+      : 7,
+  );
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setEnabled(isListingFeatureActive(service));
+    setDays(
+      Number(service.listingFeature?.days) > 0
+        ? Number(service.listingFeature?.days)
+        : 7,
+    );
+    setError("");
+    setMessage("");
+  }, [
+    service._id,
+    service.listingFeature?.enabled,
+    service.listingFeature?.days,
+    service.listingFeature?.expiresAt,
+  ]);
+
+  const expiresLabel = service.listingFeature?.expiresAt
+    ? formatDate(service.listingFeature.expiresAt)
+    : "-";
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError("");
+    setMessage("");
+    const nDays = Math.floor(Number(days));
+    if (enabled && (!Number.isInteger(nDays) || nDays < 1 || nDays > 90)) {
+      setSaving(false);
+      setError(
+        t("listingFeatureDaysInvalid", "Enter a whole number of days from 1 to 90."),
+      );
+      return;
+    }
+    try {
+      const res = await apiRequest<{
+        data?: { listingFeature?: AdminService["listingFeature"] };
+      }>(`/admin/services/${service._id}/listing-feature`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          enabled,
+          days: enabled ? nDays : undefined,
+        }),
+      });
+      if (!res?.data?.listingFeature) {
+        setError(
+          t("listingFeatureSaveFailed", "Could not update featuring."),
+        );
+        return;
+      }
+      onUpdated(res.data.listingFeature);
+      setMessage(
+        enabled
+          ? t("listingFeatureSaved", "This work is now featured on the list.")
+          : t("listingFeatureDisabled", "Featuring was turned off."),
+      );
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : t("listingFeatureSaveFailed", "Could not update featuring."),
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mb-4 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <SectionTitle
+            title={t("listingFeatureTitle", "Feature on work list")}
+          />
+          <p className="mt-1 max-w-2xl text-sm text-slate-600">
+            {t(
+              "listingFeatureHelp",
+              "Pin this work at the top of the mobile services list with a Featured badge. Choose how many days it should stay featured.",
+            )}
+          </p>
+        </div>
+        {currentlyActive ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
+            <Star size={12} className="fill-amber-500 text-amber-500" />
+            {t("featuredActive", "Currently featured")}
+          </span>
+        ) : null}
+      </div>
+
+      <label className="mt-4 flex cursor-pointer items-center gap-2.5">
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(event) => setEnabled(event.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+        />
+        <span className="text-sm font-semibold text-slate-800">
+          {t("listingFeatureEnable", "Enable featuring")}
+        </span>
+      </label>
+
+      <div className={`mt-3 ${enabled ? "" : "opacity-50"}`}>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+          {t("listingFeatureDays", "Feature for (days)")}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {FEATURE_DAY_PRESETS.map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              disabled={!enabled || saving}
+              onClick={() => setDays(preset)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                days === preset
+                  ? "bg-amber-500 text-white"
+                  : "border border-amber-200 bg-white text-amber-900 hover:bg-amber-100"
+              }`}
+            >
+              {preset} {t("days", "days")}
+            </button>
+          ))}
+          <input
+            type="number"
+            min={1}
+            max={90}
+            disabled={!enabled || saving}
+            value={days}
+            onChange={(event) => setDays(Number(event.target.value))}
+            className="w-20 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 outline-none ring-amber-400 focus:ring-2"
+            aria-label={t("listingFeatureDays", "Feature for (days)")}
+          />
+        </div>
+        {currentlyActive ? (
+          <p className="mt-2 text-xs text-slate-500">
+            {t("listingFeatureExpires", "Expires")}: {expiresLabel}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => void handleSave()}
+          disabled={saving}
+          className="rounded-lg bg-[#22409a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1a327c] disabled:opacity-60"
+        >
+          {saving
+            ? t("saving", "Saving…")
+            : t("listingFeatureSave", "Save featuring")}
+        </button>
+        {message ? (
+          <p className="text-sm font-medium text-emerald-700">{message}</p>
+        ) : null}
+        {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
       </div>
     </div>
   );

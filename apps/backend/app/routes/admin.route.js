@@ -13,6 +13,7 @@ import {
   handleSuspendUser,
   handleExportRegistrations,
   handleExportServices,
+  updateServiceListingFeature,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import checkAdmin from "../middlewares/checkRole.middleware.js";
@@ -80,6 +81,14 @@ router.get(
   userStatus,
   checkAdmin,
   getAdminAllServices
+);
+
+router.patch(
+  "/services/:id/listing-feature",
+  verifyToken,
+  userStatus,
+  checkAdmin,
+  updateServiceListingFeature
 );
 
 export default router;

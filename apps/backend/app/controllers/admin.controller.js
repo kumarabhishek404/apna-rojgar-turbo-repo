@@ -7,12 +7,17 @@ import NotificationMetric from "../models/notificationMetric.model.js";
 import Payment from "../models/payment.model.js";
 import Service from "../models/service.model.js";
 import Invitation from "../models/invitation.model.js";
+import mongoose from "mongoose";
 import { getPromotionPaymentStats } from "../utils/payment.service.js";
 import { handleSendNotificationController } from "./notification.controller.js";
 import { exportWeeklyRegistrations } from "../cron/weeklyRegistrationsExport.js";
 import { exportWeeklyServices } from "../cron/weeklyServicesExport.js";
 import logError from "../utils/addErrorLog.js";
 import { getEnglishTitles } from "../utils/translations.js";
+import {
+  isListingFeatureActive,
+  parseListingFeatureDays,
+} from "../utils/listingFeature.js";
 
 export const handleActivateUser = async (req, res) => {
   const admin = req?.user;
@@ -1018,7 +1023,7 @@ export const getAdminAllServices = async (req, res) => {
       ];
     }
 
-    const [total, services, statusStats, promotionCount] = await Promise.all([
+    const [total, services, statusStats, promotionCount, featuredCount] = await Promise.all([
       Service.countDocuments(query),
       Service.find(query)
         .sort({ createdAt: -1 })
@@ -1053,6 +1058,11 @@ export const getAdminAllServices = async (req, res) => {
         ...query,
         "socialMediaPromotion.enabled": true,
       }),
+      Service.countDocuments({
+        ...query,
+        "listingFeature.enabled": true,
+        "listingFeature.expiresAt": { $gt: new Date() },
+      }),
     ]);
 
     const stats = {
@@ -1063,6 +1073,7 @@ export const getAdminAllServices = async (req, res) => {
       pending: 0,
       rejected: 0,
       promoted: promotionCount,
+      featured: featuredCount,
     };
     statusStats.forEach((entry) => {
       const key = String(entry?._id || "").toUpperCase();
@@ -1090,6 +1101,88 @@ export const getAdminAllServices = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to fetch services",
+    });
+  }
+};
+
+/**
+ * PATCH /admin/services/:id/listing-feature
+ * Pin or unpin a service at the top of the in-app work list for N days.
+ */
+export const updateServiceListingFeature = async (req, res) => {
+  const { id } = req.params;
+  const enabled = req.body?.enabled;
+  const now = new Date();
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid service id",
+    });
+  }
+
+  if (typeof enabled !== "boolean") {
+    return res.status(400).json({
+      success: false,
+      message: "enabled must be a boolean",
+    });
+  }
+
+  try {
+    const service = await Service.findById(id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    if (enabled) {
+      const days = parseListingFeatureDays(req.body?.days);
+      if (days == null) {
+        return res.status(400).json({
+          success: false,
+          message: "days must be an integer between 1 and 90",
+        });
+      }
+      service.listingFeature = {
+        enabled: true,
+        days,
+        startsAt: now,
+        expiresAt: new Date(now.getTime() + days * 24 * 60 * 60 * 1000),
+        featuredBy: req.user._id,
+      };
+    } else {
+      const previous = service.listingFeature || {};
+      service.listingFeature = {
+        enabled: false,
+        days: previous.days || 0,
+        startsAt: previous.startsAt,
+        expiresAt: previous.expiresAt,
+        featuredBy: req.user._id,
+      };
+    }
+
+    await service.save();
+    const listingFeature = service.listingFeature?.toObject
+      ? service.listingFeature.toObject()
+      : service.listingFeature;
+
+    res.status(200).json({
+      success: true,
+      message: enabled
+        ? "Service featured on the work list"
+        : "Service listing feature disabled",
+      data: {
+        listingFeature,
+        isActive: isListingFeatureActive(service, now),
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to update listing feature",
     });
   }
 };

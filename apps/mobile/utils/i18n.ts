@@ -43,13 +43,41 @@ export const setI18nLocale = (locale: string) => {
   i18n.locale = locale;
 };
 
-// Function to get dynamic worker type translation
+/** Worker keys are `{ singular, plural }`. Never show "[object Object]". */
+export function humanizeI18nValue(raw: unknown, fallback = ""): string {
+  if (raw == null) return fallback;
+  if (typeof raw === "number" && Number.isFinite(raw)) return String(raw);
+  if (typeof raw === "string") {
+    const s = raw.trim();
+    if (!s || s === "[object Object]") return fallback;
+    return s;
+  }
+  if (typeof raw === "object") {
+    const row = raw as Record<string, unknown>;
+    const pick =
+      row.singular ??
+      row.one ??
+      row.other ??
+      row.plural ??
+      row.name ??
+      row.title ??
+      row.label;
+    if (pick != null && typeof pick !== "object") return String(pick);
+  }
+  return fallback;
+}
+
 export const getDynamicWorkerType = (key: string, count: number): string => {
   const translations = i18n.t(key);
-  if (translations && translations.singular && translations.plural) {
-    return count === 1 ? translations.singular : translations.plural;
+  if (translations && typeof translations === "object") {
+    const row = translations as { singular?: string; plural?: string };
+    if (row.singular || row.plural) {
+      return count === 1
+        ? String(row.singular || row.plural)
+        : String(row.plural || row.singular);
+    }
   }
-  return i18n.t(key); // Fallback to the regular translation if singular/plural not found
+  return humanizeI18nValue(translations, key);
 };
 
 // Custom hook to use `t` directly

@@ -5,6 +5,10 @@ import User from "../models/user.model.js";
 import logError from "../utils/addErrorLog.js";
 import { haversineDistance } from "../utils/functions.js";
 import { PUBLIC_STATS_DISPLAY_OFFSET } from "../config/publicStatsDisplay.config.js";
+import {
+  listingFeatureRankExpr,
+  sortWithFeaturedFirst,
+} from "../utils/listingFeature.js";
 
 /**
  * Public paginated list of service `_id`s for Next static export (shareable `/services/:id` URLs).
@@ -114,7 +118,9 @@ export const getAllServices = async (req, res) => {
     req.body;
 
   try {
-    const skip = (page - 1) * limit;
+    const pageNum = Math.max(1, Number(page) || 1);
+    const limitNum = Math.max(1, Number(limit) || 10);
+    const skip = (pageNum - 1) * limitNum;
     let query = { employer: { $ne: _id } };
 
     // Filter by status
@@ -156,12 +162,16 @@ export const getAllServices = async (req, res) => {
     const userLocation = user?.geoLocation;
 
     // Fetch services in one go. Keep sort at DB-level before pagination.
+    // Active listing features always rank first, then the requested secondary sort.
+    const now = new Date();
+    const featuredRank = listingFeatureRankExpr(now);
     let services = [];
     if (sortBy === "more_salary") {
       services = await Service.aggregate([
         { $match: query },
         {
           $addFields: {
+            listingFeatureRank: featuredRank,
             maxPayPerDay: {
               $ifNull: [
                 {
@@ -178,17 +188,18 @@ export const getAllServices = async (req, res) => {
             },
           },
         },
-        { $sort: { maxPayPerDay: -1, createdAt: -1 } },
+        { $sort: { listingFeatureRank: -1, maxPayPerDay: -1, createdAt: -1 } },
         { $skip: skip },
-        { $limit: Number(limit) },
+        { $limit: limitNum },
       ]);
     } else {
-      const dbSort = sortBy === "latest" ? { createdAt: -1 } : { createdAt: -1 };
-      services = await Service.find(query)
-        .sort(dbSort)
-        .skip(skip)
-        .limit(Number(limit))
-        .lean(); // Use lean() to get plain objects and reduce memory overhead
+      services = await Service.aggregate([
+        { $match: query },
+        { $addFields: { listingFeatureRank: featuredRank } },
+        { $sort: { listingFeatureRank: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limitNum },
+      ]);
     }
 
     const totalServices = await Service.countDocuments(query);
@@ -311,15 +322,20 @@ export const getAllServices = async (req, res) => {
     }
 
     if (sortBy === "more_salary") {
-      // Already sorted at DB level (maxPayPerDay desc) before pagination.
-      // Keep this order intact.
+      services = sortWithFeaturedFirst(
+        services,
+        (a, b) => (b.maxPayPerDay || 0) - (a.maxPayPerDay || 0),
+      );
     } else if (sortBy === "latest") {
-      services?.sort(
-        (a, b) => new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
+      services = sortWithFeaturedFirst(
+        services,
+        (a, b) =>
+          new Date(b?.createdAt).getTime() - new Date(a?.createdAt).getTime(),
       );
     } else {
-      // Default and "nearest": sort by nearest distance.
-      services?.sort(
+      // Default and "nearest": featured first, then nearest distance.
+      services = sortWithFeaturedFirst(
+        services,
         (a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity),
       );
     }
@@ -329,10 +345,10 @@ export const getAllServices = async (req, res) => {
       message: "Works fetched successfully",
       data: services,
       pagination: {
-        page: Number(page),
-        pages: Math.ceil(totalServices / limit),
+        page: pageNum,
+        pages: Math.ceil(totalServices / limitNum),
         total: totalServices,
-        limit: Number(limit),
+        limit: limitNum,
       },
     });
   } catch (error) {

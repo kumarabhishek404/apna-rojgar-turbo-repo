@@ -16,6 +16,17 @@ export const AnalyticsEvents = {
 
   /** User tapped a tel: link — never log phone numbers, only context ids. */
   CALL_TAP: "call_tap",
+
+  AI_OPENED: "ai_opened",
+  AI_SUGGESTION_SHOWN: "ai_suggestion_shown",
+  AI_SUGGESTION_CLICKED: "ai_suggestion_clicked",
+  AI_VOICE_STARTED: "ai_voice_started",
+  AI_VOICE_COMPLETED: "ai_voice_completed",
+  AI_INTENT_DETECTED: "ai_intent_detected",
+  AI_INTENT_FAILED: "ai_intent_failed",
+  AI_ACTION_STARTED: "ai_action_started",
+  AI_ACTION_COMPLETED: "ai_action_completed",
+  AI_RESPONSE_RATED: "ai_response_rated",
 } as const;
 
 export type AnalyticsEventName =

@@ -82,6 +82,7 @@ import appVersionRoutes from "./app/routes/appVersion.route.js";
 import analyticsRoutes from "./app/routes/analytics.route.js";
 import paymentRoutes from "./app/routes/payment.route.js";
 import blogRoutes, { adminBlogRouter } from "./app/routes/blog.route.js";
+import saathiRoutes from "./app/routes/saathi.route.js";
 
 // ✅ Import cron jobs
 import scheduleNotifiyLiveServiceOfUserSkills from "./app/cron/activeServicesNotification.js";
@@ -128,6 +129,7 @@ app.use("/api/v1/booking", bookingRoutes);
 app.use("/api/v1/appVersion", appVersionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/saathi", saathiRoutes);
 
 // ✅ Global Error Handling Middleware
 app.use((err, req, res, next) => {
