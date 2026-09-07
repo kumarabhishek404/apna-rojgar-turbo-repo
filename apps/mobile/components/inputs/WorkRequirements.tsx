@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from "react-native";
 import Counter from "@/components/inputs/Counter";
-import Colors from "@/constants/Colors";
 import Button from "@/components/inputs/Button";
 import { filterWorkerTypes } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 import TextInputComponent from "./TextInputWithIcon";
 import { getDynamicWorkerType } from "@/utils/i18n";
+import {
+  MIN_PAY_PER_DAY,
+  getPayPerDayFieldError,
+  parsePayPerDay,
+} from "@/utils/serviceRequirements";
+import TOAST from "@/app/hooks/toast";
+import Colors from "@/constants/Colors";
 
 interface Props {
   type: string;
@@ -24,7 +30,10 @@ export default function WorkerRequirementSelector({
   const [selectedWorker, setSelectedWorker] = useState<any>(null);
   const [count, setCount] = useState(1);
   const [price, setPrice] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const payFieldErrorKey = getPayPerDayFieldError(price);
+  const parsedPay = parsePayPerDay(price);
+  const canSavePay =
+    parsedPay != null && parsedPay >= MIN_PAY_PER_DAY;
 
   const workerTypes = filterWorkerTypes(type, subType) || [];
 
@@ -36,34 +45,44 @@ export default function WorkerRequirementSelector({
   const openPopup = (worker: any) => {
     setSelectedWorker(worker);
     setCount(1);
-    setPrice("0");
+    setPrice("");
   };
 
   const saveWorker = () => {
+    const payPerDay = parsePayPerDay(price);
+    if (payPerDay == null) {
+      TOAST.error(t("payPerDayIsRequired"));
+      return;
+    }
+    if (payPerDay < MIN_PAY_PER_DAY) {
+      TOAST.error(t("payPerDayMustBeAtLeast500"));
+      return;
+    }
+    if (!Number.isFinite(count) || count < 1) {
+      TOAST.error(t("totalRequiredMustBeGreaterThan0"));
+      return;
+    }
+
     const newData = [
-      ...value,
+      ...(Array.isArray(value) ? value : []),
       {
         name: selectedWorker.value,
         count,
-        payPerDay: parseInt(price),
+        payPerDay,
       },
     ];
     onChange(newData);
     setSelectedWorker(null);
-  };
-
-  const removeWorker = (name: string) => {
-    onChange(value.filter((v) => v.name !== name));
+    setPrice("");
   };
 
   const sentence = (item: any) =>
-    `${item.count} ${getDynamicWorkerType(item?.name, item.count)} ${t("workersNeeded")} ${item.payPerDay ? `₹${item.payPerDay}` : ""} ${
-      item.payPerDay ? t("perDay") : ""
-    }`;
+    `${item.count} ${getDynamicWorkerType(item?.name, item.count)} ${t("workersNeeded")} ${
+      item.payPerDay ? `₹${item.payPerDay}` : ""
+    } ${item.payPerDay ? t("perDay") : ""}`;
 
   return (
     <View style={{ gap: 18 }}>
-      {/* ✅ Selected Workers */}
       {value?.length > 0 && (
         <View>
           <Text style={styles.heading}>{t("selectedWorkers")}</Text>
@@ -81,7 +100,6 @@ export default function WorkerRequirementSelector({
         </View>
       )}
 
-      {/* ✅ Available Workers */}
       <Text style={styles.heading}>{t("tapToAddWorkers")}</Text>
 
       <View style={styles.grid}>
@@ -96,7 +114,6 @@ export default function WorkerRequirementSelector({
         ))}
       </View>
 
-      {/* ✅ POPUP */}
       <Modal visible={!!selectedWorker} transparent animationType="slide">
         <View style={styles.modalBg}>
           <View style={styles.modalBox}>
@@ -110,13 +127,25 @@ export default function WorkerRequirementSelector({
               name="payPerDay"
               label="pricePerDay"
               value={price}
-              placeholder={t("enterPayPerDay")}
+              placeholder={t("enterPayPerDayMin500")}
               type="number"
               onChangeText={setPrice}
-              style={{ marginVertical: 30 }}
+              isRequired
+              errors={
+                payFieldErrorKey
+                  ? { payPerDay: { message: t(payFieldErrorKey) } }
+                  : undefined
+              }
+              style={{ marginTop: 12 }}
             />
+            <Text style={styles.minPayHint}>
+              {t("payPerDayMinHint", { amount: MIN_PAY_PER_DAY })}
+            </Text>
+            {payFieldErrorKey ? (
+              <Text style={styles.minPayError}>{t(payFieldErrorKey)}</Text>
+            ) : null}
 
-            <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flexDirection: "row", gap: 10, marginTop: 8 }}>
               <Button
                 title={t("cancel")}
                 isPrimary={false}
@@ -127,6 +156,7 @@ export default function WorkerRequirementSelector({
                 title={t("save")}
                 isPrimary
                 onPress={saveWorker}
+                disabled={!canSavePay}
                 style={{ flex: 1 }}
               />
             </View>
@@ -135,6 +165,10 @@ export default function WorkerRequirementSelector({
       </Modal>
     </View>
   );
+
+  function removeWorker(name: string) {
+    onChange(value.filter((v) => v.name !== name));
+  }
 }
 
 const styles = StyleSheet.create({
@@ -172,4 +206,17 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   modalTitle: { fontSize: 18, fontWeight: "700" },
+  minPayHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.primary,
+    fontWeight: "600",
+    marginTop: -4,
+  },
+  minPayError: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.danger,
+    fontWeight: "600",
+  },
 });

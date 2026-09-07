@@ -25,7 +25,7 @@ const notifyUsersWithPendingRequests = async () => {
     // Send notifications to each user
     for (const user of usersWithPendingRequests) {
       try {
-        handleSendNotificationController(
+        const result = await handleSendNotificationController(
           user._id,
           getEnglishTitles()?.PENDING_REQUEST_REMINDER,
           {
@@ -35,10 +35,12 @@ const notifyUsersWithPendingRequests = async () => {
             actionBy: null,
             actionOn: user._id,
           },
+          null,
+          { source: "CRON" },
         );
 
         console.log(
-          `✅ [Cron] Notification sent to user: ${user.name} (${user._id})`,
+          `${result?.success ? "✅" : "⏭️"} [Cron] Pending reminder ${result?.queued ? "queued" : result?.success ? "sent" : "skipped"} for user: ${user.name} (${user._id})`,
         );
       } catch (error) {
         logError(error, null, 500, "cronJob - notifyUsersWithPendingRequests");
@@ -60,10 +62,15 @@ const notifyUsersWithPendingRequests = async () => {
 };
 
 const scheduleNotifyUsersWithPendingRequests = () => {
-  cron.schedule("0 10 * * 1", async () => {
-    console.log("⏰ [Cron] Running notifyUsersWithPendingRequests...");
-    await notifyUsersWithPendingRequests();
-  });
+  // Mon / Wed / Fri at 10:00 IST — more frequent than weekly-only.
+  cron.schedule(
+    "0 10 * * 1,3,5",
+    async () => {
+      console.log("⏰ [Cron] Running notifyUsersWithPendingRequests...");
+      await notifyUsersWithPendingRequests();
+    },
+    { timezone: "Asia/Kolkata" },
+  );
 };
 
 export default scheduleNotifyUsersWithPendingRequests;

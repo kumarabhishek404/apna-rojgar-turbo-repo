@@ -11,6 +11,27 @@ type State = {
   hasError: boolean;
 };
 
+function isStaleChunkError(error: unknown) {
+  if (typeof error === "string") {
+    return /ChunkLoadError|Loading chunk|Failed to load chunk|dynamically imported module/i.test(
+      error,
+    );
+  }
+  const err = error as { name?: string; message?: string } | undefined;
+  const text = `${err?.name || ""} ${err?.message || ""}`;
+  return /ChunkLoadError|Loading chunk|Failed to load chunk|dynamically imported module/i.test(
+    text,
+  );
+}
+
+function reloadOnceForStaleChunk() {
+  if (typeof window === "undefined") return;
+  const key = "ar_stale_chunk_reload";
+  if (sessionStorage.getItem(key) === "1") return;
+  sessionStorage.setItem(key, "1");
+  window.location.reload();
+}
+
 class WebsiteErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 
@@ -19,6 +40,10 @@ class WebsiteErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
+    if (isStaleChunkError(error)) {
+      reloadOnceForStaleChunk();
+      return;
+    }
     void reportError({
       message: error.message || "React render error",
       stack: error.stack,
@@ -53,6 +78,10 @@ class WebsiteErrorBoundary extends Component<Props, State> {
 export default function WebsiteErrorReporter({ children }: Props) {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
+      if (isStaleChunkError(event.error) || isStaleChunkError(event.message)) {
+        reloadOnceForStaleChunk();
+        return;
+      }
       void reportError({
         message: event.message || "Unhandled window error",
         stack: event.error?.stack,
@@ -62,6 +91,10 @@ export default function WebsiteErrorReporter({ children }: Props) {
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
       const reason = event.reason;
+      if (isStaleChunkError(reason)) {
+        reloadOnceForStaleChunk();
+        return;
+      }
       const message =
         reason instanceof Error
           ? reason.message

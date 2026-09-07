@@ -27,6 +27,12 @@ const GlobalRuntimeErrorReporter = () => {
         message: error?.message || "Unhandled runtime error",
         stack: error?.stack,
         route: isFatal ? "fatal-runtime" : "runtime",
+        statusCode: 500,
+        errorName: error?.name || "RuntimeError",
+        context: {
+          kind: "runtime",
+          isFatal: Boolean(isFatal),
+        },
       });
       defaultHandler?.(error, isFatal);
     });
@@ -47,6 +53,11 @@ const AppWithErrorBoundary = ({ children }: any) => {
           stack: error?.stack,
           componentStack: info?.componentStack,
           route: "react-error-boundary",
+          statusCode: 500,
+          errorName: error?.name || "ReactRenderError",
+          context: {
+            kind: "react-error-boundary",
+          },
         });
       }}
     >

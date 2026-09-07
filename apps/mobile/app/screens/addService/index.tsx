@@ -5,6 +5,7 @@ import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import Loader from "@/components/commons/Loaders/Loader";
 import Colors from "@/constants/Colors";
 import { t } from "@/utils/translationHelper";
+import { getApiErrorMessage } from "@/utils/apiError";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, Stack, useFocusEffect, useNavigation } from "expo-router";
 import { useAtom } from "jotai";
@@ -35,6 +36,10 @@ import PromotionChoiceModal from "@/components/commons/PromotionChoiceModal";
 import { useCashfreePromotionPayment } from "@/utils/useCashfreePromotionPayment";
 import PAYMENT from "@/app/api/payment";
 import { buildServiceImageUploadParts } from "@/utils/serviceImageUpload";
+import {
+  getRequirementsValidationError,
+  normalizeRequirements,
+} from "@/utils/serviceRequirements";
 
 const AddServiceScreen = () => {
   const queryClient = useQueryClient();
@@ -94,6 +99,7 @@ const AddServiceScreen = () => {
 
   const mutationAddService = useMutation({
     mutationKey: [addService?._id ? "editService" : "addService"],
+    retry: false,
     mutationFn: () =>
       addService?._id ? handleEditSubmit(addService?._id) : handleSubmit(),
     onSuccess: async (data: any) => {
@@ -151,8 +157,10 @@ const AddServiceScreen = () => {
       });
 
       TOAST?.error(
-        err?.response?.data?.message ||
-          (addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed")),
+        getApiErrorMessage(
+          err,
+          addService?._id ? t("serviceUpdateFailed") : t("serviceCreateFailed"),
+        ),
       );
     },
     onSettled: () => {
@@ -282,6 +290,13 @@ const AddServiceScreen = () => {
       throw new Error("Required fields are missing");
     }
 
+    const requirementsError = getRequirementsValidationError(requirements);
+    if (requirementsError) {
+      TOAST.error(t(requirementsError));
+      throw new Error(t(requirementsError));
+    }
+    const safeRequirements = normalizeRequirements(requirements);
+
     const imageParts = await buildServiceImageUploadParts(images);
     const finalLocation = await ensureLocation(location, address);
 
@@ -294,7 +309,7 @@ const AddServiceScreen = () => {
       startDate: moment(startDate).format("YYYY-MM-DD"),
       duration: String(duration),
       bookingType: "byService",
-      requirements: JSON.stringify(requirements),
+      requirements: JSON.stringify(safeRequirements),
       facilities: JSON.stringify(facilities),
       promoteSocialMedia: String(promotionChoiceRef.current.promoteSocialMedia),
       ...(promotionChoiceRef.current.promotionOrderId
@@ -338,6 +353,13 @@ const AddServiceScreen = () => {
         imageCount: images.length,
       });
 
+      const requirementsError = getRequirementsValidationError(requirements);
+      if (requirementsError) {
+        TOAST.error(t(requirementsError));
+        throw new Error(t(requirementsError));
+      }
+      const safeRequirements = normalizeRequirements(requirements);
+
       const formData: any = new FormData();
 
       const imageParts = await buildServiceImageUploadParts(images);
@@ -365,7 +387,7 @@ const AddServiceScreen = () => {
       formData.append("startDate", moment(startDate).format("YYYY-MM-DD"));
       formData.append("duration", String(duration));
       formData.append("bookingType", "byService");
-      formData.append("requirements", JSON.stringify(requirements));
+      formData.append("requirements", JSON.stringify(safeRequirements));
       formData.append("facilities", JSON.stringify(facilities));
 
       const response: any = await EMPLOYER?.editService(formData);

@@ -16,6 +16,11 @@ import TextInputComponent from "./TextInputWithIcon";
 import { Controller, useForm } from "react-hook-form";
 import TOAST from "@/app/hooks/toast";
 import { getDynamicWorkerType } from "@/utils/i18n";
+import {
+  MIN_PAY_PER_DAY,
+  getPayPerDayFieldError,
+} from "@/utils/serviceRequirements";
+import CustomText from "../commons/CustomText";
 
 const { height } = Dimensions.get("window");
 
@@ -76,8 +81,14 @@ const SkillsSelector = ({
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors: priceErrors },
   } = useForm({ defaultValues: { pricePerDay: "" } });
+  const watchedPay = watch("pricePerDay");
+  const canSaveSkillPay =
+    !isPricePerDayNeeded ||
+    (getPayPerDayFieldError(watchedPay) == null &&
+      String(watchedPay || "").trim() !== "");
 
   const handleSelect = (skill: any) => {
     if (selectedInterests.length >= 5) {
@@ -97,6 +108,13 @@ const SkillsSelector = ({
   };
 
   const handleAddSkill = (data: any) => {
+    if (isPricePerDayNeeded) {
+      const payError = getPayPerDayFieldError(data.pricePerDay);
+      if (payError || data.pricePerDay === "" || data.pricePerDay == null) {
+        TOAST.error(t(payError || "payPerDayIsRequired"));
+        return;
+      }
+    }
     const newSkill = {
       skill: selectedSkill?.value,
       pricePerDay: isPricePerDayNeeded ? data.pricePerDay : null,
@@ -138,19 +156,36 @@ const SkillsSelector = ({
       <Controller
         control={control}
         name="pricePerDay"
-        rules={{ required: t("priceIsRequired") }}
+        rules={{
+          required: t("priceIsRequired"),
+          validate: (value) => {
+            const err = getPayPerDayFieldError(value);
+            return err ? t(err) : true;
+          },
+        }}
         render={({ field: { onChange, value } }) => (
-          <TextInputComponent
-            name="pricePerDay"
-            label="pricePerDay"
-            type="number"
-            maxLength={4}
-            placeholder={t("enterPricePerDay")}
-            value={value}
-            errors={priceErrors}
-            textStyles={{ fontSize: 16 }}
-            onChangeText={onChange}
-          />
+          <View>
+            <TextInputComponent
+              name="pricePerDay"
+              label="pricePerDay"
+              type="number"
+              maxLength={4}
+              placeholder={t("enterPayPerDayMin500")}
+              value={value}
+              errors={priceErrors}
+              textStyles={{ fontSize: 16 }}
+              onChangeText={onChange}
+            />
+            <CustomText
+              baseFont={13}
+              color={Colors.primary}
+              fontWeight="600"
+              textAlign="left"
+              style={{ marginTop: 8 }}
+            >
+              {t("payPerDayMinHint", { amount: MIN_PAY_PER_DAY })}
+            </CustomText>
+          </View>
         )}
       />
     </View>
@@ -303,6 +338,7 @@ const SkillsSelector = ({
           primaryButton={{
             title: isEditMode ? t("updateSkillPrice") : t("addSkillPrice"),
             action: handleSubmit(handleAddSkill),
+            disabled: !canSaveSkillPay,
           }}
           secondaryButton={{
             title: t("cancel"),

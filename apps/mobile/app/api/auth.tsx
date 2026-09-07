@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import auth from "@react-native-firebase/auth";
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
+import { FEATURE_FLAGS } from "@/constants/featureFlags";
 import { Platform } from "react-native";
 
 const checkMobileExistance = async (payload: any) => {
@@ -129,6 +130,11 @@ const verifyOTP = async (payload: {
 };
 
 const sendEmailCode = async (email: string) => {
+  if (!FEATURE_FLAGS.EMAIL_VERIFICATION) {
+    const err: any = new Error("Email verification is temporarily disabled");
+    err.code = "EMAIL_VERIFICATION_DISABLED";
+    throw err;
+  }
   console.log("email", email);
   try {
     const response = await API_CLIENT.makePostRequest("/auth/send-email-code", {
@@ -142,6 +148,11 @@ const sendEmailCode = async (email: string) => {
 };
 
 const verifyEmailCode = async (code: string) => {
+  if (!FEATURE_FLAGS.EMAIL_VERIFICATION) {
+    const err: any = new Error("Email verification is temporarily disabled");
+    err.code = "EMAIL_VERIFICATION_DISABLED";
+    throw err;
+  }
   console.log("code", code);
   try {
     const response = await API_CLIENT.makePostRequest(

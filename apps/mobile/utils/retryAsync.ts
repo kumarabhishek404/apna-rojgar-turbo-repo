@@ -1,6 +1,22 @@
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Retry async calls on network failures — helpful on slow/unstable connections. */
+function isNonRetryableError(error: unknown): boolean {
+  const status = Number((error as { response?: { status?: number } })?.response?.status);
+  if (Number.isFinite(status) && status >= 400 && status < 500) {
+    return true;
+  }
+  const code = String(
+    (error as { response?: { data?: { errorCode?: string } } })?.response?.data
+      ?.errorCode || "",
+  );
+  return (
+    code === "PAY_PER_DAY_TOO_LOW" ||
+    code === "PAY_PER_DAY_REQUIRED" ||
+    code === "REQUIREMENTS_REQUIRED"
+  );
+}
+
+/** Retry async calls on network failures — never retry the same 4xx validation payload. */
 export async function retryAsync<T>(
   fn: () => Promise<T>,
   options: { retries?: number; baseDelayMs?: number } = {},
@@ -13,7 +29,7 @@ export async function retryAsync<T>(
       return await fn();
     } catch (error) {
       lastError = error;
-      if (attempt === retries - 1) break;
+      if (isNonRetryableError(error) || attempt === retries - 1) break;
       await sleep(baseDelayMs * (attempt + 1));
     }
   }

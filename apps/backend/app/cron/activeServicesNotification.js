@@ -143,6 +143,7 @@ const sendNotificationToUsers = async (users, serviceId) => {
             serviceId,
           },
           null,
+          { source: "CRON" },
         );
 
         if (result?.success) {
@@ -231,13 +232,17 @@ const notifyUsersForActiveServices = async () => {
  * Schedule the cron job (Runs every hour).
  */
 const scheduleNotifiyLiveServiceOfUserSkills = () => {
-  cron.schedule("0 * * * *", async () => {
-    console.log(
-      "⏰ [Cron] Schedule Triggered at:",
-      new Date().toLocaleString(),
-    );
-    await notifyUsersForActiveServices();
-  });
+  cron.schedule(
+    "0 * * * *",
+    async () => {
+      console.log(
+        "⏰ [Cron] Schedule Triggered at:",
+        new Date().toLocaleString(),
+      );
+      await notifyUsersForActiveServices();
+    },
+    { timezone: "Asia/Kolkata" },
+  );
 };
 
 export default scheduleNotifiyLiveServiceOfUserSkills;

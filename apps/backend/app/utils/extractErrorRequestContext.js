@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import User from "../models/user.model.js";
 
 const SENSITIVE_HEADER = new Set([
   "authorization",
@@ -152,11 +153,8 @@ export function extractDeviceSnapshot(req) {
   return { device, clientHeaders };
 }
 
-/**
- * User snapshot from `req.user` (Mongoose doc or plain object), plus unverified JWT subject when user is not loaded.
- */
-export function extractUserSnapshot(req) {
-  const emptyUser = {
+function emptyUserSnapshot() {
+  return {
     id: null,
     name: null,
     mobile: null,
@@ -164,44 +162,159 @@ export function extractUserSnapshot(req) {
     role: null,
     email: null,
     locale: null,
+    status: null,
   };
+}
+
+function normalizeUserId(value) {
+  if (value == null || value === "") return null;
+  const id = String(value);
+  return mongoose.isValidObjectId(id) ? new mongoose.Types.ObjectId(id) : null;
+}
+
+function pickString(...values) {
+  for (const value of values) {
+    if (value == null) continue;
+    const s = String(value).trim();
+    if (s) return s;
+  }
+  return null;
+}
+
+/**
+ * Normalize a partial user object from req.user, client body, or DB doc.
+ */
+export function normalizeUserSnapshot(raw) {
+  const base = emptyUserSnapshot();
+  if (!raw || typeof raw !== "object") return base;
+
+  const id = normalizeUserId(raw.id ?? raw._id ?? raw.userId);
+  const email =
+    typeof raw.email === "object" && raw.email != null
+      ? pickString(raw.email.value, raw.email.address)
+      : pickString(raw.email);
+  const locale =
+    typeof raw.locale === "object" && raw.locale != null
+      ? pickString(raw.locale.language, raw.locale)
+      : pickString(raw.locale);
+
+  return {
+    id,
+    name: pickString(raw.name) ?? null,
+    mobile: pickString(raw.mobile, raw.phone) ?? null,
+    countryCode: pickString(raw.countryCode) ?? null,
+    role: pickString(raw.role) ?? null,
+    email: email ?? null,
+    locale: locale ?? null,
+    status: pickString(raw.status) ?? null,
+  };
+}
+
+/** Prefer non-empty fields from `override` over `base`. */
+export function mergeUserSnapshots(base, override) {
+  const a = normalizeUserSnapshot(base);
+  const b = normalizeUserSnapshot(override);
+  return {
+    id: b.id || a.id || null,
+    name: b.name || a.name || null,
+    mobile: b.mobile || a.mobile || null,
+    countryCode: b.countryCode || a.countryCode || null,
+    role: b.role || a.role || null,
+    email: b.email || a.email || null,
+    locale: b.locale || a.locale || null,
+    status: b.status || a.status || null,
+  };
+}
+
+export function mergeDeviceSnapshots(base, override) {
+  const a = base && typeof base === "object" ? base : {};
+  const b = override && typeof override === "object" ? override : {};
+  const merged = { ...a };
+
+  for (const [key, value] of Object.entries(b)) {
+    if (key === "extras") continue;
+    if (value == null || value === "") continue;
+    merged[key] = value;
+  }
+
+  const extrasA =
+    a.extras && typeof a.extras === "object" && !Array.isArray(a.extras)
+      ? a.extras
+      : {};
+  const extrasB =
+    b.extras && typeof b.extras === "object" && !Array.isArray(b.extras)
+      ? b.extras
+      : {};
+  const extras = { ...extrasA, ...extrasB };
+  if (Object.keys(extras).length > 0) {
+    merged.extras = extras;
+  }
+
+  return merged;
+}
+
+async function hydrateUserFromDb(user) {
+  const id = user?.id;
+  if (!id) return user;
+
+  const needsHydration =
+    !user.name || !user.mobile || !user.role || !user.email || !user.status;
+  if (!needsHydration) return user;
+
+  try {
+    const doc = await User.findById(id)
+      .select("name mobile countryCode role email locale status")
+      .lean();
+    if (!doc) return user;
+    return mergeUserSnapshots(user, doc);
+  } catch {
+    return user;
+  }
+}
+
+/**
+ * User snapshot from `req.user` (Mongoose doc or plain object), optional client
+ * override, plus JWT subject when user is not loaded. Hydrates from DB when only id is known.
+ */
+export async function extractUserSnapshot(req, userOverride = null) {
+  let tokenSubjectUserId = null;
+  let user = emptyUserSnapshot();
 
   const u = req?.user;
   if (u && (u._id || u.id)) {
-    const id = u._id ?? u.id;
-    return {
-      user: {
-        id: mongoose.isValidObjectId(id) ? id : null,
-        name: u.name ?? "",
-        mobile: u.mobile ?? "",
-        countryCode: u.countryCode ?? "",
-        role: u.role ?? "",
-        email: typeof u.email?.value === "string" ? u.email.value : "",
-        locale: u.locale?.language ?? "",
-      },
-      tokenSubjectUserId: null,
-    };
-  }
-
-  let tokenSubjectUserId = null;
-  const auth = req?.headers?.authorization;
-  if (auth && auth.startsWith("Bearer ")) {
-    const token = auth.replace(/^Bearer\s+/i, "").trim();
-    if (token) {
-      try {
-        const decoded = jwt.decode(token, { complete: false });
-        const sub = decoded?._id ?? decoded?.sub ?? decoded?.id ?? decoded?.userId;
-        if (sub != null && mongoose.isValidObjectId(String(sub))) {
-          tokenSubjectUserId = new mongoose.Types.ObjectId(String(sub));
+    user = normalizeUserSnapshot(u);
+  } else {
+    const auth = req?.headers?.authorization;
+    if (auth && auth.startsWith("Bearer ")) {
+      const token = auth.replace(/^Bearer\s+/i, "").trim();
+      if (token) {
+        try {
+          const decoded = jwt.decode(token, { complete: false });
+          const sub =
+            decoded?._id ?? decoded?.sub ?? decoded?.id ?? decoded?.userId;
+          if (sub != null && mongoose.isValidObjectId(String(sub))) {
+            tokenSubjectUserId = new mongoose.Types.ObjectId(String(sub));
+            user = normalizeUserSnapshot({ id: tokenSubjectUserId });
+          }
+        } catch {
+          /* ignore */
         }
-      } catch {
-        /* ignore */
       }
     }
   }
 
+  if (userOverride) {
+    user = mergeUserSnapshots(user, userOverride);
+  }
+
+  user = await hydrateUserFromDb(user);
+
+  if (!tokenSubjectUserId && user.id) {
+    tokenSubjectUserId = null;
+  }
+
   return {
-    user: emptyUser,
+    user,
     tokenSubjectUserId,
   };
 }

@@ -141,6 +141,11 @@ export function translateKnownApiMessage(language: AppLanguage, rawMessage: stri
     return fillTemplate(tmpl, { workerId: m[1].trim() });
   }
 
+  m = raw.match(/^Requirement #\d+: pay per day must be at least ₹?\d+$/i);
+  if (m) {
+    return translate(language, "payPerDayMustBeAtLeast500", raw);
+  }
+
   return rawMessage;
 }
 

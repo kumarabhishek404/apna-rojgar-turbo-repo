@@ -1,4 +1,5 @@
 import type { AxiosError } from "axios";
+import { t } from "@/utils/translationHelper";
 
 const AUTH_ERROR_MESSAGES = new Set([
   "Invalid Token",
@@ -27,8 +28,18 @@ export function getApiErrorMessage(
   error: unknown,
   fallback = "Something went wrong. Please try again.",
 ): string {
-  const axiosErr = error as AxiosError<{ message?: string }>;
+  const axiosErr = error as AxiosError<{ message?: string; errorCode?: string }>;
+  const code = axiosErr?.response?.data?.errorCode;
+  if (code === "PAY_PER_DAY_TOO_LOW") {
+    return t("payPerDayMustBeAtLeast500");
+  }
+  if (code === "PAY_PER_DAY_REQUIRED") {
+    return t("payPerDayIsRequired");
+  }
   const message = axiosErr?.response?.data?.message;
+  if (typeof message === "string" && /pay per day must be at least/i.test(message)) {
+    return t("payPerDayMustBeAtLeast500");
+  }
   if (typeof message === "string" && message.trim()) return message.trim();
   if (axiosErr?.message?.trim()) return axiosErr.message.trim();
   return fallback;

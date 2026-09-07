@@ -88,13 +88,13 @@ const SecondScreen: React.FC<SecondScreenProps> = ({
                     "payPerDayShouldBeInNumber"
                   )}`;
                 }
-                if (item?.payPerDay === 0 || !item?.payPerDay) {
+                if (Number(item?.payPerDay) < 500) {
                   setErrorField({
                     index: i,
                     name: "price",
                   });
                   return `${t("requirement")} #${i + 1}: ${t(
-                    "payPerDayMustBeGreaterThan0"
+                    "payPerDayMustBeAtLeast500"
                   )}`;
                 }
                 if (item?.count === 0 || !item?.count) {

@@ -25,6 +25,7 @@ export const authAtom = atomWithStorage<StoredAuth | null>(
   AUTH_STORAGE_KEY,
   null,
   safeStorage,
+  { getOnInit: true },
 );
 
 export const authStore = getDefaultStore();

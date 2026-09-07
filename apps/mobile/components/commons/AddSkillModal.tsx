@@ -16,6 +16,10 @@ import CustomSegmentedButton from "@/app/screens/bottomTabs/(user)/bookingsAndRe
 import { getDynamicWorkerType } from "@/utils/i18n";
 import { translateWorkerTypes } from "@/constants/functions";
 import CustomText from "./CustomText";
+import {
+  MIN_PAY_PER_DAY,
+  getPayPerDayFieldError,
+} from "@/utils/serviceRequirements";
 
 type ServiceRequirement = {
   name?: string;
@@ -80,6 +84,17 @@ const AddSkillDrawer = ({
 
   const onAddSkills = async () => {
     try {
+      if (role === "worker") {
+        const payError = getPayPerDayFieldError(skillWithPrice?.pricePerDay);
+        if (
+          payError ||
+          skillWithPrice?.pricePerDay == null ||
+          skillWithPrice?.pricePerDay === ""
+        ) {
+          TOAST.error(t(payError || "payPerDayIsRequired"));
+          return;
+        }
+      }
       const payload =
         role === "worker" ? skillWithPrice : { skill: selectedSkill };
       await mutationAddSkills.mutateAsync(payload, {
@@ -99,17 +114,21 @@ const AddSkillDrawer = ({
   };
 
   const renderPriceInput = () => {
+    const payError = getPayPerDayFieldError(skillWithPrice?.pricePerDay);
     return (
       <View style={styles.priceInputContainer}>
         <TextInputComponent
           label="enterPricePerDay"
           name="pricePerDay"
-          placeholder={t("enterPricePerDay")}
+          placeholder={t("enterPayPerDayMin500")}
           type="number"
           style={styles.priceInput}
           value={skillWithPrice?.pricePerDay}
           maxLength={4}
           onChangeText={(price: string) => handlePriceChange(price)}
+          errors={
+            payError ? { pricePerDay: { message: t(payError) } } : undefined
+          }
           icon={
             <FontAwesome
               name="rupee"
@@ -119,6 +138,15 @@ const AddSkillDrawer = ({
             />
           }
         />
+        <CustomText
+          baseFont={13}
+          color={Colors.primary}
+          fontWeight="600"
+          textAlign="left"
+          style={{ marginTop: 8 }}
+        >
+          {t("payPerDayMinHint", { amount: MIN_PAY_PER_DAY })}
+        </CustomText>
       </View>
     );
   };
@@ -222,7 +250,9 @@ const AddSkillDrawer = ({
           action: onAddSkills,
           disabled:
             role === "worker"
-              ? !skillWithPrice || !skillWithPrice?.pricePerDay
+              ? !skillWithPrice ||
+                !skillWithPrice?.pricePerDay ||
+                Boolean(getPayPerDayFieldError(skillWithPrice?.pricePerDay))
               : !selectedSkill,
         },
         secondaryButton: {

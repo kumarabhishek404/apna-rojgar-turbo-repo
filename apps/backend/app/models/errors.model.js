@@ -17,6 +17,8 @@ const deviceSnapshotSchema = new mongoose.Schema(
     sessionId: { type: String },
     isPhysicalDevice: { type: Boolean },
     forwardedFor: { type: String },
+    /** Extra device fields from the client payload (brand, totalMemory, etc.). */
+    extras: { type: mongoose.Schema.Types.Mixed },
   },
   { _id: false },
 );
@@ -30,6 +32,7 @@ const userSnapshotSchema = new mongoose.Schema(
     role: { type: String },
     email: { type: String },
     locale: { type: String },
+    status: { type: String },
   },
   { _id: false },
 );
@@ -38,6 +41,8 @@ const errorLogSchema = new mongoose.Schema(
   {
     message: { type: String, required: true },
     stack: { type: String },
+    errorName: { type: String },
+    errorCode: { type: String },
     /** backend | mobile | website */
     source: {
       type: String,
@@ -55,6 +60,11 @@ const errorLogSchema = new mongoose.Schema(
     requestParams: { type: Object, default: {} },
     requestQuery: { type: Object, default: {} },
     statusCode: { type: Number, default: 500 },
+    /**
+     * Free-form error context from clients/backends:
+     * API method/url, sanitized request/response, screen, isFatal, etc.
+     */
+    context: { type: mongoose.Schema.Types.Mixed, default: {} },
     /** Populated when JWT payload can be read but user was not attached (e.g. invalid signature). */
     tokenSubjectUserId: {
       type: mongoose.Schema.Types.ObjectId,
