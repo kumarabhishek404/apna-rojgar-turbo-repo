@@ -134,7 +134,6 @@ const ServiceDetails = () => {
 
   const setDrawerState: any = useSetAtom(Atoms?.BottomDrawerAtom);
 
-  const [isAdmin] = useState(userDetails?.isAdmin);
   const {
     isLoading,
     data: response,
@@ -466,7 +465,7 @@ const ServiceDetails = () => {
                   </CustomText>
                 </View>
               ) : null}
-              {(service?.employer === userDetails?._id || isAdmin) &&
+              {service?.employer === userDetails?._id &&
                 service?.bookingType === "byService" && (
                   <ApplicantSummary
                     appliedCount={applicants?.length}
@@ -951,7 +950,6 @@ const ServiceDetails = () => {
               isMemberLoading={isMemberLoading}
               isMemberFetchingNextPage={isMemberFetchingNextPage}
               userDetails={userDetails}
-              isAdmin={isAdmin}
               isSelected={isSelected}
               isMediatorOrSingleWorker={isMediatorOrSingleWorker}
               isWorkerBooked={isWorkerBooked}
@@ -980,7 +978,6 @@ const ServiceDetails = () => {
               category={"booking"}
               booking={service}
               userDetails={userDetails}
-              isAdmin={isAdmin}
               id={id as string}
               refetch={refetch}
               refreshUser={refreshUser}

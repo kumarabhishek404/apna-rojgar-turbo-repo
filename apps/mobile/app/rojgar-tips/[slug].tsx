@@ -5,6 +5,7 @@ import {
 } from "expo-router";
 import { useEffect } from "react";
 
+/** Deep-link / scheme bridge → native tip detail. */
 export default function RojgarTipsArticleBridge() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
@@ -20,7 +21,6 @@ export default function RojgarTipsArticleBridge() {
       });
       return;
     }
-
     router.replace("/screens/rojgar-tips");
   }, [router, slug, rootNavigationState?.key]);
 

@@ -187,17 +187,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-GLB-018",
-    "title": "Admin tab labels show Users, Services, People, Requests, Profile",
-    "sheet": "01 - App Launch",
-    "dir": "app-launch",
-    "file": "flows/generated/app-launch/TC-GLB-018-admin-tab-labels-show-users-services-people-requests-profile.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-GLB-019",
     "title": "Unread notification badge updates on tab bar",
     "sheet": "27 - Notifications",
@@ -485,7 +474,7 @@
   },
   {
     "testId": "TC-ONB-014",
-    "title": "First launch flow note — auto onboarding may not be wired",
+    "title": "First launch flow note \u2014 auto onboarding may not be wired",
     "sheet": "02 - Language Selection",
     "dir": "language-selection",
     "file": "flows/generated/language-selection/TC-ONB-014-first-launch-flow-note-auto-onboarding-may-not-be-wired.yaml",
@@ -1199,72 +1188,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-HOME-022",
-    "title": "Admin home shows user management list",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-022-admin-home-shows-user-management-list.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-023",
-    "title": "Admin filter users by role",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-023-admin-filter-users-by-role.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-024",
-    "title": "Admin suspend user",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-024-admin-suspend-user.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-025",
-    "title": "Admin activate suspended user",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-025-admin-activate-suspended-user.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-026",
-    "title": "Admin user list shows status badges",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-026-admin-user-list-shows-status-badges.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-027",
-    "title": "Admin search users",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-027-admin-search-users.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-HOME-028",
     "title": "Home dashboard Hindi strings render",
     "sheet": "10 - Home Tab",
@@ -1317,17 +1240,6 @@
     "role": "All",
     "testType": "Functionality",
     "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-033",
-    "title": "Admin user list pagination",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-033-admin-user-list-pagination.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
     "automation": "automated"
   },
   {
@@ -1394,17 +1306,6 @@
     "role": "All",
     "testType": "Functionality",
     "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-HOME-040",
-    "title": "Admin tap user opens detail or actions",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-HOME-040-admin-tap-user-opens-detail-or-actions.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P1",
     "automation": "automated"
   },
   {
@@ -1639,39 +1540,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-WORK-022",
-    "title": "Admin work tab shows service management",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-WORK-022-admin-work-tab-shows-service-management.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-WORK-023",
-    "title": "Admin view all posted services",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-WORK-023-admin-view-all-posted-services.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-WORK-024",
-    "title": "Admin tap service opens detail",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-WORK-024-admin-tap-service-opens-detail.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-WORK-025",
     "title": "Empty state when no active jobs",
     "sheet": "11 - Work Tab",
@@ -1727,17 +1595,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-WORK-030",
-    "title": "Tab label matches role (Work vs Teams for admin)",
-    "sheet": "11 - Work Tab",
-    "dir": "work-tab",
-    "file": "flows/generated/work-tab/TC-WORK-030-tab-label-matches-role-work-vs-teams-for-admin.yaml",
-    "role": "All",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-WORK-031",
     "title": "Worker cards show skills and rating",
     "sheet": "11 - Work Tab",
@@ -1756,17 +1613,6 @@
     "file": "flows/generated/work-tab/TC-WORK-032-service-index-with-query-params-filters-correctly.yaml",
     "role": "All",
     "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-WORK-033",
-    "title": "Admin service list shows employer and status",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-WORK-033-admin-service-list-shows-employer-and-status.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
     "priority": "P1",
     "automation": "automated"
   },
@@ -1845,17 +1691,6 @@
     "role": "Mediator",
     "testType": "Availability",
     "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-PEOP-004",
-    "title": "Admin people tab loads",
-    "sheet": "12 - People Tab",
-    "dir": "people-tab",
-    "file": "flows/generated/people-tab/TC-PEOP-004-admin-people-tab-loads.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P1",
     "automation": "automated"
   },
   {
@@ -2090,17 +1925,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-PEOP-026",
-    "title": "Admin people tab consistent with app theme",
-    "sheet": "12 - People Tab",
-    "dir": "people-tab",
-    "file": "flows/generated/people-tab/TC-PEOP-026-admin-people-tab-consistent-with-app-theme.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-ACT-001",
     "title": "Worker activity tab loads with sub-tabs",
     "sheet": "13 - Activity Tab",
@@ -2129,17 +1953,6 @@
     "dir": "activity-tab",
     "file": "flows/generated/activity-tab/TC-ACT-003-mediator-activity-tab-loads-with-sub-tabs.yaml",
     "role": "Mediator",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ACT-004",
-    "title": "Admin activity tab shows requests queue",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ACT-004-admin-activity-tab-shows-requests-queue.yaml",
-    "role": "Admin",
     "testType": "Availability",
     "priority": "P0",
     "automation": "automated"
@@ -2486,28 +2299,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-ACT-036",
-    "title": "Admin approve activation request",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ACT-036-admin-approve-activation-request.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ACT-037",
-    "title": "Admin reject suspension request",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ACT-037-admin-reject-suspension-request.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-ACT-038",
     "title": "Activity icon sub-tabs scroll if many",
     "sheet": "13 - Activity Tab",
@@ -2541,34 +2332,12 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-ACT-041",
-    "title": "Admin requests show request type and user",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ACT-041-admin-requests-show-request-type-and-user.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-PROF-001",
     "title": "Profile tab loads with user info",
     "sheet": "14 - Profile Tab",
     "dir": "profile-tab",
     "file": "flows/generated/profile-tab/TC-PROF-001-profile-tab-loads-with-user-info.yaml",
     "role": "All",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-PROF-002",
-    "title": "Admin profile tab loads",
-    "sheet": "14 - Profile Tab",
-    "dir": "profile-tab",
-    "file": "flows/generated/profile-tab/TC-PROF-002-admin-profile-tab-loads.yaml",
-    "role": "Admin",
     "testType": "Availability",
     "priority": "P0",
     "automation": "automated"
@@ -2747,17 +2516,6 @@
     "role": "All",
     "testType": "UI Design",
     "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-PROF-019",
-    "title": "Admin profile settings accessible",
-    "sheet": "14 - Profile Tab",
-    "dir": "profile-tab",
-    "file": "flows/generated/profile-tab/TC-PROF-019-admin-profile-settings-accessible.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
     "automation": "automated"
   },
   {
@@ -4158,17 +3916,6 @@
     "automation": "automated"
   },
   {
-    "testId": "TC-USR-020",
-    "title": "Admin suspend user from profile",
-    "sheet": "22 - User Profile",
-    "dir": "user-profile",
-    "file": "flows/generated/user-profile/TC-USR-020-admin-suspend-user-from-profile.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-USR-021",
     "title": "Mediator team info on user info box",
     "sheet": "22 - User Profile",
@@ -5533,17 +5280,6 @@
     "automation": "manual-review"
   },
   {
-    "testId": "TC-NOT-021",
-    "title": "Admin local notification trigger for testing",
-    "sheet": "27 - Notifications",
-    "dir": "notifications",
-    "file": "flows/generated/notifications/TC-NOT-021-admin-local-notification-trigger-for-testing.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
     "testId": "TC-NOT-022",
     "title": "Stale notifications cleaned up",
     "sheet": "27 - Notifications",
@@ -6150,7 +5886,7 @@
   },
   {
     "testId": "TC-SUP-027",
-    "title": "Help screen offline — static content still readable",
+    "title": "Help screen offline \u2014 static content still readable",
     "sheet": "31 - Help & Support",
     "dir": "help-support",
     "file": "flows/generated/help-support/TC-SUP-027-help-screen-offline-static-content-still-readable.yaml",
@@ -6244,391 +5980,6 @@
     "file": "flows/generated/help-support/TC-SUP-035-feedback-includes-app-version-and-device-info.yaml",
     "role": "All",
     "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-001",
-    "title": "Admin users tab loads user list",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-001-admin-users-tab-loads-user-list.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-002",
-    "title": "Admin suspend user from users tab",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-002-admin-suspend-user-from-users-tab.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-003",
-    "title": "Admin activate user from users tab",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-003-admin-activate-user-from-users-tab.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-004",
-    "title": "Admin filter users by role",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-004-admin-filter-users-by-role.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-005",
-    "title": "Admin filter users by status",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-005-admin-filter-users-by-status.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-006",
-    "title": "Admin search users by name/mobile",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-006-admin-search-users-by-name-mobile.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-007",
-    "title": "Admin services tab loads all jobs",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-007-admin-services-tab-loads-all-jobs.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-008",
-    "title": "Admin tap service opens detail",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-008-admin-tap-service-opens-detail.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-009",
-    "title": "Admin service cards show employer and status",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-009-admin-service-cards-show-employer-and-status.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-010",
-    "title": "Admin requests queue loads",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-010-admin-requests-queue-loads.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-011",
-    "title": "Admin approve user activation request",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-011-admin-approve-user-activation-request.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-012",
-    "title": "Admin reject/deny request",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-012-admin-reject-deny-request.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-013",
-    "title": "Admin profile tab loads",
-    "sheet": "14 - Profile Tab",
-    "dir": "profile-tab",
-    "file": "flows/generated/profile-tab/TC-ADM-013-admin-profile-tab-loads.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-014",
-    "title": "Admin settings section accessible",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-014-admin-settings-section-accessible.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-015",
-    "title": "Admin all feedback screen loads",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-015-admin-all-feedback-screen-loads.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-016",
-    "title": "Admin view feedback with ratings",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-016-admin-view-feedback-with-ratings.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-017",
-    "title": "Feedback rating breakdown chart/section",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-017-feedback-rating-breakdown-chart-section.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-018",
-    "title": "Feedback reasons breakdown",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-018-feedback-reasons-breakdown.yaml",
-    "role": "Admin",
-    "testType": "Availability",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-019",
-    "title": "Admin users list pagination",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-019-admin-users-list-pagination.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-020",
-    "title": "Admin user status badges color-coded",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-020-admin-user-status-badges-color-coded.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-021",
-    "title": "Admin request cards show type and timestamp",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-021-admin-request-cards-show-type-and-timestamp.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-022",
-    "title": "Non-admin cannot access admin users view",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-022-non-admin-cannot-access-admin-users-view.yaml",
-    "role": "Worker",
-    "testType": "Availability",
-    "priority": "P0",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-023",
-    "title": "Admin pull to refresh services",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-023-admin-pull-to-refresh-services.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-024",
-    "title": "Admin pull to refresh requests",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-024-admin-pull-to-refresh-requests.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-025",
-    "title": "Admin logout from profile",
-    "sheet": "14 - Profile Tab",
-    "dir": "profile-tab",
-    "file": "flows/generated/profile-tab/TC-ADM-025-admin-logout-from-profile.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-026",
-    "title": "Non-admin allFeedback access restricted",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-026-non-admin-allfeedback-access-restricted.yaml",
-    "role": "Worker",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-027",
-    "title": "Admin screens labels in Hindi",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-027-admin-screens-labels-in-hindi.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-028",
-    "title": "Admin services empty state",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-028-admin-services-empty-state.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-029",
-    "title": "Admin requests empty state",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-029-admin-requests-empty-state.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-030",
-    "title": "Admin tap user opens profile or actions",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-030-admin-tap-user-opens-profile-or-actions.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-031",
-    "title": "Admin filter or sort feedback if available",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-031-admin-filter-or-sort-feedback-if-available.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-032",
-    "title": "Suspend confirmation modal shown",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-032-suspend-confirmation-modal-shown.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-033",
-    "title": "All 5 admin tabs labeled correctly",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-033-all-5-admin-tabs-labeled-correctly.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-034",
-    "title": "Admin API calls use admin auth token",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-034-admin-api-calls-use-admin-auth-token.yaml",
-    "role": "Admin",
-    "testType": "Functionality",
-    "priority": "P1",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-ADM-035",
-    "title": "Admin list safe area and scroll",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-ADM-035-admin-list-safe-area-and-scroll.yaml",
-    "role": "Admin",
-    "testType": "UI Design",
     "priority": "P2",
     "automation": "automated"
   },
@@ -7298,17 +6649,6 @@
     "sheet": "22 - User Profile",
     "dir": "user-profile",
     "file": "flows/generated/user-profile/TC-UI-041-favourites-empty-state-ui.yaml",
-    "role": "All",
-    "testType": "UI Design",
-    "priority": "P2",
-    "automation": "automated"
-  },
-  {
-    "testId": "TC-UI-042",
-    "title": "Admin users list empty state UI",
-    "sheet": "40 - Admin Panel",
-    "dir": "admin-panel",
-    "file": "flows/generated/admin-panel/TC-UI-042-admin-users-list-empty-state-ui.yaml",
     "role": "All",
     "testType": "UI Design",
     "priority": "P2",

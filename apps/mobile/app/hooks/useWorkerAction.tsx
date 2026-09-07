@@ -1,6 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 import MEDIATOR from "@/app/api/mediator";
-import ADMIN from "@/app/api/admin";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import USER from "../api/user";
@@ -58,24 +57,6 @@ const useApiCalls = (id: any, refetch: any) => {
     },
   });
 
-  const mutationActivateUser = useMutation({
-    mutationKey: ["activateUser", { id }],
-    mutationFn: () => ADMIN?.activateUser({ userId: id }),
-    onSuccess: () => {
-      refetch();
-      TOAST?.success(t("userActivated"));
-    },
-  });
-
-  const mutationSuspendUser = useMutation({
-    mutationKey: ["suspendUser", { id }],
-    mutationFn: () => ADMIN?.suspendUser({ userId: id }),
-    onSuccess: () => {
-      refetch();
-      TOAST?.success(t("userSuspended"));
-    },
-  });
-
   const mutationCancelRequest = useMutation({
     mutationKey: ["cancelRequest"],
     mutationFn: () => MEDIATOR?.cancelTeamRequest({ userId: id }),
@@ -100,8 +81,6 @@ const useApiCalls = (id: any, refetch: any) => {
     mutationCancelBookingRequest,
     mutationRemoveBookedWorker,
     mutationSendRequest,
-    mutationActivateUser,
-    mutationSuspendUser,
     mutationCancelRequest,
     mutationRemoveMemberFromTeam,
   };

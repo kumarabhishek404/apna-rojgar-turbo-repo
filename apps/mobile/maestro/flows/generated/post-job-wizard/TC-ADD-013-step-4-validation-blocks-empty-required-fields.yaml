@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["post-a-job-wizard", "functionality", "employer", "automated"]
 ---
 # TC-ADD-013: Step 4: validation blocks empty required fields

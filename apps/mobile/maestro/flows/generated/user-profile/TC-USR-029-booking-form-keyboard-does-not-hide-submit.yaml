@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["user-browse-profile-actions", "ui-design", "employer", "automated"]
 ---
 # TC-USR-029: Booking form keyboard does not hide submit

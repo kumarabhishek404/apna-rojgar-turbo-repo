@@ -33,6 +33,7 @@ import {
 } from "@/constants/functions";
 import APP_CONTEXT from "@/app/context/locale";
 import HomePageLinks from "@/components/commons/HomePageLinks";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 const HOME_HEADING = "#1F2E4D";
 const CTA_OUTLINE_BORDER = "rgba(14, 79, 197, 0.35)";
@@ -49,8 +50,9 @@ const CATEGORY_ICON_MAP: Record<string, keyof typeof Ionicons.glyphMap> = {
 };
 
 const UnifiedHomeDashboard = () => {
-  const { role, locale } = APP_CONTEXT.useApp();
+  const { role: contextRole, locale } = APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms.UserAtom);
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
   const {
     data: servicesRes,
     isLoading: loadingServices,
@@ -588,7 +590,7 @@ const UnifiedHomeDashboard = () => {
               <View style={styles.sectionGap}>{categorySection}</View>
             ) : null}
 
-            {userDetails?.role !== "EMPLOYER" ? (
+            {role !== "EMPLOYER" ? (
               <View style={styles.sectionGap}>{servicesSection}</View>
             ) : null}
             <View style={styles.sectionGap}>{workersSection}</View>

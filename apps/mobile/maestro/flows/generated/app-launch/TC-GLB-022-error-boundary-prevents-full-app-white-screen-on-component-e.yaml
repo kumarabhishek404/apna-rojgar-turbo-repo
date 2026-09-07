@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["global-app-shell", "availability", "all", "automated"]
 ---
 # TC-GLB-022: Error boundary prevents full app white-screen on component error

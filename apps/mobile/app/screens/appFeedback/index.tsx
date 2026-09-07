@@ -14,16 +14,13 @@ import { useMutation } from "@tanstack/react-query";
 import USER from "@/app/api/user";
 import TOAST from "@/app/hooks/toast";
 import Loader from "@/components/commons/Loaders/Loader";
-import { useAtomValue } from "jotai";
 import * as DeviceInfo from "expo-device";
 import { Platform } from "react-native";
 import ReasoneSelection from "../allFeedback/reasons";
 import ErrorText from "@/components/commons/ErrorText";
-import Atoms from "@/app/AtomStore";
 import { promptForAppReviewAfterPositiveFeedback } from "@/utils/appStoreReview";
 
 const FeedbackForm = () => {
-  const userDetails = useAtomValue(Atoms?.UserAtom);
   const [deviceInfo, setDeviceInfo] = useState<any>(null);
   const {
     control,
@@ -105,15 +102,6 @@ const FeedbackForm = () => {
             <CustomHeading textAlign="left" color={Colors?.inputLabel}>
               {t("howIsYourFirstImpressionOfTheProduct")}
             </CustomHeading>
-            {userDetails?.isAdmin && (
-              <Button
-                isPrimary={false}
-                title={t("allFeedbacks")}
-                onPress={() => {}}
-                style={styles.allFeedbacksButton}
-                textStyle={{ fontSize: 11 }}
-              />
-            )}
           </View>
 
           <Controller
@@ -229,10 +217,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  allFeedbacksButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
   },
   formContainer: {
     padding: 20,

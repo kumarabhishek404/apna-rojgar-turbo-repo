@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, Switch } from "react-native";
 import {
   AntDesign,
@@ -30,6 +30,7 @@ import { removeToken } from "@/utils/authStorage";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import APP_CONTEXT from "@/app/context/locale";
 import { promptForAppReview } from "@/utils/appStoreReview";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 const ProfileMenu = ({ disabled }: any) => {
   const { refreshUser } = REFRESH_USER.useRefreshUser();
@@ -39,9 +40,9 @@ const ProfileMenu = ({ disabled }: any) => {
   const [notificationConsent, setNotificationConsent] = useAtom(
     Atoms?.NotificationConsentAtom
   );
-  const [isAdmin, setIsAdmin] = useState(false);
   const { logout } = USE_LOGOUT.useLogout();
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const mutationDeactivateAccount = useMutation({
     mutationKey: ["updateProfile"],
@@ -55,10 +56,6 @@ const ProfileMenu = ({ disabled }: any) => {
       console.error("error while deactivatibg the profile ", err);
     },
   });
-
-  useEffect(() => {
-    setIsAdmin(userDetails?.isAdmin);
-  }, [userDetails?.role]);
 
   const registerNotification = async () => {
     try {
@@ -188,7 +185,7 @@ const ProfileMenu = ({ disabled }: any) => {
             type: "teamJoiningRequest",
           },
         }),
-      roleCondition: isAdmin,
+      roleCondition: false,
       style: [styles?.menuItem],
       isSuspended: disabled,
     },
@@ -401,7 +398,7 @@ const ProfileMenu = ({ disabled }: any) => {
     //     <Ionicons name="close-circle-outline" size={30} color={Colors.danger} />
     //   ),
     //   onPress: () => setModalVisible(true),
-    //   roleCondition: isAdmin,
+    //   roleCondition: false,
     //   style: [styles?.menuItem],
     //   textStyle: { color: Colors.danger },
     //   isSuspended: disabled,
@@ -416,7 +413,7 @@ const ProfileMenu = ({ disabled }: any) => {
         />
       ),
       onPress: () => router?.push("/screens/profile/deleteProfile"),
-      roleCondition: isAdmin,
+      roleCondition: false,
       style: [styles?.menuItem],
       textStyle: { color: Colors.danger },
       isSuspended: userDetails?.status === "DELETED",

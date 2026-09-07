@@ -17,10 +17,6 @@ accounts:
     mobile: "MEDIATOR_MOBILE_PLACEHOLDER"
     role: MEDIATOR
     description: Mediator with team capabilities
-  admin:
-    mobile: "ADMIN_MOBILE_PLACEHOLDER"
-    role: ADMIN
-    description: Admin isAdmin flag on backend
 
 auth:
   staging_otp: "000000"

@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["tab-activity", "functionality", "employer", "automated"]
 ---
 # TC-ACT-019: Employer My Services item actions work

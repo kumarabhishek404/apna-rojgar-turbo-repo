@@ -256,6 +256,7 @@ const applyAsMediator = async (
         {
           actionBy: user._id,
           actionOn: worker._id,
+          serviceId: service._id,
         },
         req,
       ),
@@ -273,6 +274,7 @@ const applyAsMediator = async (
       {
         actionBy: user._id,
         actionOn: service.employer,
+        serviceId: service._id,
       },
       req,
     );
@@ -293,6 +295,7 @@ const notifyEmployerApplied = (user, service, req) => {
     {
       actionBy: user._id,
       actionOn: service.employer,
+      serviceId: service._id,
     },
     req,
   );

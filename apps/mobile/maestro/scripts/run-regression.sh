@@ -22,7 +22,6 @@ maestro test regression/regression-suite.yaml \
   -e WORKER_MOBILE="$WORKER_MOBILE" \
   -e EMPLOYER_MOBILE="$EMPLOYER_MOBILE" \
   -e MEDIATOR_MOBILE="$MEDIATOR_MOBILE" \
-  -e ADMIN_MOBILE="${ADMIN_MOBILE:-$WORKER_MOBILE}" \
   -e SAMPLE_JOB_ID="${SAMPLE_JOB_ID:-}" \
   --format junit \
   --output "$ROOT/reports/maestro-regression-junit.xml"

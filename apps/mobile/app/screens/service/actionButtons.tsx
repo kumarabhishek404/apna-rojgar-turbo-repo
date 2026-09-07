@@ -32,6 +32,7 @@ import { handleCall } from "@/constants/functions";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import APP_CONTEXT from "@/app/context/locale";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents } from "@/utils/analyticsEvents";
 
@@ -43,7 +44,6 @@ interface ServiceActionButtonsProps {
   isMemberLoading: boolean;
   isMemberFetchingNextPage: boolean;
   userDetails: any;
-  isAdmin: boolean;
   isSelected: boolean;
   isMediatorOrSingleWorker: boolean;
   isWorkerBooked: boolean;
@@ -76,7 +76,6 @@ const ServiceActionButtons = ({
   isSelectedWorkerLoading,
   isMemberLoading,
   isMemberFetchingNextPage,
-  isAdmin,
   isSelected,
   isMediatorOrSingleWorker,
   isWorkerBooked,
@@ -105,7 +104,8 @@ const ServiceActionButtons = ({
   const [selectedSkill, setSelectedSkill] = useState("");
   const [filteredSkills, setFilteredSkills] = useState<any[]>([]);
   const [isAddSkill, setIsAddSkill] = useState(false);
-  const { role } = APP_CONTEXT.useApp();
+  const { role: contextRole } = APP_CONTEXT.useApp();
+  const role = getMobileEffectiveRole(userDetails) || contextRole;
 
   const hasUsersAppliedOrSelected =
     service?.appliedUsers?.some((user: any) => user.status === "PENDING") ||
@@ -331,7 +331,6 @@ const ServiceActionButtons = ({
       //   );
 
       case service.employer !== userDetails?._id &&
-        !isAdmin &&
         service.status === "HIRING":
         return (
           <>
@@ -475,25 +474,6 @@ const ServiceActionButtons = ({
                 textStyle={{ color: Colors?.white }}
               />
             )}
-          </>
-        );
-
-      case isAdmin:
-        return (
-          <>
-            <Button
-              isPrimary={true}
-              title={t("deleteService")}
-              onPress={mutationCancelBookingByEmployer.mutate}
-              style={styles.deleteBtn}
-            />
-            <Button
-              isPrimary={false}
-              title={t("completeService")}
-              onPress={mutationCompleteService.mutate}
-              style={styles.completeBtn}
-              textStyle={{ color: Colors?.white }}
-            />
           </>
         );
 

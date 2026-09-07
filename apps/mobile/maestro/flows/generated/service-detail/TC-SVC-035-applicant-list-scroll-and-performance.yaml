@@ -4,7 +4,6 @@ env:
   WORKER_MOBILE: ${WORKER_MOBILE}
   EMPLOYER_MOBILE: ${EMPLOYER_MOBILE}
   MEDIATOR_MOBILE: ${MEDIATOR_MOBILE}
-  ADMIN_MOBILE: ${ADMIN_MOBILE}
 tags: ["service-listing-detail", "ui-design", "employer", "automated"]
 ---
 # TC-SVC-035: Applicant list scroll and performance

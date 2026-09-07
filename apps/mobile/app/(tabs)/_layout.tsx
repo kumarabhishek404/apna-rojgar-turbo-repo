@@ -20,12 +20,11 @@ import {
 import Colors from "@/constants/Colors";
 import CustomText from "@/components/commons/CustomText";
 import { t } from "@/utils/translationHelper";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import Atoms from "../AtomStore";
 import NOTIFICATION from "../api/notification";
 import ExitConfirmationModal from "@/components/commons/ExitPopup";
 import UserProfile from "../screens/bottomTabs/(user)/profile";
-import API_CLIENT from "../api";
 import { getToken } from "@/utils/authStorage";
 import { uploadPendingProfileImage } from "@/utils/backgroundImageUpload";
 import REFRESH_USER from "../hooks/useRefreshUser";
@@ -33,7 +32,10 @@ import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAuthApiError } from "@/utils/apiError";
-import { useAppStoreReviewPrompt } from "@/app/hooks/useAppStoreReviewPrompt";
+import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
+import { getMobileEffectiveRole } from "@/utils/mobileRole";
+import useUnreadNotificationsHandler from "../hooks/useInAppNotifications";
+import triggerLocalNotification from "@/utils/triggerLocalNotification";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -68,13 +70,18 @@ export default function Layout() {
 
   const [, setNotificationCount]: any = useAtom(Atoms.notificationCount);
   const pathname = usePathname();
-  const [userDetails, setUserDetails] = useAtom(Atoms.UserAtom);
+  const userDetails = useAtomValue(Atoms.UserAtom);
 
   const [showExitModal, setShowExitModal] = useState(false);
+  const [unreadNotificationPayload, setUnreadNotificationPayload] = useState<any>(null);
   const history = useRef<string[]>([]);
   const [isReady, setIsReady] = useState(false);
   const [storageHydrated, setStorageHydrated] = useState(false);
   const { refreshUser } = REFRESH_USER.useRefreshUser();
+  useUnreadNotificationsHandler(
+    unreadNotificationPayload,
+    triggerLocalNotification,
+  );
 
   useEffect(() => {
     setIsReady(true);
@@ -99,7 +106,8 @@ export default function Layout() {
   }, []);
 
   useEffect(() => {
-    setRole(userDetails?.role || "");
+    const effectiveRole = getMobileEffectiveRole(userDetails);
+    if (effectiveRole) setRole(effectiveRole);
   }, [userDetails]);
 
   useEffect(() => {
@@ -111,18 +119,21 @@ export default function Layout() {
     const fetchUnreadNotifications = async () => {
       if (!shouldPollNotifications) {
         setNotificationCount(0);
+        setUnreadNotificationPayload(null);
         return;
       }
 
       const token = await getToken();
       if (!token) {
         setNotificationCount(0);
+        setUnreadNotificationPayload(null);
         return;
       }
 
       try {
         const data = await NOTIFICATION.fetchUnreadNotificationsCount();
         setNotificationCount(data?.unreadCount || 0);
+        setUnreadNotificationPayload(data);
       } catch (error: unknown) {
         if (!isAuthApiError(error)) {
           console.error("Error fetching notifications:", error);
@@ -137,6 +148,7 @@ export default function Layout() {
       intervalId = setInterval(fetchUnreadNotifications, POLLING_INTERVAL);
     } else {
       setNotificationCount(0);
+      setUnreadNotificationPayload(null);
     }
 
     return () => {
@@ -279,18 +291,13 @@ export default function Layout() {
     );
   };
 
-  const isAdmin = userDetails?.isAdmin;
-  const apiRole = String(userDetails?.role ?? "").toUpperCase();
+  const apiRole = getMobileEffectiveRole(userDetails);
 
-  /** Bottom labels match what each tab shows for non-admin users. */
-  const workTabTitleKey = isAdmin
-    ? "teams"
-    : apiRole === "WORKER"
-      ? "tabWork"
-      : "tabNavWorkLabour";
-  const peopleTabTitleKey = isAdmin
-    ? "tabPeople"
-    : apiRole === "MEDIATOR"
+  /** Bottom labels match worker / employer / mediator UX (stored ADMIN uses employer labels). */
+  const workTabTitleKey =
+    apiRole === "WORKER" ? "tabWork" : "tabNavWorkLabour";
+  const peopleTabTitleKey =
+    apiRole === "MEDIATOR"
       ? "tabNavPeopleActiveWork"
       : "tabNavPeopleContractors";
   // Keep bottom-tab labels/icons reactive to language changes.
@@ -334,9 +341,9 @@ export default function Layout() {
                     props={props}
                     path="/(tabs)/"
                     testID="tab-home"
-                    title={isAdmin ? "services" : "tabHome"}
-                    iconName={isAdmin ? "grid-outline" : "home-outline"}
-                    activeIconName={isAdmin ? "grid" : "home"}
+                    title="tabHome"
+                    iconName="home-outline"
+                    activeIconName="home"
                     iconLibrary="Ionicons"
                   />
                 ),
@@ -352,8 +359,8 @@ export default function Layout() {
                     path="/(tabs)/second"
                     testID="tab-work"
                     title={workTabTitleKey}
-                    iconName={isAdmin ? "people-outline" : "briefcase-outline"}
-                    activeIconName={isAdmin ? "people" : "briefcase"}
+                    iconName="briefcase-outline"
+                    activeIconName="briefcase"
                     iconLibrary="Ionicons"
                   />
                 ),
@@ -386,8 +393,8 @@ export default function Layout() {
                     path="/(tabs)/fourth"
                     testID="tab-activity"
                     title="tabActivity"
-                    iconName={isAdmin ? "alert-circle-outline" : "stats-chart-outline"}
-                    activeIconName={isAdmin ? "alert-circle" : "stats-chart"}
+                    iconName="stats-chart-outline"
+                    activeIconName="stats-chart"
                     iconLibrary="Ionicons"
                   />
                 ),

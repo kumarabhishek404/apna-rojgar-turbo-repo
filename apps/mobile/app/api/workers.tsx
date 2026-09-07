@@ -71,14 +71,16 @@ const fetchMyAppliedServices = async ({ pageParam }: any) => {
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching my applied services : `,
-      error?.response?.data?.message
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching my applied services"
-    );
+    const message = error?.response?.data?.message;
+    const isNetwork = !error?.response;
+    if (isNetwork) {
+      if (__DEV__) {
+        console.warn("[worker] fetchMyAppliedServices: Network Error");
+      }
+    } else {
+      console.warn(`[worker] fetchMyAppliedServices:`, message);
+      TOAST?.error(message || "An error occurred while fetching my applied services");
+    }
     throw error;
   }
 };

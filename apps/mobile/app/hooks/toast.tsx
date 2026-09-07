@@ -146,7 +146,7 @@ const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
   toastRef = {
     show: (message: string, type: ToastType = "info") => {
-      const id = new Date().getTime();
+      const id = Date.now() * 1000 + Math.floor(Math.random() * 1000);
 
       // Token/session failures: one global toast only (see API interceptor).
       if (type === "error" && shouldSuppressAuthErrorToast(message)) {

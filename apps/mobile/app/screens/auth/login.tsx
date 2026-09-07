@@ -14,7 +14,6 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
 import Atoms from "@/app/AtomStore";
-import USER from "@/app/api/user";
 import { useForm, Controller } from "react-hook-form";
 import TextInputComponent from "@/components/inputs/TextInputWithIcon";
 import CustomHeading from "@/components/commons/CustomHeading";
@@ -35,6 +34,7 @@ import {
   shouldSkipOtpClient,
 } from "@/utils/devOtp";
 import { syncPendingLocaleToProfile } from "@/utils/pendingLocaleSync";
+import { isStoredAdminRole } from "@/utils/mobileRole";
 
 const isBlankValue = (value: unknown) =>
   value === undefined || value === null || String(value).trim() === "";
@@ -148,14 +148,14 @@ export default function Login() {
       //   return;
       // }
 
-      const normalizedUser = {
+      const sessionUser = {
         ...user,
         profilePicture: user?.profilePicture || user?.profileImage || "",
       };
 
       // 2️⃣ Incomplete onboarding (main details)
       if (!user?.name || !user?.address || !user?.gender || !user?.age) {
-        setUserDetails(normalizedUser);
+        setUserDetails(sessionUser);
         router.push({
           pathname: "/screens/auth/register/second",
           params: { userId: user._id },
@@ -164,9 +164,9 @@ export default function Login() {
       }
 
       // 3️⃣ Role/skills are not completed yet.
-      // The role/skills screen is the source of truth for this onboarding step.
-      if (!hasRole(user?.role)) {
-        setUserDetails(normalizedUser);
+      // ADMIN already has a platform role — skip picker so we never overwrite it on login.
+      if (!hasRole(user?.role) && !isStoredAdminRole(user)) {
+        setUserDetails(sessionUser);
         router.push({
           pathname: "/screens/auth/register/fourth",
           params: { userId: user._id },
@@ -174,19 +174,13 @@ export default function Login() {
         return;
       }
 
-      // 4️⃣ Route to profile-picture step on every login.
-      // Keep profile photo optional (skip still allowed on that screen).
-      setUserDetails({ isAuth: true, ...normalizedUser });
+      // 4️⃣ Profile-picture step on every login (photo optional).
+      // Do not pass role/skills — that step must not persist EMPLOYER over ADMIN.
+      setUserDetails({ isAuth: true, ...sessionUser });
       router.push({
         pathname: "/screens/auth/register/fifth",
         params: {
           userId: user._id,
-          role: String(user?.role ?? ""),
-          skills: JSON.stringify(Array.isArray(user?.skills) ? user.skills : []),
-          numberOfWorkersInTeam:
-            user?.role === "MEDIATOR" && user?.numberOfWorkersInTeam != null
-              ? String(user.numberOfWorkersInTeam)
-              : "",
           fromLogin: "1",
           profileMissing: hasProfilePicture(user) ? "0" : "1",
         },
@@ -200,7 +194,10 @@ export default function Login() {
         ),
         syncPendingLocaleToProfile(user._id),
         refreshUser().then((updatedUser) =>
-          setUserDetails({ isAuth: true, ...updatedUser }),
+          setUserDetails({
+            isAuth: true,
+            ...(updatedUser || {}),
+          }),
         ),
       ]);
     },
@@ -463,6 +460,31 @@ export default function Login() {
                 {/* Registration entry remains intentionally hidden to preserve the existing auth flow. */}
               </View>
             </View>
+            <TouchableOpacity
+              style={styles.blogsLink}
+              activeOpacity={0.85}
+              onPress={() => router.push("/screens/rojgar-tips")}
+              accessibilityRole="button"
+              accessibilityLabel={t("rojgarTips")}
+            >
+              <Ionicons
+                name="newspaper-outline"
+                size={18}
+                color={Colors.white}
+              />
+              <CustomText
+                color={Colors.white}
+                baseFont={14}
+                fontWeight="700"
+              >
+                {t("rojgarTips")}
+              </CustomText>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={Colors.white}
+              />
+            </TouchableOpacity>
             <View style={styles.supportSlot}>
               <ContactSupport />
             </View>
@@ -574,6 +596,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 12 },
     elevation: 8,
     marginTop: 2,
+  },
+  blogsLink: {
+    alignSelf: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+    marginRight: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
   },
   supportSlot: {
     marginTop: "auto",
