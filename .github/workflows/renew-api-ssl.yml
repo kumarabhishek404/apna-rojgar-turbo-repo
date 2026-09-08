@@ -10,6 +10,12 @@ name: Renew API SSL (Let's Encrypt)
 
 on:
   workflow_dispatch:
+    inputs:
+      force_renew:
+        description: "Force a new 90-day cert even if the current one is still valid"
+        required: false
+        default: "false"
+        type: boolean
 
 concurrency:
   group: renew-api-ssl
@@ -36,6 +42,8 @@ jobs:
 
       - name: Renew certificate and reload nginx
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          FORCE_RENEW: ${{ github.event.inputs.force_renew || 'false' }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -43,52 +51,78 @@ jobs:
           passphrase: ${{ secrets.EC2_SSH_KEY_PASSPHRASE }}
           command_timeout: 12m
           script_stop: true
+          envs: FORCE_RENEW
           script: |
             set -e -o pipefail
+            LIVE=/etc/letsencrypt/live/api.apnarojgarindia.com/fullchain.pem
             echo "=== host ==="
             hostname
             date -u
             echo "=== certbot ==="
-            command -v certbot || sudo command -v certbot || true
+            command -v certbot || true
             sudo certbot certificates || true
-            echo "=== live files ==="
-            sudo ls -la /etc/letsencrypt/live/ 2>/dev/null || true
 
-            renew_ok=0
-            if sudo certbot renew --force-renewal --non-interactive --nginx; then
-              renew_ok=1
-              echo "renewed via: certbot renew --nginx"
-            elif sudo certbot certonly --nginx --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
-              renew_ok=1
-              echo "renewed via: certonly --nginx"
+            needs_renew=0
+            if [ "${FORCE_RENEW:-false}" = "true" ]; then
+              needs_renew=1
+              echo "force_renew input is true"
             else
-              echo "nginx plugin failed; trying standalone (brief nginx stop)"
-              sudo systemctl stop nginx
-              if sudo certbot certonly --standalone --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
-                renew_ok=1
-                echo "renewed via: certonly --standalone"
+              end="$(sudo openssl x509 -enddate -noout -in "$LIVE" | cut -d= -f2)"
+              end_epoch="$(date -u -d "$end" +%s)"
+              now_epoch="$(date -u +%s)"
+              days_left=$(( (end_epoch - now_epoch) / 86400 ))
+              echo "days_left=$days_left"
+              if [ "$days_left" -lt 30 ]; then
+                needs_renew=1
               fi
-              sudo systemctl start nginx
             fi
 
-            if [ "$renew_ok" -ne 1 ]; then
-              echo "ERROR: Let's Encrypt renewal failed"
-              sudo systemctl is-active nginx || sudo systemctl start nginx || true
-              exit 1
+            if [ "$needs_renew" -eq 1 ]; then
+              renew_ok=0
+              if sudo certbot renew --force-renewal --non-interactive --nginx; then
+                renew_ok=1
+                echo "renewed via: certbot renew --nginx"
+              elif sudo certbot certonly --nginx --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
+                renew_ok=1
+                echo "renewed via: certonly --nginx"
+              else
+                echo "nginx plugin failed; trying standalone (brief nginx stop)"
+                sudo systemctl stop nginx
+                if sudo certbot certonly --standalone --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
+                  renew_ok=1
+                  echo "renewed via: certonly --standalone"
+                fi
+                sudo systemctl start nginx
+              fi
+              if [ "$renew_ok" -ne 1 ]; then
+                echo "ERROR: Let's Encrypt renewal failed"
+                sudo systemctl is-active nginx || sudo systemctl start nginx || true
+                exit 1
+              fi
+              sudo nginx -t
+              sudo systemctl reload nginx || sudo nginx -s reload
+            else
+              echo "Skipping issuance; cert still has 30+ days. Enabling auto-renew only."
             fi
 
-            sudo nginx -t
-            sudo systemctl reload nginx || sudo nginx -s reload
-
-            echo "=== timers ==="
-            sudo systemctl list-timers 'certbot*' --all 2>/dev/null || true
+            echo "=== enable auto-renew ==="
+            sudo systemctl list-unit-files | grep -i certbot || true
             sudo systemctl enable --now certbot.timer 2>/dev/null || true
+            sudo systemctl enable --now certbot-renew.timer 2>/dev/null || true
             sudo systemctl enable --now snap.certbot.renew.timer 2>/dev/null || true
-
-            echo "=== new leaf cert ==="
-            LIVE="$(sudo ls -d /etc/letsencrypt/live/api.apnarojgarindia.com* 2>/dev/null | head -n 1)"
-            if [ -n "$LIVE" ] && [ -f "$LIVE/fullchain.pem" ]; then
-              sudo openssl x509 -in "$LIVE/fullchain.pem" -noout -subject -issuer -dates
+            if [ -f /etc/cron.d/certbot ]; then
+              echo "found /etc/cron.d/certbot"
+              sudo cat /etc/cron.d/certbot || true
+            elif ! sudo crontab -l 2>/dev/null | grep -q certbot; then
+              echo "installing daily certbot cron"
+              sudo bash -c 'echo "0 3 * * * root certbot renew --quiet --nginx --deploy-hook \"systemctl reload nginx\"" > /etc/cron.d/certbot'
+              sudo chmod 644 /etc/cron.d/certbot
             fi
+            sudo systemctl list-timers 'certbot*' --all 2>/dev/null || true
+            echo "=== cron.d ==="
+            sudo ls -la /etc/cron.d/ 2>/dev/null || true
+
+            echo "=== leaf cert ==="
+            sudo openssl x509 -in "$LIVE" -noout -subject -issuer -dates
             echo "=== done ==="
             date -u
