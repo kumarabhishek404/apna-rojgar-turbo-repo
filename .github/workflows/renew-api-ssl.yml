@@ -1,10 +1,11 @@
 # Renew Let's Encrypt TLS for api.apnarojgarindia.com on the EC2 nginx host.
-# Let's Encrypt max lifetime is 90 days; this job force-renews for a full term.
+# Let's Encrypt max lifetime is 90 days.
 #
 # Secrets: same as deploy-backend-ec2.yml (EC2_HOST, EC2_USER, EC2_SSH_KEY or
 # EC2_SSH_KEY_B64, optional EC2_SSH_KEY_PASSPHRASE).
 #
 # Trigger: GitHub → Actions → Renew API SSL (Let's Encrypt) → Run workflow
+# Leave force_renew off unless you really need a brand-new 90-day cert.
 
 name: Renew API SSL (Let's Encrypt)
 
@@ -50,79 +51,50 @@ jobs:
           key_path: /home/runner/.ssh/deploy_key.pem
           passphrase: ${{ secrets.EC2_SSH_KEY_PASSPHRASE }}
           command_timeout: 12m
-          script_stop: true
+          script_stop: false
           envs: FORCE_RENEW
           script: |
-            set -e -o pipefail
-            LIVE=/etc/letsencrypt/live/api.apnarojgarindia.com/fullchain.pem
+            set +e
             echo "=== host ==="
             hostname
             date -u
-            echo "=== certbot ==="
-            command -v certbot || true
-            sudo certbot certificates || true
+            echo "FORCE_RENEW=${FORCE_RENEW:-false}"
+            echo "=== certbot certificates ==="
+            sudo certbot certificates
 
-            needs_renew=0
-            if [ "${FORCE_RENEW:-false}" = "true" ]; then
-              needs_renew=1
-              echo "force_renew input is true"
+            if [ "$FORCE_RENEW" = "true" ]; then
+              echo "=== force renew (full 90-day term) ==="
+              sudo certbot renew --force-renewal --non-interactive --nginx
             else
-              end="$(sudo openssl x509 -enddate -noout -in "$LIVE" | cut -d= -f2)"
-              end_epoch="$(date -u -d "$end" +%s)"
-              now_epoch="$(date -u +%s)"
-              days_left=$(( (end_epoch - now_epoch) / 86400 ))
-              echo "days_left=$days_left"
-              if [ "$days_left" -lt 30 ]; then
-                needs_renew=1
-              fi
+              echo "=== renew only if within 30 days ==="
+              sudo certbot renew --non-interactive --nginx
+            fi
+            if [ $? -ne 0 ]; then
+              echo "ERROR: certbot renew failed"
+              sudo systemctl start nginx >/dev/null 2>&1
+              exit 1
             fi
 
-            if [ "$needs_renew" -eq 1 ]; then
-              renew_ok=0
-              if sudo certbot renew --force-renewal --non-interactive --nginx; then
-                renew_ok=1
-                echo "renewed via: certbot renew --nginx"
-              elif sudo certbot certonly --nginx --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
-                renew_ok=1
-                echo "renewed via: certonly --nginx"
-              else
-                echo "nginx plugin failed; trying standalone (brief nginx stop)"
-                sudo systemctl stop nginx
-                if sudo certbot certonly --standalone --force-renewal --non-interactive --agree-tos -d api.apnarojgarindia.com; then
-                  renew_ok=1
-                  echo "renewed via: certonly --standalone"
-                fi
-                sudo systemctl start nginx
-              fi
-              if [ "$renew_ok" -ne 1 ]; then
-                echo "ERROR: Let's Encrypt renewal failed"
-                sudo systemctl is-active nginx || sudo systemctl start nginx || true
-                exit 1
-              fi
-              sudo nginx -t
-              sudo systemctl reload nginx || sudo nginx -s reload
-            else
-              echo "Skipping issuance; cert still has 30+ days. Enabling auto-renew only."
-            fi
+            sudo nginx -t
+            sudo systemctl reload nginx || sudo nginx -s reload
 
             echo "=== enable auto-renew ==="
-            sudo systemctl list-unit-files | grep -i certbot || true
-            sudo systemctl enable --now certbot.timer 2>/dev/null || true
-            sudo systemctl enable --now certbot-renew.timer 2>/dev/null || true
-            sudo systemctl enable --now snap.certbot.renew.timer 2>/dev/null || true
-            if [ -f /etc/cron.d/certbot ]; then
+            sudo systemctl list-unit-files | grep -i certbot
+            sudo systemctl enable --now certbot.timer
+            sudo systemctl enable --now certbot-renew.timer
+            sudo ls -la /etc/cron.d/
+            if sudo test -f /etc/cron.d/certbot; then
               echo "found /etc/cron.d/certbot"
-              sudo cat /etc/cron.d/certbot || true
-            elif ! sudo crontab -l 2>/dev/null | grep -q certbot; then
+              sudo cat /etc/cron.d/certbot
+            else
               echo "installing daily certbot cron"
-              sudo bash -c 'echo "0 3 * * * root certbot renew --quiet --nginx --deploy-hook \"systemctl reload nginx\"" > /etc/cron.d/certbot'
+              echo '0 3 * * * root certbot renew --quiet --nginx --deploy-hook "systemctl reload nginx"' | sudo tee /etc/cron.d/certbot
               sudo chmod 644 /etc/cron.d/certbot
             fi
-            sudo systemctl list-timers 'certbot*' --all 2>/dev/null || true
-            echo "=== cron.d ==="
-            sudo ls -la /etc/cron.d/ 2>/dev/null || true
+            sudo systemctl list-timers --all | grep -i certbot
 
             echo "=== leaf cert ==="
-            sudo openssl x509 -in "$LIVE" -noout -subject -issuer -dates
+            sudo certbot certificates
             echo "=== done ==="
             date -u
+            exit 0
