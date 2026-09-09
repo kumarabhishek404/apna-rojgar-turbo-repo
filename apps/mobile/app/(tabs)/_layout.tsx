@@ -304,6 +304,12 @@ export default function Layout() {
   // Keep bottom-tab labels/icons reactive to language changes.
   void locale;
 
+  const showMainTabs = !(
+    userDetails &&
+    !userDetails?.token &&
+    userDetails?.status !== "ACTIVE"
+  );
+
   if (!isReady || !storageHydrated) return null;
 
   if (!isSessionValid(userDetails)) {
@@ -419,7 +425,7 @@ export default function Layout() {
           <UserProfile />
         )}
 
-        {showMainTabs && !isAdmin ? (
+        {showMainTabs ? (
           <SaathiSpeakFab bottomOffset={tabBarHeight + 10} />
         ) : null}
 

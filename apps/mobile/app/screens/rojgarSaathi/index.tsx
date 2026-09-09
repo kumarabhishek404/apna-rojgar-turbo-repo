@@ -208,7 +208,9 @@ export default function RojgarSaathiScreen() {
       success: false,
       reason: result.reason,
     });
-    if (result.reason === "denied" || result.reason === "unavailable") {
+    if (result.reason === "denied") {
+      pushBubble("saathi", t("saathiMicDenied"));
+    } else if (result.reason === "unavailable") {
       pushBubble("saathi", t("saathiTypeInstead"));
     } else {
       pushBubble("saathi", t("saathiSpeechUnclear"));

@@ -24,7 +24,13 @@
     "assetBundlePatterns": ["**/*"],
 
     "plugins": [
-      "expo-av",
+      [
+        "expo-av",
+        {
+          microphonePermission:
+            "Allow Apna Rojgar to use the microphone so you can talk to Rojgar Saathi.",
+        },
+      ],
       "expo-router",
       "expo-font",
       "expo-localization",
@@ -67,6 +73,14 @@
           }
         }
       ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow Apna Rojgar to use the microphone so you can talk to Rojgar Saathi.",
+          "speechRecognitionPermission": "Allow Apna Rojgar to convert your speech to text for Rojgar Saathi.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
       "expo-web-browser"
     ],
 
@@ -74,6 +88,10 @@
       "supportsTablet": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.kumarabhishek404.labourapp",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Apna Rojgar uses the microphone so you can talk to Rojgar Saathi.",
+        "NSSpeechRecognitionUsageDescription": "Apna Rojgar converts your speech to text so Rojgar Saathi can help you."
+      },
       "associatedDomains": [
         "applinks:apnarojgarindia.com",
         "applinks:www.apnarojgarindia.com"
