@@ -31,6 +31,7 @@ import REFRESH_USER from "../hooks/useRefreshUser";
 import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
+import { isAccountSuspended } from "@/utils/userStatus";
 import { isAuthApiError } from "@/utils/apiError";
 import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
 import SaathiSpeakFab from "@/components/commons/SaathiSpeakFab";
@@ -90,7 +91,10 @@ export default function Layout() {
 
   useAppStoreReviewPrompt(
     userDetails,
-    isReady && storageHydrated && isSessionValid(userDetails),
+    isReady &&
+      storageHydrated &&
+      isSessionValid(userDetails) &&
+      !isAccountSuspended(userDetails),
   );
 
   useEffect(() => {
@@ -115,7 +119,9 @@ export default function Layout() {
     if (!storageHydrated) return;
 
     const shouldPollNotifications =
-      isSessionValid(userDetails) && hasAuthenticatedUser(userDetails);
+      isSessionValid(userDetails) &&
+      hasAuthenticatedUser(userDetails) &&
+      !isAccountSuspended(userDetails);
 
     const fetchUnreadNotifications = async () => {
       if (!shouldPollNotifications) {
@@ -311,6 +317,10 @@ export default function Layout() {
   );
 
   if (!isReady || !storageHydrated) return null;
+
+  if (isAccountSuspended(userDetails)) {
+    return null;
+  }
 
   if (!isSessionValid(userDetails)) {
     return <Redirect href="/screens/auth/login" />;

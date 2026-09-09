@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
+import { getDefaultStore } from "jotai";
+import Atoms from "@/app/AtomStore";
+import { isAccountSuspended } from "@/utils/userStatus";
 
 function shouldOpenHome(url: string | null | undefined): boolean {
   if (!url) return false;
@@ -22,6 +25,7 @@ export default function AppDeepLinkHomeRecovery() {
   useEffect(() => {
     const goHome = (url: string | null | undefined) => {
       if (!shouldOpenHome(url)) return;
+      if (isAccountSuspended(getDefaultStore().get(Atoms.UserAtom))) return;
       setTimeout(() => {
         try {
           router.replace("/");

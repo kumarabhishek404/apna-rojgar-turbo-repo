@@ -153,6 +153,11 @@ export default function Login() {
         profilePicture: user?.profilePicture || user?.profileImage || "",
       };
 
+      if (user?.status === "SUSPENDED") {
+        setUserDetails({ isAuth: true, ...sessionUser });
+        return;
+      }
+
       // 2️⃣ Incomplete onboarding (main details)
       if (!user?.name || !user?.address || !user?.gender || !user?.age) {
         setUserDetails(sessionUser);

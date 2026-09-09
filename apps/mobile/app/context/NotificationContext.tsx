@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import * as Notifications from "expo-notifications";
 import PUSH_NOTIFICATION from "@/app/hooks/usePushNotification";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom, getDefaultStore } from "jotai";
 import Atoms from "@/app/AtomStore";
 import * as Linking from "expo-linking";
 import { getServiceDetailsDeepLink } from "@/utils/serviceDeepLink";
@@ -16,6 +16,7 @@ import { openNotificationTarget } from "@/utils/openNotificationTarget";
 import NotificationBanner from "@/components/commons/InAppNotificationBanner";
 import { openNotificationData } from "@/utils/notificationNavigation";
 import NOTIFICATION from "@/app/api/notification";
+import { isAccountSuspended } from "@/utils/userStatus";
 
 interface NotificationContextType {
   expoPushToken: string | null;
@@ -86,6 +87,9 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
         );
 
         const data = response?.notification?.request?.content?.data;
+        if (isAccountSuspended(getDefaultStore().get(Atoms.UserAtom))) {
+          return;
+        }
         if (typeof data?.notificationId === "string") {
           void NOTIFICATION.markNotificationOpened(data.notificationId).catch(
             (openError) =>
@@ -113,7 +117,7 @@ const NotificationProvider: React.FC<NotificationProviderProps> = ({
       value={{ expoPushToken, notification, error }}
     >
       {children}
-      {notificationContent ? (
+      {notificationContent && !isAccountSuspended(userDetails) ? (
         <NotificationBanner
           key={notification.request.identifier}
           title={notificationContent.title}

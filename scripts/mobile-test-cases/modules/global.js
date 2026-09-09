@@ -270,9 +270,9 @@ export default [
     testType: "Functionality",
     priority: "P0",
     prerequisites: "Account suspended on backend",
-    title: "Suspended account shows message and logs out",
-    steps: "1. Login or use suspended account.\n2. Trigger API call.",
-    expectedResult: "User notified; redirected to login; session cleared.",
+    title: "Suspended account shows lock screen with support email",
+    steps: "1. Login or use suspended account.\n2. Observe the app.",
+    expectedResult: "Only the suspended-account screen is shown with policy message and support email; other screens are blocked.",
   }),
   c({
     screenName: "Disabled Account",

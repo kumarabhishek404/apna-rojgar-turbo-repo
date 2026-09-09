@@ -1,5 +1,8 @@
 import { APPLINK } from "@/constants";
 
+/** Official support mailbox for account reactivation and policy queries. */
+export const SUPPORT_EMAIL = "info@apnarojgarindia.com";
+
 /** Official Apna Rojgar social & app links (aligned with website schema). */
 export const SOCIAL_LINKS = {
   whatsappGroup:

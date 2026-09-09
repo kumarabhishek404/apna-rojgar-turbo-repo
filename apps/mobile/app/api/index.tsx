@@ -9,6 +9,11 @@ import { t } from "@/utils/translationHelper";
 import { isAuthApiError, markGlobalAuthErrorHandled } from "@/utils/apiError";
 import reportError, { sanitizeForErrorLog } from "@/utils/reportError";
 import { getApiBaseUrl } from "@/constants/apiBaseUrl";
+import {
+  persistUserStatus,
+  restrictionStatusFromApiMessage,
+  USER_STATUS,
+} from "@/utils/userStatus";
 
 const parseRequestBodyForLog = (data: unknown) => {
   if (data == null) return null;
@@ -300,11 +305,16 @@ api.interceptors.response.use(
         });
       }
 
-      if (
-        error.response?.data &&
-        (error.response?.data?.message === "User account is disabled" ||
-          error.response?.data?.message === "User is not activated yet" ||
-          error.response?.data?.message === "User is suspended")
+      const restrictionStatus = restrictionStatusFromApiMessage(
+        typeof error.response?.data?.message === "string"
+          ? error.response.data.message
+          : undefined,
+      );
+      if (restrictionStatus === USER_STATUS.SUSPENDED) {
+        persistUserStatus(USER_STATUS.SUSPENDED);
+      } else if (
+        restrictionStatus === USER_STATUS.DISABLED ||
+        restrictionStatus === USER_STATUS.PENDING
       ) {
         router.replace("/(tabs)/fifth");
       }
