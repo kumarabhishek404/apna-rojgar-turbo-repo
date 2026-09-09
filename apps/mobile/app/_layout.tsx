@@ -16,6 +16,7 @@ import { useAppUpdateGuard } from "@/utils/useAppUpdateGuard";
 import ForceUpdateScreen from "@/components/commons/ForceUpdateSection";
 import AnalyticsSession from "@/components/commons/AnalyticsSession";
 import AppDeepLinkHomeRecovery from "@/components/commons/AppDeepLinkHomeRecovery";
+import AccountAccessGuard from "@/components/commons/AccountAccessGuard";
 
 const queryClient = new QueryClient();
 
@@ -36,22 +37,24 @@ const AppNavigator = () => {
                 <ToastProvider>
                   <AnalyticsSession />
                   <AppDeepLinkHomeRecovery />
-                  <StatusBar style="light" />
+                  <AccountAccessGuard>
+                    <StatusBar style="light" />
 
-                  <SafeAreaView
-                    style={{ flex: 1, backgroundColor: Colors.primary }}
-                    edges={["top", "bottom"]}
-                  >
-                    {/**
-                     * Single Stack registers **all** file routes (`(tabs)`, `job`, `screens`, …).
-                     * Do not list only `(tabs)` — that hid `/screens/*` and `/job/*` from the navigator,
-                     * so deep links could never open service details.
-                     */}
-                    <Stack screenOptions={{ headerShown: false }} />
+                    <SafeAreaView
+                      style={{ flex: 1, backgroundColor: Colors.primary }}
+                      edges={["top", "bottom"]}
+                    >
+                      {/**
+                       * Single Stack registers **all** file routes (`(tabs)`, `job`, `screens`, …).
+                       * Do not list only `(tabs)` — that hid `/screens/*` and `/job/*` from the navigator,
+                       * so deep links could never open service details.
+                       */}
+                      <Stack screenOptions={{ headerShown: false }} />
 
-                    <GlobalBottomDrawer />
-                    <GlobalSideDrawer />
-                  </SafeAreaView>
+                      <GlobalBottomDrawer />
+                      <GlobalSideDrawer />
+                    </SafeAreaView>
+                  </AccountAccessGuard>
                 </ToastProvider>
               </PaperProvider>
             </APP_CONTEXT.AppProvider>

@@ -39,8 +39,6 @@ const useLogout = (): UseLogoutReturn => {
 
       router.replace("/screens/auth/login");
       setIsLoggedIn(false);
-
-      console.log("Redirected to login");
       setUserDetails({});
     } catch (error: any) {
       const errorMessage = error?.message || "Error during logout";

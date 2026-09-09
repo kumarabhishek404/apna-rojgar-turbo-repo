@@ -1,4 +1,7 @@
 import { router } from "expo-router";
+import { getDefaultStore } from "jotai";
+import Atoms from "@/app/AtomStore";
+import { isAccountSuspended } from "@/utils/userStatus";
 
 const TEAM_TYPES = new Set([
   "GET_AN_TEAM_JOINING_INVITATION_FROM_MEDIATOR",
@@ -32,6 +35,9 @@ export function openNotificationTarget(payload: {
   type?: unknown;
   data?: Record<string, unknown> | null;
 } | null | undefined) {
+  if (isAccountSuspended(getDefaultStore().get(Atoms.UserAtom))) {
+    return;
+  }
   const data = (payload?.data || {}) as Record<string, unknown>;
   const type = String(payload?.type || data.type || "").toUpperCase();
   const serviceId = asId(data.serviceId);

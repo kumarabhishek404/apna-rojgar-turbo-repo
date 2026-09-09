@@ -1,4 +1,7 @@
 import { getToken } from "@/utils/authStorage";
+import { isAccountSuspended } from "@/utils/userStatus";
+
+export { isAccountSuspended };
 
 export function isSessionValid(userDetails: Record<string, unknown> | null | undefined) {
   return Boolean(

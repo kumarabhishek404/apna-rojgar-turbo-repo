@@ -599,8 +599,7 @@ const UserProfile = () => {
                 )) && (
                 <ProfileNotification />
               )}
-              {(userDetails?.status === "SUSPENDED" ||
-                userDetails?.status === "DISABLED") && <InactiveAccountMessage />}
+              {userDetails?.status === "DISABLED" && <InactiveAccountMessage />}
               {userDetails?.status === "PENDING" && <PendingApprovalMessage />}
 
               <StatsCard />
