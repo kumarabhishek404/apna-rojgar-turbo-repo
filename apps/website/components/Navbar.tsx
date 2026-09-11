@@ -937,7 +937,7 @@ function NavbarContent() {
             className="group flex min-w-0 max-w-full items-center gap-2.5 sm:gap-3"
           >
             <div
-              className={`relative shrink-0 overflow-hidden rounded-full transition-all duration-300 ${
+              className={`relative shrink-0 transition-all duration-300 ${
                 scrolled ? "h-9 w-9 sm:h-10 sm:w-10" : "h-10 w-10 sm:h-11 sm:w-11"
               }`}
             >
@@ -945,16 +945,16 @@ function NavbarContent() {
                 src={LOGO}
                 alt={t("apnaRojgarLogoAlt", "Apna Rojgar Logo")}
                 suppressHydrationWarning
-                className="rounded-full object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]"
-                width={44}
-                height={44}
+                fill
+                sizes="44px"
+                className="object-contain"
                 priority
               />
             </div>
 
             <span
               suppressHydrationWarning
-              className="truncate whitespace-nowrap text-[1.35rem] font-extrabold leading-none tracking-[-0.03em] text-[#22409a] transition-colors group-hover:text-[#1b347d] sm:text-[1.65rem] lg:text-[1.85rem]"
+              className="whitespace-nowrap py-[0.12em] text-[1.35rem] font-extrabold leading-snug tracking-[-0.03em] text-[#22409a] transition-colors group-hover:text-[#1b347d] sm:text-[1.65rem] lg:text-[1.85rem]"
             >
               {t("brandName", "Apna Rojgar")}
             </span>

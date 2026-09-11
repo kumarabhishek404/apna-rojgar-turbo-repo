@@ -49,7 +49,7 @@ export default function AppLandingPage() {
             className="rounded-xl bg-white p-1 shadow-lg"
             priority
           />
-          <span className="text-2xl font-bold tracking-tight">
+          <span className="py-[0.12em] text-2xl font-bold leading-snug tracking-tight">
             {t("brandName", "Apna Rojgar")}
           </span>
         </Link>

@@ -213,18 +213,18 @@ const DashboardSidebarContent = memo(function DashboardSidebarContent({
 
   const brandMark = (
     <>
-      <span className="relative aspect-square h-9 w-9 shrink-0 overflow-hidden rounded-full bg-transparent sm:h-10 sm:w-10">
+      <span className="relative aspect-square h-9 w-9 shrink-0 sm:h-10 sm:w-10">
         <Image
           src={LOGO}
           alt=""
           fill
           sizes="40px"
-          className="rounded-full object-contain"
+          className="object-contain"
           priority
         />
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate whitespace-nowrap text-[1.15rem] font-extrabold leading-none tracking-[-0.03em] text-[#1a2f69] transition-colors group-hover:text-[#22409a] sm:text-[1.35rem]">
+      <div className="min-w-0 flex-1 overflow-visible">
+        <p className="whitespace-nowrap py-[0.12em] text-[1.15rem] font-extrabold leading-snug tracking-[-0.03em] text-[#1a2f69] transition-colors group-hover:text-[#22409a] sm:text-[1.35rem]">
           {t("brandName", "Apna Rojgar")}
         </p>
       </div>
