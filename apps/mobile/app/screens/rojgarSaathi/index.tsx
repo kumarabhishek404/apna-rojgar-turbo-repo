@@ -25,8 +25,7 @@ import { buildSuggestions, userReplyForChip } from "@/ai/suggestions/suggestionE
 import type { SuggestionChip, SaathiSnapshot } from "@/ai/suggestions/suggestionTypes";
 import { runRojgarAgent } from "@/ai/agent/rojgarAgent";
 import type { ConversationSlots, SaathiChoice } from "@/ai/agent/agentContext";
-import { speakSaathi, stopSpeaking } from "@/ai/voice/textToSpeech";
-import { transcribeSpeech, stopTranscription } from "@/ai/voice/speechToText";
+import { stopSpeaking } from "@/ai/voice/textToSpeech";
 import { SaathiEvents, trackSaathi } from "@/ai/analytics/aiAnalytics";
 
 const DISMISS_KEY = "rojgarSaathi.dismissedSuggestions";
@@ -52,7 +51,6 @@ export default function RojgarSaathiScreen() {
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
-  const [listening, setListening] = useState(false);
   const [slots, setSlots] = useState<ConversationSlots>({});
   const [choiceChips, setChoiceChips] = useState<SaathiChoice[]>([]);
   const scrollRef = useRef<ScrollView>(null);
@@ -93,7 +91,6 @@ export default function RojgarSaathiScreen() {
     void load();
     return () => {
       stopSpeaking();
-      void stopTranscription();
     };
   }, [load]);
 
@@ -149,7 +146,6 @@ export default function RojgarSaathiScreen() {
             );
           }
         }
-        speakSaathi(reply.text, locale);
         trackSaathi(
           reply.intent === "UNKNOWN"
             ? SaathiEvents.INTENT_FAILED
@@ -190,31 +186,6 @@ export default function RojgarSaathiScreen() {
     const reply = userReplyForChip(chip);
     const text = t(reply.key, reply.params);
     await handleReply(text, "suggestion", chip.intent);
-  };
-
-  const onMic = async () => {
-    if (listening || busy) return;
-    trackSaathi(SaathiEvents.VOICE_STARTED, { language: locale, role });
-    setListening(true);
-    const result = await transcribeSpeech(locale);
-    setListening(false);
-    if (result.ok) {
-      trackSaathi(SaathiEvents.VOICE_COMPLETED, { language: locale, success: true });
-      await handleReply(result.text, "voice");
-      return;
-    }
-    trackSaathi(SaathiEvents.VOICE_COMPLETED, {
-      language: locale,
-      success: false,
-      reason: result.reason,
-    });
-    if (result.reason === "denied") {
-      pushBubble("saathi", t("saathiMicDenied"));
-    } else if (result.reason === "unavailable") {
-      pushBubble("saathi", t("saathiTypeInstead"));
-    } else {
-      pushBubble("saathi", t("saathiSpeechUnclear"));
-    }
   };
 
   const confirmChips = chips.filter(
@@ -401,17 +372,6 @@ export default function RojgarSaathiScreen() {
         </ScrollView>
 
         <View style={styles.composer}>
-          <TouchableOpacity
-            style={[styles.mic, listening && styles.micLive]}
-            onPress={() => void onMic()}
-            accessibilityRole="button"
-            accessibilityLabel={t("saathiSpeakPrompt")}
-          >
-            <Ionicons name={listening ? "mic" : "mic-outline"} size={36} color={Colors.white} />
-          </TouchableOpacity>
-          <CustomText baseFont={13} color={Colors.subHeading} style={{ marginTop: 6 }}>
-            {listening ? t("saathiListening") : t("saathiSpeakPrompt")}
-          </CustomText>
           <View style={styles.inputRow}>
             <TextInput
               value={draft}
@@ -492,20 +452,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#E6ECF7",
   },
-  mic: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    backgroundColor: Colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  micLive: { backgroundColor: Colors.danger },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 12,
     width: "100%",
   },
   input: {

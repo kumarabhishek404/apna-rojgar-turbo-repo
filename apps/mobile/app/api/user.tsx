@@ -347,6 +347,23 @@ const addAppFeedback = async (payload: any) => {
   }
 };
 
+const applyVerification = async () => {
+  try {
+    const data = await API_CLIENT.makePostRequest("/user/apply-verification", {});
+    return data;
+  } catch (error: any) {
+    console.error(
+      `[userService] An error occurred while applying for verification : `,
+      error?.response?.data,
+    );
+    TOAST?.error(
+      error?.response?.data?.message ||
+        t("verificationApplyFailed"),
+    );
+    throw error;
+  }
+};
+
 const USER = {
   getUserInfo,
   updateUserById,
@@ -364,6 +381,7 @@ const USER = {
   unLikeService,
   fetchAllLikedServices,
   addAppFeedback,
+  applyVerification,
 };
 
 export default USER;

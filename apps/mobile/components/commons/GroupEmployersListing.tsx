@@ -13,6 +13,7 @@ import profileImage from "../../assets/images/placeholder-person.jpg";
 import { Link, router } from "expo-router";
 import { debounce } from "lodash";
 import CustomHeading from "./CustomHeading";
+import VerifiedBadge from "./VerifiedBadge";
 import RatingAndReviews from "./RatingAndReviews";
 import CustomText from "./CustomText";
 import { t } from "@/utils/translationHelper";
@@ -32,6 +33,7 @@ type RenderItemTypes = {
     reviews: string;
     price: string;
     isBookmarked: boolean;
+    verification?: string;
   };
   index: number;
 };
@@ -76,7 +78,10 @@ const GroupEmployersListing = ({
             recyclingKey={item?.profilePicture || item?._id}
           />
           <View>
-            <CustomHeading textAlign="left">{item.name}</CustomHeading>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <CustomHeading textAlign="left">{item.name}</CustomHeading>
+              <VerifiedBadge user={item} size="sm" />
+            </View>
             <RatingAndReviews
               rating={item?.rating?.average}
               reviews={item?.rating?.count}

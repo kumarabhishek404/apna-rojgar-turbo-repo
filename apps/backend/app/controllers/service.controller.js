@@ -433,25 +433,25 @@ export const getServiceDetail = async (req, res) => {
       {
         path: "bookedWorker",
         select:
-          "name email profilePicture address mobile gender skills rating team",
+          "name email profilePicture address mobile gender skills rating team verification",
       },
       {
         path: "appliedUsers.user",
         select:
-          "name email profilePicture address mobile gender rating team skills",
+          "name email profilePicture address mobile gender rating team skills verification",
       },
       {
         path: "appliedUsers.workers.worker",
-        select: "name email profilePicture address mobile gender rating skills",
+        select: "name email profilePicture address mobile gender rating skills verification",
       },
       {
         path: "selectedUsers.user",
         select:
-          "name email profilePicture address mobile gender rating team skills",
+          "name email profilePicture address mobile gender rating team skills verification",
       },
       {
         path: "selectedUsers.workers.worker",
-        select: "name email profilePicture address mobile gender rating skills",
+        select: "name email profilePicture address mobile gender rating skills verification",
       },
     ];
 
@@ -464,7 +464,7 @@ export const getServiceDetail = async (req, res) => {
         populate: {
           path: "workers",
           select:
-            "_id name email profilePicture address mobile gender skills rating",
+            "_id name email profilePicture address mobile gender skills rating verification",
         },
       },
       {
@@ -474,7 +474,7 @@ export const getServiceDetail = async (req, res) => {
         populate: {
           path: "workers",
           select:
-            "_id name email profilePicture address mobile gender skills rating",
+            "_id name email profilePicture address mobile gender skills rating verification",
         },
       },
       {
@@ -484,7 +484,7 @@ export const getServiceDetail = async (req, res) => {
         populate: {
           path: "workers",
           select:
-            "_id name email profilePicture address mobile gender skills rating",
+            "_id name email profilePicture address mobile gender skills rating verification",
         },
       },
     ];
@@ -498,7 +498,7 @@ export const getServiceDetail = async (req, res) => {
               {
                 path: "employer",
                 select:
-                  "name email profilePicture address mobile gender skills rating",
+                  "name email profilePicture address mobile gender skills rating verification",
               },
             ],
       )
@@ -591,11 +591,11 @@ export const getAllAppliedUsers = async (req, res) => {
     const service = await Service.findById(serviceId)
       .populate({
         path: "appliedUsers.user",
-        select: "name email profilePicture skills mobile address gender rating",
+        select: "name email profilePicture skills mobile address gender rating verification",
       })
       .populate({
         path: "appliedUsers.workers.worker",
-        select: "name email profilePicture address mobile gender skills rating",
+        select: "name email profilePicture address mobile gender skills rating verification",
       });
 
     if (!service) {
@@ -668,11 +668,11 @@ export const getAllSelectedUsers = async (req, res) => {
     const service = await Service.findById(serviceId)
       .populate({
         path: "selectedUsers.user",
-        select: "name email profilePicture skills mobile address gender rating",
+        select: "name email profilePicture skills mobile address gender rating verification",
       })
       .populate({
         path: "selectedUsers.workers.worker",
-        select: "name email profilePicture address mobile gender skills rating",
+        select: "name email profilePicture address mobile gender skills rating verification",
       });
 
     if (!service) {

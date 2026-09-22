@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { CheckCircle2, Clock, Loader2, MapPin, Megaphone, Share2, ShieldCheck, XCircle } from "lucide-react";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
 import { apiRequest } from "@/lib/auth";
 import { getPromotionConfig } from "@/lib/payment";
 import { isServicePromoted, type SocialMediaPromotion } from "@/lib/servicePromotion";
@@ -43,7 +44,7 @@ type ServiceDetail = {
   geoLocation?: GeoPoint | null;
   socialMediaPromotion?: SocialMediaPromotion | null;
   requirements?: Array<{ name: string; count: number; payPerDay?: number }>;
-  employer?: { _id?: string; name?: string; mobile?: string } | string;
+  employer?: { _id?: string; name?: string; mobile?: string; verification?: string } | string;
   appliedUsers?: AppliedUserEntry[];
 };
 
@@ -647,10 +648,15 @@ export default function ServiceDetailsView({
             <ShieldCheck className="h-3.5 w-3.5" />
             {t("employer")}
           </div>
-          <p className="text-base font-semibold text-[#16264f]">
-            {typeof service.employer === "object" && service.employer != null
-              ? service.employer.name || "-"
-              : "-"}
+          <p className="flex items-center gap-1.5 text-base font-semibold text-[#16264f]">
+            <span>
+              {typeof service.employer === "object" && service.employer != null
+                ? service.employer.name || "-"
+                : "-"}
+            </span>
+            {typeof service.employer === "object" && service.employer != null ? (
+              <VerifiedBadge user={service.employer} size="sm" />
+            ) : null}
           </p>
           <p className="text-sm text-gray-700">
             {typeof service.employer === "object" && service.employer != null

@@ -1,6 +1,5 @@
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StoreReview from "expo-store-review";
 import { t } from "@/utils/translationHelper";
 import { openPlayStore } from "@/utils/openExternalLink";
 
@@ -102,23 +101,11 @@ async function isEligibleForAutoPrompt(): Promise<boolean> {
 }
 
 /**
- * Opens the native Play / App Store in-app review sheet when available.
- * Falls back to the Play Store listing (no &reviewId=0).
+ * After "Rate now": open this app's Play Store listing only.
+ * Does not use Google's in-app review sheet.
  */
 export async function launchAppStoreReview(): Promise<void> {
-  try {
-    const available = await StoreReview.isAvailableAsync();
-    if (available) {
-      await StoreReview.requestReview();
-      return;
-    }
-  } catch (error) {
-    console.warn("[appStoreReview] requestReview failed:", error);
-  }
-
-  if (Platform.OS === "android") {
-    await openPlayStore();
-  }
+  await openPlayStore();
 }
 
 function showSoftPromptAlert(): void {
@@ -146,10 +133,10 @@ function showSoftPromptAlert(): void {
 }
 
 /**
- * Soft “Rate us?” Alert in the selected app language, then native review / listing.
+ * Soft “Rate us?” Alert in the selected app language, then Play Store listing.
  *
  * - Auto: skipped if already completed, or cooldown not elapsed.
- * - force (menu): if completed, opens store flow without soft prompt; else shows prompt.
+ * - force (menu): if completed, opens Play Store without soft prompt; else shows prompt.
  */
 export async function promptForAppReview(
   options: PromptOptions = {},

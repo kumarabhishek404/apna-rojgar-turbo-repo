@@ -18,6 +18,12 @@ import {
   isListingFeatureActive,
   parseListingFeatureDays,
 } from "../utils/listingFeature.js";
+import {
+  isVerifiableRole,
+  normalizeVerification,
+  pendingVerificationQuery,
+  VERIFICATION_STATUS,
+} from "../utils/userVerification.js";
 
 export const handleActivateUser = async (req, res) => {
   const admin = req?.user;
@@ -129,6 +135,59 @@ export const handleSuspendUser = async (req, res) => {
   }
 };
 
+export const handleUpdateUserVerification = async (req, res) => {
+  const { userId } = req.params;
+  const verification = normalizeVerification(req.body?.verification);
+
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Valid user ID is required",
+    });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!isVerifiableRole(user.role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Only workers, employers, and mediators can be verified",
+      });
+    }
+
+    const previous = normalizeVerification(user.verification);
+    user.verification = verification;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message:
+        verification === VERIFICATION_STATUS.COMPLETED
+          ? "User is now verified"
+          : `Verification updated to ${verification}`,
+      data: {
+        _id: user._id,
+        verification: user.verification,
+        previousVerification: previous,
+      },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message:
+        error?.message || "Something went wrong while updating verification",
+    });
+  }
+};
+
 export const getAllUsers = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
@@ -137,6 +196,7 @@ export const getAllUsers = async (req, res) => {
   const role = String(req.query.role || "").trim().toUpperCase();
   const source = String(req.query.source || "").trim().toLowerCase();
   const search = String(req.query.search || "").trim();
+  const verificationFilter = String(req.query.verification || "ALL").trim();
 
   const query = {};
   if (status && status !== "ALL") query.status = status;
@@ -156,8 +216,23 @@ export const getAllUsers = async (req, res) => {
     ];
   }
 
+  if (verificationFilter && verificationFilter !== "ALL") {
+    const nextStatus = normalizeVerification(verificationFilter);
+    if (nextStatus === VERIFICATION_STATUS.PENDING) {
+      const pendingMatch = pendingVerificationQuery();
+      if (query.$or) {
+        query.$and = [{ $or: query.$or }, pendingMatch];
+        delete query.$or;
+      } else {
+        Object.assign(query, pendingMatch);
+      }
+    } else {
+      query.verification = nextStatus;
+    }
+  }
+
   try {
-    const [totalUsers, users, roleStats] = await Promise.all([
+    const [totalUsers, users, roleStats, verificationStats] = await Promise.all([
       User.countDocuments(query),
       User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
       User.aggregate([
@@ -165,6 +240,23 @@ export const getAllUsers = async (req, res) => {
         {
           $group: {
             _id: "$role",
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      User.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: {
+              $cond: [
+                {
+                  $in: ["$verification", ["Applied", "Completed"]],
+                },
+                "$verification",
+                "Pending",
+              ],
+            },
             count: { $sum: 1 },
           },
         },
@@ -178,6 +270,11 @@ export const getAllUsers = async (req, res) => {
       mediators: 0,
       employers: 0,
       unassigned: 0,
+      verification: {
+        pending: 0,
+        applied: 0,
+        completed: 0,
+      },
     };
     roleStats.forEach((entry) => {
       const roleKey = String(entry?._id || "").toUpperCase();
@@ -186,6 +283,12 @@ export const getAllUsers = async (req, res) => {
       else if (roleKey === "MEDIATOR") stats.mediators = entry.count;
       else if (roleKey === "EMPLOYER") stats.employers = entry.count;
       else stats.unassigned += entry.count;
+    });
+    verificationStats.forEach((entry) => {
+      const key = String(entry?._id || "Pending");
+      if (key === "Applied") stats.verification.applied = entry.count;
+      else if (key === "Completed") stats.verification.completed = entry.count;
+      else stats.verification.pending = entry.count;
     });
 
     res.status(200).json({
@@ -294,11 +397,11 @@ export const getAdminDirectRequests = async (req, res) => {
         .limit(limit)
         .populate(
           "employer",
-          "name mobile role address profilePicture email status registrationSource",
+          "name mobile role address profilePicture email status registrationSource verification",
         )
         .populate(
           "bookedWorker",
-          "name mobile role address profilePicture email status registrationSource skills",
+          "name mobile role address profilePicture email status registrationSource skills verification",
         ),
       Invitation.aggregate([
         { $match: query },
@@ -1031,19 +1134,19 @@ export const getAdminAllServices = async (req, res) => {
         .limit(limit)
         .populate(
           "employer",
-          "name mobile role address profilePicture status registrationSource email",
+          "name mobile role address profilePicture status registrationSource email verification",
         )
         .populate(
           "bookedWorker",
-          "name mobile role address profilePicture",
+          "name mobile role address profilePicture verification",
         )
         .populate({
           path: "appliedUsers.user",
-          select: "name mobile role address profilePicture",
+          select: "name mobile role address profilePicture verification",
         })
         .populate({
           path: "appliedUsers.workers.worker",
-          select: "name mobile role address profilePicture",
+          select: "name mobile role address profilePicture verification",
         }),
       Service.aggregate([
         { $match: query },
@@ -1220,7 +1323,7 @@ export const getAdminPromotionPayments = async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate("user", "name mobile role profilePicture address")
+        .populate("user", "name mobile role profilePicture address verification")
         .populate(
           "service",
           "jobID type subType address status socialMediaPromotion startDate createdAt",

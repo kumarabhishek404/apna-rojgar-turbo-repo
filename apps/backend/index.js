@@ -1,4 +1,5 @@
 import fs from "fs";
+import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
@@ -148,8 +149,21 @@ app.use((err, req, res, next) => {
 });
 
 // createIndexes()
-// ✅ Start server
+// Bind IPv4 explicitly. `localhost` on macOS is ::1 first, so also try IPv6
+// and warn if something else (often serverless-offline) already owns it.
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   logRuntimeMode(PORT);
 });
+
+const ipv6Server = http.createServer(app);
+ipv6Server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.warn(
+      `⚠️ [::1]:${PORT} is already in use. http://localhost:${PORT} will miss this API — use http://127.0.0.1:${PORT} or stop the other process.`,
+    );
+    return;
+  }
+  console.warn(`⚠️ Could not bind [::1]:${PORT}: ${err.message}`);
+});
+ipv6Server.listen(PORT, "::1");

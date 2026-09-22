@@ -4,6 +4,7 @@ import Colors from "@/constants/Colors";
 import CustomHeading from "@/components/commons/CustomHeading";
 import ProfilePicture from "@/components/commons/ProfilePicture";
 import CustomText from "@/components/commons/CustomText";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
 import ShowAddress from "@/components/commons/ShowAddress";
 import ShowSkills from "@/components/commons/ShowSkills";
 import ButtonComp from "@/components/inputs/Button";
@@ -45,9 +46,12 @@ const SelectedApplicantsList = ({
             <View style={styles.card}>
               <ProfilePicture uri={item.user.profilePicture} />
               <View style={styles.infoContainer}>
-                <CustomText fontWeight="600" style={styles.name}>
-                  {item.user.name}
-                </CustomText>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <CustomText fontWeight="600" style={styles.name}>
+                    {item.user.name}
+                  </CustomText>
+                  <VerifiedBadge user={item.user} size="sm" />
+                </View>
                 <ShowAddress address={item.user.address} />
                 <ShowSkills userSkills={item.user.skills} />
               </View>

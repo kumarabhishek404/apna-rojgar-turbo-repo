@@ -13,6 +13,7 @@ import { Link, router } from "expo-router";
 import { debounce } from "lodash";
 import RatingAndReviews from "./RatingAndReviews";
 import CustomHeading from "./CustomHeading";
+import VerifiedBadge from "./VerifiedBadge";
 import { t } from "@/utils/translationHelper";
 
 type RenderItemTypes = {
@@ -27,6 +28,7 @@ type RenderItemTypes = {
     reviews: string;
     price: string;
     isBookmarked: boolean;
+    verification?: string;
   };
   index: number;
 };
@@ -72,9 +74,12 @@ const GroupWorkersListing = ({
             recyclingKey={item?.profilePicture || item?._id}
           />
           <View>
-            <CustomHeading textAlign="left" baseFont={14}>
-              {item.name}
-            </CustomHeading>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <CustomHeading textAlign="left" baseFont={14}>
+                {item.name}
+              </CustomHeading>
+              <VerifiedBadge user={item} size="sm" />
+            </View>
             <RatingAndReviews
               rating={item?.rating || 4.5}
               reviews={item?.reviews || 400}

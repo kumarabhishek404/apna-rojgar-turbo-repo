@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Check, Copy } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { apiRequest } from "@/lib/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useAdminAccess } from "@/components/webapp/admin/useAdminAccess";
 import InfiniteScrollSentinel from "@/components/webapp/admin/InfiniteScrollSentinel";
+import AdminDirectRequestDetailsView, {
+  type DirectRequestRecord,
+} from "@/components/webapp/admin/AdminDirectRequestDetailsView";
 
 type AdminPerson = {
   _id?: string;
@@ -20,24 +23,7 @@ type AdminPerson = {
   skills?: unknown;
 };
 
-type DirectRequest = {
-  _id: string;
-  status?: string;
-  startDate?: string;
-  duration?: string | number;
-  address?: string;
-  description?: string;
-  requiredNumberOfWorkers?: number;
-  images?: string[];
-  facilities?: Record<string, boolean>;
-  appliedSkill?: { skill?: string; payPerDay?: number | string; [key: string]: unknown };
-  type?: string;
-  subType?: string;
-  employer?: AdminPerson | string;
-  bookedWorker?: AdminPerson | string;
-  createdAt?: string;
-  updatedAt?: string;
-};
+type DirectRequest = DirectRequestRecord;
 
 type RequestStats = {
   total?: number;
@@ -86,18 +72,6 @@ function formatDate(value?: string) {
   return date.toLocaleString();
 }
 
-function stringValue(value: unknown) {
-  if (value == null) return "-";
-  const normalized = String(value).trim();
-  return normalized || "-";
-}
-
-function emailValue(email?: AdminPerson["email"]) {
-  if (!email) return "-";
-  if (typeof email === "string") return stringValue(email);
-  return stringValue(email.value);
-}
-
 function resolvePerson(value?: AdminPerson | string | null): AdminPerson | null {
   if (!value || typeof value === "string") return null;
   return value;
@@ -114,32 +88,6 @@ function skillFromRequest(request: DirectRequest) {
     }
   }
   return "-";
-}
-
-async function copyText(value: string) {
-  if (!value || value === "-") return false;
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(value);
-      return true;
-    }
-  } catch {
-    /* fall through */
-  }
-  try {
-    const el = document.createElement("textarea");
-    el.value = value;
-    el.setAttribute("readonly", "");
-    el.style.position = "fixed";
-    el.style.left = "-9999px";
-    document.body.appendChild(el);
-    el.select();
-    const ok = document.execCommand("copy");
-    document.body.removeChild(el);
-    return ok;
-  } catch {
-    return false;
-  }
 }
 
 export default function AdminDirectRequestsPage() {
@@ -492,31 +440,40 @@ function RequestDetailsModal({
   onClose: () => void;
   t: (key: string, fallback?: string) => string;
 }) {
-  const sender = resolvePerson(request.employer);
-  const receiver = resolvePerson(request.bookedWorker);
-  const rawJson = JSON.stringify(request, null, 2);
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-3"
+      className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+        className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-[0_20px_80px_rgba(15,23,42,0.35)]"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label={t("directRequestDetails", "Direct request details")}
       >
-        <div className="flex items-start justify-between border-b border-slate-200 p-4">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-[#f7f9ff] to-[#eef3ff] px-4 py-3">
           <div>
-            <h3 className="text-lg font-bold text-slate-800">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#22409a]/80">
               {t("directRequestDetails", "Direct request details")}
-            </h3>
-            <p className="text-xs text-slate-500">
-              {t("requestId", "Request ID")}: {request._id}
             </p>
+            <h3 className="text-base font-bold text-[#16264f]">
+              {t("viewDetails", "View details")}
+            </h3>
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -527,332 +484,16 @@ function RequestDetailsModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               {t("close", "Close")}
             </button>
           </div>
         </div>
-
-        <div className="max-h-[calc(92vh-84px)] overflow-y-auto p-4">
-          <div className="mb-4 grid gap-3 rounded-2xl border border-[#22409a]/15 bg-gradient-to-r from-[#eef3ff] to-white p-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center">
-            <PartySummary
-              label={t("senderEmployer", "Sender (Employer)")}
-              person={sender}
-              fallbackId={
-                typeof request.employer === "string" ? request.employer : undefined
-              }
-            />
-            <div className="hidden justify-center text-[#22409a] sm:flex">
-              <ArrowRight size={22} />
-            </div>
-            <PartySummary
-              label={t("receiver", "Receiver")}
-              person={receiver}
-              fallbackId={
-                typeof request.bookedWorker === "string"
-                  ? request.bookedWorker
-                  : undefined
-              }
-            />
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-2">
-            <div className="space-y-3">
-              <SectionTitle title={t("requestInformation", "Request information")} />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <CopyableDetail
-                  title={t("requestId", "Request ID")}
-                  value={stringValue(request._id)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("status", "Status")}
-                  value={stringValue(request.status)}
-                />
-                <CopyableDetail
-                  title={t("skill", "Skill")}
-                  value={skillFromRequest(request)}
-                />
-                <CopyableDetail
-                  title={t("payPerDay", "Pay per day")}
-                  value={
-                    request.appliedSkill?.payPerDay != null
-                      ? `₹${request.appliedSkill.payPerDay}`
-                      : "-"
-                  }
-                />
-                <CopyableDetail
-                  title={t("workersNeeded", "Workers needed")}
-                  value={stringValue(request.requiredNumberOfWorkers)}
-                />
-                <CopyableDetail
-                  title={t("duration", "Duration (days)")}
-                  value={stringValue(request.duration)}
-                />
-                <CopyableDetail
-                  title={t("startDate", "Start date")}
-                  value={formatDate(request.startDate)}
-                />
-                <CopyableDetail
-                  title={t("address", "Address")}
-                  value={stringValue(request.address)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("description", "Description")}
-                  value={stringValue(request.description)}
-                  className="sm:col-span-2"
-                />
-                <CopyableDetail
-                  title={t("createdAt", "Created at")}
-                  value={formatDate(request.createdAt)}
-                />
-                <CopyableDetail
-                  title={t("updatedAt", "Updated at")}
-                  value={formatDate(request.updatedAt)}
-                />
-              </div>
-              <DetailBlock
-                title={t("facilities", "Facilities")}
-                data={request.facilities}
-              />
-              <DetailBlock
-                title={t("appliedSkill", "Applied skill object")}
-                data={request.appliedSkill}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <PersonDetailsCard
-                title={t("senderDetails", "Sender details (Employer)")}
-                person={sender}
-                fallbackId={
-                  typeof request.employer === "string"
-                    ? request.employer
-                    : undefined
-                }
-                t={t}
-              />
-              <PersonDetailsCard
-                title={t("receiverDetails", "Receiver details")}
-                person={receiver}
-                fallbackId={
-                  typeof request.bookedWorker === "string"
-                    ? request.bookedWorker
-                    : undefined
-                }
-                t={t}
-              />
-            </div>
-          </div>
-
-          {Array.isArray(request.images) && request.images.length > 0 ? (
-            <div className="mt-4 space-y-2">
-              <SectionTitle title={t("images", "Images")} />
-              <div className="flex flex-wrap gap-2">
-                {request.images.map((src) => (
-                  <a
-                    key={src}
-                    href={src}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="block h-20 w-20 overflow-hidden rounded-xl border border-slate-200"
-                  >
-                    <img
-                      src={src}
-                      alt="Request attachment"
-                      className="h-full w-full object-cover"
-                    />
-                  </a>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {t("fullRawRecord", "Full raw database record")}
-              </p>
-              <CopyIconButton
-                value={rawJson}
-                label={t("fullRawRecord", "Full raw database record")}
-              />
-            </div>
-            <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">
-              {rawJson}
-            </pre>
-          </div>
+        <div className="max-h-[calc(92vh-4.25rem)] overflow-y-auto p-4 md:p-5">
+          <AdminDirectRequestDetailsView request={request} />
         </div>
       </div>
-    </div>
-  );
-}
-
-function PartySummary({
-  label,
-  person,
-  fallbackId,
-}: {
-  label: string;
-  person: AdminPerson | null;
-  fallbackId?: string;
-}) {
-  const name = person?.name || "Unknown";
-  return (
-    <div className="min-w-0 rounded-xl border border-white/60 bg-white/80 p-3 shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-wide text-[#22409a]/80">
-        {label}
-      </p>
-      <div className="mt-2 flex items-center gap-3">
-        {person?.profilePicture ? (
-          <img
-            src={person.profilePicture}
-            alt={name}
-            className="h-11 w-11 rounded-full object-cover ring-1 ring-slate-200"
-          />
-        ) : (
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#22409a] text-sm font-bold text-white">
-            {name.slice(0, 1).toUpperCase()}
-          </div>
-        )}
-        <div className="min-w-0">
-          <p className="truncate font-semibold text-slate-800">{name}</p>
-          <p className="truncate text-xs text-slate-500">
-            {person?.role || "-"} · {person?.mobile || fallbackId || "-"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PersonDetailsCard({
-  title,
-  person,
-  fallbackId,
-  t,
-}: {
-  title: string;
-  person: AdminPerson | null;
-  fallbackId?: string;
-  t: (key: string, fallback?: string) => string;
-}) {
-  return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <SectionTitle title={title} />
-      {person ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <CopyableDetail title={t("name", "Name")} value={stringValue(person.name)} />
-          <CopyableDetail
-            title={t("mobileNumber", "Mobile")}
-            value={stringValue(person.mobile)}
-          />
-          <CopyableDetail title={t("role", "Role")} value={stringValue(person.role)} />
-          <CopyableDetail
-            title={t("status", "Status")}
-            value={stringValue(person.status)}
-          />
-          <CopyableDetail
-            title={t("email", "Email")}
-            value={emailValue(person.email)}
-          />
-          <CopyableDetail
-            title={t("registrationSource", "Registration source")}
-            value={stringValue(person.registrationSource)}
-          />
-          <CopyableDetail
-            title={t("address", "Address")}
-            value={stringValue(person.address)}
-            className="sm:col-span-2"
-          />
-          <CopyableDetail
-            title={t("userId", "User ID")}
-            value={stringValue(person._id)}
-            className="sm:col-span-2"
-          />
-        </div>
-      ) : (
-        <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          {fallbackId
-            ? `${t("userId", "User ID")}: ${fallbackId}`
-            : t("unknownUser", "Unknown user")}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function SectionTitle({ title }: { title: string }) {
-  return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-[#22409a]">
-      {title}
-    </p>
-  );
-}
-
-function CopyIconButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    const ok = await copyText(value);
-    if (!ok) return;
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={() => void handleCopy()}
-      title={copied ? "Copied" : "Copy to clipboard"}
-      aria-label={`Copy ${label}`}
-      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition hover:border-[#22409a]/30 hover:text-[#22409a]"
-    >
-      {copied ? (
-        <Check size={14} className="text-emerald-600" />
-      ) : (
-        <Copy size={14} />
-      )}
-    </button>
-  );
-}
-
-function CopyableDetail({
-  title,
-  value,
-  className = "",
-}: {
-  title: string;
-  value: string;
-  className?: string;
-}) {
-  const canCopy = Boolean(value && value !== "-");
-  return (
-    <div
-      className={`rounded-xl border border-slate-200 bg-slate-50 p-3 ${className}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-          {title}
-        </p>
-        {canCopy ? <CopyIconButton value={value} label={title} /> : null}
-      </div>
-      <p className="mt-1 break-words text-sm font-medium text-slate-800">{value}</p>
-    </div>
-  );
-}
-
-function DetailBlock({ title, data }: { title: string; data: unknown }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-        {title}
-      </p>
-      <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">
-        {data == null ? "-" : JSON.stringify(data, null, 2)}
-      </pre>
     </div>
   );
 }
