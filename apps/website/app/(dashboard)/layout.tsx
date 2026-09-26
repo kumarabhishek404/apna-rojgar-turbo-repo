@@ -5,6 +5,15 @@ import ServicesDashboard from "@/components/webapp/ServicesDashboard";
  * Individual pages under (dashboard)/ only exist for URLs/metadata — content
  * is rendered inside ServicesDashboard via pathname.
  */
-export default function DashboardShellLayout() {
-  return <ServicesDashboard />;
+export default function DashboardShellLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <ServicesDashboard />
+      {children}
+    </>
+  );
 }

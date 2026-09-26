@@ -1,7 +1,17 @@
+"use client";
+
 import { SOCIAL_BRAND_ICON_BY_ID } from "@/components/social/socialBrandIcons";
 import { SOCIAL_NAV_ITEMS } from "@/constants/social";
+import { usePathname } from "next/navigation";
+
+function isAdminPath(pathname: string) {
+  return pathname.startsWith("/admin") || pathname.startsWith("/webapp/admin");
+}
 
 export default function SocialWall() {
+  const pathname = usePathname() || "";
+  if (isAdminPath(pathname)) return null;
+
   return (
     <aside
       className="pointer-events-none fixed right-[max(0.5rem,env(safe-area-inset-right,0px))] top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-1 rounded-2xl border border-slate-200/90 bg-white/95 p-1.5 shadow-lg shadow-slate-900/10 backdrop-blur-md md:pointer-events-auto md:flex lg:right-[max(0.75rem,env(safe-area-inset-right,0px))]"

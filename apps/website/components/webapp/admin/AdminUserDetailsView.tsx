@@ -6,10 +6,12 @@ import {
   Briefcase,
   CheckCircle2,
   Copy,
+  ExternalLink,
   IdCard,
   Languages,
   Mail,
   MapPin,
+  MessageCircle,
   Phone,
   ShieldCheck,
   Star,
@@ -23,6 +25,11 @@ import {
   VERIFICATION_STATUS,
   type VerificationStatus,
 } from "@/lib/userVerification";
+import {
+  buildNewUserWhatsappWelcome,
+  openWhatsappUserChat,
+  whatsappChatUrl,
+} from "@/lib/newUserWhatsappWelcome";
 
 export type AdminUserRecord = {
   _id: string;
@@ -165,6 +172,85 @@ function geoLabel(geo?: { coordinates?: number[] }) {
     return "";
   }
   return `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
+}
+
+function WelcomeWhatsappCard({
+  name,
+  role,
+  countryCode,
+  mobile,
+}: {
+  name?: string;
+  role?: string;
+  countryCode?: string;
+  mobile?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const message = useMemo(
+    () => buildNewUserWhatsappWelcome(name, role),
+    [name, role],
+  );
+  const chat = useMemo(
+    () => whatsappChatUrl(countryCode, mobile, message),
+    [countryCode, mobile, message],
+  );
+
+  const copyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const sendOnWhatsapp = () => {
+    void navigator.clipboard.writeText(message).catch(() => undefined);
+    openWhatsappUserChat(countryCode, mobile, message);
+  };
+
+  return (
+    <Section title="Welcome WhatsApp" icon={MessageCircle}>
+      <div className="overflow-hidden rounded-xl border border-[#25D366]/25 bg-gradient-to-br from-[#f3fff7] to-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#25D366]/15 bg-[#25D366]/8 px-3.5 py-2.5">
+          <p className="text-xs font-semibold text-[#0b5c32]">
+            इस यूज़र की भूमिका के हिसाब से तैयार संदेश — कॉपी करके WhatsApp पर भेजें
+          </p>
+          <div className="flex items-center gap-2">
+            {chat ? (
+              <button
+                type="button"
+                onClick={sendOnWhatsapp}
+                title={`WhatsApp chat खोलें: +${chat.phone}`}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#25D366] px-2.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#1fb855]"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Send
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => void copyMessage()}
+              title={copied ? "Copied" : "Copy WhatsApp message"}
+              aria-label="Copy WhatsApp welcome message"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#25D366]/30 bg-white px-2.5 py-1.5 text-xs font-bold text-[#0b5c32] transition hover:bg-[#f3fff7]"
+            >
+              {copied ? (
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+        </div>
+        <pre className="max-h-72 overflow-auto whitespace-pre-wrap px-3.5 py-3 font-sans text-[13px] leading-relaxed text-[#16264f]">
+          {message}
+        </pre>
+      </div>
+    </Section>
+  );
 }
 
 function Copyable({ value, label }: { value: string; label: string }) {
@@ -668,6 +754,13 @@ export default function AdminUserDetailsView({
           />
         </div>
       </Section>
+
+      <WelcomeWhatsappCard
+        name={user.name}
+        role={user.role}
+        countryCode={user.countryCode}
+        mobile={user.mobile}
+      />
     </div>
   );
 }

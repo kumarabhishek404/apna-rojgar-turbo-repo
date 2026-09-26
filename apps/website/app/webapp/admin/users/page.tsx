@@ -13,10 +13,10 @@ import AdminUserDetailsView, {
 } from "@/components/webapp/admin/AdminUserDetailsView";
 import VerifiedBadge from "@/components/commons/VerifiedBadge";
 import {
-  normalizeVerification,
   VERIFICATION_STATUS,
   type VerificationStatus,
 } from "@/lib/userVerification";
+import { formatJoinExact, formatJoinLabel } from "@/lib/joinDateLabel";
 
 export default function AdminUsersPage() {
   const access = useAdminAccess();
@@ -311,13 +311,15 @@ export default function AdminUsersPage() {
                   <th className="px-4 py-3">Mobile</th>
                   <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Verification</th>
                   <th className="px-4 py-3">Source</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((user) => (
+                {rows.map((user) => {
+                  const joined = formatJoinLabel(user.createdAt);
+                  const joinedExact = formatJoinExact(user.createdAt);
+                  return (
                   <tr key={user._id} className="border-t border-slate-100 transition hover:bg-slate-50/80">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -352,31 +354,29 @@ export default function AdminUsersPage() {
                         {user.status || "-"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          normalizeVerification(user.verification) === VERIFICATION_STATUS.COMPLETED
-                            ? "bg-emerald-50 text-emerald-700"
-                            : normalizeVerification(user.verification) === VERIFICATION_STATUS.APPLIED
-                              ? "bg-sky-50 text-sky-700"
-                              : "bg-amber-50 text-amber-700"
-                        }`}
-                      >
-                        {normalizeVerification(user.verification)}
-                      </span>
-                    </td>
                     <td className="px-4 py-3 text-slate-600">{user.registrationSource || "-"}</td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedUser(user)}
-                        className="rounded-lg border border-[#22409a]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] transition hover:bg-[#eef3ff]"
-                      >
-                        View details
-                      </button>
+                      <div className="inline-flex flex-col items-end gap-1.5">
+                        {joined ? (
+                          <p
+                            className="text-xs font-medium tabular-nums text-slate-500"
+                            title={joinedExact}
+                          >
+                            {joined}
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUser(user)}
+                          className="rounded-lg border border-[#22409a]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] transition hover:bg-[#eef3ff]"
+                        >
+                          View details
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
