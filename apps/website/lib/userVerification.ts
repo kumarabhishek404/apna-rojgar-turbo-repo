@@ -16,7 +16,9 @@ export function normalizeVerification(value?: string | null): VerificationStatus
   return VERIFICATION_STATUS.PENDING;
 }
 
-export function isUserVerified(userOrStatus?: { verification?: string } | string | null) {
+export function isUserVerified(
+  userOrStatus?: { verification?: string | null } | string | null,
+) {
   const value =
     userOrStatus && typeof userOrStatus === "object"
       ? userOrStatus.verification
