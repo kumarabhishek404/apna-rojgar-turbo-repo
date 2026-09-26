@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/auth";
 import Link from "next/link";
+import { useLanguage } from "@/components/LanguageProvider";
+import CityFilterSelect from "@/components/filters/CityFilterSelect";
+import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
+import { useListingCities, useListingSkills } from "@/hooks/useListingCities";
 
 type Contractor = {
   _id: string;
@@ -13,9 +17,19 @@ type Contractor = {
 };
 
 export default function ContractorsPage() {
+  const { t } = useLanguage();
   const [contractors, setContractors] = useState<Contractor[]>([]);
-  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
+  const [skill, setSkill] = useState("");
   const [error, setError] = useState("");
+  // Each dropdown is scoped by the other selection so every option it offers
+  // still returns results.
+  const { cities, loading: citiesLoading } = useListingCities({
+    kind: "users",
+    role: "EMPLOYER",
+    skill,
+  });
+  const { skills, loading: skillsLoading } = useListingSkills("EMPLOYER", city);
 
   useEffect(() => {
     const load = async () => {
@@ -23,7 +37,13 @@ export default function ContractorsPage() {
       try {
         const response = await apiRequest<{ data: Contractor[] }>(
           "/user/all?role=EMPLOYER&page=1&limit=20",
-          { method: "POST", body: JSON.stringify({}) },
+          {
+            method: "POST",
+            body: JSON.stringify({
+              ...(city ? { city } : {}),
+              ...(skill ? { skills: [skill] } : {}),
+            }),
+          },
         );
         setContractors(response.data || []);
       } catch (e) {
@@ -31,12 +51,7 @@ export default function ContractorsPage() {
       }
     };
     load();
-  }, []);
-
-  const filtered = contractors.filter((contractor) => {
-    const hay = `${contractor.name || ""} ${contractor.mobile || ""} ${contractor.address || ""}`.toLowerCase();
-    return hay.includes(search.toLowerCase());
-  });
+  }, [city, skill]);
 
   return (
     <section className="space-y-5">
@@ -45,16 +60,26 @@ export default function ContractorsPage() {
         <p className="mt-1 text-sm text-blue-100">Browse employers/contractors and inspect profiles.</p>
       </div>
       {error ? <p className="mt-3 rounded bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      <div className="rounded-xl bg-white p-4 shadow">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search contractor by name, phone or location"
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
+      <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow sm:flex-row">
+        <CityFilterSelect
+          cities={cities}
+          value={city}
+          onChange={setCity}
+          loading={citiesLoading}
+          className="w-full sm:max-w-xs"
+          t={t}
+        />
+        <SkillFilterSelect
+          skills={skills}
+          value={skill}
+          onChange={setSkill}
+          loading={skillsLoading}
+          className="w-full sm:max-w-xs"
+          t={t}
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((contractor) => (
+        {contractors.map((contractor) => (
           <div key={contractor._id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
             <p className="text-lg font-semibold text-gray-900">{contractor.name || "Unnamed Contractor"}</p>
             <p className="mt-1 text-sm text-gray-600">{contractor.mobile || "-"}</p>
@@ -71,7 +96,7 @@ export default function ContractorsPage() {
           </div>
         ))}
       </div>
-      {filtered.length === 0 ? <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">No contractors found.</div> : null}
+      {contractors.length === 0 ? <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">No contractors found.</div> : null}
     </section>
   );
 }

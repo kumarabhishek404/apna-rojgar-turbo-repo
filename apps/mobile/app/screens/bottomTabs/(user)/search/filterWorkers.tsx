@@ -74,6 +74,10 @@ const FiltersWorkers = ({
   };
 
   const selectedSkills = watch("skills");
+  const selectedDistance = watch("distance");
+  const hasSelection =
+    !!selectedDistance ||
+    (Array.isArray(selectedSkills) && selectedSkills.length > 0);
 
   const filteredSkills = useMemo(() => {
     const query = skillSearch.trim().toLowerCase();
@@ -89,7 +93,7 @@ const FiltersWorkers = ({
   }, [skillSearch, skills]);
 
   const activeFilterCount = [
-    !!watch("distance"),
+    !!selectedDistance,
     Array.isArray(selectedSkills) && selectedSkills.length > 0,
   ].filter(Boolean).length;
   const isContractorFilter = forcedRole === "MEDIATOR";
@@ -298,32 +302,37 @@ const FiltersWorkers = ({
     if (filterVisible) {
       setDrawerState({
         visible: true,
+        fullSheet: true,
         title: drawerTitleKey,
         content: filterContent,
-        primaryButton: {
-          title: "apply",
-          action: handleSubmit(handleApply),
-        },
-        secondaryButton: {
-          title: "clear",
-          action: handleClear,
-        },
+        primaryButton: hasSelection
+          ? {
+              title: "apply",
+              action: handleSubmit(handleApply),
+            }
+          : null,
+        secondaryButton: hasSelection
+          ? {
+              title: "clear",
+              action: handleClear,
+            }
+          : null,
         onClose: () => {
-          // Ensure state is synced
           setFilterVisible(false);
           setDrawerState((prev: any) => ({ ...prev, visible: false }));
         },
       });
-    } else {
-      // Force hide if filterVisible becomes false from parent
-      setDrawerState((prev: any) => ({ ...prev, visible: false }));
+      return;
     }
 
-    // Cleanup on unmount
+    setDrawerState((prev: any) => ({ ...prev, visible: false }));
+  }, [filterVisible, forcedRole, hasSelection, drawerTitleKey]);
+
+  useEffect(() => {
     return () => {
       setDrawerState((prev: any) => ({ ...prev, visible: false }));
     };
-  }, [filterVisible, forcedRole]); // Keep forced role synced
+  }, []);
 
   return null;
 };
@@ -331,7 +340,7 @@ const FiltersWorkers = ({
 const styles = StyleSheet.create({
   scrollbarContent: {
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 16,
     gap: 16,
   },
   heroCard: {

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/auth";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
+import CityFilterSelect from "@/components/filters/CityFilterSelect";
+import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
+import { useListingCities, useListingSkills } from "@/hooks/useListingCities";
 
 type Worker = {
   _id: string;
@@ -21,8 +24,17 @@ type Worker = {
 export default function WorkersPage() {
   const { t } = useLanguage();
   const [workers, setWorkers] = useState<Worker[]>([]);
-  const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
+  const [skill, setSkill] = useState("");
   const [error, setError] = useState("");
+  // Each dropdown is scoped by the other selection so every option it offers
+  // still returns results.
+  const { cities, loading: citiesLoading } = useListingCities({
+    kind: "users",
+    role: "WORKER",
+    skill,
+  });
+  const { skills, loading: skillsLoading } = useListingSkills("WORKER", city);
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +42,13 @@ export default function WorkersPage() {
       try {
         const response = await apiRequest<{ data: Worker[] }>(
           "/user/all?role=WORKER&page=1&limit=20",
-          { method: "POST", body: JSON.stringify({}) },
+          {
+            method: "POST",
+            body: JSON.stringify({
+              ...(city ? { city } : {}),
+              ...(skill ? { skills: [skill] } : {}),
+            }),
+          },
         );
         setWorkers(response.data || []);
       } catch (e) {
@@ -38,12 +56,7 @@ export default function WorkersPage() {
       }
     };
     load();
-  }, []);
-
-  const filtered = workers.filter((worker) => {
-    const hay = `${worker.name || ""} ${worker.address || ""} ${worker.mobile || ""}`.toLowerCase();
-    return hay.includes(search.toLowerCase());
-  });
+  }, [city, skill]);
 
   return (
     <section className="space-y-5">
@@ -52,16 +65,26 @@ export default function WorkersPage() {
         <p className="mt-1 text-sm text-slate-200">Discover skilled workers with profile details and ratings.</p>
       </div>
       {error ? <p className="mt-3 rounded bg-red-50 p-2 text-sm text-red-700">{error}</p> : null}
-      <div className="rounded-xl bg-white p-4 shadow">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={`${t("search")}...`}
-          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#22409a]"
+      <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow sm:flex-row">
+        <CityFilterSelect
+          cities={cities}
+          value={city}
+          onChange={setCity}
+          loading={citiesLoading}
+          className="w-full sm:max-w-xs"
+          t={t}
+        />
+        <SkillFilterSelect
+          skills={skills}
+          value={skill}
+          onChange={setSkill}
+          loading={skillsLoading}
+          className="w-full sm:max-w-xs"
+          t={t}
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((worker) => (
+        {workers.map((worker) => (
           <div key={worker._id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-2">
               <p className="text-lg font-semibold text-gray-900">{worker.name || "Unnamed Worker"}</p>
@@ -93,7 +116,7 @@ export default function WorkersPage() {
           </div>
         ))}
       </div>
-      {filtered.length === 0 ? <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">No workers found.</div> : null}
+      {workers.length === 0 ? <div className="rounded-xl bg-white p-6 text-center text-sm text-gray-500 shadow">No workers found.</div> : null}
     </section>
   );
 }

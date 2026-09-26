@@ -1,15 +1,16 @@
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
+import {
+  getApiErrorMessage,
+  isTransientApiError,
+  logApiCatch,
+} from "@/utils/apiError";
 
-// Helper function for consistent error handling
-const handleServiceError = (error: any, operation: string) => {
-  const errorMessage =
-    error?.response?.data?.message || `Failed to ${operation}`;
-  console.error(`[ServiceAPI] ${operation} failed:`, {
-    error: error?.response?.data || error,
-    operation,
-  });
-  TOAST?.error(errorMessage);
+const handleServiceError = (error: unknown, operation: string) => {
+  logApiCatch(`[ServiceAPI] ${operation} failed`, error);
+  if (!isTransientApiError(error)) {
+    TOAST?.error(getApiErrorMessage(error, `Failed to ${operation}`));
+  }
   throw error;
 };
 
@@ -19,15 +20,13 @@ const getServiceById = async (id: any) => {
       `/service/service-info/${id}`
     );
     return data;
-  } catch (error: any) {
-    console.error(
-      `[Users] [userService] An error occurred while fetching service details : `,
-      error
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching service details"
-    );
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch service details failed", error);
+    if (!isTransientApiError(error)) {
+      TOAST?.error(
+        getApiErrorMessage(error, "An error occurred while fetching service details"),
+      );
+    }
     throw error;
   }
 };
@@ -41,6 +40,30 @@ const fetchAllServices = async ({ pageParam, status, payload }: any) => {
     return data.data;
   } catch (error: any) {
     handleServiceError(error, "fetch services");
+  }
+};
+
+/** Cities that currently have browsable work, for the listing city dropdown. */
+const fetchServiceCities = async (skill = "") => {
+  try {
+    const query = skill ? `?skill=${encodeURIComponent(skill)}` : "";
+    const response = await API_CLIENT.makeGetRequest(`/service/cities${query}`);
+    return response?.data?.data ?? [];
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch service cities failed", error);
+    return [];
+  }
+};
+
+/** Official worker skills required on browsable work, for the listing skill dropdown. */
+const fetchServiceSkills = async (city = "") => {
+  try {
+    const query = city ? `?city=${encodeURIComponent(city)}` : "";
+    const response = await API_CLIENT.makeGetRequest(`/service/skills${query}`);
+    return response?.data?.data ?? [];
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch service skills failed", error);
+    return [];
   }
 };
 
@@ -59,15 +82,13 @@ const fetchMyAppliedWorkers = async ({ pageParam, serviceId }: any) => {
       `/service/${serviceId}/applied/users?page=${pageParam}&limit=10`
     );
     return data.data;
-  } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching all applied workers : `,
-      error?.response?.data?.message
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching all applied workers"
-    );
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch applied workers failed", error);
+    if (!isTransientApiError(error)) {
+      TOAST?.error(
+        getApiErrorMessage(error, "An error occurred while fetching all applied workers"),
+      );
+    }
     throw error;
   }
 };
@@ -78,15 +99,16 @@ const fetchSelectedWorkers = async ({ pageParam, serviceId }: any) => {
       `/service/${serviceId}/selected/users?page=${pageParam}&limit=10`
     );
     return data.data;
-  } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching selected workers of service : `,
-      error?.response?.data?.message
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching selected workers of service"
-    );
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch selected workers failed", error);
+    if (!isTransientApiError(error)) {
+      TOAST?.error(
+        getApiErrorMessage(
+          error,
+          "An error occurred while fetching selected workers of service",
+        ),
+      );
+    }
     throw error;
   }
 };
@@ -95,15 +117,8 @@ const fetchAllVillages = async (payload: any) => {
   try {
     const data = await API_CLIENT.makePostRequest(`/service/villages`, payload);
     return data.data;
-  } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching villages of selected state : `,
-      error?.response?.data?.message
-    );
-    // TOAST?.error(
-    //   error?.response?.data?.message ||
-    //     "An error occurred while fetching villages of selected state"
-    // );
+  } catch (error: unknown) {
+    logApiCatch("[ServiceAPI] fetch villages failed", error);
     throw error;
   }
 };
@@ -111,6 +126,8 @@ const fetchAllVillages = async (payload: any) => {
 const SERVICE = {
   fetchAllServices,
   fetchServiceCategories,
+  fetchServiceCities,
+  fetchServiceSkills,
   getServiceById,
   fetchMyAppliedWorkers,
   fetchSelectedWorkers,

@@ -51,6 +51,10 @@ const UnifiedWorkScreen = () => {
     !!userDetails?._id && userDetails?.status === "ACTIVE";
   const [serviceSort, setServiceSort] = useState<ServiceSortId>("nearest");
   const [workerSort, setWorkerSort] = useState<WorkerSortId>("nearest");
+  const [serviceCity, setServiceCity] = useState("");
+  const [serviceSkill, setServiceSkill] = useState("");
+  const [labourCity, setLabourCity] = useState("");
+  const [labourSkill, setLabourSkill] = useState("");
 
   const {
     data: servicesRes,
@@ -66,6 +70,8 @@ const UnifiedWorkScreen = () => {
       "unifiedWorkActiveServices",
       userDetails?._id,
       serviceSort,
+      serviceCity,
+      serviceSkill,
       categoryType || "",
     ],
     queryFn: ({ pageParam }) =>
@@ -74,6 +80,8 @@ const UnifiedWorkScreen = () => {
         status: "ACTIVE",
         payload: {
           sortBy: serviceSort,
+          ...(serviceCity ? { city: serviceCity } : {}),
+          ...(serviceSkill ? { skills: [serviceSkill] } : {}),
           ...(categoryType ? { type: categoryType } : {}),
         },
       }),
@@ -98,13 +106,21 @@ const UnifiedWorkScreen = () => {
     hasNextPage: hasMoreLabours,
     refetch: refetchLabours,
   } = useInfiniteQuery({
-    queryKey: ["unifiedWorkLabours", userDetails?._id, workerSort],
+    queryKey: [
+      "unifiedWorkLabours",
+      userDetails?._id,
+      workerSort,
+      labourCity,
+      labourSkill,
+    ],
     queryFn: ({ pageParam }) =>
       USER.fetchAllUsers({
         pageParam,
         role: "WORKER",
         payload: {
           sortBy: workerSort,
+          ...(labourCity ? { city: labourCity } : {}),
+          ...(labourSkill ? { skills: [labourSkill] } : {}),
         },
       }),
     initialPageParam: 1,
@@ -169,6 +185,10 @@ const UnifiedWorkScreen = () => {
             headingTitleKey="activeWorkHeading"
             selectedSort={serviceSort}
             onSelectSort={setServiceSort}
+            selectedCity={serviceCity}
+            onSelectCity={setServiceCity}
+            selectedSkill={serviceSkill}
+            onSelectSkill={setServiceSkill}
             activeCategoryType={categoryType}
             onClearCategoryFilter={clearCategoryFilter}
           />
@@ -186,6 +206,10 @@ const UnifiedWorkScreen = () => {
             listingRoleType="worker"
             selectedSort={workerSort}
             onSelectSort={setWorkerSort}
+            selectedCity={labourCity}
+            onSelectCity={setLabourCity}
+            selectedSkill={labourSkill}
+            onSelectSkill={setLabourSkill}
           />
         )}
       </View>

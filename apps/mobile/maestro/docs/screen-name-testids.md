@@ -73,7 +73,7 @@ Maestro prefers `id:` selectors. This document lists **implemented** testIDs and
 | File | Label key | English value |
 |------|-----------|---------------|
 | `ListingServices.tsx` | viewDetails | View Details |
-| `ListingSearchToolbar.tsx` | filter | Filter |
+| `ListingFilterBar.tsx` | filter | Filter |
 | `HomeHeroSection.tsx` | notifications | Notifications |
 | `service/[id].tsx` | shareService | Share |
 | `UnifiedTabFab.tsx` | dynamic | FAB label |

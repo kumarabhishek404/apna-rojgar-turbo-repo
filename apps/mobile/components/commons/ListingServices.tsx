@@ -20,7 +20,6 @@ import { t } from "@/utils/translationHelper";
 import DateDisplay from "./ShowDate";
 import ShowAddress from "./ShowAddress";
 import ShowDistance from "./ShowDistance";
-import ShowDuration from "./ShowDuration";
 import ShowFacilities from "./ShowFacilities";
 import { getServiceJobId } from "@/utils/serviceJobId";
 import { isServicePromoted } from "@/utils/servicePromotion";
@@ -170,19 +169,32 @@ const ListingsServices = React.memo(({ item }: any) => {
                   )}
                 </View>
               )}
-              {getServiceJobId(item) ? (
-                <View style={styles.jobIdBadgeOnHero} pointerEvents="none">
-                  <CustomText
-                    color={Colors.white}
-                    fontWeight="800"
-                    baseFont={11}
-                    textAlign="left"
-                    numberOfLines={1}
-                  >
-                    {getServiceJobId(item)}
-                  </CustomText>
-                </View>
-              ) : null}
+              <View style={styles.heroTopRow} pointerEvents="none">
+                {getServiceJobId(item) ? (
+                  <View style={styles.jobIdBadgeOnHero}>
+                    <CustomText
+                      color={Colors.white}
+                      fontWeight="800"
+                      baseFont={11}
+                      textAlign="left"
+                      numberOfLines={1}
+                    >
+                      {getServiceJobId(item)}
+                    </CustomText>
+                  </View>
+                ) : (
+                  <View />
+                )}
+                <ShowDistance
+                  address={item?.address}
+                  loggedInUserLocation={userDetails?.geoLocation}
+                  targetLocation={item?.geoLocation}
+                  align="right"
+                  color={Colors.white}
+                  baseFont={11}
+                  wrapperStyle={styles.distanceOnHero}
+                />
+              </View>
               {isOwnService ? (
                 <View
                   style={[
@@ -216,14 +228,32 @@ const ListingsServices = React.memo(({ item }: any) => {
                   </CustomText>
                 </View>
               )}
-              {featured ? (
-                <View style={styles.featuredBadgeOnHero} pointerEvents="none">
-                  <Ionicons name="star" size={13} color="#92400E" />
-                  <CustomText baseFont={11} fontWeight="800" color="#92400E">
-                    {t("featuredBadge")}
-                  </CustomText>
-                </View>
-              ) : null}
+              <View style={styles.heroBottomRow} pointerEvents="none">
+                {featured ? (
+                  <View style={styles.featuredBadgeOnHero}>
+                    <Ionicons name="star" size={13} color="#92400E" />
+                    <CustomText baseFont={11} fontWeight="800" color="#92400E">
+                      {t("featuredBadge")}
+                    </CustomText>
+                  </View>
+                ) : (
+                  <View />
+                )}
+                {item?.duration != null && Number(item.duration) > 0 ? (
+                  <View style={styles.durationOnHero}>
+                    <CustomText
+                      color={Colors.white}
+                      fontWeight="800"
+                      baseFont={11}
+                      textAlign="right"
+                      numberOfLines={1}
+                    >
+                      {item.duration}{" "}
+                      {Number(item.duration) > 1 ? t("days") : t("day")}
+                    </CustomText>
+                  </View>
+                ) : null}
+              </View>
 
               {userDetails?._id === item?.employer &&
                 item?.bookingType === "byService" && (
@@ -416,31 +446,6 @@ const ListingsServices = React.memo(({ item }: any) => {
                   />
                 </View>
               </View>
-
-              <View style={styles.durationDistanceCard}>
-                <View style={styles.durationDistanceInner}>
-                  <View style={styles.metaRowCompact}>
-                    <Ionicons
-                      name="time-outline"
-                      size={18}
-                      color={Colors.subHeading}
-                    />
-                    <ShowDuration
-                      duration={item?.duration}
-                      alignment="left"
-                      showLeadingEmoji={false}
-                    />
-                  </View>
-                  <View style={styles.distancePill}>
-                    <ShowDistance
-                      address={item?.address}
-                      loggedInUserLocation={userDetails?.geoLocation}
-                      targetLocation={item?.geoLocation}
-                      align="right"
-                    />
-                  </View>
-                </View>
-              </View>
             </View>
             <ShowFacilities facilities={item?.facilities} />
           </TouchableOpacity>
@@ -579,12 +584,47 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: Colors.secondaryBackground,
   },
-  jobIdBadgeOnHero: {
+  heroTopRow: {
     position: "absolute",
     top: 8,
     left: 8,
-    zIndex: 3,
-    maxWidth: "78%",
+    right: 8,
+    zIndex: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  jobIdBadgeOnHero: {
+    maxWidth: "58%",
+    backgroundColor: "rgba(34, 64, 154, 0.92)",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  distanceOnHero: {
+    maxWidth: "42%",
+    flexShrink: 0,
+    backgroundColor: "rgba(34, 64, 154, 0.92)",
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  heroBottomRow: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    right: 8,
+    zIndex: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  durationOnHero: {
+    maxWidth: "42%",
+    flexShrink: 0,
+    marginLeft: "auto",
     backgroundColor: "rgba(34, 64, 154, 0.92)",
     paddingVertical: 5,
     paddingHorizontal: 8,
@@ -592,7 +632,7 @@ const styles = StyleSheet.create({
   },
   promotionBadgeOnHero: {
     position: "absolute",
-    top: 8,
+    top: 42,
     right: 8,
     zIndex: 3,
     flexDirection: "row",
@@ -612,10 +652,6 @@ const styles = StyleSheet.create({
     borderColor: "#FCD34D",
   },
   featuredBadgeOnHero: {
-    position: "absolute",
-    bottom: 10,
-    left: 8,
-    zIndex: 3,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
@@ -661,7 +697,7 @@ const styles = StyleSheet.create({
   },
   directTagOnHero: {
     position: "absolute",
-    top: 10,
+    top: 42,
     right: 10,
     zIndex: 2,
     backgroundColor: Colors.primary,
@@ -793,37 +829,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
     justifyContent: "center",
     paddingTop: 2,
-  },
-  durationDistanceCard: {
-    marginTop: 12,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.08)",
-  },
-  durationDistanceInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-  metaRowCompact: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    flex: 1,
-    minWidth: 140,
-  },
-  distancePill: {
-    flexShrink: 0,
-    backgroundColor: "rgba(34, 64, 154, 0.08)",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "rgba(34, 64, 154, 0.14)",
   },
   ctaRow: {
     marginTop: 12,

@@ -39,12 +39,9 @@ const FollowInstagram: React.FC<FollowInstagramProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // light instagram tint background
     backgroundColor: "#FFF1F4",
     padding: 16,
-    borderRadius: 10,
-    marginBottom: 20,
-    marginHorizontal: 16,
+    borderRadius: 14,
   },
   title: {
     fontSize: 16,

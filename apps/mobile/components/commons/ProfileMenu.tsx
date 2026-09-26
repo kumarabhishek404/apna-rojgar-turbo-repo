@@ -29,7 +29,7 @@ import BadgeComponent from "./Badge";
 import { removeToken } from "@/utils/authStorage";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import APP_CONTEXT from "@/app/context/locale";
-import { promptForAppReview } from "@/utils/appStoreReview";
+import { openPlayStoreWriteReview } from "@/utils/openExternalLink";
 import { getMobileEffectiveRole } from "@/utils/mobileRole";
 
 const ProfileMenu = ({ disabled }: any) => {
@@ -371,7 +371,7 @@ const ProfileMenu = ({ disabled }: any) => {
         <MaterialIcons name="star-rate" size={28} color={Colors?.primary} />
       ),
       onPress: () => {
-        void promptForAppReview({ force: true });
+        void openPlayStoreWriteReview();
       },
       style: [styles?.menuItem],
       isSuspended: false,

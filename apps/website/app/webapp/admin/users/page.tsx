@@ -4,6 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { apiRequest } from "@/lib/auth";
 import { useAdminAccess } from "@/components/webapp/admin/useAdminAccess";
 import InfiniteScrollSentinel from "@/components/webapp/admin/InfiniteScrollSentinel";
+import CityFilterSelect from "@/components/filters/CityFilterSelect";
+import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
+import { useLanguage } from "@/components/LanguageProvider";
+import { useAdminUserCities, useAdminUserSkills } from "@/hooks/useAdminUserFilters";
 
 type AdminUser = {
   _id: string;
@@ -24,6 +28,7 @@ type AdminUser = {
 
 export default function AdminUsersPage() {
   const access = useAdminAccess();
+  const { t } = useLanguage();
   const [rows, setRows] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -43,14 +48,26 @@ export default function AdminUsersPage() {
   const [selectedSource, setSelectedSource] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [searchText, setSearchText] = useState("");
+  const [city, setCity] = useState("");
+  const [skill, setSkill] = useState("");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const listingFilters = {
+    role: selectedRole,
+    status: selectedStatus,
+    source: selectedSource,
+    search: searchText,
+    city,
+    skill,
+  };
+  const { cities, loading: citiesLoading } = useAdminUserCities(listingFilters);
+  const { skills, loading: skillsLoading } = useAdminUserSkills(listingFilters);
 
   useEffect(() => {
     setRows([]);
     setPages(1);
     setTotal(0);
     setPage(1);
-  }, [selectedRole, selectedSource, selectedStatus, searchText]);
+  }, [selectedRole, selectedSource, selectedStatus, searchText, city, skill]);
 
   useEffect(() => {
     if (access !== "allowed") return;
@@ -64,6 +81,8 @@ export default function AdminUsersPage() {
     if (selectedSource !== "ALL") params.set("source", selectedSource);
     const q = searchText.trim();
     if (q) params.set("search", q);
+    if (city) params.set("city", city);
+    if (skill) params.set("skill", skill);
 
     apiRequest<{
       data: AdminUser[];
@@ -93,7 +112,7 @@ export default function AdminUsersPage() {
         setLoading(false);
         setLoadingMore(false);
       });
-  }, [access, page, selectedRole, selectedSource, selectedStatus, searchText]);
+  }, [access, page, selectedRole, selectedSource, selectedStatus, searchText, city, skill]);
 
   const canLoadMore = page < pages;
   const handleLoadMore = useCallback(() => {
@@ -180,6 +199,36 @@ export default function AdminUsersPage() {
               <option value="ios">ios</option>
               <option value="-">unknown</option>
             </select>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("city", "City")}
+            </label>
+            <CityFilterSelect
+              cities={cities}
+              value={city}
+              onChange={setCity}
+              loading={citiesLoading}
+              compact
+              className="w-full"
+              t={t}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {t("skill", "Skill")}
+            </label>
+            <SkillFilterSelect
+              skills={skills}
+              value={skill}
+              onChange={setSkill}
+              loading={skillsLoading}
+              compact
+              className="w-full"
+              t={t}
+            />
           </div>
         </div>
       </div>

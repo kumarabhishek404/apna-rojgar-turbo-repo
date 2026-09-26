@@ -1,8 +1,8 @@
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as StoreReview from "expo-store-review";
 import { t } from "@/utils/translationHelper";
-import { openPlayStore } from "@/utils/openExternalLink";
+import { openPlayStoreWriteReview } from "@/utils/openExternalLink";
 
 const KEYS = {
   lastPromptedAt: "app_store_review_last_prompted_at",
@@ -103,7 +103,7 @@ async function isEligibleForAutoPrompt(): Promise<boolean> {
 
 /**
  * Opens the native Play / App Store in-app review sheet when available.
- * Falls back to the Play Store listing (no &reviewId=0).
+ * Falls back to the Play Store write-a-review listing.
  */
 export async function launchAppStoreReview(): Promise<void> {
   try {
@@ -116,9 +116,7 @@ export async function launchAppStoreReview(): Promise<void> {
     console.warn("[appStoreReview] requestReview failed:", error);
   }
 
-  if (Platform.OS === "android") {
-    await openPlayStore();
-  }
+  await openPlayStoreWriteReview();
 }
 
 function showSoftPromptAlert(): void {

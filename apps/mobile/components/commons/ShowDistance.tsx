@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { View, type StyleProp, type ViewStyle } from "react-native";
 import { t } from "@/utils/translationHelper";
 import {
   calculateDistance,
@@ -13,7 +14,16 @@ const ShowDistance = ({
   align,
   color,
   baseFont,
-}: any) => {
+  wrapperStyle,
+}: {
+  address?: string;
+  loggedInUserLocation?: any;
+  targetLocation?: any;
+  align?: string;
+  color?: string;
+  baseFont?: number;
+  wrapperStyle?: StyleProp<ViewStyle>;
+}) => {
   const [fallbackCoords, setFallbackCoords] = useState<any>(null);
 
   // ✅ Normalize logged-in user coords
@@ -74,11 +84,17 @@ const ShowDistance = ({
     return null;
   }
 
-  return (
+  const label = (
     <CustomHeading textAlign={align ?? "center"} color={color} baseFont={baseFont}>
       {distance} {t("kms")} {t("distance")}
     </CustomHeading>
   );
+
+  if (wrapperStyle) {
+    return <View style={wrapperStyle}>{label}</View>;
+  }
+
+  return label;
 };
 
 export default ShowDistance;

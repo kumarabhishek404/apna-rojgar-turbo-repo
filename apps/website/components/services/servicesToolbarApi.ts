@@ -1,13 +1,22 @@
+import type { CityOption } from "@/components/filters/CityFilterSelect";
+import type { SkillOption } from "@/components/filters/SkillFilterSelect";
+
 export type ServicesToolbarApi = {
-  search: string;
-  setSearch: (v: string) => void;
+  /** Empty string means “all cities”. */
+  city: string;
+  setCity: (v: string) => void;
+  cities: CityOption[];
+  citiesLoading: boolean;
+  /** Empty string means “all skills”. */
+  skill: string;
+  setSkill: (v: string) => void;
+  skills: SkillOption[];
+  skillsLoading: boolean;
   sortBy: "latest" | "nearest" | "more";
   setSortBy: (v: "latest" | "nearest" | "more") => void;
   openCreateModal: () => void;
   canCreate: boolean;
   /** When false, hides the “new service” control (e.g. applied-jobs list). */
   showCreateButton?: boolean;
-  /** Optional search placeholder (e.g. applied jobs copy). */
-  searchPlaceholder?: string;
   t: (key: string, fallback?: string) => string;
 };

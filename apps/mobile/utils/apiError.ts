@@ -11,6 +11,20 @@ const AUTH_ERROR_MESSAGES = new Set([
 
 const AUTH_STATUS_TEXTS = new Set(["TokenExpiredError", "Unauthorized Request"]);
 
+/** Device offline, API host down, or the phone cannot reach the configured URL. */
+export function isNetworkApiError(error: unknown): boolean {
+  const axiosErr = error as AxiosError;
+  if (axiosErr?.response) return false;
+  const code = String(axiosErr?.code || "");
+  const message = String(axiosErr?.message || "");
+  return (
+    code === "ERR_NETWORK" ||
+    code === "ECONNABORTED" ||
+    code === "ETIMEDOUT" ||
+    /network error|network request failed|failed to fetch/i.test(message)
+  );
+}
+
 export function isAuthApiError(error: unknown): boolean {
   const axiosErr = error as AxiosError<{ message?: string; statusText?: string }>;
   const message = axiosErr?.response?.data?.message;
@@ -43,6 +57,20 @@ export function getApiErrorMessage(
   if (typeof message === "string" && message.trim()) return message.trim();
   if (axiosErr?.message?.trim()) return axiosErr.message.trim();
   return fallback;
+}
+
+/** No usable HTTP body — already warned by the axios interceptor. */
+export function isTransientApiError(error: unknown): boolean {
+  return isNetworkApiError(error) || isAuthApiError(error);
+}
+
+/**
+ * Failed API catch without RN LogBox (`console.error` in __DEV__).
+ * Network/auth are silent here; the interceptor already reports ERR_NETWORK.
+ */
+export function logApiCatch(scope: string, error: unknown): void {
+  if (isTransientApiError(error)) return;
+  console.warn(scope, getApiErrorMessage(error, ""));
 }
 
 /** Set when the API client shows the global session-expired toast. */

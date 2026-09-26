@@ -18,6 +18,8 @@ export type ServiceItem = {
   subType: string;
   description?: string;
   address: string;
+  /** District resolved from `address` by the API; "" when it could not be determined. */
+  city?: string;
   status: string;
   images?: string[];
   distance?: number;

@@ -1,6 +1,13 @@
 import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 import { getToken } from "@/utils/authStorage";
+import {
+  getApiErrorMessage,
+  isAuthApiError,
+  isNetworkApiError,
+  isTransientApiError,
+  logApiCatch,
+} from "@/utils/apiError";
 
 const registerDevice = async (payload: any) => {
   try {
@@ -31,15 +38,13 @@ const fetchAllNotifications = async ({ pageParam }: any) => {
       `/notification/all?page=${pageParam}&limit=10`
     );
     return data?.data;
-  } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching all notifications : `,
-      error?.response?.data?.message
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching all notifications"
-    );
+  } catch (error: unknown) {
+    logApiCatch("[userService] fetch notifications failed", error);
+    if (!isTransientApiError(error)) {
+      TOAST?.error(
+        getApiErrorMessage(error, "An error occurred while fetching all notifications"),
+      );
+    }
     throw error;
   }
 };
@@ -54,11 +59,15 @@ const fetchUnreadNotificationsCount = async () => {
     const data = await API_CLIENT.makeGetRequest(`/notification/unread-count`);
     return data?.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching unread notifications count : `,
-      error?.response?.data?.message ?? error?.response,
+    // Background poll: a down API or flaky network must not open LogBox.
+    if (isNetworkApiError(error) || isAuthApiError(error)) {
+      return null;
+    }
+    console.warn(
+      `[userService] unread notifications count failed:`,
+      error?.response?.data?.message ?? error?.message,
     );
-    throw error;
+    return null;
   }
 };
 
@@ -70,14 +79,10 @@ const markAsReadNotification = async (payload: any) => {
       payload
     );
     return data.data;
-  } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while marking as read notification : `,
-      error?.response?.data?.message
-    );
+  } catch (error: unknown) {
+    logApiCatch("[userService] mark notification read failed", error);
     TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while marking as read notification"
+      getApiErrorMessage(error, "An error occurred while marking as read notification"),
     );
     throw error;
   }

@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./app/utils/connectDB.js";
+import { getDistrictIndex } from "./app/utils/districtIndex.js";
 import logError from "./app/utils/addErrorLog.js";
 import { logRuntimeMode } from "./app/utils/runtimeMode.js";
 
@@ -152,4 +153,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   logRuntimeMode(PORT);
+  // Building the district lookup takes a few seconds; do it now so the first
+  // browse request does not wait for it.
+  getDistrictIndex().catch((error) =>
+    console.error("Failed to warm the district index:", error?.message),
+  );
 });

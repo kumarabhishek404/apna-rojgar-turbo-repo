@@ -9,6 +9,8 @@ import {
   getAdminNotifications,
   getAdminPromotionPayments,
   getAllUsers,
+  getAdminUserCities,
+  getAdminUserSkills,
   handleActivateUser,
   handleSuspendUser,
   handleExportRegistrations,
@@ -28,6 +30,8 @@ router.post("/activate-user", checkAdmin, handleActivateUser);
 router.delete("/suspend-user/:userId", checkAdmin, handleSuspendUser);
 
 router.get("/all-users", verifyToken, userStatus, checkAdmin, getAllUsers);
+router.get("/user-cities", verifyToken, userStatus, checkAdmin, getAdminUserCities);
+router.get("/user-skills", verifyToken, userStatus, checkAdmin, getAdminUserSkills);
 router.get("/error-logs", verifyToken, userStatus, checkAdmin, getAdminErrorLogs);
 router.get(
   "/analytics-events",

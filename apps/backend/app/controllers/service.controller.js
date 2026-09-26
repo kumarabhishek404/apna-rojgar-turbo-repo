@@ -9,6 +9,11 @@ import {
   listingFeatureRankExpr,
   sortWithFeaturedFirst,
 } from "../utils/listingFeature.js";
+import {
+  attachCities,
+  buildCityAddressFilter,
+  listCities,
+} from "../utils/cityFromAddress.js";
 
 /**
  * Public paginated list of service `_id`s for Next static export (shareable `/services/:id` URLs).
@@ -102,6 +107,100 @@ export const getPublicPlatformStats = async (req, res) => {
   }
 };
 
+/**
+ * Cities that currently have browsable work, for the listing city dropdown.
+ * Mirrors the `getAllServices` active-listing match so every option returns results.
+ */
+const browseServicesMatch = (req) => ({
+  employer: { $ne: req.user?._id },
+  bookingType: "byService",
+  status: "HIRING",
+});
+
+export const getServiceCities = async (req, res) => {
+  try {
+    const { skill } = req.query;
+    const match = browseServicesMatch(req);
+    const skillValue = String(skill || "").trim();
+    if (skillValue) {
+      const escaped = skillValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      match.requirements = {
+        $elemMatch: { name: new RegExp(`^${escaped}$`, "i") },
+      };
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Cities fetched successfully",
+      data: await listCities(Service, match),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+/**
+ * Worker skills required on browsable work, for the listing skill dropdown.
+ * Only skills that appear on an active listing are offered, narrowed by `city`
+ * when one is already applied. Values are the stored slugs from `requirements.name`.
+ */
+export const getServiceSkills = async (req, res) => {
+  try {
+    const { city } = req.query;
+    const match = browseServicesMatch(req);
+    const cityFilter = await buildCityAddressFilter(Service, {}, city);
+    if (cityFilter) match.address = cityFilter;
+
+    const rows = await Service.aggregate([
+      { $match: match },
+      {
+        $project: {
+          skillSlugs: {
+            $setUnion: [
+              {
+                $filter: {
+                  input: {
+                    $map: {
+                      input: { $ifNull: ["$requirements", []] },
+                      in: "$$this.name",
+                    },
+                  },
+                  cond: {
+                    $and: [
+                      { $eq: [{ $type: "$$this" }, "string"] },
+                      { $ne: ["$$this", ""] },
+                    ],
+                  },
+                },
+              },
+              [],
+            ],
+          },
+        },
+      },
+      { $unwind: "$skillSlugs" },
+      { $group: { _id: "$skillSlugs", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Skills fetched successfully",
+      data: rows.map((row) => ({ skill: row._id, count: row.count })),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
 export const getAllServices = async (req, res) => {
   const { _id } = req.user;
   const { page = 1, limit = 10, status } = req.query;
@@ -113,6 +212,7 @@ export const getAllServices = async (req, res) => {
     serviceStartIn,
     state,
     district,
+    city,
     sortBy,
   } =
     req.body;
@@ -150,9 +250,13 @@ export const getAllServices = async (req, res) => {
       }
     }
 
-    // Filter by state/district in address
+    // Filter by state/district/city in address. The city is a district resolved
+    // from the address rather than a substring of it, so it matches on the set
+    // of addresses that belong to that district.
     if (state) query.address = { $regex: new RegExp(state, "i") };
     if (district) query.address = { $regex: new RegExp(district, "i") };
+    const cityFilter = await buildCityAddressFilter(Service, {}, city);
+    if (cityFilter) query.address = cityFilter;
     if (sortBy === "food_available") query["facilities.food"] = true;
     if (sortBy === "living_available") query["facilities.living"] = true;
     if (sortBy === "esi_pf") query["facilities.esi_pf"] = true;
@@ -343,7 +447,7 @@ export const getAllServices = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Works fetched successfully",
-      data: services,
+      data: await attachCities(services),
       pagination: {
         page: pageNum,
         pages: Math.ceil(totalServices / limitNum),

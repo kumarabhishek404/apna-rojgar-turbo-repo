@@ -107,7 +107,7 @@ const SegmentedControl = ({
                   <View style={styles.iconRow}>
                     <Ionicons
                       name={seg.icon}
-                      size={15}
+                      size={16}
                       color={
                         selected
                           ? Colors.primary
@@ -117,7 +117,7 @@ const SegmentedControl = ({
                     <CustomText
                       fontWeight={selected ? "800" : "600"}
                       baseFont={hasSublabel ? 11 : 13}
-                      numberOfLines={2}
+                      numberOfLines={1}
                       color={
                         selected
                           ? Colors.primary
@@ -174,11 +174,12 @@ const styles = StyleSheet.create({
   },
   track: {
     position: "relative",
-    minHeight: 44,
+    minHeight: 48,
     borderRadius: 999,
     backgroundColor: TRACK,
     padding: INSET,
     overflow: "hidden",
+    justifyContent: "center",
   },
   trackTall: {
     minHeight: 58,
@@ -201,14 +202,17 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "stretch",
+    alignSelf: "stretch",
+    minHeight: 40,
     zIndex: 1,
   },
   cell: {
     flex: 1,
+    minHeight: 40,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 4,
-    paddingVertical: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 0,
   },
   sublabel: {
     marginTop: 2,
@@ -219,11 +223,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
-    flexWrap: "wrap",
+    gap: 6,
+    flexShrink: 1,
   },
   labelWithIcon: {
     flexShrink: 1,
+    includeFontPadding: false,
+    textAlignVertical: "center",
+    lineHeight: 18,
   },
 });
 

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   BackHandler,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAtom } from "jotai";
 import { useRouter, usePathname } from "expo-router";
 
@@ -25,6 +26,7 @@ const { height, width } = Dimensions.get("window");
 const GlobalBottomDrawer = () => {
   const pathname = usePathname(); // 🔁 Replaces useNavigationState
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [drawerState, setDrawerState]: any = useAtom(Atoms?.BottomDrawerAtom);
   const slideAnim = useRef(new Animated.Value(height)).current;
   const prevDrawerState = useRef<any>(null);
@@ -102,6 +104,7 @@ const GlobalBottomDrawer = () => {
       <Animated.View
         style={[
           styles.drawerContainer,
+          drawerState.fullSheet && styles.drawerFullSheet,
           { transform: [{ translateY: slideAnim }] },
         ]}
       >
@@ -141,8 +144,15 @@ const GlobalBottomDrawer = () => {
               drawerState.content && drawerState.content()
             )}
           </View>
+        </ScrollView>
 
-          <View style={styles.footer}>
+        {drawerState.secondaryButton || drawerState.primaryButton ? (
+          <View
+            style={[
+              styles.footer,
+              { paddingBottom: Math.max(insets.bottom, 12) },
+            ]}
+          >
             {drawerState.secondaryButton && (
               <ButtonComp
                 isPrimary={false}
@@ -170,7 +180,7 @@ const GlobalBottomDrawer = () => {
               />
             )}
           </View>
-        </ScrollView>
+        ) : null}
       </Animated.View>
     </>
   );
@@ -193,7 +203,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     width: width,
-    maxHeight: height * 0.7,
+    maxHeight: height * 0.88,
     backgroundColor: Colors.background,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
@@ -205,6 +215,9 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 10,
     zIndex: 999,
+  },
+  drawerFullSheet: {
+    height: height * 0.88,
   },
   header: {
     flexDirection: "row",
@@ -236,8 +249,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 20,
+    paddingTop: 12,
+    paddingHorizontal: 0,
     gap: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(34, 64, 154, 0.12)",
+    backgroundColor: Colors.background,
   },
   loaderContainer: {
     flex: 1,

@@ -7,6 +7,8 @@ import {
   getAllSelectedUsers,
   getAllServices,
   getServiceCategories,
+  getServiceCities,
+  getServiceSkills,
   getPublicServiceIdsForStaticExport,
   getPublicPlatformStats,
   getServiceDetail,
@@ -20,6 +22,8 @@ router.get("/public/platform-stats", getPublicPlatformStats);
 router.post("/villages", getAllTheVillages)
 router.use(verifyToken, userStatus);
 router.get("/categories", getServiceCategories);
+router.get("/cities", getServiceCities);
+router.get("/skills", getServiceSkills);
 router.post("/all", getAllServices);
 router.get("/service-info/:id", getServiceDetail);
 router.get("/:serviceId/applied/users", getAllAppliedUsers);

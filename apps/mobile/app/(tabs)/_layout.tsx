@@ -32,12 +32,13 @@ import APP_CONTEXT from "../context/locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { hasAuthenticatedUser, isSessionValid } from "@/utils/session";
 import { isAccountSuspended } from "@/utils/userStatus";
-import { isAuthApiError } from "@/utils/apiError";
+import { isAuthApiError, isNetworkApiError } from "@/utils/apiError";
 import { useAppStoreReviewPrompt } from "@/utils/useAppStoreReviewPrompt";
 import SaathiSpeakFab from "@/components/commons/SaathiSpeakFab";
 import { getMobileEffectiveRole } from "@/utils/mobileRole";
 import useUnreadNotificationsHandler from "../hooks/useInAppNotifications";
 import triggerLocalNotification from "@/utils/triggerLocalNotification";
+import WorkTabAttentionIcon from "@/components/commons/WorkTabAttentionIcon";
 
 const POLLING_INTERVAL = 30000;
 type IconLibrary =
@@ -142,8 +143,8 @@ export default function Layout() {
         setNotificationCount(data?.unreadCount || 0);
         setUnreadNotificationPayload(data);
       } catch (error: unknown) {
-        if (!isAuthApiError(error)) {
-          console.error("Error fetching notifications:", error);
+        if (!isAuthApiError(error) && !isNetworkApiError(error)) {
+          console.warn("Error fetching notifications:", error);
         }
       }
     };
@@ -215,6 +216,7 @@ export default function Layout() {
     iconLibrary = "MaterialIcons",
     itemStyles,
     testID,
+    attractIcon = false,
   }: {
     props: any;
     path: string;
@@ -224,6 +226,7 @@ export default function Layout() {
     iconLibrary?: IconLibrary;
     itemStyles?: any;
     testID?: string;
+    attractIcon?: boolean;
   }) => {
     const isSelected = `/(tabs)${pathname}` === path;
 
@@ -271,11 +274,22 @@ export default function Layout() {
       >
         <View style={styles.tabColumn}>
           <View style={[styles.tabPill, isSelected && styles.tabPillActive]}>
-            <Icon
-              name={iconNameLiteral}
-              size={isSelected ? iconSize + 1 : iconSize}
-              color={isSelected ? "#FFFFFF" : "#5F7BA8"}
-            />
+            {attractIcon ? (
+              <WorkTabAttentionIcon
+                selected={isSelected}
+                size={isSelected ? iconSize + 1 : iconSize}
+                color={isSelected ? "#FFFFFF" : "#5F7BA8"}
+                iconName={iconName}
+                activeIconName={activeIconName || iconName}
+                Icon={Icon}
+              />
+            ) : (
+              <Icon
+                name={iconNameLiteral}
+                size={isSelected ? iconSize + 1 : iconSize}
+                color={isSelected ? "#FFFFFF" : "#5F7BA8"}
+              />
+            )}
             <CustomText
               color={isSelected ? "#FFFFFF" : "#5F7BA8"}
               fontWeight={isSelected ? "700" : "600"}
@@ -303,6 +317,12 @@ export default function Layout() {
   /** Bottom labels match worker / employer / mediator UX (stored ADMIN uses employer labels). */
   const workTabTitleKey =
     apiRole === "WORKER" ? "tabWork" : "tabNavWorkLabour";
+  const workTabIconName =
+    apiRole === "WORKER" ? "briefcase-outline" : "construction";
+  const workTabActiveIconName =
+    apiRole === "WORKER" ? "briefcase" : "construction";
+  const workTabIconLibrary =
+    apiRole === "WORKER" ? "Ionicons" : "MaterialIcons";
   const peopleTabTitleKey =
     apiRole === "MEDIATOR"
       ? "tabNavPeopleActiveWork"
@@ -372,9 +392,10 @@ export default function Layout() {
                     path="/(tabs)/second"
                     testID="tab-work"
                     title={workTabTitleKey}
-                    iconName="briefcase-outline"
-                    activeIconName="briefcase"
-                    iconLibrary="Ionicons"
+                    iconName={workTabIconName}
+                    activeIconName={workTabActiveIconName}
+                    iconLibrary={workTabIconLibrary}
+                    attractIcon
                   />
                 ),
               }}
@@ -495,6 +516,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     gap: 2,
     minHeight: 48,
+    overflow: "visible",
   },
   tabPillActive: {
     backgroundColor: "#0E4FC5",
