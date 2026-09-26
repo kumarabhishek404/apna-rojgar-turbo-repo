@@ -21,6 +21,7 @@ import { useAtomValue } from "jotai";
 import Atoms from "@/app/AtomStore";
 import ShowAddress from "./ShowAddress";
 import CustomText from "./CustomText";
+import VerifiedBadge from "./VerifiedBadge";
 import { handleCall } from "@/constants/functions";
 import { t } from "@/utils/translationHelper";
 
@@ -142,9 +143,16 @@ const ListingsVerticalWorkers = ({
                   ) : null}
                 </View>
                 <View style={styles.cardContent}>
-                  <CustomHeading textAlign="left" style={styles.workerName}>
-                    {item?.name}
-                  </CustomHeading>
+                  <View style={styles.nameRow}>
+                    <CustomHeading
+                      textAlign="left"
+                      style={styles.workerName}
+                      numberOfLines={1}
+                    >
+                      {item?.name}
+                    </CustomHeading>
+                    <VerifiedBadge user={item} size="sm" />
+                  </View>
 
                   <View style={styles.addressMetaRow}>
                     <View style={styles.metaIconBadge}>
@@ -351,8 +359,14 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  workerName: {
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     marginBottom: 8,
+  },
+  workerName: {
+    flexShrink: 1,
   },
   addressMetaRow: {
     flexDirection: "row",

@@ -18,27 +18,10 @@ import {
   type VerificationStatus,
 } from "@/lib/userVerification";
 
-type AdminUser = {
-  _id: string;
-  name?: string;
-  mobile?: string;
-  role?: string;
-  status?: string;
-  registrationSource?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  profilePicture?: string;
-  email?: { value?: string; isVerified?: boolean };
-  gender?: string;
-  age?: string;
-  address?: string;
-  locale?: { language?: string };
-};
-
 export default function AdminUsersPage() {
   const access = useAdminAccess();
   const { t } = useLanguage();
-  const [rows, setRows] = useState<AdminUser[]>([]);
+  const [rows, setRows] = useState<AdminUserRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
@@ -61,7 +44,6 @@ export default function AdminUsersPage() {
   const [searchText, setSearchText] = useState("");
   const [city, setCity] = useState("");
   const [skill, setSkill] = useState("");
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const listingFilters = {
     role: selectedRole,
     status: selectedStatus,
@@ -69,6 +51,7 @@ export default function AdminUsersPage() {
     search: searchText,
     city,
     skill,
+    verification: selectedVerification,
   };
   const { cities, loading: citiesLoading } = useAdminUserCities(listingFilters);
   const { skills, loading: skillsLoading } = useAdminUserSkills(listingFilters);

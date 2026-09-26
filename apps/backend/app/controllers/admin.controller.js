@@ -22,6 +22,32 @@ import {
   buildCityAddressFilter,
   listCities,
 } from "../utils/cityFromAddress.js";
+import {
+  isVerifiableRole,
+  normalizeVerification,
+  pendingVerificationQuery,
+  VERIFICATION_STATUS,
+} from "../utils/userVerification.js";
+
+const applyVerificationFilter = (query, verificationFilter) => {
+  const raw = String(verificationFilter || "ALL").trim();
+  if (!raw || raw === "ALL") return query;
+
+  const nextStatus = normalizeVerification(raw);
+  if (nextStatus === VERIFICATION_STATUS.PENDING) {
+    const pendingMatch = pendingVerificationQuery();
+    if (query.$or) {
+      query.$and = [{ $or: query.$or }, pendingMatch];
+      delete query.$or;
+    } else {
+      Object.assign(query, pendingMatch);
+    }
+    return query;
+  }
+
+  query.verification = nextStatus;
+  return query;
+};
 
 /** Shared match for the admin users table and its city/skill dropdowns. */
 const adminUsersBaseQuery = (req) => {
@@ -31,6 +57,7 @@ const adminUsersBaseQuery = (req) => {
   const search = String(req.query.search || "").trim();
   const city = String(req.query.city || "").trim();
   const skill = String(req.query.skill || "").trim();
+  const verification = String(req.query.verification || "ALL").trim();
 
   const query = {};
   if (status && status !== "ALL") query.status = status;
@@ -49,6 +76,7 @@ const adminUsersBaseQuery = (req) => {
       { "email.value": { $regex: search, $options: "i" } },
     ];
   }
+  applyVerificationFilter(query, verification);
 
   return { query, city, skill };
 };
@@ -65,11 +93,6 @@ const applyAdminUserPlaceFilters = async (
   }
   return query;
 };
-  isVerifiableRole,
-  normalizeVerification,
-  pendingVerificationQuery,
-  VERIFICATION_STATUS,
-} from "../utils/userVerification.js";
 
 export const handleActivateUser = async (req, res) => {
   const admin = req?.user;
@@ -239,44 +262,6 @@ export const getAllUsers = async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
   const skip = (page - 1) * limit;
   const { query, city, skill } = adminUsersBaseQuery(req);
-  const status = String(req.query.status || "ACTIVE").trim().toUpperCase();
-  const role = String(req.query.role || "").trim().toUpperCase();
-  const source = String(req.query.source || "").trim().toLowerCase();
-  const search = String(req.query.search || "").trim();
-  const verificationFilter = String(req.query.verification || "ALL").trim();
-
-  const query = {};
-  if (status && status !== "ALL") query.status = status;
-  if (role && role !== "ALL") {
-    if (role === "-") query.role = { $in: [null, ""] };
-    else query.role = role;
-  }
-  if (source && source !== "ALL") {
-    if (source === "-") query.registrationSource = { $in: [null, ""] };
-    else query.registrationSource = source;
-  }
-  if (search) {
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { mobile: { $regex: search, $options: "i" } },
-      { "email.value": { $regex: search, $options: "i" } },
-    ];
-  }
-
-  if (verificationFilter && verificationFilter !== "ALL") {
-    const nextStatus = normalizeVerification(verificationFilter);
-    if (nextStatus === VERIFICATION_STATUS.PENDING) {
-      const pendingMatch = pendingVerificationQuery();
-      if (query.$or) {
-        query.$and = [{ $or: query.$or }, pendingMatch];
-        delete query.$or;
-      } else {
-        Object.assign(query, pendingMatch);
-      }
-    } else {
-      query.verification = nextStatus;
-    }
-  }
 
   try {
     await applyAdminUserPlaceFilters(query, { city, skill });

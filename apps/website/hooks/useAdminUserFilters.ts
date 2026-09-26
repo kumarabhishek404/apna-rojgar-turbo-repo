@@ -13,6 +13,7 @@ type AdminUserFilterQuery = {
   search: string;
   city?: string;
   skill?: string;
+  verification?: string;
 };
 
 const adminUserFilterParams = ({
@@ -22,6 +23,7 @@ const adminUserFilterParams = ({
   search,
   city,
   skill,
+  verification,
 }: AdminUserFilterQuery) => {
   const params = new URLSearchParams();
   if (status) params.set("status", status);
@@ -31,6 +33,9 @@ const adminUserFilterParams = ({
   if (q) params.set("search", q);
   if (city) params.set("city", city);
   if (skill) params.set("skill", skill);
+  if (verification && verification !== "ALL") {
+    params.set("verification", verification);
+  }
   return params.toString();
 };
 
