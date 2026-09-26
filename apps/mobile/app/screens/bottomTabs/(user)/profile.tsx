@@ -47,6 +47,12 @@ import {
   isMediatorProfileIncomplete,
 } from "@/constants/functions";
 import { getMobileEffectiveRole } from "@/utils/mobileRole";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
+import {
+  isVerifiableRole,
+  normalizeVerification,
+  VERIFICATION_STATUS,
+} from "@/utils/userVerification";
 
 type TabKey = "overview" | "settings";
 
@@ -226,6 +232,24 @@ const UserProfile = () => {
     },
   });
 
+  const mutationApplyVerification = useMutation({
+    mutationKey: ["applyVerification"],
+    mutationFn: () => USER.applyVerification(),
+    onSuccess: (response) => {
+      const nextUser = response?.data?.data || response?.data;
+      if (nextUser) {
+        setUserDetails({
+          ...userDetails,
+          verification: nextUser.verification,
+        });
+      }
+      TOAST?.success(
+        response?.data?.message || t("verificationAppliedSuccess"),
+      );
+      refreshUser();
+    },
+  });
+
   const handleProfilePictureSubmit = async (profileImage: any) => {
     if (
       !profileImage ||
@@ -385,6 +409,9 @@ const UserProfile = () => {
 
   const uiRole = getMobileEffectiveRole(userDetails) || role;
   const roleMeta = ROLE_META[uiRole] ?? ROLE_META["EMPLOYER"];
+  const verification = normalizeVerification(userDetails?.verification);
+  const canApplyVerification =
+    isVerifiableRole(uiRole) && verification === VERIFICATION_STATUS.PENDING;
 
   return (
     <>
@@ -394,6 +421,7 @@ const UserProfile = () => {
           mutationUpdateRole?.isPending ||
           mutationAddSkills?.isPending ||
           mutationRemoveSkill?.isPending ||
+          mutationApplyVerification?.isPending ||
           isLoading ||
           loading
         }
@@ -470,14 +498,22 @@ const UserProfile = () => {
                   profileImage={profilePicture}
                 />
                 <View style={styles.heroInfo}>
-                  <CustomHeading
-                    textAlign="left"
-                    baseFont={20}
-                    numberOfLines={2}
-                    style={styles.heroName}
-                  >
-                    {userDetails?.name || "Name"}
-                  </CustomHeading>
+                  <View style={styles.heroNameRow}>
+                    <CustomHeading
+                      textAlign="left"
+                      baseFont={20}
+                      numberOfLines={2}
+                      style={styles.heroName}
+                    >
+                      {userDetails?.name || "Name"}
+                    </CustomHeading>
+                    <VerifiedBadge
+                      user={userDetails}
+                      size="lg"
+                      tone="onDark"
+                      showLabel
+                    />
+                  </View>
 
                   <View style={styles.roleSection}>
                     <CustomText
@@ -508,6 +544,40 @@ const UserProfile = () => {
                         {t(uiRole?.toLowerCase() || "employer")}
                       </CustomText>
                     </View>
+
+                    {verification === VERIFICATION_STATUS.APPLIED ? (
+                      <CustomText
+                        baseFont={12}
+                        color="rgba(255,255,255,0.82)"
+                        textAlign="left"
+                      >
+                        {t("verificationPendingReview")}
+                      </CustomText>
+                    ) : null}
+
+                    {canApplyVerification ? (
+                      <TouchableOpacity
+                        style={styles.changeRoleBtn}
+                        onPress={() => mutationApplyVerification.mutate()}
+                        activeOpacity={0.88}
+                      >
+                        <View style={styles.changeRoleLeft}>
+                          <Ionicons
+                            name="shield-checkmark-outline"
+                            size={18}
+                            color={Colors.primary}
+                          />
+                          <CustomText
+                            baseFont={14}
+                            fontWeight="700"
+                            color={Colors.primary}
+                            numberOfLines={1}
+                          >
+                            {t("applyForVerification")}
+                          </CustomText>
+                        </View>
+                      </TouchableOpacity>
+                    ) : null}
 
                     <TouchableOpacity
                       style={styles.changeRoleBtn}
@@ -676,6 +746,12 @@ const styles = StyleSheet.create({
     minWidth: 0,
     paddingTop: 6,
     gap: 12,
+  },
+  heroNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
   },
   heroName: {
     color: Colors.white,

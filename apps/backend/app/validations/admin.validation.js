@@ -15,3 +15,14 @@ export const activateSuspendUserSchema = Joi.object({
       "any.required": "User ID is required",
     }),
 });
+
+export const updateUserVerificationSchema = Joi.object({
+  verification: Joi.string()
+    .valid("Pending", "Applied", "Completed")
+    .required()
+    .messages({
+      "any.only": "Verification must be Pending, Applied, or Completed",
+      "any.required": "Verification is required",
+      "string.empty": "Verification is required",
+    }),
+});

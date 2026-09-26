@@ -8,6 +8,15 @@ import CityFilterSelect from "@/components/filters/CityFilterSelect";
 import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useAdminUserCities, useAdminUserSkills } from "@/hooks/useAdminUserFilters";
+import AdminUserDetailsView, {
+  type AdminUserRecord,
+} from "@/components/webapp/admin/AdminUserDetailsView";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
+import {
+  normalizeVerification,
+  VERIFICATION_STATUS,
+  type VerificationStatus,
+} from "@/lib/userVerification";
 
 type AdminUser = {
   _id: string;
@@ -42,11 +51,13 @@ export default function AdminUsersPage() {
     workers: 0,
     mediators: 0,
     employers: 0,
+    verification: { pending: 0, applied: 0, completed: 0 },
   });
   const limit = 20;
   const [selectedRole, setSelectedRole] = useState("ALL");
   const [selectedSource, setSelectedSource] = useState("ALL");
   const [selectedStatus, setSelectedStatus] = useState("ALL");
+  const [selectedVerification, setSelectedVerification] = useState("ALL");
   const [searchText, setSearchText] = useState("");
   const [city, setCity] = useState("");
   const [skill, setSkill] = useState("");
@@ -61,13 +72,16 @@ export default function AdminUsersPage() {
   };
   const { cities, loading: citiesLoading } = useAdminUserCities(listingFilters);
   const { skills, loading: skillsLoading } = useAdminUserSkills(listingFilters);
+  const [selectedUser, setSelectedUser] = useState<AdminUserRecord | null>(null);
+  const [verificationSaving, setVerificationSaving] = useState(false);
+  const [actionMessage, setActionMessage] = useState("");
 
   useEffect(() => {
     setRows([]);
     setPages(1);
     setTotal(0);
     setPage(1);
-  }, [selectedRole, selectedSource, selectedStatus, searchText, city, skill]);
+  }, [selectedRole, selectedSource, selectedStatus, selectedVerification, searchText, city, skill]);
 
   useEffect(() => {
     if (access !== "allowed") return;
@@ -83,15 +97,17 @@ export default function AdminUsersPage() {
     if (q) params.set("search", q);
     if (city) params.set("city", city);
     if (skill) params.set("skill", skill);
+    if (selectedVerification !== "ALL") params.set("verification", selectedVerification);
 
     apiRequest<{
-      data: AdminUser[];
+      data: AdminUserRecord[];
       stats?: {
         total?: number;
         admin?: number;
         workers?: number;
         mediators?: number;
         employers?: number;
+        verification?: { pending?: number; applied?: number; completed?: number };
       };
       pagination?: { total?: number; page?: number; pages?: number };
     }>(`/admin/all-users?${params.toString()}`)
@@ -105,6 +121,11 @@ export default function AdminUsersPage() {
           workers: res?.stats?.workers || 0,
           mediators: res?.stats?.mediators || 0,
           employers: res?.stats?.employers || 0,
+          verification: {
+            pending: res?.stats?.verification?.pending || 0,
+            applied: res?.stats?.verification?.applied || 0,
+            completed: res?.stats?.verification?.completed || 0,
+          },
         });
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed to load users"))
@@ -112,13 +133,57 @@ export default function AdminUsersPage() {
         setLoading(false);
         setLoadingMore(false);
       });
-  }, [access, page, selectedRole, selectedSource, selectedStatus, searchText, city, skill]);
+  }, [access, page, selectedRole, selectedSource, selectedStatus, selectedVerification, searchText, city, skill]);
 
   const canLoadMore = page < pages;
   const handleLoadMore = useCallback(() => {
     if (loading || loadingMore || !canLoadMore) return;
     setPage((prev) => prev + 1);
   }, [canLoadMore, loading, loadingMore]);
+
+  useEffect(() => {
+    if (!selectedUser) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedUser(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selectedUser]);
+
+  useEffect(() => {
+    setActionMessage("");
+  }, [selectedUser?._id]);
+
+  const handleVerificationChange = async (verification: VerificationStatus) => {
+    if (!selectedUser?._id) return;
+    setVerificationSaving(true);
+    setActionMessage("");
+    try {
+      await apiRequest(`/admin/users/${selectedUser._id}/verification`, {
+        method: "PATCH",
+        body: JSON.stringify({ verification }),
+      });
+      const nextUser = { ...selectedUser, verification };
+      setSelectedUser(nextUser);
+      setRows((prev) =>
+        prev.map((row) => (row._id === nextUser._id ? nextUser : row)),
+      );
+      setActionMessage(
+        verification === VERIFICATION_STATUS.COMPLETED
+          ? "User is now verified."
+          : `Verification updated to ${verification}.`,
+      );
+    } catch (e) {
+      setActionMessage(e instanceof Error ? e.message : "Failed to update verification");
+    } finally {
+      setVerificationSaving(false);
+    }
+  };
 
   if (access === "loading") return <section className="rounded-2xl bg-white p-6">Checking admin access...</section>;
   if (access === "denied") return null;
@@ -135,10 +200,13 @@ export default function AdminUsersPage() {
         <Stat title="Workers" value={stats.workers} />
         <Stat title="Mediators" value={stats.mediators} />
         <Stat title="Employers" value={stats.employers} />
+        <Stat title="Verified" value={stats.verification.completed} />
+        <Stat title="Applied" value={stats.verification.applied} />
+        <Stat title="Pending verification" value={stats.verification.pending} />
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-5">
+        <div className="grid gap-3 md:grid-cols-6">
           <div className="md:col-span-2">
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Search user
@@ -200,6 +268,21 @@ export default function AdminUsersPage() {
               <option value="-">unknown</option>
             </select>
           </div>
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Verification
+            </label>
+            <select
+              value={selectedVerification}
+              onChange={(e) => setSelectedVerification(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none ring-[#22409a] focus:ring-2"
+            >
+              <option value="ALL">All verification</option>
+              <option value="Pending">Pending</option>
+              <option value="Applied">Applied</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
@@ -245,6 +328,7 @@ export default function AdminUsersPage() {
                   <th className="px-4 py-3">Mobile</th>
                   <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Verification</th>
                   <th className="px-4 py-3">Source</th>
                   <th className="px-4 py-3 text-right">Action</th>
                 </tr>
@@ -266,7 +350,10 @@ export default function AdminUsersPage() {
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-slate-800">{user.name || "Unnamed"}</p>
+                          <p className="flex items-center gap-1.5 font-semibold text-slate-800">
+                            <span>{user.name || "Unnamed"}</span>
+                            <VerifiedBadge user={user} size="sm" />
+                          </p>
                           <p className="text-xs text-slate-500">{user.email?.value || "No email"}</p>
                         </div>
                       </div>
@@ -280,6 +367,19 @@ export default function AdminUsersPage() {
                     <td className="px-4 py-3 text-slate-600">
                       <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
                         {user.status || "-"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          normalizeVerification(user.verification) === VERIFICATION_STATUS.COMPLETED
+                            ? "bg-emerald-50 text-emerald-700"
+                            : normalizeVerification(user.verification) === VERIFICATION_STATUS.APPLIED
+                              ? "bg-sky-50 text-sky-700"
+                              : "bg-amber-50 text-amber-700"
+                        }`}
+                      >
+                        {normalizeVerification(user.verification)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-600">{user.registrationSource || "-"}</td>
@@ -323,130 +423,45 @@ export default function AdminUsersPage() {
 
       {selectedUser ? (
         <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-3"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm"
           onClick={() => setSelectedUser(null)}
           role="presentation"
         >
           <div
-            className="max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+            className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-[0_20px_80px_rgba(15,23,42,0.35)]"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label="User details"
           >
-            <div className="flex items-start justify-between border-b border-slate-200 p-4">
+            <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-[#f7f9ff] to-[#eef3ff] px-4 py-3">
               <div>
-                <h3 className="text-lg font-bold text-slate-800">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#22409a]/80">
+                  User details
+                </p>
+                <h3 className="text-base font-bold text-[#16264f]">
                   {selectedUser.name || "Unnamed user"}
                 </h3>
-                <p className="text-xs text-slate-500">User ID: {selectedUser._id}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedUser(null)}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
               >
                 Close
               </button>
             </div>
-            <div className="max-h-[calc(92vh-84px)] overflow-y-auto p-4">
-              <div className="grid gap-4 xl:grid-cols-2">
-                <div className="space-y-3">
-                  <SectionTitle title="Identity & Access" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Detail title="Name" value={stringValue((selectedUser as any).name)} />
-                    <Detail title="Role" value={stringValue((selectedUser as any).role)} />
-                    <Detail title="Status" value={stringValue((selectedUser as any).status)} />
-                    <Detail
-                      title="Registration source"
-                      value={stringValue((selectedUser as any).registrationSource)}
-                    />
-                    <Detail title="User ID" value={stringValue((selectedUser as any)._id)} className="sm:col-span-2" />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <SectionTitle title="Contact" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Detail title="Mobile" value={stringValue((selectedUser as any).mobile)} />
-                    <Detail title="Country code" value={stringValue((selectedUser as any).countryCode)} />
-                    <Detail title="Email" value={stringValue((selectedUser as any).email?.value)} className="sm:col-span-2" />
-                    <Detail
-                      title="Email verified"
-                      value={(selectedUser as any).email?.isVerified ? "Yes" : "No"}
-                    />
-                    <Detail
-                      title="Notification consent"
-                      value={(selectedUser as any).notificationConsent === false ? "No" : "Yes"}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <SectionTitle title="Personal Details" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Detail title="Gender" value={stringValue((selectedUser as any).gender)} />
-                    <Detail title="Age" value={stringValue((selectedUser as any).age)} />
-                    <Detail title="Date of birth" value={stringValue((selectedUser as any).dateOfBirth)} />
-                    <Detail title="Aadhaar" value={stringValue((selectedUser as any).aadhaarNumber)} />
-                    <Detail title="Language" value={stringValue((selectedUser as any).locale?.language)} />
-                    <Detail title="Address" value={stringValue((selectedUser as any).address)} className="sm:col-span-2" />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <SectionTitle title="Activity Counters" />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Detail title="Liked users count" value={countValue((selectedUser as any).likedUsers)} />
-                    <Detail title="Liked services count" value={countValue((selectedUser as any).likedServices)} />
-                    <Detail title="Liked by count" value={countValue((selectedUser as any).likedBy)} />
-                    <Detail title="Booking requests count" value={countValue((selectedUser as any).bookingRequestBy)} />
-                    <Detail title="My bookings count" value={countValue((selectedUser as any).myBookings)} />
-                    <Detail title="Booked by count" value={countValue((selectedUser as any).bookedBy)} />
-                    <Detail title="Skills count" value={countValue((selectedUser as any).skills)} />
-                    <Detail title="Saved addresses count" value={countValue((selectedUser as any).savedAddresses)} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-4">
-                <DetailBlock title="Geo Location" data={(selectedUser as any).geoLocation} />
-                <DetailBlock title="Skills" data={(selectedUser as any).skills} />
-                <DetailBlock title="Work Details" data={(selectedUser as any).workDetails} />
-                <DetailBlock title="Work Details" data={(selectedUser as any).serviceDetails} />
-                <DetailBlock title="Mediator Details" data={(selectedUser as any).mediatorDetails} />
-                <DetailBlock title="Ratings" data={(selectedUser as any).rating} />
-                <DetailBlock title="Earnings" data={(selectedUser as any).earnings} />
-                <DetailBlock title="Spent" data={(selectedUser as any).spent} />
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <Detail
-                  title="Created"
-                  value={
-                    (selectedUser as any).createdAt
-                      ? new Date((selectedUser as any).createdAt).toLocaleString()
-                      : "-"
-                  }
-                />
-                <Detail
-                  title="Updated"
-                  value={
-                    (selectedUser as any).updatedAt
-                      ? new Date((selectedUser as any).updatedAt).toLocaleString()
-                      : "-"
-                  }
-                />
-              </div>
-
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Full raw database object
+            <div className="max-h-[calc(92vh-4.25rem)] overflow-y-auto p-4 md:p-5">
+              {actionMessage ? (
+                <p className="mb-3 rounded-xl border border-[#22409a]/15 bg-[#f7f9ff] px-3 py-2 text-sm font-medium text-[#22409a]">
+                  {actionMessage}
                 </p>
-                <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">
-                  {JSON.stringify(selectedUser, null, 2)}
-                </pre>
-              </div>
+              ) : null}
+              <AdminUserDetailsView
+                user={selectedUser}
+                onVerificationChange={handleVerificationChange}
+                verificationSaving={verificationSaving}
+              />
             </div>
           </div>
         </div>
@@ -462,63 +477,5 @@ function Stat({ title, value }: { title: string; value: number }) {
       <p className="mt-1 text-2xl font-bold text-[#1e3a8a]">{value}</p>
     </div>
   );
-}
-
-function Detail({
-  title,
-  value,
-  className = "",
-}: {
-  title: string;
-  value: string;
-  className?: string;
-}) {
-  return (
-    <div className={`rounded-xl border border-slate-200 bg-slate-50 p-3 ${className}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{title}</p>
-      <p className="mt-1 text-sm font-medium text-slate-700">{value}</p>
-    </div>
-  );
-}
-
-function SectionTitle({ title }: { title: string }) {
-  return (
-    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-      {title}
-    </p>
-  );
-}
-
-function DetailBlock({ title, data }: { title: string; data: unknown }) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-        {title}
-      </p>
-      <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs text-slate-700">
-        {pretty(data)}
-      </pre>
-    </div>
-  );
-}
-
-function pretty(value: unknown) {
-  if (value == null) return "-";
-  if (typeof value === "string") return value || "-";
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
-function stringValue(value: unknown) {
-  if (value == null) return "-";
-  const normalized = String(value).trim();
-  return normalized || "-";
-}
-
-function countValue(value: unknown) {
-  return Array.isArray(value) ? String(value.length) : "0";
 }
 

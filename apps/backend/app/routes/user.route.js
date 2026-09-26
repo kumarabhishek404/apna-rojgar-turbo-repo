@@ -2,6 +2,7 @@ import {
   getAllLikedUsers,
   getMyInfo,
   getUserCities,
+  handleApplyVerification,
   getUserDetails,
   getUserSkills,
   getUsersOnRole,
@@ -44,6 +45,7 @@ const maybeUploadProfileImage = (req, res, next) => {
 };
 
 router.get("/info", verifyToken, getMyInfo);
+router.post("/apply-verification", verifyToken, userStatus, handleApplyVerification);
 router.patch(
   "/info",
   verifyToken,

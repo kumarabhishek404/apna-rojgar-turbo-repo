@@ -31,6 +31,7 @@ import WorkHistory from "@/components/commons/WorkHistory";
 import TeamDetails from "../team/teamDetails";
 import UserProfilePlaceholder from "@/components/commons/LoadingPlaceholders/UserDetailsPlaceholder";
 import UserRoleTag from "@/components/commons/UserRoleTag";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
 import Atoms from "@/app/AtomStore";
 import { trackEvent } from "@/utils/analytics";
 import { AnalyticsEvents } from "@/utils/analyticsEvents";
@@ -186,6 +187,7 @@ const User = () => {
                   <CustomHeading textAlign="left" baseFont={20}>
                     {user?.name}
                   </CustomHeading>
+                  <VerifiedBadge user={user} size="md" />
                   <View style={styles.roleTagLine}>
                     <UserRoleTag user={user} variant="compact" />
                   </View>

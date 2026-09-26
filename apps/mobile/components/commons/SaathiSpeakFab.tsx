@@ -108,7 +108,7 @@ export default function SaathiSpeakFab({ bottomOffset }: Props) {
             end={{ x: 0.9, y: 1 }}
             style={styles.micCircle}
           >
-            <Ionicons name="mic" size={26} color={Colors.white} />
+            <Ionicons name="chatbubble-ellipses" size={24} color={Colors.white} />
           </LinearGradient>
         </View>
       </TouchableOpacity>

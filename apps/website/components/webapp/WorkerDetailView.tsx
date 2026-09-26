@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/auth";
 import { STATIC_EXPORT_DYNAMIC_PLACEHOLDER_ID } from "@/lib/staticExportDynamicRoutes";
 import { useParams } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
 
 type UserDetail = {
   _id: string;
@@ -18,6 +19,7 @@ type UserDetail = {
   skills?: Array<{ skill?: string }>;
   status?: string;
   role?: string;
+  verification?: string;
   serviceDetails?: {
     byService?: { total?: number; completed?: number; pending?: number; cancelled?: number };
   };
@@ -93,7 +95,10 @@ export default function WorkerDetailView({ id: idProp }: { id?: string }) {
             {(data.name || "W").slice(0, 1).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{data.name || t("workers")}</h1>
+            <h1 className="flex items-center gap-2 text-2xl font-bold">
+              <span>{data.name || t("workers")}</span>
+              <VerifiedBadge user={data} size="lg" tone="onDark" showLabel />
+            </h1>
             <p className="text-sm text-slate-200">
               {data.role || t("worker", "WORKER")} - {data.status || "-"}
             </p>

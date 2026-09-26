@@ -423,6 +423,12 @@ const UserSchema = new mongoose.Schema(
       enum: ["ACTIVE", "PENDING", "SUSPENDED", "DISABLED", "DELETED"],
       default: "PENDING",
     },
+    verification: {
+      type: String,
+      enum: ["Pending", "Applied", "Completed"],
+      default: "Pending",
+      index: true,
+    },
     rating: {
       average: {
         type: Number,

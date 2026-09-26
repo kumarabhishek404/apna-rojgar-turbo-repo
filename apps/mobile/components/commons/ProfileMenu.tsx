@@ -300,7 +300,7 @@ const ProfileMenu = ({ disabled }: any) => {
     {
       title: t("saathiTitle"),
       icon: (
-        <Ionicons name="mic-outline" size={28} color={Colors.primary} />
+        <Ionicons name="chatbubble-ellipses-outline" size={28} color={Colors.primary} />
       ),
       onPress: () =>
         router?.push({

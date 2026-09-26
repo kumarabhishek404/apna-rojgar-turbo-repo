@@ -7,6 +7,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import CityFilterSelect from "@/components/filters/CityFilterSelect";
 import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
 import { useListingCities, useListingSkills } from "@/hooks/useListingCities";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
 
 type Contractor = {
   _id: string;
@@ -14,6 +15,7 @@ type Contractor = {
   mobile?: string;
   address?: string;
   rating?: { average?: number };
+  verification?: string;
 };
 
 export default function ContractorsPage() {
@@ -81,7 +83,10 @@ export default function ContractorsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {contractors.map((contractor) => (
           <div key={contractor._id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <p className="text-lg font-semibold text-gray-900">{contractor.name || "Unnamed Contractor"}</p>
+            <p className="flex items-center gap-1.5 text-lg font-semibold text-gray-900">
+              <span>{contractor.name || "Unnamed Contractor"}</span>
+              <VerifiedBadge user={contractor} size="sm" />
+            </p>
             <p className="mt-1 text-sm text-gray-600">{contractor.mobile || "-"}</p>
             <p className="text-sm text-gray-600">{contractor.address || "-"}</p>
             <p className="mt-2 text-xs font-medium text-gray-500">

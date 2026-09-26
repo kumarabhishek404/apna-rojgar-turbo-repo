@@ -16,6 +16,10 @@ import {
   buildCityAddressFilter,
   listCities,
 } from "../utils/cityFromAddress.js";
+  isVerifiableRole,
+  normalizeVerification,
+  VERIFICATION_STATUS,
+} from "../utils/userVerification.js";
 
 const PUBLIC_ROLES = new Set(["WORKER", "MEDIATOR", "EMPLOYER"]);
 
@@ -49,7 +53,7 @@ export const getMyInfo = async (req, res) => {
 
   try {
     const user = await User.findById(_id)
-      .populate("employedBy", "name mobile email")
+      .populate("employedBy", "name mobile email verification")
       .select("-password");
 
     if (!user) {
@@ -88,6 +92,58 @@ export const getMyInfo = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+export const handleApplyVerification = async (req, res) => {
+  const userId = req.user?._id;
+
+  try {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!isVerifiableRole(user.role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Only workers, employers, and mediators can apply for verification",
+      });
+    }
+
+    const current = normalizeVerification(user.verification);
+    if (current === VERIFICATION_STATUS.COMPLETED) {
+      return res.status(400).json({
+        success: false,
+        message: "Your profile is already verified",
+      });
+    }
+    if (current === VERIFICATION_STATUS.APPLIED) {
+      return res.status(200).json({
+        success: true,
+        message: "Your verification request is already under review",
+        data: user,
+      });
+    }
+
+    user.verification = VERIFICATION_STATUS.APPLIED;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Verification request submitted",
+      data: user,
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message:
+        error?.message || "Something went wrong while applying for verification",
     });
   }
 };

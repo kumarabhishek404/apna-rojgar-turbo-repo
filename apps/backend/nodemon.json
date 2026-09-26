@@ -1,5 +1,5 @@
 {
-  "watch": ["app", "index"],
+  "watch": ["app", "index.js"],
   "ext": ".js,.json",
   "ignore": ["node_modules"],
   "exec": "node --experimental-modules --es-module-specifier-resolution=node index.js"

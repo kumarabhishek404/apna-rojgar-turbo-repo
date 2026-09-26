@@ -13,6 +13,7 @@ import {
   getAdminUserSkills,
   handleActivateUser,
   handleSuspendUser,
+  handleUpdateUserVerification,
   handleExportRegistrations,
   handleExportServices,
   updateServiceListingFeature,
@@ -20,6 +21,8 @@ import {
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import checkAdmin from "../middlewares/checkRole.middleware.js";
 import userStatus from "../middlewares/userStatus.middleware.js";
+import validate from "../middlewares/validate.middleware.js";
+import { updateUserVerificationSchema } from "../validations/admin.validation.js";
 const router = express.Router();
 
 router.post("/export-registrations", handleExportRegistrations);
@@ -28,6 +31,12 @@ router.post("/export-services", handleExportServices);
 router.use(verifyToken, userStatus);
 router.post("/activate-user", checkAdmin, handleActivateUser);
 router.delete("/suspend-user/:userId", checkAdmin, handleSuspendUser);
+router.patch(
+  "/users/:userId/verification",
+  checkAdmin,
+  validate(updateUserVerificationSchema),
+  handleUpdateUserVerification,
+);
 
 router.get("/all-users", verifyToken, userStatus, checkAdmin, getAllUsers);
 router.get("/user-cities", verifyToken, userStatus, checkAdmin, getAdminUserCities);

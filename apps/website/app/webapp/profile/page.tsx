@@ -16,6 +16,12 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import VerifiedBadge from "@/components/commons/VerifiedBadge";
+import {
+  isVerifiableRole,
+  normalizeVerification,
+  VERIFICATION_STATUS,
+} from "@/lib/userVerification";
 
 type Skill = { skill: string; pricePerDay?: number | null };
 const WORKER_PROFILE_CREATED_KEY = "apna_rojgar_worker_profile_created";
@@ -28,6 +34,7 @@ type UserInfo = {
   gender?: string;
   role?: "WORKER" | "MEDIATOR" | "EMPLOYER";
   status?: "ACTIVE" | "PENDING" | "SUSPENDED" | "DISABLED" | "DELETED";
+  verification?: string;
   profilePicture?: string;
   skills?: Skill[];
   locale?: string | { language?: string };
@@ -74,6 +81,7 @@ export default function ProfilePage() {
   const [draftSkillIds, setDraftSkillIds] = useState<string[]>([]);
   const [savingSkills, setSavingSkills] = useState(false);
   const [updatingPhoto, setUpdatingPhoto] = useState(false);
+  const [applyingVerification, setApplyingVerification] = useState(false);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
 
   const allowedSkillIds = useMemo(() => new Set(WORKERTYPES.map((w) => w.value)), []);
@@ -334,6 +342,37 @@ export default function ProfilePage() {
     }
   };
 
+  const applyForVerification = async () => {
+    setError("");
+    setMessage("");
+    setApplyingVerification(true);
+    try {
+      const response = await apiRequest<{ data?: UserInfo; message?: string }>(
+        "/user/apply-verification",
+        { method: "POST" },
+      );
+      if (response.data) {
+        setUser(response.data);
+        const currentAuth = getAuth();
+        if (currentAuth) {
+          saveAuth({ ...currentAuth, user: response.data });
+        }
+      }
+      setMessage(
+        response.message ||
+          t("verificationAppliedSuccess", "Verification request submitted."),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to apply for verification");
+    } finally {
+      setApplyingVerification(false);
+    }
+  };
+
+  const verification = normalizeVerification(user?.verification);
+  const canApplyVerification =
+    isVerifiableRole(user?.role) && verification === VERIFICATION_STATUS.PENDING;
+
   return (
     <section className="space-y-5">
       <div className="rounded-2xl bg-gradient-to-r from-amber-700 to-orange-600 p-6 text-white shadow-lg">
@@ -404,8 +443,9 @@ export default function ProfilePage() {
               }}
             />
             <div className="min-w-0">
-              <p className="truncate text-lg font-bold text-[#16264f]">
-                {user?.name || t("user", "User")}
+              <p className="flex items-center gap-2 truncate text-lg font-bold text-[#16264f]">
+                <span className="truncate">{user?.name || t("user", "User")}</span>
+                <VerifiedBadge user={user} showLabel />
               </p>
               <p className="text-[11px] text-[#22409a]">
                 {updatingPhoto
@@ -452,6 +492,29 @@ export default function ProfilePage() {
               <ShieldCheck className="h-3.5 w-3.5" />
               {t(user?.status?.toLowerCase?.() || "active", user?.status || "ACTIVE")}
             </span>
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                verification === VERIFICATION_STATUS.COMPLETED
+                  ? "bg-emerald-50 text-emerald-700"
+                  : verification === VERIFICATION_STATUS.APPLIED
+                    ? "bg-sky-50 text-sky-700"
+                    : "bg-amber-50 text-amber-700"
+              }`}
+            >
+              {t("verification", "Verification")}: {verification}
+            </span>
+            {canApplyVerification ? (
+              <button
+                type="button"
+                disabled={applyingVerification}
+                onClick={() => void applyForVerification()}
+                className="rounded-lg border border-[#22409a]/35 bg-white px-3 py-1.5 text-xs font-semibold text-[#22409a] transition hover:bg-[#f2f6ff] disabled:opacity-60"
+              >
+                {applyingVerification
+                  ? t("applying", "Applying...")
+                  : t("applyForVerification", "Apply for verification")}
+              </button>
+            ) : null}
             {canManageSkills ? (
               <button
                 type="button"

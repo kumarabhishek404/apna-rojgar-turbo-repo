@@ -1,6 +1,5 @@
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as StoreReview from "expo-store-review";
 import { t } from "@/utils/translationHelper";
 import { openPlayStoreWriteReview } from "@/utils/openExternalLink";
 
@@ -144,10 +143,10 @@ function showSoftPromptAlert(): void {
 }
 
 /**
- * Soft “Rate us?” Alert in the selected app language, then native review / listing.
+ * Soft “Rate us?” Alert in the selected app language, then Play Store listing.
  *
  * - Auto: skipped if already completed, or cooldown not elapsed.
- * - force (menu): if completed, opens store flow without soft prompt; else shows prompt.
+ * - force (menu): if completed, opens Play Store without soft prompt; else shows prompt.
  */
 export async function promptForAppReview(
   options: PromptOptions = {},

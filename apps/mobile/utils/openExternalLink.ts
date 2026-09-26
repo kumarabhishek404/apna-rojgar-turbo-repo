@@ -35,13 +35,33 @@ export async function openExternalLink(
   return false;
 }
 
+/** Native Play Store listing for this app (stars + Write a review on the page). */
+export function getPlayStoreListingUrl(): string {
+  return `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE}`;
+}
+
+/**
+ * Opens this app in the Play Store app (not a browser) so the user can rate
+ * and review. Google does not allow a deep link that auto-opens the write-review
+ * composer; the listing page is the supported destination.
+ */
 export async function openPlayStore(): Promise<boolean> {
-  const webUrl = `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE}`;
+  const webUrl = getPlayStoreListingUrl();
+  const marketUrl = `market://details?id=${PLAY_STORE_PACKAGE}`;
 
   if (Platform.OS === "android") {
-    const opened = await openExternalLink(webUrl, {
-      appUrl: `market://details?id=${PLAY_STORE_PACKAGE}`,
-    });
+    try {
+      const IntentLauncher = await import("expo-intent-launcher");
+      await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+        data: marketUrl,
+        packageName: "com.android.vending",
+      });
+      return true;
+    } catch {
+      // Play Store missing or intent rejected — try market:// then https.
+    }
+
+    const opened = await openExternalLink(webUrl, { appUrl: marketUrl });
     if (opened) return true;
   }
 
