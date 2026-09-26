@@ -12,6 +12,10 @@ import logError from "../utils/addErrorLog.js";
 import { withTrustedProfileMatch } from "../utils/trustedProfile.js";
 import { userHasAdminAccess } from "../utils/functions.js";
 import {
+  attachCities,
+  buildCityAddressFilter,
+  listCities,
+} from "../utils/cityFromAddress.js";
   isVerifiableRole,
   normalizeVerification,
   VERIFICATION_STATUS,
@@ -810,10 +814,110 @@ export const checkMobileNumberExistance = async (req, res) => {
   }
 };
 
+/**
+ * Base match shared by the browse listing and its filter-option endpoints, so
+ * every city and skill offered in a dropdown is guaranteed to return results.
+ */
+const browseUsersMatch = (req) => {
+  const { role } = req.query;
+  const match = {
+    status: "ACTIVE",
+    _id: { $ne: req.user?._id },
+    mobile: { $nin: [process.env.ADMIN_MOBILE] },
+  };
+  if (PUBLIC_ROLES.has(role)) match.role = role;
+  return match;
+};
+
+/**
+ * Cities where users of the requested role are registered, for the listing city
+ * dropdown. Narrowed by `skill` when one is already applied.
+ */
+export const getUserCities = async (req, res) => {
+  try {
+    const { skill } = req.query;
+    const match = browseUsersMatch(req);
+    if (skill) match["skills.skill"] = skill;
+
+    return res.status(200).json({
+      success: true,
+      message: "Cities fetched successfully",
+      data: await listCities(User, match),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+/**
+ * Skills held by users of the requested role, for the listing skill dropdown.
+ * Only skills somebody actually has are listed, narrowed by `city` when one is
+ * already applied. Values are the stored slugs; clients translate them.
+ */
+export const getUserSkills = async (req, res) => {
+  try {
+    const { city } = req.query;
+    const match = browseUsersMatch(req);
+    const cityFilter = await buildCityAddressFilter(User, {}, city);
+    if (cityFilter) match.address = cityFilter;
+
+    const rows = await User.aggregate([
+      { $match: match },
+      {
+        // Some profiles list the same skill twice; `$setUnion` over the slugs
+        // dedupes them so the count is users, not skill entries.
+        $project: {
+          skillSlugs: {
+            $setUnion: [
+              {
+                $filter: {
+                  input: {
+                    $map: {
+                      input: { $ifNull: ["$skills", []] },
+                      in: "$$this.skill",
+                    },
+                  },
+                  cond: {
+                    $and: [
+                      { $eq: [{ $type: "$$this" }, "string"] },
+                      { $ne: ["$$this", ""] },
+                    ],
+                  },
+                },
+              },
+              [],
+            ],
+          },
+        },
+      },
+      { $unwind: "$skillSlugs" },
+      { $group: { _id: "$skillSlugs", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Skills fetched successfully",
+      data: rows.map((row) => ({ skill: row._id, count: row.count })),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
 export const getUsersOnRole = async (req, res) => {
   try {
     const { role, page = 1, limit = 10 } = req.query;
-    const { skills, name, distance, completedServices, rating, sortBy } = req.body;
+    const { skills, name, city, distance, completedServices, rating, sortBy } =
+      req.body;
     const loggedInUserId = req.user?._id;
 
     // Base match filter
@@ -839,6 +943,14 @@ export const getUsersOnRole = async (req, res) => {
     // Name filtering
     if (name) {
       match.name = { $regex: name, $options: "i" };
+    }
+
+    // City filtering. The city is a district resolved from the address rather
+    // than a substring of it, so it matches on the set of addresses that
+    // belong to that district.
+    const cityFilter = await buildCityAddressFilter(User, {}, city);
+    if (cityFilter) {
+      match.address = cityFilter;
     }
 
     // Rating filtering
@@ -1015,7 +1127,7 @@ export const getUsersOnRole = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Users fetched successfully",
-      data: users,
+      data: await attachCities(users),
       pagination: {
         page: parsedPage,
         pages: Math.ceil(totalUsers / parsedLimit),

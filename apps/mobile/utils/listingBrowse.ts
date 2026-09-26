@@ -98,6 +98,50 @@ export function filterServicesBySearch(items: any[], query: string): any[] {
   });
 }
 
+/**
+ * The city is the district the backend resolved from the listing's address; it
+ * is frequently absent from the address text itself, so never re-derive it here.
+ * Listings whose district could not be determined belong to no city.
+ */
+export function matchesCity(item: any, city: string): boolean {
+  const target = norm(city);
+  if (!target) return true;
+  return norm(item?.city) === target;
+}
+
+/** Safety net for screens whose data source cannot filter by city server-side. */
+export function filterListingsByCity<T>(items: T[], city: string): T[] {
+  if (!city?.trim()) return items;
+  return items.filter((item) => matchesCity(item, city));
+}
+
+/** Skills are stored on users as `{ skill: <slug> }`, so match on the slug. */
+export function matchesSkill(item: any, skill: string): boolean {
+  const target = norm(skill);
+  if (!target) return true;
+  return (item?.skills ?? []).some((entry: any) => norm(entry?.skill) === target);
+}
+
+/** Safety net for screens whose data source cannot filter by skill server-side. */
+export function filterUsersBySkill<T>(items: T[], skill: string): T[] {
+  if (!skill?.trim()) return items;
+  return items.filter((item) => matchesSkill(item, skill));
+}
+
+/** Works store required skills on `requirements[].name`. */
+export function serviceMatchesSkill(item: any, skill: string): boolean {
+  const target = norm(skill);
+  if (!target) return true;
+  return (item?.requirements ?? []).some(
+    (entry: any) => norm(entry?.name) === target,
+  );
+}
+
+export function filterServicesBySkill<T>(items: T[], skill: string): T[] {
+  if (!skill?.trim()) return items;
+  return items.filter((item) => serviceMatchesSkill(item, skill));
+}
+
 export type WorkerSortId = "nearest" | "trusted_profiles";
 export type ContractorSortId = "nearest" | "larger_team" | "trusted_profiles";
 export type ServiceSortId =

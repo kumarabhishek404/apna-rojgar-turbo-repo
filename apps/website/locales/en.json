@@ -93,7 +93,7 @@
   "guidesHelps": "Guides / Helps",
   "groceryFashion": "Grocery, Fashion",
   "musicTvGames": "Music, TV, Games",
-  "perDay": "Per Day",
+  "perDay": "per day",
   "worker": "Worker",
   "employer": "Employer",
   "mediator": "Contractor",
@@ -123,7 +123,6 @@
   "yourApplicationCancelledSuccessfully": "Your application cancelled successfully",
   "serviceCompletedSuccessfully": "Work completed successfully",
   "workerSelectedSuccessfully": "Worker selected successfully",
-
   "selected": "Selected",
   "proposals": "Proposals",
   "select": "Select",
@@ -216,19 +215,20 @@
   "edit": "Edit",
   "removeFromService": "Leave The Work",
   "workRequirments": "Work Requirements",
-
   "construction": "Construction",
   "farming": "Farming",
   "helping": "Helping",
   "labour": "Worker",
   "brickLayer": "Brick Layer",
   "stoneMason": "Stone Mason",
-  "mistri": "Mistri",
+  "mistri": {
+    "singular": "Mason",
+    "plural": "Masons"
+  },
   "dhaanBuwai": "Dhan Buwai",
   "dhaanPitai": "Dhaan Pitai",
   "alooBuwai": "Aloo Buwai",
   "bazraaKatai": "Bazara Katai",
-
   "home": "Home",
   "help": "Help",
   "editService": "Edit Work",
@@ -236,21 +236,19 @@
   "addNeed": "Add Need",
   "myProfile": "Profile",
   "viewYourProfile": "View Your Profile",
-
   "titleDescription": "Title & Description",
   "addressDate": "Address & Date",
   "requirements": "Requirements",
   "images": "Images",
-
   "contacts": "Contacts",
   "skills": "Skills",
+  "skill": "Skill",
   "password": "Password",
   "price": "Price",
   "rating": "Rating",
   "duration": "Duration",
   "travelling": "Travelling",
   "distance": "Distance",
-
   "active": "Active",
   "upcoming": "Upcoming",
   "hiring": "Hiring",
@@ -260,7 +258,6 @@
   "received": "Received",
   "accepted": "Accepted",
   "rejected": "Rejected",
-
   "andhrapradesh": "Andhra Pradesh",
   "arunachalpradesh": "Arunachal Pradesh",
   "assam": "Assam",
@@ -299,12 +296,10 @@
   "ladakh": "Ladakh",
   "jammuandkashmir": "Jammu & Kashmir",
   "nctdelhi": "NCT Delhi",
-
   "india": "India",
   "canada": "Canada",
   "belgium": "Belgium",
   "algeria": "Algeria",
-
   "faq_how_to_recharge_fastag_question": "How to recharge a fastag?",
   "faq_how_to_recharge_fastag_answer": [
     "1. Add new fastag.",
@@ -312,33 +307,28 @@
     "3. Click on Recharge button, and enter amount.",
     "4. Select payment method and pay."
   ],
-
   "faq_recharge_different_provider_question": "Can I recharge fastags from different provider?",
   "faq_recharge_different_provider_answer": [
     "Yes, you can recharge fastags from different providers using the app."
   ],
-
   "faq_recharge_failed_question": "Recharge failed but amount deducted from account?",
   "faq_recharge_failed_answer": [
     "Please contact our support team, and we will assist you in resolving the issue."
   ],
-
   "faq_add_card_question": "How to add credit or debit card for easy recharge?",
   "faq_add_card_answer": [
     "You can add your card details under the Payments section for easy recharges."
   ],
-
   "faq_view_tolls_question": "Can I see tolls paid before I started using the app?",
   "faq_view_tolls_answer": [
     "Unfortunately, tolls paid before using the app cannot be viewed."
   ],
-
   "workType": "Work Type",
   "workTitle": "Work Title",
   "workSubTitle": "Work Sub Title",
   "workTypeIsRequired": "Work type is required",
   "workSubTypeIsRequired": "Work sub type is required",
-  "selectWorkSubType": "Select Work Sub Type",
+  "selectWorkSubType": "Select Work Type",
   "workSubType": "Work Sub Type",
   "workRequirements": "Work Requirements",
   "location": "Location",
@@ -358,7 +348,6 @@
   "submitAllDetails": "Submit All Details",
   "count": "Count",
   "esi_pf": "ESI / PF",
-
   "pendingApprovalHeading": "Profile Approval Pending",
   "pendingApprovalMessage": "Your profile is currently under review. Approval is required before you can access all features.",
   "inactiveHeading": "Account Suspended",
@@ -372,11 +361,9 @@
   "reviewAddedSuccessfully": "Review added successfully",
   "reviewEditedSuccessfully": "Review edited successfully",
   "reviewDeletedSuccessfully": "Review deleted successfully",
-
   "selectWorkers": "Select members from your team",
-  "selectedWorkers": "Selected Contractors",
+  "selectedWorkers": "Selected workers",
   "startAConversation": "Start A Conversation",
-
   "howWouldYouRate": "How would you rate your experience with this worker?",
   "whatDidYouLike": "What did you like the most?",
   "feedbackIsRequired": "Feedback is required",
@@ -394,7 +381,6 @@
   "qualityOfWork": "Quality of work",
   "cleanliness": "Cleanliness",
   "overallExperience": "Overall experience",
-
   "collectionPlaces": "Collection Places",
   "extraFacilities": "Extra Facilities",
   "teamCollection": "Team Collection",
@@ -447,7 +433,6 @@
   "emailIsRequired": "Email is required",
   "passwordIsRequired": "Password is required",
   "enterAValidEmailAddress": "Enter a valid email address",
-
   "enterAValidPassword": "Enter a valid password",
   "pleaseCheckYourEmail": "Please check your email",
   "weHaveSentACodeTo": "We've sent a code to",
@@ -554,7 +539,6 @@
   "male": "Male",
   "female": "Female",
   "other": "Other",
-
   "alreadyHaveAnAccount": "Already have an account?",
   "dateOfBirth": "Date Of Birth",
   "saveAndVerifyButton": "Save and Verify",
@@ -601,7 +585,7 @@
   "pleaseFillAllFields": "Please fill all fields",
   "addNewSkills": "Add new skill",
   "searchAndSelectSkills": "Search and select skill",
-  "selectSkill": "Select Skill",
+  "selectSkill": "Select skill",
   "addSkill": "Add Skill",
   "uploadNewImage": "Upload New Image",
   "yourSkills": "Your skills",
@@ -652,9 +636,8 @@
   "receivedDirectBookingRequests": "Received Direct Booking Requests",
   "bookingsAndRequest": "Bookings & Request",
   "bookedWorker": "Booked Worker",
-
   "allRequests": "Requests",
-  "allBookings": "Bookings",
+  "allBookings": "ALL BOOKINGS",
   "sentRequest": "Sent Request",
   "receivedRequest": "Received Request",
   "addBookingDetails": "Add Booking Details",
@@ -771,7 +754,6 @@
   "continueToPublish": "Continue to Publish",
   "verifyingServiceWithServer": "Checking details with the server…",
   "servicePromotedBadge": "Promoted",
-  "featuredBadge": "Featured",
   "serviceNotPromotedBadge": "Not promoted",
   "servicePromoteNow": "Promote now",
   "servicePromotedHint": "Featured on Apna Rojgar social media & groups",
@@ -814,7 +796,6 @@
   "of": "of",
   "loadingMore": "Loading more…",
   "action": "Action",
-  "all": "All",
   "addingNewService": "Adding New Work",
   "completeProfileButton": "Complete Profile",
   "completeYourProfileToUnlockAllFeatures": "Complete your profile to unlock all features!",
@@ -868,7 +849,6 @@
   "rupessPerDay": "Rupess Per Day",
   "workerName": "Worker Name",
   "workerSkill": "Worker Skill",
-
   "removeBookedWorker": "Remove Booked Worker",
   "byService": "Applied In Work",
   "direct": "Direct Booking",
@@ -893,7 +873,6 @@
   "checkDetails": "Verify Details",
   "facilities": "Facilities",
   "pleaseSelectAProfilePicture": "Please Select A Profile Picture",
-
   "profileInformation": "Profile Information",
   "otherInformation": "Other Information",
   "profileSuspended": "Profile Suspended",
@@ -914,7 +893,13 @@
   "myAllServices": "My Works",
   "searchServices": "SEARCH SERVICES",
   "onlyActiveUsersCanCreateServices": "Only active users can create services.",
-  "searchWorkPlaceholder": "Search work...",
+  "allCities": "All cities",
+  "findCity": "Find city…",
+  "selectCity": "Select city",
+  "noCitiesAvailable": "No cities available yet",
+  "allSkills": "All skills",
+  "findSkill": "Find skill…",
+  "noSkillsAvailable": "No skills available yet",
   "searchWorkers": "SEARCH WORKERS",
   "showAllServices": "SHOW ALL SERVICES",
   "searchServicesTitle": "Search Works",
@@ -937,7 +922,6 @@
   "chooseImages": "Choose images",
   "notAddedAnyImage": "Not added any image",
   "enterWorkDescription": "Enter work description",
-
   "January": "January",
   "February": "February",
   "March": "March",
@@ -950,7 +934,6 @@
   "October": "October",
   "November": "November",
   "December": "December",
-
   "servicePost": "Work Post",
   "facilitiesProvidedByEmployer": "Facilities provided by employer",
   "facilitiesSectionHint": "Food, stay, travel and ESI/PF — see yes or no for this job at one place.",
@@ -1158,7 +1141,6 @@
   "openContractorFromList": "Open a contractor from the list to view this profile.",
   "loadingProfile": "Loading profile...",
   "contractor": "Contractor",
-  "totalServices": "Total Works",
   "serviceStats": "Work stats",
   "workStats": "Work stats",
   "individualTotal": "Individual Total",
@@ -1199,7 +1181,6 @@
   "PRESENT": "PRESENT",
   "ABSENT": "ABSENT",
   "HALF-DAY": "HALF-DAY",
-
   "Sunday": "Sunday",
   "Monday": "Monday",
   "Tuesday": "Tuesday",
@@ -1221,12 +1202,10 @@
   "minutes": "minutes",
   "second": "second",
   "seconds": "seconds",
-
   "profileUpdated": "Profile Updated",
   "showAllWorkers": "SHOW ALL WORKERS",
   "searchWorkerName": "Search Worker by Name",
   "searchWorkerSkill": "Search Worker by Skill",
-
   "enableTitle": "Enable Notifications",
   "disableTitle": "Disable Notifications",
   "enableMessage": "Do you want to turn on notifications for this app?",
@@ -1240,7 +1219,6 @@
   "youHaveUnsavedChanges": "You have unsaved changes. Would you like to save before leaving?",
   "areYouAMediator": "If you are a mediator than click skip button and move forward",
   "skip": "Skip",
-
   "headerTitle": "Share App",
   "shareMessage": "Check out this amazing app: {{appLink}}",
   "shareHeading": "Share Our App With Your Family",
@@ -1256,7 +1234,6 @@
   "deactivate": "Deactivate",
   "paginationText": "Showing {{totalFetchedData}} from {{totalData}} {{type}}",
   "and": "and",
-
   "selected_worker_types": "Selected Worker Types",
   "selected_worker_help": "Select the type of workers you need for your job",
   "no_workers_selected": "No workers selected yet.",
@@ -1308,7 +1285,6 @@
   "generalFeedback": "General feedback",
   "attendanceUpdatedSuccessfully": "Attendance updated successfully.",
   "noOptionsAvailable": "No options available",
-
   "noLongerUsing": "No longer need the service/platform",
   "betterAlternative": "Found a better alternative",
   "privacyConcerns": "Concerns about privacy",
@@ -1316,10 +1292,8 @@
   "difficultyUsing": "Difficulty using the platform",
   "securityConcerns": "Worried about account security",
   "personalReasons": "Personal reasons",
-
   "selectReason": "Please select the reason(s) for deleting your account.",
   "confirmationMessage": "You want to delete your account permanently. This action is irreversible and will lead to a loss of all your data.",
-
   "writeReason": "Write the reason for deleting this account",
   "pleaseWriteReason": "Please write your reason.",
   "fullExperience": "We'd love to give you the full experience :)",
@@ -1336,7 +1310,6 @@
   "changeAddress": "Change Address",
   "unableToFetchLocation": "Unable to fetch location",
   "addAddressManually": "Add Address Manually",
-
   "createPassword": "Create a 4-Digit Password",
   "createPasswordNote": "please do not forget this password",
   "confirmPasswordNote": "please write the password again",
@@ -1345,16 +1318,13 @@
   "enterFullPassword": "Please enter full password",
   "associatedWorkers": "{{count}} associated workers",
   "getStarted": "Get Started",
-
   "title1": "Title 1",
   "title2": "Title 2",
   "title3": "Title 3",
   "text1": "Text 1",
   "text2": "Text 2",
   "text3": "Text 3",
-
   "callMediator": "Call Contractor",
-
   "allSavedAddress": "All Saved Address",
   "savedAddresses": "Saved Addresses",
   "additionalDetails": "Additional Details",
@@ -1366,7 +1336,6 @@
   "show": "Show",
   "showApplicationsDetails": "Show Applications",
   "fetchCurrentLocation": "Fetch Current Location",
-
   "startFrom": "Start from {{date}}, {{day}}",
   "endOn": "End on {{date}}, {{day}}",
   "date": "{{date}}, {{day}}",
@@ -1381,19 +1350,16 @@
   "yourBookings": "Your Bookings",
   "yourApplications": "Your Applications",
   "allApplications": "ALL APPLICATIONS",
-  "allBookings": "ALL BOOKINGS",
   "receivedRequests": "Received Requests",
   "sentRequestsUpper": "SENT REQUESTS",
   "receivedRequestsUpper": "RECEIVED REQUESTS",
   "receivedBookingRequests": "Received Booking Requests",
   "sentBookingRequests": "Sent Booking Requests",
   "appTagline": "Be Skilled, Be Successful",
-  "remove": "Remove",
-
+  "remove": "Tap to remove",
   "verificationTitle": "Verification",
   "enterMobileTitle": "Enter Mobile Number",
   "otpTitle": "Enter Code",
-
   "verificationDescription1": "We will send you a One Time Password on your phone number",
   "verificationDescription2": "You will receive an Code via SMS",
   "enterMobileSubtext": "Please enter your 10-digit mobile number to continue",
@@ -1402,22 +1368,18 @@
   "mobileNumberPlaceholder": "Enter your phone number",
   "otpPlaceholder": "Enter Code",
   "sendOtp": "Send Code",
-  "verifyOtp": "Verify Code",
   "resendOtp": "Resend Code",
   "resendOtpIn": "Resend Code in {{seconds}} seconds",
-
   "mobileRequired": "Mobile number is required",
   "mobileInvalid": "Enter a valid 10-digit mobile number",
   "otpRequired": "Code is required",
   "otpInvalid": "Enter a valid 6-digit Code",
-
   "checkingMobile": "Checking mobile number...",
   "otpSentSuccess": "Code Sent Successfully",
   "otpSentFail": "Failed to send Code",
   "verifyingOtp": "Verifying Code...",
   "otpVerified": "Code Verified Successfully",
   "otpInvalidMessage": "Invalid Code",
-
   "resetYourPassword": "Reset Your Password",
   "resetPasswordDescription": "Please enter your mobile number to receive a verification code.",
   "verifyMobileNumber": "Verify Mobile Number",
@@ -1436,7 +1398,6 @@
   "pleaseEnterYourPersonalDetailsToContinue": "Please enter your personal details to continue.",
   "listenAboutService": "Listen About Work",
   "speakingAndClose": "Speaking...close it",
-
   "leaveWithoutSaving": "Leave Without Saving?",
   "areYouWantLeave": "Are you sure you want to leave? Any unsaved changes will be lost.",
   "stay": "Stay",
@@ -1447,100 +1408,168 @@
   "notAdded": "Not Added",
   "applyByMediator": "Applied By Contractor",
   "askToMediator": "Call To Contractor",
-
   "farmingWork": "Farming Work",
   "fieldPreparation": "Field Preparation",
   "cropCare": "Crop Care",
   "harvestWork": "Harvest Work",
   "farmSupport": "Farm Support",
-
   "shopWork": "Shop Work",
   "shopStaff": "Shop Staff",
   "shopLogistics": "Loading & Delivery",
   "shopBusiness": "Business Support",
-
   "homeMaintenance": "Home Maintenance",
   "houseHelp": "House Help",
   "homeRepair": "Repair Work",
-
   "constructionWork": "Construction Work",
   "mistriWork": "Mistri Work",
   "siteStaff": "Site Staff",
-
   "animalWork": "Animal Work",
   "dairyWork": "Dairy Work",
-
   "driverJobs": "Driver Jobs",
   "vehicleDrivers": "Vehicle Drivers",
   "heavyDrivers": "Heavy Machine Drivers",
-
   "factoryJobs": "Factory Jobs",
   "factoryStaff": "Factory Staff",
   "factoryOffice": "Office Staff",
   "factoryLoading": "Loading Work",
-
   "electricalRepair": "Electrical & Appliance Repair",
   "applianceRepair": "Appliance Repair",
   "wiringWork": "Wiring Work",
   "wiring": "Wiring Setup",
-
   "generalLabour": "General Labour",
   "dailyLabour": "Daily Labour",
-
-  "jutai": { "singular": "Plowing Worker", "plural": "Plowing Workers" },
-  "bueai": { "singular": "Sowing Worker", "plural": "Sowing Workers" },
-  "sichai": { "singular": "Irrigation Worker", "plural": "Irrigation Workers" },
-  "khad": { "singular": "Fertilizer Worker", "plural": "Fertilizer Workers" },
-  "chidkaab": { "singular": "Spraying Worker", "plural": "Spraying Workers" },
-
-  "niraiGudai": { "singular": "Weeding Worker", "plural": "Weeding Workers" },
-  "dekhbhal": { "singular": "Crop Care Worker", "plural": "Crop Care Workers" },
-  "rakhwali": { "singular": "Crop Guard", "plural": "Crop Guards" },
-
+  "jutai": {
+    "singular": "Plowing Worker",
+    "plural": "Plowing Workers"
+  },
+  "bueai": {
+    "singular": "Sowing Worker",
+    "plural": "Sowing Workers"
+  },
+  "sichai": {
+    "singular": "Irrigation Worker",
+    "plural": "Irrigation Workers"
+  },
+  "khad": {
+    "singular": "Fertilizer Worker",
+    "plural": "Fertilizer Workers"
+  },
+  "chidkaab": {
+    "singular": "Spraying Worker",
+    "plural": "Spraying Workers"
+  },
+  "niraiGudai": {
+    "singular": "Weeding Worker",
+    "plural": "Weeding Workers"
+  },
+  "dekhbhal": {
+    "singular": "Crop Care Worker",
+    "plural": "Crop Care Workers"
+  },
+  "rakhwali": {
+    "singular": "Crop Guard",
+    "plural": "Crop Guards"
+  },
   "katai": {
     "singular": "Crop Cutting Worker",
     "plural": "Crop Cutting Workers"
   },
-  "thresing": { "singular": "Threshing Worker", "plural": "Threshing Workers" },
-  "harvesting": { "singular": "Harvest Worker", "plural": "Harvest Workers" },
-  "dulai": { "singular": "Loading Worker", "plural": "Loading Workers" },
-  "binai": { "singular": "Picking Worker", "plural": "Picking Workers" },
-  "chhatai": { "singular": "Sorting Worker", "plural": "Sorting Workers" },
-  "taarBandi": { "singular": "Fence Worker", "plural": "Fence Workers" },
-
-  "shopHelper": { "singular": "Shop Helper", "plural": "Shop Helpers" },
-  "cashier": { "singular": "Cashier", "plural": "Cashiers" },
+  "thresing": {
+    "singular": "Threshing Worker",
+    "plural": "Threshing Workers"
+  },
+  "harvesting": {
+    "singular": "Harvest Worker",
+    "plural": "Harvest Workers"
+  },
+  "dulai": {
+    "singular": "Loading Worker",
+    "plural": "Loading Workers"
+  },
+  "binai": {
+    "singular": "Picking Worker",
+    "plural": "Picking Workers"
+  },
+  "chhatai": {
+    "singular": "Sorting Worker",
+    "plural": "Sorting Workers"
+  },
+  "taarBandi": {
+    "singular": "Fence Worker",
+    "plural": "Fence Workers"
+  },
+  "shopHelper": {
+    "singular": "Shop Helper",
+    "plural": "Shop Helpers"
+  },
+  "cashier": {
+    "singular": "Cashier",
+    "plural": "Cashiers"
+  },
   "computerOperator": {
     "singular": "Computer Operator",
     "plural": "Computer Operators"
   },
-  "accountant": { "singular": "Accountant", "plural": "Accountants" },
-  "palledar": { "singular": "Loader", "plural": "Loaders" },
-  "packer": { "singular": "Packer", "plural": "Packers" },
-  "deliveryBoy": { "singular": "Delivery Boy", "plural": "Delivery Boys" },
-  "recovery": { "singular": "Recovery Worker", "plural": "Recovery Workers" },
+  "accountant": {
+    "singular": "Accountant",
+    "plural": "Accountants"
+  },
+  "palledar": {
+    "singular": "Loader",
+    "plural": "Loaders"
+  },
+  "packer": {
+    "singular": "Packer",
+    "plural": "Packers"
+  },
+  "deliveryBoy": {
+    "singular": "Delivery Boy",
+    "plural": "Delivery Boys"
+  },
+  "recovery": {
+    "singular": "Recovery Worker",
+    "plural": "Recovery Workers"
+  },
   "marketing": {
     "singular": "Marketing Worker",
     "plural": "Marketing Workers"
   },
-
-  "maid": { "singular": "Maid", "plural": "Maids" },
-  "gardener": { "singular": "Gardener", "plural": "Gardeners" },
+  "maid": {
+    "singular": "Maid",
+    "plural": "Maids"
+  },
+  "gardener": {
+    "singular": "Gardener",
+    "plural": "Gardeners"
+  },
   "securityGuard": {
     "singular": "Security Guard",
     "plural": "Security Guards"
   },
-  "driver": { "singular": "Driver", "plural": "Drivers" },
+  "driver": {
+    "singular": "Driver",
+    "plural": "Drivers"
+  },
   "generalHelper": {
     "singular": "General Helper",
     "plural": "General Helpers"
   },
-
-  "plumber": { "singular": "Plumber", "plural": "Plumbers" },
-  "electrician": { "singular": "Electrician", "plural": "Electricians" },
-  "painter": { "singular": "Painter", "plural": "Painters" },
-  "carpenter": { "singular": "Carpenter", "plural": "Carpenters" },
-  "mistri": { "singular": "Mason", "plural": "Masons" },
+  "plumber": {
+    "singular": "Plumber",
+    "plural": "Plumbers"
+  },
+  "electrician": {
+    "singular": "Electrician",
+    "plural": "Electricians"
+  },
+  "painter": {
+    "singular": "Painter",
+    "plural": "Painters"
+  },
+  "carpenter": {
+    "singular": "Carpenter",
+    "plural": "Carpenters"
+  },
   "beldaar": {
     "singular": "Construction Helper",
     "plural": "Construction Helpers"
@@ -1549,50 +1578,110 @@
     "singular": "Low Voltage Technician",
     "plural": "Low Voltage Technicians"
   },
-
-  "tileMistri": { "singular": "Tile Mason", "plural": "Tile Masons" },
-  "brickMistri": { "singular": "Brick Mason", "plural": "Brick Masons" },
-  "plasterMistri": { "singular": "Plaster Mason", "plural": "Plaster Masons" },
+  "tileMistri": {
+    "singular": "Tile Mason",
+    "plural": "Tile Masons"
+  },
+  "brickMistri": {
+    "singular": "Brick Mason",
+    "plural": "Brick Masons"
+  },
+  "plasterMistri": {
+    "singular": "Plaster Mason",
+    "plural": "Plaster Masons"
+  },
   "shuttering": {
     "singular": "Shuttering Worker",
     "plural": "Shuttering Workers"
   },
-  "steelFixer": { "singular": "Steel Fixer", "plural": "Steel Fixers" },
-  "welder": { "singular": "Welder", "plural": "Welders" },
-  "pipeWelder": { "singular": "Pipe Welder", "plural": "Pipe Welders" },
-  "ducting": { "singular": "Ducting Worker", "plural": "Ducting Workers" },
-  "beldaarConstruction": { "singular": "Beldaar", "plural": "Beldaars" },
-  "storeKeeper": { "singular": "Store Keeper", "plural": "Store Keepers" },
-  "supervisor": { "singular": "Supervisor", "plural": "Supervisors" },
-  "foreman": { "singular": "Foreman", "plural": "Foremen" },
-  "fitter": { "singular": "Fitter", "plural": "Fitters" },
-
+  "steelFixer": {
+    "singular": "Steel Fixer",
+    "plural": "Steel Fixers"
+  },
+  "welder": {
+    "singular": "Welder",
+    "plural": "Welders"
+  },
+  "pipeWelder": {
+    "singular": "Pipe Welder",
+    "plural": "Pipe Welders"
+  },
+  "ducting": {
+    "singular": "Ducting Worker",
+    "plural": "Ducting Workers"
+  },
+  "beldaarConstruction": {
+    "singular": "Beldaar",
+    "plural": "Beldaars"
+  },
+  "storeKeeper": {
+    "singular": "Store Keeper",
+    "plural": "Store Keepers"
+  },
+  "supervisor": {
+    "singular": "Supervisor",
+    "plural": "Supervisors"
+  },
+  "foreman": {
+    "singular": "Foreman",
+    "plural": "Foremen"
+  },
+  "fitter": {
+    "singular": "Fitter",
+    "plural": "Fitters"
+  },
   "veterinary": {
     "singular": "Veterinary Helper",
     "plural": "Veterinary Helpers"
   },
-  "milking": { "singular": "Milking Worker", "plural": "Milking Workers" },
-  "animalFeeder": { "singular": "Animal Feeder", "plural": "Animal Feeders" },
+  "milking": {
+    "singular": "Milking Worker",
+    "plural": "Milking Workers"
+  },
+  "animalFeeder": {
+    "singular": "Animal Feeder",
+    "plural": "Animal Feeders"
+  },
   "animalCleaner": {
     "singular": "Animal Cleaner",
     "plural": "Animal Cleaners"
   },
-
-  "truckDriver": { "singular": "Truck Driver", "plural": "Truck Drivers" },
-  "carDriver": { "singular": "Car Driver", "plural": "Car Drivers" },
+  "truckDriver": {
+    "singular": "Truck Driver",
+    "plural": "Truck Drivers"
+  },
+  "carDriver": {
+    "singular": "Car Driver",
+    "plural": "Car Drivers"
+  },
   "tractorDriver": {
     "singular": "Tractor Driver",
     "plural": "Tractor Drivers"
   },
-  "bikeDriver": { "singular": "Bike Driver", "plural": "Bike Drivers" },
-  "busDriver": { "singular": "Bus Driver", "plural": "Bus Drivers" },
+  "bikeDriver": {
+    "singular": "Bike Driver",
+    "plural": "Bike Drivers"
+  },
+  "busDriver": {
+    "singular": "Bus Driver",
+    "plural": "Bus Drivers"
+  },
   "ambulanceDriver": {
     "singular": "Ambulance Driver",
     "plural": "Ambulance Drivers"
   },
-  "tempoDriver": { "singular": "Tempo Driver", "plural": "Tempo Drivers" },
-  "jcbDriver": { "singular": "JCB Driver", "plural": "JCB Drivers" },
-  "craneDriver": { "singular": "Crane Driver", "plural": "Crane Drivers" },
+  "tempoDriver": {
+    "singular": "Tempo Driver",
+    "plural": "Tempo Drivers"
+  },
+  "jcbDriver": {
+    "singular": "JCB Driver",
+    "plural": "JCB Drivers"
+  },
+  "craneDriver": {
+    "singular": "Crane Driver",
+    "plural": "Crane Drivers"
+  },
   "forkliftDriver": {
     "singular": "Forklift Driver",
     "plural": "Forklift Drivers"
@@ -1601,24 +1690,38 @@
     "singular": "Road Roller Driver",
     "plural": "Road Roller Drivers"
   },
-  "rmcDriver": { "singular": "RMC Driver", "plural": "RMC Drivers" },
-  "loaderDriver": { "singular": "Loader Driver", "plural": "Loader Drivers" },
+  "rmcDriver": {
+    "singular": "RMC Driver",
+    "plural": "RMC Drivers"
+  },
+  "loaderDriver": {
+    "singular": "Loader Driver",
+    "plural": "Loader Drivers"
+  },
   "combineDriver": {
     "singular": "Combine Driver",
     "plural": "Combine Drivers"
   },
-  "hydraDriver": { "singular": "Hydra Driver", "plural": "Hydra Drivers" },
-
+  "hydraDriver": {
+    "singular": "Hydra Driver",
+    "plural": "Hydra Drivers"
+  },
   "factoryHelper": {
     "singular": "Factory Helper",
     "plural": "Factory Helpers"
   },
-  "operator": { "singular": "Machine Operator", "plural": "Machine Operators" },
+  "operator": {
+    "singular": "Machine Operator",
+    "plural": "Machine Operators"
+  },
   "maintenance": {
     "singular": "Maintenance Worker",
     "plural": "Maintenance Workers"
   },
-  "janitor": { "singular": "Cleaner", "plural": "Cleaners" },
+  "janitor": {
+    "singular": "Cleaner",
+    "plural": "Cleaners"
+  },
   "factorySupervisor": {
     "singular": "Factory Supervisor",
     "plural": "Factory Supervisors"
@@ -1639,13 +1742,18 @@
     "singular": "Data Entry Operator",
     "plural": "Data Entry Operators"
   },
-  "gateKeeper": { "singular": "Gate Keeper", "plural": "Gate Keepers" },
+  "gateKeeper": {
+    "singular": "Gate Keeper",
+    "plural": "Gate Keepers"
+  },
   "factoryPalledar": {
     "singular": "Factory Loader",
     "plural": "Factory Loaders"
   },
-
-  "acMechanic": { "singular": "AC Mechanic", "plural": "AC Mechanics" },
+  "acMechanic": {
+    "singular": "AC Mechanic",
+    "plural": "AC Mechanics"
+  },
   "fridgeMechanic": {
     "singular": "Fridge Mechanic",
     "plural": "Fridge Mechanics"
@@ -1662,7 +1770,10 @@
     "singular": "Geyser Mechanic",
     "plural": "Geyser Mechanics"
   },
-  "tvMechanic": { "singular": "TV Mechanic", "plural": "TV Mechanics" },
+  "tvMechanic": {
+    "singular": "TV Mechanic",
+    "plural": "TV Mechanics"
+  },
   "inverterMechanic": {
     "singular": "Inverter Mechanic",
     "plural": "Inverter Mechanics"
@@ -1671,81 +1782,66 @@
     "singular": "Motor/Submersible Mechanic",
     "plural": "Motor/Submersible Mechanics"
   },
-
   "generalLabourer": {
     "singular": "General Labour",
     "plural": "General Labourers"
   },
-  "palledarGeneral": { "singular": "Loader", "plural": "Loaders" },
-
+  "palledarGeneral": {
+    "singular": "Loader",
+    "plural": "Loaders"
+  },
   "noInternetTitle": "No internet connection",
   "noInternetSubtitle": "Please check your internet connection and try again",
   "noInternetRetry": "TRY AGAIN",
   "noInternetConnectAdmin": "CONNECT TO ADMINISTRATION",
-
   "notificationsEnabled": "Notifications enabled",
-
   "youHaveAppliedSuccessfully": "You have applied successfully",
   "youAppliedWithTheseMembers": "You applied with these members",
   "youAppliedIndividually": "You applied individually",
   "youAppliedByMediator": "You applied by mediator",
   "appliedSkill": "Applied skill",
   "yourAppliedSkill": "Your applied skill",
-
   "pleaseEnterOTP": "Please Enter Code",
-
   "moreThanOneWorkers": "More than one workers",
   "multipleSkills": "Multiple skills",
   "requestToActivateAccountButton": "Request To Activate Account",
   "passwordAddedSuccessfully": "Password added successfully",
-
   "userAddedSuccessfully": "User added successfully",
   "userDetailsAddedSuccessfully": "User details added successfully",
   "userRoleAddedSuccessfully": "User role added successfully",
   "profilePictureAddedSuccessfully": "Profile picture added successfully",
-
   "voiceCallMayBeCome": "You may receive the Code via a voice call.",
-
   "updateAvailable": "Update Available",
   "newVersionIsAvailable": "A new version is available. Restarting...",
   "restart": "Restart",
-
   "age": "Age",
   "enterYourAge": "Enter your age",
   "ageIsRequired": "Age is required",
-
   "aadhaarNumber": "Aadhaar number",
   "enterYourAadhaarNumber": "Enter your Aadhaar number",
   "aadhaarIsRequired": "Aadhaar number is required",
   "aadhaarMustBe12Digits": "Aadhaar number must be exactly 12 digits",
-
   "required": "required",
   "noSkill": "No skill",
   "lessThanOneDay": "Less than {{duration}} day",
   "lessThanMultipleDays": "Less than {{duration}} days",
   "userAlreadyExist": "User is already exist",
-
   "joinWhatsappGroupTitle": "Join Our WhatsApp Group",
   "joinWhatsappGroupDescription": "Get new work updates, important information, and announcements directly on WhatsApp.",
   "joinWhatsappGroupButton": "Join WhatsApp Group",
-
   "updateRequired": "Update Required",
   "updateNow": "Update Now",
   "forceUpdateMessage": "A new version of the app is available. Please update the app to continue using all features.",
-
   "add": "Add Work",
   "talkDirect": "Talk Direct",
-
   "instaTitle": "Follow Us on Instagram",
   "instaDescription": "Get daily updates, reels, job posts and important announcements on Instagram.",
   "instaButtonText": "Follow Instagram",
-
   "supportTitle": "Need help with Login / Registration?",
   "supportSubtitle": "👉 Contact us immediately",
   "callUs": "Call Us",
   "whatsappUs": "WhatsApp Us",
   "supportWhatsappMessage": "Namaste, I need help with login/registration in the app",
-
   "allServicesSubHeading": "Find trusted employers near you and book services instantly 🚀",
   "workersListSubHeading": "Find trusted workers near you and hire instantly 👷‍♂️",
   "workersListCountBadge": "{{count}} workers",
@@ -1755,45 +1851,30 @@
   "refresh": "Refresh",
   "serviceListPullHint": "Pull down to refresh the list",
   "serviceListCountBadge": "{{count}} open",
-
   "fetchLocation": "Get My Location",
   "locationNotFound": "Location not found",
   "locationSaved": "Location saved successfully ✅",
   "locationError": "Unable to fetch location",
   "chooseFromFollowing": "Choose from the following options",
-
   "yourRole": "Your role",
   "changeRole": "Change role",
   "selectRole": "Select your role",
-  "worker": "Worker",
   "workerSubtitle": "Find jobs",
-  "employer": "Employer",
   "employerSubtitle": "Post jobs",
-  "mediator": "Contractor",
   "mediatorSubtitle": "Connect both",
-
   "workTypeTitle": "What type of work do you want to post?",
   "workTypeSubtitle": "Select the category so the right workers can find your job faster.",
   "workTypeHint": "This helps workers near you see your job first.",
   "workTypeRequired": "Please choose a work category",
-  "back": "Back",
   "nextContinue": "Next Step",
   "workSubTypeTitle": "Select the exact work",
   "workSubTypeSubtitle": "Choose what work needs to be done.",
   "workSubTypeHint": "This helps skilled workers contact you quickly.",
-  "selectWorkSubType": "Select Work Type",
   "workSubTypeRequired": "Please choose a work sub category",
-
-  "selectedWorkers": "Selected workers",
   "tapToAddWorkers": "Tap to add workers",
   "enterDetailsFor": "Enter details for",
   "workersNeeded": "workers needed",
-  "perDay": "per day",
   "enterPayPerDay": "Enter pay per day",
-  "remove": "Tap to remove",
-  "save": "Save",
-  "cancel": "Cancel",
-
   "addWorkPhotos": "Add work photos",
   "workPhotosGuide": "Photos help workers understand your work better. You can upload up to 3 photos.",
   "tips": "Tips",
@@ -1802,106 +1883,80 @@
   "tipOptional": "Photos are optional but increase responses",
   "maxThreeImages": "You can upload maximum 3 images",
   "postWork": "Post Work",
-
   "extraBenefits": "Add extra benefits",
   "benefitsHelpYou": "Providing facilities helps attract more workers.",
   "proTip": "Pro Tip",
   "benefitsIncreaseChances": "Works with food, stay or travel support get 2x more responses.",
-
   "jobDetailsTitle": "Describe the work",
   "jobDetailsSubtitle": "Tell workers how long the work is and what they need to do.",
   "describeWorkExample": "Example: Need 2 painters for house painting. Work includes wall preparation and painting. Tools will be provided.",
   "whatToWrite": "What should you write?",
   "descriptionTips": "Mention work type, tools, location details and any important instructions.",
-
   "whereAndWhenTitle": "Work location & start date",
   "whereAndWhenSubtitle": "Tell workers where the work is and when it will start.",
   "locationTipTitle": "Why this is important?",
   "locationTipText": "Workers decide quickly based on distance and start date. Clear info gets faster responses.",
-
   "hireWorkersTitle": "Hire workers",
   "hireWorkersSubtitle": "Choose workers, set salary and quantity.",
   "salaryTipTitle": "Tip to get faster applicants",
   "salaryTipText": "Higher and fair salary attracts workers faster.",
   "enterValidSalary": "Enter valid daily salary",
   "enterWorkerCount": "Enter number of workers",
-
   "selectWorkLocation": "Where should the work happen?",
-
   "reviewYourWorkPost": "Review Your Work",
   "reviewBeforeSubmitHint": "Please check all details carefully before posting the work.",
-
   "allTopWorkers": "Top Workers",
   "step": "Step",
-
   "food": "Food Provided",
   "living": "Stay / Room Provided",
   "travel": "Travel Allowance",
-
   "discoverWorkers": "Nearby workers ready to help",
   "discoverWorkersSubHeading": "These workers are available near your location. You can view profiles and hire them for your work easily.",
-
   "myActivityHeading": "My Activities (WORKER)",
   "myActivityTitle": "Activities",
   "myWorkHeaderGuide": "Here you can see who invited you for work and where you have applied. Accept requests quickly to start earning.",
-
   "tabReceivedWorkTitle": "Work Invitations",
   "tabReceivedWorkSubtitle": "Employers invited you",
-
   "tabAppliedWorkTitle": "Applied Works",
   "tabAppliedWorkSubtitle": "Works you applied for",
-
   "noReceivedRequestsTitle": "No work invitations yet",
   "noReceivedRequestsSubtitle": "Employers will send you requests here when they like your profile.",
   "noReceivedRequestsCTA": "Complete Profile",
-
   "noAppliedServicesTitle": "You haven’t applied for works yet",
   "noAppliedServicesSubtitle": "Go to search and apply for works near you to start getting work.",
   "noAppliedServicesCTA": "Find Work",
-
   "ctaCompleteProfileStep1": "Add your skills",
   "ctaCompleteProfileStep2": "Add your work photos",
   "ctaCompleteProfileStep3": "Set your location",
-
   "ctaFindWorkStep1": "Open Search",
   "ctaFindWorkStep2": "Choose nearby works",
   "ctaFindWorkStep3": "Tap Apply",
-
   "myWorkDashboard": "My Work (WORKER)",
   "myWorkTitle": "My Work",
   "myWorkDashboardSub": "Here you can see the work you got and your upcoming works.",
   "workTip": "Complete your work on time to get more work offers.",
-
   "noWorkYet": "No work yet",
   "findWork": "Find Work",
-
   "myEmployerDashboard": "Booked Workers",
   "employerActivityTitle": "My Activities (EMPLOYER)",
   "employerWorkHeaderGuide": "Track your tasks and created works here.",
-
   "tabSentRequestsTitle": "Sent Requests",
   "tabSentRequestsSubtitle": "View requests sent to workers",
   "tabCreatedServicesTitle": "My Created Works",
   "tabCreatedServicesSubtitle": "List of works you have created",
-
   "noSentRequestsTitle": "No Sent Requests",
   "noSentRequestsSubtitle": "You haven’t sent any requests to workers yet.",
   "noCreatedServicesTitle": "No Created Works",
   "noCreatedServicesSubtitle": "You haven’t created any works yet.",
-
   "employerCtaCompleteProfileStep1": "Complete your profile",
   "employerCtaCompleteProfileStep2": "Send requests to workers",
   "employerCtaCompleteProfileStep3": "Track responses to your requests",
-
   "employerCtaCreateServiceStep1": "Create a new service",
   "employerCtaCreateServiceStep2": "Fill in service details",
   "employerCtaCreateServiceStep3": "Make it available to workers",
-
   "createNewService": "Create New Work",
-
   "employerBookingHeaderGuide": "Track your created works and booked workers here.",
   "employerTip": "Manage your services and requests on time.",
-
   "mediatorActivityTitle": "My Activity (MEDIATOR)",
   "mediatorWorkHeaderGuide": "Track team requests and services you applied for as a mediator.",
   "tabTeamJoiningRequestsTitle": "Team Joining Requests",
@@ -1919,20 +1974,57 @@
   "mediatorStepApplyService": "Apply for work",
   "mediatorStepTrackService": "Track work status",
   "mediatorCTAApplyService": "Apply Now",
-
   "myMediatorDashboard": "My Work (MEDIATOR)",
   "mediatorDashboardGuide": "Here you can see all the works where you have applied as a mediator. Manage and track your selections easily.",
   "mediatorTip": "Tip: Apply proactively, and keep your profile updated to increase your chances of being selected as a mediator.",
   "noMediatorServicesTitle": "No Works Assigned Yet",
   "exploreServices": "Explore Available Works",
-
   "uploadImages": "Upload Work Photos",
   "addNewWork": "Add new work",
-
   "profilePictureOptional": "Profile photo is optional. You can skip this step.",
   "completeNameAgeGenderAddress": "Please complete name, age, gender, address, and profile photo.",
   "pleaseCompleteMissingFields": "Please complete the highlighted fields.",
   "openCamera": "Open Camera",
   "selfieHelpsWork": "People trust profiles with photos more, and they get work faster.",
-  "missingProfileDetailsToast": "Some details are missing. Please fill highlighted fields."
+  "missingProfileDetailsToast": "Some details are missing. Please fill highlighted fields.",
+  "customerServiceAssistant": {
+    "singular": "Customer Work Assistant",
+    "plural": "Customer Work Assistants"
+  },
+  "glassFitter": {
+    "singular": "Glass Fitter",
+    "plural": "Glass Fitters"
+  },
+  "inventoryTaker": {
+    "singular": "Inventory Taker",
+    "plural": "Inventory Takers"
+  },
+  "laborers": {
+    "singular": "Labourer",
+    "plural": "Labourers"
+  },
+  "manualCutting": {
+    "singular": "Manual Cutting Worker",
+    "plural": "Manual Cutting Workers"
+  },
+  "marbleFitter": {
+    "singular": "Marble Fitter",
+    "plural": "Marble Fitters"
+  },
+  "masons": {
+    "singular": "Mason",
+    "plural": "Masons"
+  },
+  "seasonalFarmLabor": {
+    "singular": "Seasonal Farm Worker",
+    "plural": "Seasonal Farm Workers"
+  },
+  "tileLayer": {
+    "singular": "Tile Layer",
+    "plural": "Tile Layers"
+  },
+  "waterDistribution": {
+    "singular": "Water Distribution Worker",
+    "plural": "Water Distribution Workers"
+  }
 }

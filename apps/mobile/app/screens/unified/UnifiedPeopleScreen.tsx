@@ -43,6 +43,10 @@ const UnifiedPeopleScreen = () => {
   const [serviceSort, setServiceSort] = useState<ServiceSortId>("nearest");
   const [contractorSort, setContractorSort] =
     useState<ContractorSortId>("nearest");
+  const [serviceCity, setServiceCity] = useState("");
+  const [serviceSkill, setServiceSkill] = useState("");
+  const [contractorCity, setContractorCity] = useState("");
+  const [contractorSkill, setContractorSkill] = useState("");
 
   const {
     data: servicesRes,
@@ -53,13 +57,21 @@ const UnifiedPeopleScreen = () => {
     hasNextPage: hasMoreServices,
     refetch: refetchServices,
   } = useInfiniteQuery({
-    queryKey: ["unifiedPeopleActiveServices", userDetails?._id, serviceSort],
+    queryKey: [
+      "unifiedPeopleActiveServices",
+      userDetails?._id,
+      serviceSort,
+      serviceCity,
+      serviceSkill,
+    ],
     queryFn: ({ pageParam }) =>
       SERVICE.fetchAllServices({
         pageParam,
         status: "ACTIVE",
         payload: {
           sortBy: serviceSort,
+          ...(serviceCity ? { city: serviceCity } : {}),
+          ...(serviceSkill ? { skills: [serviceSkill] } : {}),
         },
       }),
     initialPageParam: 1,
@@ -83,13 +95,21 @@ const UnifiedPeopleScreen = () => {
     hasNextPage: hasMoreContractors,
     refetch: refetchContractors,
   } = useInfiniteQuery({
-    queryKey: ["unifiedPeopleContractors", userDetails?._id, contractorSort],
+    queryKey: [
+      "unifiedPeopleContractors",
+      userDetails?._id,
+      contractorSort,
+      contractorCity,
+      contractorSkill,
+    ],
     queryFn: ({ pageParam }) =>
       USER.fetchAllUsers({
         pageParam,
         role: "MEDIATOR",
         payload: {
           sortBy: contractorSort,
+          ...(contractorCity ? { city: contractorCity } : {}),
+          ...(contractorSkill ? { skills: [contractorSkill] } : {}),
         },
       }),
     initialPageParam: 1,
@@ -153,6 +173,10 @@ const UnifiedPeopleScreen = () => {
             headingTitleKey="activeWorkHeading"
             selectedSort={serviceSort}
             onSelectSort={setServiceSort}
+            selectedCity={serviceCity}
+            onSelectCity={setServiceCity}
+            selectedSkill={serviceSkill}
+            onSelectSkill={setServiceSkill}
           />
         ) : (
           <AllWorkers
@@ -168,6 +192,10 @@ const UnifiedPeopleScreen = () => {
             listingRoleType="mediator"
             selectedSort={contractorSort}
             onSelectSort={setContractorSort}
+            selectedCity={contractorCity}
+            onSelectCity={setContractorCity}
+            selectedSkill={contractorSkill}
+            onSelectSkill={setContractorSkill}
           />
         )}
       </View>

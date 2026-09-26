@@ -9,19 +9,22 @@ import FiltersWorkers from "./filterWorkers";
 import { t } from "@/utils/translationHelper";
 import WorkersLoadingPlaceholder from "@/components/commons/LoadingPlaceholders/ListingVerticalWorkerPlaceholder";
 import GradientWrapper from "@/components/commons/GradientWrapper";
-import ListingSearchToolbar from "@/components/commons/ListingSearchToolbar";
+import ListingFilterBar from "@/components/commons/ListingFilterBar";
 import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
 import {
-  filterUsersBySearch,
-  filterUsersBySearchLoose,
+  filterListingsByCity,
+  filterUsersBySkill,
   sortContractorList,
   sortWorkerList,
   type ContractorSortId,
   type WorkerSortId,
 } from "@/utils/listingBrowse";
+import { officialListingSkills } from "@/utils/officialListingSkills";
 import i18n from "@/utils/i18n";
 import APP_CONTEXT from "@/app/context/locale";
 import Atoms from "@/app/AtomStore";
+import USER from "@/app/api/user";
+import { useQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 
 const WORKER_TAB_DEFS: { id: WorkerSortId; labelKey: string }[] = [
@@ -49,14 +52,37 @@ const AllWorkers = ({
   listingRoleType = "worker",
   selectedSort = "nearest",
   onSelectSort,
+  selectedCity = "",
+  onSelectCity,
+  selectedSkill = "",
+  onSelectSkill,
 }: any) => {
   APP_CONTEXT.useApp();
   const userDetails = useAtomValue(Atoms?.UserAtom);
   const [isAddFilters, setIsAddFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [city, setCity] = useState<string>(selectedCity);
+  const [skill, setSkill] = useState<string>(selectedSkill);
 
   const browseKind = listingRoleType === "mediator" ? "contractors" : "workers";
   const enforcedRole = browseKind === "contractors" ? "MEDIATOR" : "WORKER";
+
+  // Each dropdown is scoped by the other selection so every option it offers
+  // still returns results.
+  const { data: cities = [], isLoading: loadingCities } = useQuery({
+    queryKey: ["userCities", enforcedRole, skill],
+    queryFn: () => USER.fetchUserCities(enforcedRole, skill),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: skillCounts = [], isLoading: loadingSkills } = useQuery({
+    queryKey: ["userSkills", enforcedRole, city],
+    queryFn: () => USER.fetchUserSkills(enforcedRole, city),
+    staleTime: 5 * 60 * 1000,
+  });
+  const skills = useMemo(
+    () => officialListingSkills(skillCounts),
+    [skillCounts],
+  );
 
   const [workerSort, setWorkerSort] = useState<WorkerSortId>("nearest");
   const [contractorSort, setContractorSort] =
@@ -69,6 +95,14 @@ const AllWorkers = ({
       setWorkerSort(selectedSort as WorkerSortId);
     }
   }, [browseKind, selectedSort]);
+
+  React.useEffect(() => {
+    setCity(selectedCity);
+  }, [selectedCity]);
+
+  React.useEffect(() => {
+    setSkill(selectedSkill);
+  }, [selectedSkill]);
 
   const sortTabs = useMemo(() => {
     const defs =
@@ -90,13 +124,23 @@ const AllWorkers = ({
     }
   };
 
+  const handleSelectCity = (nextCity: string) => {
+    setCity(nextCity);
+    if (typeof onSelectCity === "function") {
+      onSelectCity(nextCity);
+    }
+  };
+
+  const handleSelectSkill = (nextSkill: string) => {
+    setSkill(nextSkill);
+    if (typeof onSelectSkill === "function") {
+      onSelectSkill(nextSkill);
+    }
+  };
+
   const displayedData = useMemo(() => {
     const raw = Array.isArray(memoizedData) ? [...memoizedData] : [];
-    const q = searchQuery.trim();
-    let rows =
-      browseKind === "contractors"
-        ? filterUsersBySearchLoose(raw, q)
-        : filterUsersBySearch(raw, q);
+    let rows = filterUsersBySkill(filterListingsByCity(raw, city), skill);
     const userLoc = userDetails?.geoLocation ?? userDetails?.location ?? null;
     rows =
       browseKind === "contractors"
@@ -105,7 +149,8 @@ const AllWorkers = ({
     return rows;
   }, [
     memoizedData,
-    searchQuery,
+    city,
+    skill,
     browseKind,
     selectedSortId,
     userDetails?.geoLocation,
@@ -137,20 +182,30 @@ const AllWorkers = ({
     });
   };
 
-  const placeholderKey =
-    browseKind === "contractors"
-      ? "searchListPlaceholderContractors"
-      : "searchListPlaceholderWorkers";
+  const isContractors = browseKind === "contractors";
+  const cityTitleKey = isContractors
+    ? "selectCityForContractors"
+    : "selectCityForWorkers";
+  const skillTitleKey = isContractors
+    ? "selectSkillForContractors"
+    : "selectSkillForWorkers";
 
   return (
     <GradientWrapper>
       <View style={styles.container}>
-        <ListingSearchToolbar
+        <ListingFilterBar
           variant="onDark"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+          cities={cities}
+          selectedCity={city}
+          onSelectCity={handleSelectCity}
+          skills={skills}
+          selectedSkill={skill}
+          onSelectSkill={handleSelectSkill}
           onPressFilter={() => setIsAddFilters(true)}
-          placeholderKey={placeholderKey}
+          isLoading={loadingCities}
+          skillsLoading={loadingSkills}
+          titleKey={cityTitleKey}
+          skillTitleKey={skillTitleKey}
         />
 
         <ScrollableSortTabs

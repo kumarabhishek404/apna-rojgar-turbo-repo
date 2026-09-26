@@ -2,20 +2,24 @@ import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 import { t } from "@/utils/translationHelper";
 import { getUserIdFromToken } from "@/utils/authStorage";
+import {
+  getApiErrorMessage,
+  isTransientApiError,
+  logApiCatch,
+} from "@/utils/apiError";
+
+const toastUnlessTransient = (error: unknown, fallback: string) => {
+  if (isTransientApiError(error)) return;
+  TOAST?.error(getApiErrorMessage(error, fallback));
+};
 
 const getUserInfo = async () => {
   try {
     const response = await API_CLIENT.makeGetRequest(`/user/info`);
     return response?.data;
   } catch (error: any) {
-    console.error(
-      `[Users] [userService] An error occurred while refreshing user details  : `,
-      error,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while getting user details",
-    );
+    logApiCatch("[userService] refresh user details failed", error);
+    toastUnlessTransient(error, "An error occurred while getting user details");
     throw error;
   }
 };
@@ -80,13 +84,8 @@ const updateUserById = async (payload: any) => {
     );
     return await API_CLIENT.makePatchRequest(`/user/info`, body);
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while updating user : `,
-      error?.response?.data,
-    );
-    TOAST?.error(
-      error?.response?.data?.message || "An error occurred while updating user",
-    );
+    logApiCatch("[userService] update user failed", error);
+    TOAST?.error(getApiErrorMessage(error, "An error occurred while updating user"));
     throw error;
   }
 };
@@ -96,13 +95,9 @@ const updateSkills = async (payload: any) => {
     const data = await API_CLIENT.makePostRequest("/user/add-skill", payload);
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while adding skills in the worker : `,
-      error?.response?.data?.message,
-    );
+    logApiCatch("[userService] add skills failed", error);
     TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while adding skills in the worker",
+      getApiErrorMessage(error, "An error occurred while adding skills in the worker"),
     );
     throw error;
   }
@@ -116,13 +111,12 @@ const removeSkill = async (payload: any) => {
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while remove skill from the user profile : `,
-      error?.response?.data?.message,
-    );
+    logApiCatch("[userService] remove skill failed", error);
     TOAST?.error(
-      error?.response?.data?.message ||
+      getApiErrorMessage(
+        error,
         "An error occurred while remove skill from the user profile",
+      ),
     );
     throw error;
   }
@@ -186,15 +180,33 @@ const fetchAllUsers = async ({
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching users : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching users",
-    );
+    logApiCatch("[userService] fetch users failed", error);
+    toastUnlessTransient(error, "An error occurred while fetching users");
     throw error;
+  }
+};
+
+/** Cities where users of `role` are registered, for the listing city dropdown. */
+const fetchUserCities = async (role = "WORKER", skill = "") => {
+  try {
+    const query = new URLSearchParams({ role, ...(skill ? { skill } : {}) });
+    const response = await API_CLIENT.makeGetRequest(`/user/cities?${query}`);
+    return response?.data?.data ?? [];
+  } catch (error: unknown) {
+    logApiCatch("[userService] fetch cities failed", error);
+    return [];
+  }
+};
+
+/** Skills held by users of `role`, for the listing skill dropdown. */
+const fetchUserSkills = async (role = "WORKER", city = "") => {
+  try {
+    const query = new URLSearchParams({ role, ...(city ? { city } : {}) });
+    const response = await API_CLIENT.makeGetRequest(`/user/skills?${query}`);
+    return response?.data?.data ?? [];
+  } catch (error: unknown) {
+    logApiCatch("[userService] fetch skills failed", error);
+    return [];
   }
 };
 
@@ -203,14 +215,8 @@ const getUserDetails = async (id: any) => {
     const response = await API_CLIENT.makeGetRequest(`/user/detail/${id}`);
     return response?.data;
   } catch (error: any) {
-    console.error(
-      `[Users] [userService] An error occurred while fetching user details : `,
-      error,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while getting user details",
-    );
+    logApiCatch("[userService] fetch user details failed", error);
+    toastUnlessTransient(error, "An error occurred while getting user details");
     throw error;
   }
 };
@@ -222,13 +228,8 @@ const likeUser = async (payload: any) => {
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while liking user : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message || "An error occurred while liking user",
-    );
+    logApiCatch("[userService] like user failed", error);
+    TOAST?.error(getApiErrorMessage(error, "An error occurred while liking user"));
     throw error;
   }
 };
@@ -238,13 +239,8 @@ const unlikeUser = async ({ userId }: any) => {
     const data = await API_CLIENT.makeDeleteRequest(`/user/unlike/${userId}`);
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while unliking user : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message || "An error occurred while unliking user",
-    );
+    logApiCatch("[userService] unlike user failed", error);
+    TOAST?.error(getApiErrorMessage(error, "An error occurred while unliking user"));
     throw error;
   }
 };
@@ -258,14 +254,8 @@ const fetchAllLikedUsers = async ({ pageParam, skill }: any) => {
     );
     return data?.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching liked users : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching liked users",
-    );
+    logApiCatch("[userService] fetch liked users failed", error);
+    toastUnlessTransient(error, "An error occurred while fetching liked users");
     throw error;
   }
 };
@@ -278,14 +268,8 @@ const likeService = async (payload: any) => {
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while liking service : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while liking services",
-    );
+    logApiCatch("[userService] like service failed", error);
+    TOAST?.error(getApiErrorMessage(error, "An error occurred while liking services"));
     throw error;
   }
 };
@@ -298,14 +282,8 @@ const unLikeService = async (payload: any) => {
     );
     return data.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while unliking service : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching services",
-    );
+    logApiCatch("[userService] unlike service failed", error);
+    TOAST?.error(getApiErrorMessage(error, "An error occurred while unliking service"));
     throw error;
   }
 };
@@ -317,14 +295,8 @@ const fetchAllLikedServices = async ({ pageParam }: any) => {
     );
     return data?.data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while fetching services : `,
-      error?.response?.data?.message,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching services",
-    );
+    logApiCatch("[userService] fetch liked services failed", error);
+    toastUnlessTransient(error, "An error occurred while fetching services");
     throw error;
   }
 };
@@ -335,13 +307,9 @@ const addAppFeedback = async (payload: any) => {
     TOAST?.success(t("feedbackSubmittedSuccessfully"));
     return data;
   } catch (error: any) {
-    console.error(
-      `[userService] An error occurred while adding app feedback : `,
-      error?.response?.data?.data?.errors,
-    );
+    logApiCatch("[userService] add app feedback failed", error);
     TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while adding app feedback",
+      getApiErrorMessage(error, "An error occurred while adding app feedback"),
     );
     throw error;
   }
@@ -373,6 +341,8 @@ const USER = {
   disableAccount,
   enableAccount,
   fetchAllUsers,
+  fetchUserCities,
+  fetchUserSkills,
   getUserDetails,
   likeUser,
   unlikeUser,

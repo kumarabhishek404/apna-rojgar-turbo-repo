@@ -19,6 +19,52 @@ import {
   parseListingFeatureDays,
 } from "../utils/listingFeature.js";
 import {
+  buildCityAddressFilter,
+  listCities,
+} from "../utils/cityFromAddress.js";
+
+/** Shared match for the admin users table and its city/skill dropdowns. */
+const adminUsersBaseQuery = (req) => {
+  const status = String(req.query.status || "ACTIVE").trim().toUpperCase();
+  const role = String(req.query.role || "").trim().toUpperCase();
+  const source = String(req.query.source || "").trim().toLowerCase();
+  const search = String(req.query.search || "").trim();
+  const city = String(req.query.city || "").trim();
+  const skill = String(req.query.skill || "").trim();
+
+  const query = {};
+  if (status && status !== "ALL") query.status = status;
+  if (role && role !== "ALL") {
+    if (role === "-") query.role = { $in: [null, ""] };
+    else query.role = role;
+  }
+  if (source && source !== "ALL") {
+    if (source === "-") query.registrationSource = { $in: [null, ""] };
+    else query.registrationSource = source;
+  }
+  if (search) {
+    query.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { mobile: { $regex: search, $options: "i" } },
+      { "email.value": { $regex: search, $options: "i" } },
+    ];
+  }
+
+  return { query, city, skill };
+};
+
+const applyAdminUserPlaceFilters = async (
+  query,
+  { city, skill },
+  { includeCity = true, includeSkill = true } = {},
+) => {
+  if (includeSkill && skill) query["skills.skill"] = skill;
+  if (includeCity && city) {
+    const cityFilter = await buildCityAddressFilter(User, {}, city);
+    if (cityFilter) query.address = cityFilter;
+  }
+  return query;
+};
   isVerifiableRole,
   normalizeVerification,
   pendingVerificationQuery,
@@ -192,6 +238,7 @@ export const getAllUsers = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
   const skip = (page - 1) * limit;
+  const { query, city, skill } = adminUsersBaseQuery(req);
   const status = String(req.query.status || "ACTIVE").trim().toUpperCase();
   const role = String(req.query.role || "").trim().toUpperCase();
   const source = String(req.query.source || "").trim().toLowerCase();
@@ -232,6 +279,7 @@ export const getAllUsers = async (req, res) => {
   }
 
   try {
+    await applyAdminUserPlaceFilters(query, { city, skill });
     const [totalUsers, users, roleStats, verificationStats] = await Promise.all([
       User.countDocuments(query),
       User.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
@@ -306,6 +354,84 @@ export const getAllUsers = async (req, res) => {
   } catch (error) {
     logError(error, req, 500);
     res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+/**
+ * Districts where admin-visible users live, for the users-screen city dropdown.
+ * Honours the same role/status/source/search/skill filters as `getAllUsers`.
+ */
+export const getAdminUserCities = async (req, res) => {
+  try {
+    const { query, skill } = adminUsersBaseQuery(req);
+    await applyAdminUserPlaceFilters(query, { city: "", skill }, { includeCity: false });
+
+    return res.status(200).json({
+      success: true,
+      message: "Cities fetched successfully",
+      data: await listCities(User, query),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Something went wrong",
+    });
+  }
+};
+
+/**
+ * Official skills held by admin-visible users, for the users-screen skill dropdown.
+ * Honours the same role/status/source/search/city filters as `getAllUsers`.
+ */
+export const getAdminUserSkills = async (req, res) => {
+  try {
+    const { query, city } = adminUsersBaseQuery(req);
+    await applyAdminUserPlaceFilters(query, { city, skill: "" }, { includeSkill: false });
+
+    const rows = await User.aggregate([
+      { $match: query },
+      {
+        $project: {
+          skillSlugs: {
+            $setUnion: [
+              {
+                $filter: {
+                  input: {
+                    $map: {
+                      input: { $ifNull: ["$skills", []] },
+                      in: "$$this.skill",
+                    },
+                  },
+                  cond: {
+                    $and: [
+                      { $eq: [{ $type: "$$this" }, "string"] },
+                      { $ne: ["$$this", ""] },
+                    ],
+                  },
+                },
+              },
+              [],
+            ],
+          },
+        },
+      },
+      { $unwind: "$skillSlugs" },
+      { $group: { _id: "$skillSlugs", count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: "Skills fetched successfully",
+      data: rows.map((row) => ({ skill: row._id, count: row.count })),
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
       success: false,
       message: error?.message || "Something went wrong",
     });

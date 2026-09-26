@@ -1,11 +1,13 @@
 "use client";
 
-import { Clock, MapPin, Plus, Search, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Clock, MapPin, Plus } from "lucide-react";
+import { useRef } from "react";
+import CityFilterSelect from "@/components/filters/CityFilterSelect";
+import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
 import type { ServicesToolbarApi } from "@/components/services/servicesToolbarApi";
 import { useContainerMinWidth } from "@/lib/useContainerMinWidth";
 
-/** Inner width at which full search + text labels fit comfortably (Hindi labels, sort chips). */
+/** Inner width at which the city picker + text labels fit comfortably (Hindi labels, sort chips). */
 const TOOLBAR_SPACIOUS_PX = 560;
 
 const sortOptions = [
@@ -15,23 +17,22 @@ const sortOptions = [
 
 export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarApi }) {
   const {
-    search,
-    setSearch,
+    city,
+    setCity,
+    cities,
+    citiesLoading,
+    skill,
+    setSkill,
+    skills,
+    skillsLoading,
     sortBy,
     setSortBy,
     openCreateModal,
     showCreateButton = true,
-    searchPlaceholder,
     t,
   } = api;
-  const searchPh = searchPlaceholder ?? t("searchWorkPlaceholder", "Search work...");
   const containerRef = useRef<HTMLDivElement>(null);
   const spacious = useContainerMinWidth(containerRef, TOOLBAR_SPACIOUS_PX);
-  const [compactSearchOpen, setCompactSearchOpen] = useState(false);
-
-  useEffect(() => {
-    if (spacious) setCompactSearchOpen(false);
-  }, [spacious]);
 
   const sortChipClass = (active: boolean, iconOnly: boolean) =>
     `${
@@ -46,58 +47,25 @@ export default function ServicesToolbarFilters({ api }: { api: ServicesToolbarAp
 
   return (
     <div ref={containerRef} className="flex min-w-0 flex-col gap-2">
-      {!spacious && compactSearchOpen ? (
-        <div className="flex min-w-0 items-center gap-2">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={searchPh}
-            autoFocus
-            className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2"
-          />
-          <button
-            type="button"
-            onClick={() => setCompactSearchOpen(false)}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#22409a]/20 bg-white text-gray-600 transition hover:bg-[#eef3ff] hover:text-[#22409a]"
-            aria-label={t("close", "Close")}
-          >
-            <X className="h-5 w-5" strokeWidth={2} aria-hidden />
-          </button>
-        </div>
-      ) : null}
-
-      <div
-        className={`flex min-w-0 items-center justify-between gap-2 sm:gap-3 ${
-          !spacious && compactSearchOpen ? "justify-end" : ""
-        }`}
-      >
-        {spacious ? (
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={searchPh}
-            className="min-w-0 flex-1 rounded-xl border border-[#22409a]/20 bg-white px-3 py-2 text-sm text-gray-900 outline-none ring-[#22409a]/20 focus:border-[#22409a] focus:ring-2 sm:max-w-md"
-          />
-        ) : null}
-
-        {!spacious && !compactSearchOpen ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setCompactSearchOpen(true)}
-              className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${
-                search.trim()
-                  ? "border-[#22409a]/40 bg-[#eef3ff] text-[#22409a] shadow-sm"
-                  : "border-[#22409a]/20 bg-white text-[#22409a] hover:bg-[#eef3ff]"
-              }`}
-              aria-label={searchPh}
-              aria-expanded={compactSearchOpen}
-            >
-              <Search className="h-[1.125rem] w-[1.125rem]" strokeWidth={2} aria-hidden />
-            </button>
-            <div className="min-w-0 flex-1" aria-hidden />
-          </>
-        ) : null}
+      <div className="flex min-w-0 items-center justify-between gap-2 sm:gap-3">
+        <CityFilterSelect
+          cities={cities}
+          value={city}
+          onChange={setCity}
+          loading={citiesLoading}
+          compact={!spacious}
+          className={spacious ? "flex-1 sm:max-w-xs" : "flex-1"}
+          t={t}
+        />
+        <SkillFilterSelect
+          skills={skills}
+          value={skill}
+          onChange={setSkill}
+          loading={skillsLoading}
+          compact={!spacious}
+          className={spacious ? "flex-1 sm:max-w-xs" : "flex-1"}
+          t={t}
+        />
 
         <div className="flex shrink-0 items-center gap-2">
           {showCreateButton ? (

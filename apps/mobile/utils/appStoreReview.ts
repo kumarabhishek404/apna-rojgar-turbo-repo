@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { t } from "@/utils/translationHelper";
-import { openPlayStore } from "@/utils/openExternalLink";
+import { openPlayStoreWriteReview } from "@/utils/openExternalLink";
 
 const KEYS = {
   lastPromptedAt: "app_store_review_last_prompted_at",
@@ -101,11 +101,21 @@ async function isEligibleForAutoPrompt(): Promise<boolean> {
 }
 
 /**
- * After "Rate now": open this app's Play Store listing only.
- * Does not use Google's in-app review sheet.
+ * Opens the native Play / App Store in-app review sheet when available.
+ * Falls back to the Play Store write-a-review listing.
  */
 export async function launchAppStoreReview(): Promise<void> {
-  await openPlayStore();
+  try {
+    const available = await StoreReview.isAvailableAsync();
+    if (available) {
+      await StoreReview.requestReview();
+      return;
+    }
+  } catch (error) {
+    console.warn("[appStoreReview] requestReview failed:", error);
+  }
+
+  await openPlayStoreWriteReview();
 }
 
 function showSoftPromptAlert(): void {

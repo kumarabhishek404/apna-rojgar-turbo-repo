@@ -1,8 +1,10 @@
 import {
   getAllLikedUsers,
   getMyInfo,
+  getUserCities,
   handleApplyVerification,
   getUserDetails,
+  getUserSkills,
   getUsersOnRole,
   handleAddSkills,
   handleAddUserRating,
@@ -66,6 +68,8 @@ router.delete("/delete-account", verifyToken, handleDeleteAccount);
 router.patch("/enable-account", verifyToken, handleEnableAccount);
 
 router.post("/all", verifyToken, userStatus, getUsersOnRole);
+router.get("/cities", verifyToken, userStatus, getUserCities);
+router.get("/skills", verifyToken, userStatus, getUserSkills);
 router.get("/pending", verifyToken, userStatus, checkAdmin, getPendingUsers);
 router.get(
   "/suspended",

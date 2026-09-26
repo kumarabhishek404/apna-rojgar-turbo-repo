@@ -14,14 +14,18 @@ import { t } from "@/utils/translationHelper";
 import ListingsServicesPlaceholder from "@/components/commons/LoadingPlaceholders/ListingServicePlaceholder";
 import APP_CONTEXT from "@/app/context/locale";
 import GradientWrapper from "@/components/commons/GradientWrapper";
-import ListingSearchToolbar from "@/components/commons/ListingSearchToolbar";
+import ListingFilterBar from "@/components/commons/ListingFilterBar";
 import ScrollableSortTabs from "@/components/commons/ScrollableSortTabs";
 import CustomText from "@/components/commons/CustomText";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import SERVICE from "@/app/api/services";
 import {
-  filterServicesBySearch,
+  filterListingsByCity,
+  filterServicesBySkill,
   type ServiceSortId,
 } from "@/utils/listingBrowse";
+import { officialListingSkills } from "@/utils/officialListingSkills";
 import i18n from "@/utils/i18n";
 
 const SERVICE_TAB_DEFS: { id: ServiceSortId; labelKey: string }[] = [
@@ -46,13 +50,34 @@ const AllServices = ({
   headingTitleKey = "allServices",
   selectedSort = "nearest",
   onSelectSort,
+  selectedCity = "",
+  onSelectCity,
+  selectedSkill = "",
+  onSelectSkill,
   activeCategoryType,
   onClearCategoryFilter,
 }: any) => {
   const [isAddFilters, setIsAddFilters] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [city, setCity] = useState<string>(selectedCity);
+  const [skill, setSkill] = useState<string>(selectedSkill);
   const [serviceSort, setServiceSort] = useState<ServiceSortId>(selectedSort);
   const { role } = APP_CONTEXT.useApp();
+
+  const { data: cities = [], isLoading: loadingCities } = useQuery({
+    queryKey: ["serviceCities", skill],
+    queryFn: () => SERVICE.fetchServiceCities(skill),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: skillCounts = [], isLoading: loadingSkills } = useQuery({
+    queryKey: ["serviceSkills", city],
+    queryFn: () => SERVICE.fetchServiceSkills(city),
+    staleTime: 5 * 60 * 1000,
+  });
+  const skills = useMemo(
+    () => officialListingSkills(skillCounts),
+    [skillCounts],
+  );
 
   const safeServicesData = useMemo(
     () =>
@@ -72,9 +97,19 @@ const AllServices = ({
     setServiceSort(selectedSort);
   }, [selectedSort]);
 
-  const displayedData = useMemo(() => {
-    return filterServicesBySearch([...safeServicesData], searchQuery);
-  }, [safeServicesData, searchQuery]);
+  React.useEffect(() => {
+    setCity(selectedCity);
+  }, [selectedCity]);
+
+  React.useEffect(() => {
+    setSkill(selectedSkill);
+  }, [selectedSkill]);
+
+  const displayedData = useMemo(
+    () =>
+      filterServicesBySkill(filterListingsByCity([...safeServicesData], city), skill),
+    [safeServicesData, city, skill],
+  );
   const hasListContent =
     displayedData.length > 0 ||
     (Array.isArray(safeServicesData) && safeServicesData.length > 0);
@@ -85,6 +120,20 @@ const AllServices = ({
     setServiceSort(id);
     if (typeof onSelectSort === "function") {
       onSelectSort(id);
+    }
+  };
+
+  const handleSelectCity = (nextCity: string) => {
+    setCity(nextCity);
+    if (typeof onSelectCity === "function") {
+      onSelectCity(nextCity);
+    }
+  };
+
+  const handleSelectSkill = (nextSkill: string) => {
+    setSkill(nextSkill);
+    if (typeof onSelectSkill === "function") {
+      onSelectSkill(nextSkill);
     }
   };
 
@@ -112,13 +161,20 @@ const AllServices = ({
       <View
         style={[styles.container, role !== "WORKER" && { paddingBottom: 24 }]}
       >
-        <ListingSearchToolbar
+        <ListingFilterBar
           variant="onDark"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
+          cities={cities}
+          selectedCity={city}
+          onSelectCity={handleSelectCity}
+          skills={skills}
+          selectedSkill={skill}
+          onSelectSkill={handleSelectSkill}
           onPressFilter={() => setIsAddFilters(true)}
           showFilterButton={!activeCategoryType}
-          placeholderKey="searchListPlaceholderServices"
+          isLoading={loadingCities}
+          skillsLoading={loadingSkills}
+          titleKey="selectCityForWork"
+          skillTitleKey="selectSkillForWork"
         />
         <View style={[styles.filterRow, activeCategoryType && { marginBottom: 10 }]}>
           {activeCategoryType ? (

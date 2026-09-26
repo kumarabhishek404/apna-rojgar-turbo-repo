@@ -27,6 +27,8 @@ import { trackWebsiteEvent } from "@/lib/websiteTracking";
 import { getPromotionConfig } from "@/lib/payment";
 import { isServicePromoted } from "@/lib/servicePromotion";
 import { isListingFeatureActive } from "@/lib/serviceListingFeature";
+import { matchesCity, matchesSkill } from "@/lib/cityFilter";
+import { useListingCities, useListingServiceSkills } from "@/hooks/useListingCities";
 import { useCashfreePromotionPayment } from "@/hooks/useCashfreePromotionPayment";
 
 type UserInfo = {
@@ -99,7 +101,15 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     my: false,
     applied: false,
   });
+  // Not user-editable anymore — only seeded by the `?global=` deep link from global search.
   const [search, setSearch] = useState("");
+  const [city, setCity] = useState("");
+  const [skill, setSkill] = useState("");
+  const { cities, loading: citiesLoading } = useListingCities({
+    kind: "services",
+    skill,
+  });
+  const { skills, loading: skillsLoading } = useListingServiceSkills(city);
   const [sortBy, setSortBy] = useState<"latest" | "nearest" | "more">("latest");
   const [browserGeo, setBrowserGeo] = useState<BrowserGeo | null>(null);
   const [error, setError] = useState("");
@@ -131,7 +141,13 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       if (tab === "all") {
         servicesRes = await apiRequest<ServicesResponse>(
           `/service/all?status=ACTIVE&page=${targetPage}&limit=10`,
-          { method: "POST", body: JSON.stringify({}) },
+          {
+            method: "POST",
+            body: JSON.stringify({
+              ...(city ? { city } : {}),
+              ...(skill ? { skills: [skill] } : {}),
+            }),
+          },
         );
       } else if (tab === "my") {
         servicesRes = await apiRequest<ServicesResponse>(
@@ -160,7 +176,7 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
       inFlightRef.current[tab] = false;
       setLoadingByTab((prev) => ({ ...prev, [tab]: false }));
     }
-  }, []);
+  }, [city, skill]);
 
   useEffect(() => {
     apiRequest<{ data: UserInfo }>("/user/info")
@@ -206,6 +222,18 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
     }
   }, [globalQuery]);
 
+  const appliedCityRef = useRef(city);
+  const appliedSkillRef = useRef(skill);
+  useEffect(() => {
+    if (appliedCityRef.current === city && appliedSkillRef.current === skill) {
+      return;
+    }
+    appliedCityRef.current = city;
+    appliedSkillRef.current = skill;
+    setPageByTab((prev) => ({ ...prev, [activeTab]: 1 }));
+    void fetchForTab(activeTab, 1, false);
+  }, [city, skill, activeTab, fetchForTab]);
+
   const loadMore = useCallback(() => {
     if (!hasMoreByTab[activeTab] || loadingByTab[activeTab]) return;
     fetchForTab(activeTab, pageByTab[activeTab] + 1, true);
@@ -245,13 +273,19 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
   const services = servicesByTab[activeTab];
   const filtered = useMemo(
     () =>
-      services?.filter(
-        (service) =>
-          service.subType.toLowerCase().includes(search.toLowerCase()) ||
-          service.address.toLowerCase().includes(search.toLowerCase()) ||
-          (service.description || "").toLowerCase().includes(search.toLowerCase()),
-      ),
-    [services, search],
+      services?.filter((service) => {
+        // "my" / "applied" tabs have no server-side city filter, so apply it here too.
+        if (!matchesCity(service, city)) return false;
+        if (!matchesSkill(service, skill)) return false;
+        if (!search) return true;
+        const needle = search.toLowerCase();
+        return (
+          service.subType.toLowerCase().includes(needle) ||
+          service.address.toLowerCase().includes(needle) ||
+          (service.description || "").toLowerCase().includes(needle)
+        );
+      }),
+    [services, search, city, skill],
   );
   const ordered = useMemo(() => {
     const items = [...filtered];
@@ -352,20 +386,35 @@ export default function ServicesPage(props: ServicesPageShellProps = {}) {
 
   const toolbarApi = useMemo<ServicesToolbarApi>(
     () => ({
-      search,
-      setSearch,
+      city,
+      setCity,
+      cities,
+      citiesLoading,
+      skill,
+      setSkill,
+      skills,
+      skillsLoading,
       sortBy,
       setSortBy,
       openCreateModal,
       canCreate,
       showCreateButton: activeTab !== "applied",
-      searchPlaceholder:
-        activeTab === "applied"
-          ? t("searchAppliedService", "Search applied service by name or location")
-          : undefined,
       t,
     }),
-    [search, sortBy, setSearch, setSortBy, canCreate, openCreateModal, t, activeTab],
+    [
+      city,
+      cities,
+      citiesLoading,
+      skill,
+      skills,
+      skillsLoading,
+      sortBy,
+      setSortBy,
+      canCreate,
+      openCreateModal,
+      t,
+      activeTab,
+    ],
   );
 
   useEffect(() => {

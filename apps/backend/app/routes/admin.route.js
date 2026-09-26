@@ -9,6 +9,8 @@ import {
   getAdminNotifications,
   getAdminPromotionPayments,
   getAllUsers,
+  getAdminUserCities,
+  getAdminUserSkills,
   handleActivateUser,
   handleSuspendUser,
   handleUpdateUserVerification,
@@ -37,6 +39,8 @@ router.patch(
 );
 
 router.get("/all-users", verifyToken, userStatus, checkAdmin, getAllUsers);
+router.get("/user-cities", verifyToken, userStatus, checkAdmin, getAdminUserCities);
+router.get("/user-skills", verifyToken, userStatus, checkAdmin, getAdminUserSkills);
 router.get("/error-logs", verifyToken, userStatus, checkAdmin, getAdminErrorLogs);
 router.get(
   "/analytics-events",

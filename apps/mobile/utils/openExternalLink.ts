@@ -68,6 +68,20 @@ export async function openPlayStore(): Promise<boolean> {
   return openExternalLink(webUrl);
 }
 
+/** Opens the Play Store listing on the reviews / write-a-review surface. */
+export async function openPlayStoreWriteReview(): Promise<boolean> {
+  const webUrl = `https://play.google.com/store/apps/details?id=${PLAY_STORE_PACKAGE}&showAllReviews=true`;
+
+  if (Platform.OS === "android") {
+    const opened = await openExternalLink(webUrl, {
+      appUrl: `market://details?id=${PLAY_STORE_PACKAGE}&showAllReviews=true`,
+    });
+    if (opened) return true;
+  }
+
+  return openExternalLink(webUrl);
+}
+
 export async function openInstagramProfile(profileUrl: string): Promise<boolean> {
   const username = profileUrl
     .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")

@@ -66,11 +66,21 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
     setFilterVisible(false);
   };
 
+  const selectedDistance = watch("distance");
+  const selectedDuration = watch("duration");
+  const selectedStartIn = watch("serviceStartIn");
+  const selectedType = watch("type");
+  const hasSelection = !!(
+    selectedDistance ||
+    selectedDuration ||
+    selectedStartIn ||
+    selectedType
+  );
   const activeFilterCount = [
-    !!watch("distance"),
-    !!watch("duration"),
-    !!watch("serviceStartIn"),
-    !!watch("type"),
+    !!selectedDistance,
+    !!selectedDuration,
+    !!selectedStartIn,
+    !!selectedType,
   ].filter(Boolean).length;
 
   const renderSection = ({
@@ -305,26 +315,36 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
     if (filterVisible) {
       setDrawerState({
         visible: true,
+        fullSheet: true,
         title: "filtersServices",
         content: filterContent,
-        primaryButton: {
-          title: "apply",
-          action: handleSubmit(handleApply),
-        },
-        secondaryButton: {
-          title: "clear",
-          action: handleClear,
-        },
+        primaryButton: hasSelection
+          ? {
+              title: "apply",
+              action: handleSubmit(handleApply),
+            }
+          : null,
+        secondaryButton: hasSelection
+          ? {
+              title: "clear",
+              action: handleClear,
+            }
+          : null,
         onClose: () => {
           setDrawerState((prev: any) => ({ ...prev, visible: false }));
           setFilterVisible(false);
         },
       });
+      return;
     }
+    setDrawerState((prev: any) => ({ ...prev, visible: false }));
+  }, [filterVisible, hasSelection]);
+
+  useEffect(() => {
     return () => {
       setDrawerState((prev: any) => ({ ...prev, visible: false }));
     };
-  }, [filterVisible]);
+  }, []);
 
   return null;
 };
@@ -332,7 +352,7 @@ const FiltersServices = ({ filterVisible, setFilterVisible, onApply }: any) => {
 const styles = StyleSheet.create({
   scrollbarContent: {
     paddingTop: 4,
-    paddingBottom: 40,
+    paddingBottom: 16,
     gap: 16,
   },
   heroCard: {
