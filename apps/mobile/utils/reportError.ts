@@ -63,7 +63,7 @@ function isNoiseError({
     return true;
   }
   if (
-    /PAY_PER_DAY_TOO_LOW|PAY_PER_DAY_REQUIRED|pay per day must be at least/i.test(
+    /PAY_PER_DAY_TOO_LOW|PAY_PER_DAY_TOO_HIGH|PAY_PER_DAY_INVALID|PAY_PER_DAY_REQUIRED|pay per day must be at least|pay per day cannot exceed|pay per day must be a whole rupee/i.test(
       text,
     )
   ) {

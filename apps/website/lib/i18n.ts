@@ -146,6 +146,16 @@ export function translateKnownApiMessage(language: AppLanguage, rawMessage: stri
     return translate(language, "payPerDayMustBeAtLeast500", raw);
   }
 
+  m = raw.match(/^Requirement #\d+: pay per day cannot exceed ₹?\d+$/i);
+  if (m) {
+    return translate(language, "payPerDayTooHigh", raw);
+  }
+
+  m = raw.match(/^Requirement #\d+: pay per day must be a whole rupee/i);
+  if (m) {
+    return translate(language, "payPerDayInvalid", raw);
+  }
+
   return rawMessage;
 }
 

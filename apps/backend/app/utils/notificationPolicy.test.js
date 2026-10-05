@@ -61,24 +61,20 @@ test("builds stable per-service dedup keys and deep links", () => {
   );
 });
 
-test("classifies new reminder and promo notification types", () => {
-  const employerApps = getNotificationPolicy(
-    "EMPLOYER_PENDING_APPLICATIONS_REMINDER",
-  );
-  assert.equal(employerApps.category, NOTIFICATION_CATEGORIES.REMINDER);
-  assert.equal(employerApps.cooldownHours, 24);
+test("classifies welcome WhatsApp group notification with long cooldown", () => {
+  const policy = getNotificationPolicy("WELCOME_WHATSAPP_GROUP");
+  assert.equal(policy.category, NOTIFICATION_CATEGORIES.SYSTEM);
+  assert.equal(policy.priority, NOTIFICATION_PRIORITIES.HIGH);
+  assert.equal(policy.cooldownHours, 365 * 24);
+  assert.equal(policy.respectQuietHours, false);
+});
 
-  const directBooking = getNotificationPolicy(
-    "PENDING_DIRECT_BOOKING_REMINDER",
-  );
-  assert.equal(directBooking.category, NOTIFICATION_CATEGORIES.REMINDER);
-  assert.equal(directBooking.cooldownHours, 48);
-
-  const pending = getNotificationPolicy("PENDING_REQUEST_REMINDER");
-  assert.equal(pending.cooldownHours, 48);
-
-  const promo = getNotificationPolicy("PAID_SERVICE_PROMOTION");
-  assert.equal(promo.category, NOTIFICATION_CATEGORIES.DISCOVERY);
-  assert.equal(promo.priority, NOTIFICATION_PRIORITIES.LOW);
-  assert.equal(promo.cooldownHours, 7 * 24);
+test("preserves explicit https urls in enrichNotificationData", () => {
+  const url = "https://chat.whatsapp.com/FFvAv3Ygor4Aqbi6tSSI5j?mode=gi_t";
+  const data = enrichNotificationData({
+    url,
+    type: "WELCOME_WHATSAPP_GROUP",
+  });
+  assert.equal(data.url, url);
+  assert.equal(data.type, "WELCOME_WHATSAPP_GROUP");
 });

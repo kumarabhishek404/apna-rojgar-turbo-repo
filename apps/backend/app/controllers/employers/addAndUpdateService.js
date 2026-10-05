@@ -252,11 +252,13 @@ const parseAndValidateRequest = async (req, employerDoc = null) => {
   }
 };
 
-/** Daily wage must be at least this amount (₹). */
+/** Daily wage bounds for Indian blue-collar / skilled day rates (₹). */
 const MIN_PAY_PER_DAY = 500;
+/** Upper bound: already extreme for daily labour; rejects fake/spam amounts. */
+const MAX_PAY_PER_DAY = 50_000;
 
 /**
- * Parse requirements JSON and reject null/NaN/missing payPerDay before Mongoose.
+ * Parse requirements JSON and reject null/NaN/missing/fake payPerDay before Mongoose.
  * Empty pay was arriving as null (JSON.stringify(NaN)) and causing 500 ValidationError spam.
  */
 const parseAndNormalizeRequirements = (requirements) => {
@@ -314,11 +316,25 @@ const parseAndNormalizeRequirements = (requirements) => {
         "PAY_PER_DAY_REQUIRED",
       );
     }
+    if (!Number.isInteger(payPerDay) || !Number.isSafeInteger(payPerDay)) {
+      throw createHttpError(
+        `Requirement #${index + 1}: pay per day must be a whole rupee amount between ₹${MIN_PAY_PER_DAY} and ₹${MAX_PAY_PER_DAY}`,
+        400,
+        "PAY_PER_DAY_INVALID",
+      );
+    }
     if (payPerDay < MIN_PAY_PER_DAY) {
       throw createHttpError(
         `Requirement #${index + 1}: pay per day must be at least ₹${MIN_PAY_PER_DAY}`,
         400,
         "PAY_PER_DAY_TOO_LOW",
+      );
+    }
+    if (payPerDay > MAX_PAY_PER_DAY) {
+      throw createHttpError(
+        `Requirement #${index + 1}: pay per day cannot exceed ₹${MAX_PAY_PER_DAY}`,
+        400,
+        "PAY_PER_DAY_TOO_HIGH",
       );
     }
 

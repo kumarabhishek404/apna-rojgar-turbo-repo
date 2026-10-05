@@ -40,7 +40,7 @@ import REFRESH_USER from "@/app/hooks/useRefreshUser";
 import USE_LOGOUT from "@/app/hooks/useLogout";
 import JoinWhatsAppGroup from "@/components/commons/JoinWhatsappGroup";
 import FollowInstagram from "@/components/commons/JoinInstagramAccount";
-import { SOCIAL_LINKS } from "@/constants/socialLinks";
+import { SOCIAL_LINKS, getWhatsappGroupLinkForRole } from "@/constants/socialLinks";
 import RoleSwitcher from "@/components/commons/RoleSwitcher";
 import {
   isCoreProfileIncomplete,
@@ -688,7 +688,7 @@ const UserProfile = () => {
               <ServiceInformation information={userDetails?.serviceDetails} />
 
               <JoinWhatsAppGroup
-                groupLink={SOCIAL_LINKS.whatsappGroup}
+                groupLink={getWhatsappGroupLinkForRole(userDetails?.role)}
                 title={t("joinWhatsappGroupTitle")}
                 description={t("joinWhatsappGroupDescription")}
                 buttonText={t("joinWhatsappGroupButton")}

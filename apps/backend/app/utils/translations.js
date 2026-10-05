@@ -44,6 +44,7 @@ export const titles = {
     PENDING_DIRECT_BOOKING_REMINDER: "Direct Booking Waiting for Response",
     PAID_SERVICE_PROMOTION: "Get More Applicants with Paid Promotion",
     PROFILE_COMPLETION_REMINDER: "Complete Your Profile",
+    WELCOME_WHATSAPP_GROUP: "Welcome to Apna Rojgar",
     SYSTEM_ERROR_ALERT: "System Error Alert",
     ADMIN_NEW_USER_ALERT: "New User Registered",
     ADMIN_NEW_SERVICE_ALERT: "New Service Created",
@@ -102,6 +103,7 @@ export const titles = {
     PENDING_DIRECT_BOOKING_REMINDER: "डायरेक्ट बुकिंग का जवाब बाकी है",
     PAID_SERVICE_PROMOTION: "पेड प्रमोशन से अधिक आवेदन पाएं",
     PROFILE_COMPLETION_REMINDER: "कृपया अपनी प्रोफ़ाइल पूरी करें",
+    WELCOME_WHATSAPP_GROUP: "अपना रोजगार में आपका स्वागत है",
     SYSTEM_ERROR_ALERT: "सिस्टम त्रुटि चेतावनी",
     ADMIN_NEW_USER_ALERT: "नया उपयोगकर्ता पंजीकृत",
     ADMIN_NEW_SERVICE_ALERT: "नई सेवा बनाई गई",
@@ -150,6 +152,7 @@ export const titles = {
     BOOKING_REQUEST_REJECTED_BY_USER: "कामगाराने तुमची बुकिंग विनंती नाकारली",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "कामगाराने तुमची बुकिंग विनंती स्वीकारली",
     BOOKING_CANCELLED_BY_USER: "कामगाराने बुकिंग रद्द केली",
+    WELCOME_WHATSAPP_GROUP: "अपना रोजगार मध्ये आपले स्वागत आहे",
   },
 
   rj: {
@@ -177,6 +180,7 @@ export const titles = {
     BOOKING_REQUEST_REJECTED_BY_USER: "वर्कर थारी बुकिंग ठुकराय दी",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "वर्कर थारी बुकिंग स्वीकार लियो",
     BOOKING_CANCELLED_BY_USER: "वर्कर बुकिंग रद्द कर दी",
+    WELCOME_WHATSAPP_GROUP: "अपना रोजगार में आपका स्वागत है",
   },
 
   te: {
@@ -209,6 +213,7 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "వర్కర్ మీ బుకింగ్ అభ్యర్థనను అంగీకరించారు",
     BOOKING_CANCELLED_BY_USER: "వర్కర్ బుకింగ్‌ను రద్దు చేసుకున్నారు",
+    WELCOME_WHATSAPP_GROUP: "అప్నా రోజ్‌గర్‌కు స్వాగతం",
   },
 
   gu: {
@@ -239,6 +244,7 @@ export const titles = {
     BOOKING_REQUEST_REJECTED_BY_USER: "કામદારે તમારી બુકિંગ નકારી",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "કામદારે તમારી બુકિંગ સ્વીકારી",
     BOOKING_CANCELLED_BY_USER: "કામદારે બુકિંગ રદ કરી",
+    WELCOME_WHATSAPP_GROUP: "અપના રોજગારમાં આપનું સ્વાગત છે",
   },
 
   bn: {
@@ -271,6 +277,7 @@ export const titles = {
       "কর্মী আপনার বুকিং অনুরোধ প্রত্যাখ্যান করেছেন",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "কর্মী আপনার বুকিং অনুরোধ গ্রহণ করেছেন",
     BOOKING_CANCELLED_BY_USER: "কর্মী বুকিং বাতিল করেছেন",
+    WELCOME_WHATSAPP_GROUP: "অপনা রোজগারে স্বাগতম",
   },
 
   pa: {
@@ -302,6 +309,7 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "ਮਜਦੂਰ ਨੇ ਤੁਹਾਡੀ ਬੁਕਿੰਗ ਦੀ ਬੇਨਤੀ ਮਨਜ਼ੂਰ ਕੀਤੀ",
     BOOKING_CANCELLED_BY_USER: "ਮਜਦੂਰ ਨੇ ਬੁਕਿੰਗ ਰੱਦ ਕਰ ਦਿੱਤੀ",
+    WELCOME_WHATSAPP_GROUP: "ਆਪਣਾ ਰੋਜ਼ਗਾਰ ਵਿੱਚ ਤੁਹਾਡਾ ਸਵਾਗਤ ਹੈ",
   },
 
   kn: {
@@ -338,6 +346,7 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "ಕಾರ್ಮಿಕನು ನಿಮ್ಮ ಬುಕಿಂಗ್ ಮನವಿಯನ್ನು ಒಪ್ಪಿಕೊಂಡರು",
     BOOKING_CANCELLED_BY_USER: "ಕಾರ್ಮಿಕನು ಬುಕಿಂಗ್ ಅನ್ನು ರದ್ದು ಮಾಡಿದರು",
+    WELCOME_WHATSAPP_GROUP: "ಅಪ್ನಾ ರೋಜ್‌ಗರ್‌ಗೆ ಸ್ವಾಗತ",
   },
 
   ta: {
@@ -375,6 +384,7 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "தொழிலாளி உங்கள் முன்பதிவு கோரிக்கையை ஏற்றுக்கொண்டார்",
     BOOKING_CANCELLED_BY_USER: "தொழிலாளி முன்பதிவை ரத்து செய்தார்",
+    WELCOME_WHATSAPP_GROUP: "அப்னா ரோஜ்கருக்கு வரவேற்கிறோம்",
   },
 
   ml: {
@@ -409,6 +419,7 @@ export const titles = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "തൊഴിലാളി നിങ്ങളുടെ ബുക്കിംഗ് അഭ്യർത്ഥന അംഗീകരിച്ചു",
     BOOKING_CANCELLED_BY_USER: "തൊഴിലാളി ബുക്കിംഗ് റദ്ദാക്കി",
+    WELCOME_WHATSAPP_GROUP: "അപ്‌നാ രോജ്ഗറിലേക്ക് സ്വാഗതം",
   },
 
   ks: {
@@ -437,6 +448,7 @@ export const titles = {
     BOOKING_REQUEST_REJECTED_BY_USER: "مزدور تُہند بکنگ درخواست رد کریو",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "مزدور تُہند بکنگ درخواست منظو کریو",
     BOOKING_CANCELLED_BY_USER: "مزدور بکنگ منسوخ کریو",
+    WELCOME_WHATSAPP_GROUP: "اپنا روزگار میں خوش آمدید",
   },
 
   ur: {
@@ -467,6 +479,7 @@ export const titles = {
     BOOKING_REQUEST_REJECTED_BY_USER: "مزدور نے آپ کی بکنگ درخواست مسترد کر دی",
     BOOKING_REQUEST_ACCEPTED_BY_USER: "مزدور نے آپ کی بکنگ درخواست قبول کر لی",
     BOOKING_CANCELLED_BY_USER: "مزدور نے بکنگ منسوخ کر دی",
+    WELCOME_WHATSAPP_GROUP: "اپنا روزگار میں خوش آمدید",
   },
 };
 
@@ -555,6 +568,8 @@ const messages = {
       "Promote your work with paid social media push to reach more workers and get applicants faster.",
     PROFILE_COMPLETION_REMINDER:
       "Complete these profile details to improve your visibility: {{missingDetails}}.",
+    WELCOME_WHATSAPP_GROUP:
+      "You are registered. Tap this notification to join the {{groupLabel}} WhatsApp group for jobs and updates. {{groupLink}}",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} error at {{route}}: {{errorMessage}}",
     ADMIN_NEW_USER_ALERT:
@@ -649,6 +664,8 @@ const messages = {
       "पेड सोशल मीडिया प्रमोशन से अपने काम को और मजदूरों तक पहुँचाएँ और जल्दी आवेदन पाएँ।",
     PROFILE_COMPLETION_REMINDER:
       "अपनी प्रोफ़ाइल बेहतर दिखाने के लिए ये जानकारी पूरी करें: {{missingDetails}}।",
+    WELCOME_WHATSAPP_GROUP:
+      "आप रजिस्टर हो चुके हैं। जॉब्स और अपडेट्स के लिए {{groupLabel}} WhatsApp ग्रुप जॉइन करने हेतु इस नोटिफिकेशन पर टैप करें। {{groupLink}}",
     SYSTEM_ERROR_ALERT:
       "⚠️ {{source}} पर {{route}} में त्रुटि: {{errorMessage}}",
     ADMIN_NEW_USER_ALERT:
@@ -722,6 +739,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} ने तुमची बुकिंग विनंती स्वीकारली आहे.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} ने बुकिंग रद्द केली आहे.",
+    WELCOME_WHATSAPP_GROUP:
+      "तुम्ही नोंदणी पूर्ण केली आहे. जॉब्स आणि अपडेट्ससाठी {{groupLabel}} WhatsApp ग्रुप जॉइन करण्यासाठी या नोटिफिकेशनवर टॅप करा. {{groupLink}}",
   },
 
   rj: {
@@ -765,6 +784,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} ने तुमरी बुकिंग विनंती स्वीकार कर ली है.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} ने बुकिंग रद्द कर दी है.",
+    WELCOME_WHATSAPP_GROUP:
+      "आप रजिस्टर हो चुके हो। जॉब्स अर अपडेट्स खातर {{groupLabel}} WhatsApp ग्रुप जॉइन करण खातर ए नोटिफिकेशन पर टैप करो। {{groupLink}}",
   },
 
   te: {
@@ -808,6 +829,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} మీ బుకింగ్ అభ్యర్థనను అంగీకరించాడు.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} బుకింగ్‌ను రద్దు చేశాడు.",
+    WELCOME_WHATSAPP_GROUP:
+      "మీరు నమోదు అయ్యారు. జాబ్‌లు మరియు అప్‌డేట్‌ల కోసం {{groupLabel}} WhatsApp గ్రూప్‌లో చేరడానికి ఈ నోటిఫికేషన్‌ను ట్యాప్ చేయండి. {{groupLink}}",
   },
 
   gu: {
@@ -853,6 +876,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} એ તમારું બુકિંગ વિનંતી સ્વીકાર કરી છે.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} એ બુકિંગ રદ કરી છે.",
+    WELCOME_WHATSAPP_GROUP:
+      "તમે રજિસ્ટર થઈ ગયા છો. નોકરીઓ અને અપડેટ્સ માટે {{groupLabel}} WhatsApp ગ્રુપ જોડાવા આ નોટિફિકેશન પર ટૅપ કરો. {{groupLink}}",
   },
 
   bn: {
@@ -896,6 +921,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} আপনার বুকিং অনুরোধ গ্রহণ করেছে।",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} বুকিং বাতিল করেছে।",
+    WELCOME_WHATSAPP_GROUP:
+      "আপনি রেজিস্টার হয়ে গেছেন। চাকরি ও আপডেটের জন্য {{groupLabel}} WhatsApp গ্রুপে যোগ দিতে এই নোটিফিকেশনে ট্যাপ করুন। {{groupLink}}",
   },
 
   pa: {
@@ -939,6 +966,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} ਨੇ ਤੁਹਾਡੀ ਬੁਕਿੰਗ ਬੇਨਤੀ ਸਵੀਕਾਰ ਕਰ ਲਈ ਹੈ।",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} ਨੇ ਬੁਕਿੰਗ ਰੱਦ ਕਰ ਦਿੱਤੀ ਹੈ।",
+    WELCOME_WHATSAPP_GROUP:
+      "ਤੁਸੀਂ ਰਜਿਸਟਰ ਹੋ ਚੁੱਕੇ ਹੋ। ਨੌਕਰੀਆਂ ਅਤੇ ਅਪਡੇਟਾਂ ਲਈ {{groupLabel}} WhatsApp ਗਰੁੱਪ ਜੁਆਇਨ ਕਰਨ ਲਈ ਇਸ ਨੋਟੀਫਿਕੇਸ਼ਨ ਤੇ ਟੈਪ ਕਰੋ। {{groupLink}}",
   },
 
   kn: {
@@ -984,6 +1013,8 @@ const messages = {
       "{{workerName}} ಅವರು ನಿಮ್ಮ ಬುಕಿಂಗ್ ವಿನಂತಿಯನ್ನು ಸ್ವೀಕರಿಸಿದ್ದಾರೆ.",
     BOOKING_CANCELLED_BY_USER:
       "{{workerName}} ಅವರು ಬುಕಿಂಗ್ ಅನ್ನು ರದ್ದುಗೊಳಿಸಿದ್ದಾರೆ.",
+    WELCOME_WHATSAPP_GROUP:
+      "ನೀವು ನೋಂದಾಯಿಸಿಕೊಂಡಿದ್ದೀರಿ. ಉದ್ಯೋಗಗಳು ಮತ್ತು ಅಪ್‌ಡೇಟ್‌ಗಳಿಗಾಗಿ {{groupLabel}} WhatsApp ಗುಂಪು ಸೇರಲು ಈ ಅಧಿಸೂಚನೆಯನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ. {{groupLink}}",
   },
 
   ta: {
@@ -1032,6 +1063,8 @@ const messages = {
       "{{workerName}} அவர்கள் உங்கள் புக்கிங் கோரிக்கையை ஏற்றுக்கொண்டுள்ளனர்.",
     BOOKING_CANCELLED_BY_USER:
       "{{workerName}} அவர்கள் புக்கிங் ரத்துசெய்துள்ளனர்.",
+    WELCOME_WHATSAPP_GROUP:
+      "நீங்கள் பதிவு செய்துவிட்டீர்கள். வேலைகள் மற்றும் அப்டேட்களுக்கு {{groupLabel}} WhatsApp குழுவில் சேர இந்த அறிவிப்பைத் தட்டவும். {{groupLink}}",
   },
 
   ml: {
@@ -1075,6 +1108,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} നിങ്ങളുടെ ബുക്കിംഗ് അഭ്യർത്ഥന അംഗീകരിച്ചു.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} ബുക്കിംഗ് റദ്ദാക്കി.",
+    WELCOME_WHATSAPP_GROUP:
+      "നിങ്ങൾ രജിസ്റ്റർ ചെയ്തു. ജോലികളും അപ്ഡേറ്റുകളും ലഭിക്കാൻ {{groupLabel}} WhatsApp ഗ്രൂപ്പിൽ ചേരാൻ ഈ അറിയിപ്പ് ടാപ്പ് ചെയ്യുക. {{groupLink}}",
   },
 
   ks: {
@@ -1117,6 +1152,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} نے آپ کی بکنگ درخواست کو قبول کیا ہے.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} نے بکنگ کو منسوخ کیا ہے.",
+    WELCOME_WHATSAPP_GROUP:
+      "آپ رجسٹر ہو چکے ہیں۔ جابز اور اپڈیٹس کے لیے {{groupLabel}} WhatsApp گروپ جوائن کرنے کیلئے اس نوٹیفکیشن پر ٹیپ کریں۔ {{groupLink}}",
   },
 
   ur: {
@@ -1158,6 +1195,8 @@ const messages = {
     BOOKING_REQUEST_ACCEPTED_BY_USER:
       "{{workerName}} نے آپ کی بکنگ درخواست کو قبول کر لیا ہے.",
     BOOKING_CANCELLED_BY_USER: "{{workerName}} نے بکنگ کو منسوخ کر دیا ہے.",
+    WELCOME_WHATSAPP_GROUP:
+      "آپ رجسٹر ہو چکے ہیں۔ جابز اور اپڈیٹس کے لیے {{groupLabel}} WhatsApp گروپ جوائن کرنے کیلئے اس نوٹیفکیشن پر ٹیپ کریں۔ {{groupLink}}",
   },
 };
 

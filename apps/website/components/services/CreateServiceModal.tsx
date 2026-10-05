@@ -13,6 +13,34 @@ import { ArrowRight, Check, ChevronDown, Loader2 } from "lucide-react";
 
 type RequirementDraft = { name: string; count: number; payPerDay: string };
 
+const MIN_PAY_PER_DAY = 500;
+const MAX_PAY_PER_DAY = 50_000;
+
+function parseRequirementPay(value: string): number | null {
+  const raw = String(value ?? "").trim();
+  if (!raw || !/^\d+(\.\d+)?$/.test(raw)) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Indian-market daily wage: whole rupees from ₹500 to ₹50,000. */
+function isInvalidRequirementPay(value: string): boolean {
+  const pay = parseRequirementPay(value);
+  if (pay == null) return true;
+  if (!Number.isInteger(pay) || !Number.isSafeInteger(pay)) return true;
+  return pay < MIN_PAY_PER_DAY || pay > MAX_PAY_PER_DAY;
+}
+
+function requirementPayErrorKey(value: string): string | null {
+  if (!String(value ?? "").trim()) return null;
+  const pay = parseRequirementPay(value);
+  if (pay == null) return "payPerDayInvalid";
+  if (!Number.isInteger(pay) || !Number.isSafeInteger(pay)) return "payPerDayInvalid";
+  if (pay < MIN_PAY_PER_DAY) return "payPerDayMustBeAtLeast500";
+  if (pay > MAX_PAY_PER_DAY) return "payPerDayTooHigh";
+  return null;
+}
+
 type CreateFormState = {
   type: string;
   subType: string;
@@ -161,13 +189,14 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         !req.name ||
         req.count < 1 ||
         !req.payPerDay ||
-        Number(req.payPerDay) < 500,
+        isInvalidRequirementPay(req.payPerDay),
     );
     if (invalidRequirement) {
+      const payError = requirementPayErrorKey(invalidRequirement.payPerDay);
       setCreateIssue(
         t(
-          "payPerDayMustBeAtLeast500",
-          "Pay per day must be at least ₹500 for each worker.",
+          payError || "payPerDayInvalid",
+          "Pay per day must be between ₹500 and ₹50,000 for each worker.",
         ),
       );
       return false;
@@ -203,6 +232,12 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
         if (data?.errorCode === "PAY_PER_DAY_TOO_LOW") {
           throw new Error(t("payPerDayMustBeAtLeast500"));
         }
+        if (data?.errorCode === "PAY_PER_DAY_TOO_HIGH") {
+          throw new Error(t("payPerDayTooHigh"));
+        }
+        if (data?.errorCode === "PAY_PER_DAY_INVALID") {
+          throw new Error(t("payPerDayInvalid"));
+        }
         throw new Error(
           data?.message
             ? localizeApiErrorMessage(data.message)
@@ -229,13 +264,17 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
           !req.name ||
           req.count < 1 ||
           !req.payPerDay ||
-          Number(req.payPerDay) < 500,
+          isInvalidRequirementPay(req.payPerDay),
       )
     ) {
+      const bad = createForm.requirements.find(
+        (req) => req.payPerDay && isInvalidRequirementPay(req.payPerDay),
+      );
+      const payError = bad ? requirementPayErrorKey(bad.payPerDay) : null;
       setCreateIssue(
         t(
-          "payPerDayMustBeAtLeast500",
-          "Pay per day must be at least ₹500 for each worker.",
+          payError || "payPerDayInvalid",
+          "Pay per day must be between ₹500 and ₹50,000 for each worker.",
         ),
       );
       return;
@@ -293,6 +332,12 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
       if (!response.ok || data?.success === false) {
         if (data?.errorCode === "PAY_PER_DAY_TOO_LOW") {
           throw new Error(t("payPerDayMustBeAtLeast500"));
+        }
+        if (data?.errorCode === "PAY_PER_DAY_TOO_HIGH") {
+          throw new Error(t("payPerDayTooHigh"));
+        }
+        if (data?.errorCode === "PAY_PER_DAY_INVALID") {
+          throw new Error(t("payPerDayInvalid"));
         }
         throw new Error(
           data?.message?.trim()
@@ -545,7 +590,9 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                   <div>
                     <input
                       type="number"
-                      min={500}
+                      min={MIN_PAY_PER_DAY}
+                      max={MAX_PAY_PER_DAY}
+                      step={1}
                       className={fieldClass}
                       value={req.payPerDay}
                       onChange={(e) =>
@@ -555,18 +602,18 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                           return { ...p, requirements };
                         })
                       }
-                      placeholder={t("payPerDayMinPlaceholder", "Pay/day (min ₹500)")}
+                      placeholder={t("payPerDayMinPlaceholder", "Pay/day (₹500 – ₹50,000)")}
                     />
                     <p
                       className={`mt-1 text-xs ${
-                        req.payPerDay !== "" && Number(req.payPerDay) < 500
+                        requirementPayErrorKey(req.payPerDay)
                           ? "font-semibold text-red-600"
                           : "text-slate-500"
                       }`}
                     >
-                      {req.payPerDay !== "" && Number(req.payPerDay) < 500
-                        ? t("payPerDayMustBeAtLeast500")
-                        : t("payPerDayMinHint")}
+                      {requirementPayErrorKey(req.payPerDay)
+                        ? t(requirementPayErrorKey(req.payPerDay)!)
+                        : t("payPerDayRangeHint")}
                     </p>
                   </div>
                 </div>
@@ -715,7 +762,7 @@ export default function CreateServiceModal({ open, canCreate, onClose, onCreated
                     !req.name ||
                     req.count < 1 ||
                     !req.payPerDay ||
-                    Number(req.payPerDay) < 500,
+                    isInvalidRequirementPay(req.payPerDay),
                 )
               }
               className="group rounded-xl bg-gradient-to-r from-[#22409a] via-[#2c4fba] to-[#3154bf] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_26px_rgba(34,64,154,0.35)] transition hover:-translate-y-0.5 hover:from-[#1d3889] hover:to-[#2847ab] disabled:cursor-not-allowed disabled:opacity-70"

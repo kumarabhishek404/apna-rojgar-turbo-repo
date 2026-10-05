@@ -1,6 +1,6 @@
 import API_CLIENT from "@/app/api";
 import moment from "moment";
-import { MIN_PAY_PER_DAY } from "@/utils/serviceRequirements";
+import { MAX_PAY_PER_DAY, MIN_PAY_PER_DAY } from "@/utils/serviceRequirements";
 import { mapSkillToWorkCategory } from "./workTypeMap";
 
 export async function postWorkFromSaathi(params: {
@@ -17,6 +17,13 @@ export async function postWorkFromSaathi(params: {
 }): Promise<{ ok: boolean; message?: string; serviceId?: string }> {
   if (params.payPerDay < MIN_PAY_PER_DAY) {
     return { ok: false, message: "pay_low" };
+  }
+  if (
+    !Number.isInteger(params.payPerDay) ||
+    !Number.isSafeInteger(params.payPerDay) ||
+    params.payPerDay > MAX_PAY_PER_DAY
+  ) {
+    return { ok: false, message: "pay_high" };
   }
   const mapped = mapSkillToWorkCategory(params.skill);
   const type = params.type || mapped.type;

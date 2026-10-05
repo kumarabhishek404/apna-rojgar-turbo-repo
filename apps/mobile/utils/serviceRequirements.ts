@@ -1,10 +1,18 @@
 /**
  * Normalize + validate service requirement rows before API submit.
  * Mongoose requires a finite payPerDay; JSON.stringify(NaN) becomes null and fails.
+ *
+ * Bounds match Indian daily-wage / skilled day rates for this marketplace.
  */
 
 /** Employers must enter daily wage of at least this amount (₹). */
 export const MIN_PAY_PER_DAY = 500;
+
+/**
+ * Upper bound for pay per day (₹).
+ * Already extreme for blue-collar / skilled day work; rejects fake spam amounts.
+ */
+export const MAX_PAY_PER_DAY = 50_000;
 
 export type ServiceRequirementInput = {
   name?: string;
@@ -14,9 +22,18 @@ export type ServiceRequirementInput = {
 
 export function parsePayPerDay(value: unknown): number | null {
   if (value == null || value === "") return null;
-  const n = typeof value === "number" ? value : Number(String(value).trim());
+  const raw = typeof value === "number" ? value : String(value).trim();
+  if (typeof raw === "string" && !/^\d+(\.\d+)?$/.test(raw)) return null;
+  const n = typeof raw === "number" ? raw : Number(raw);
   if (!Number.isFinite(n)) return null;
   return n;
+}
+
+/** True when pay is a whole-rupee amount inside the Indian-market range. */
+export function isValidPayPerDay(pay: number | null): boolean {
+  if (pay == null) return false;
+  if (!Number.isInteger(pay) || !Number.isSafeInteger(pay)) return false;
+  return pay >= MIN_PAY_PER_DAY && pay <= MAX_PAY_PER_DAY;
 }
 
 export function normalizeRequirements(
@@ -55,8 +72,14 @@ export function getRequirementsValidationError(
     if (pay == null) {
       return "payPerDayIsRequired";
     }
+    if (!Number.isInteger(pay) || !Number.isSafeInteger(pay)) {
+      return "payPerDayInvalid";
+    }
     if (pay < MIN_PAY_PER_DAY) {
       return "payPerDayMustBeAtLeast500";
+    }
+    if (pay > MAX_PAY_PER_DAY) {
+      return "payPerDayTooHigh";
     }
   }
 
@@ -69,6 +92,8 @@ export function getPayPerDayFieldError(value: unknown): string | null {
   if (!raw) return null;
   const pay = parsePayPerDay(raw);
   if (pay == null) return "payPerDayShouldBeInNumber";
+  if (!Number.isInteger(pay) || !Number.isSafeInteger(pay)) return "payPerDayInvalid";
   if (pay < MIN_PAY_PER_DAY) return "payPerDayMustBeAtLeast500";
+  if (pay > MAX_PAY_PER_DAY) return "payPerDayTooHigh";
   return null;
 }

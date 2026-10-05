@@ -12,6 +12,14 @@ const requirementSchema = new mongoose.Schema({
   payPerDay: {
     type: Number,
     required: true,
+    min: [500, "Pay per day must be at least ₹500"],
+    max: [50000, "Pay per day cannot exceed ₹50000"],
+    validate: {
+      validator(value) {
+        return Number.isInteger(value) && Number.isSafeInteger(value);
+      },
+      message: "Pay per day must be a whole rupee amount",
+    },
   },
   food: {
     type: Boolean,

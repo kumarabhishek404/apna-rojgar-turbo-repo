@@ -21,6 +21,8 @@ import {
   normalizeVerification,
   VERIFICATION_STATUS,
 } from "../utils/userVerification.js";
+import { sendWelcomeWhatsappGroupNotification } from "../utils/sendWelcomeWhatsappGroupNotification.js";
+import { normalizePublicRole } from "../utils/whatsappGroups.js";
 
 const PUBLIC_ROLES = new Set(["WORKER", "MEDIATOR", "EMPLOYER"]);
 
@@ -420,6 +422,8 @@ export const handleUpdateInfo = async (req, res) => {
     //   });
     // }
 
+    const nextPublicRole = normalizePublicRole(updateData.role);
+
     // Perform update
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
@@ -433,6 +437,20 @@ export const handleUpdateInfo = async (req, res) => {
       data: updatedUser,
       token,
     });
+
+    // Registration completes with a role on /user/info. Deduped; device-register retries if no push token yet.
+    if (nextPublicRole) {
+      void sendWelcomeWhatsappGroupNotification(userId, {
+        role: nextPublicRole,
+        req,
+        source: "REGISTRATION",
+      }).catch((notifyError) => {
+        console.error(
+          "[Welcome WhatsApp] Failed after role save:",
+          notifyError?.message || notifyError,
+        );
+      });
+    }
   } catch (error) {
     logError(error, req, 500);
     res.status(500).json({

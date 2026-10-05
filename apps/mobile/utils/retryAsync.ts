@@ -11,6 +11,8 @@ function isNonRetryableError(error: unknown): boolean {
   );
   return (
     code === "PAY_PER_DAY_TOO_LOW" ||
+    code === "PAY_PER_DAY_TOO_HIGH" ||
+    code === "PAY_PER_DAY_INVALID" ||
     code === "PAY_PER_DAY_REQUIRED" ||
     code === "REQUIREMENTS_REQUIRED"
   );

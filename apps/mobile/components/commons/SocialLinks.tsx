@@ -13,13 +13,18 @@ import {
 import CustomHeading from "./CustomHeading";
 import CustomText from "./CustomText";
 import { APPLINK } from "@/constants";
-import { SOCIAL_LINKS } from "@/constants/socialLinks";
+import {
+  SOCIAL_LINKS,
+  getWhatsappGroupLinkForRole,
+} from "@/constants/socialLinks";
 import { t } from "@/utils/translationHelper";
 import {
   openExternalLink,
   openInstagramProfile,
   openPlayStore,
 } from "@/utils/openExternalLink";
+import { useAtomValue } from "jotai";
+import Atoms from "@/app/AtomStore";
 
 interface SocialItem {
   id: string;
@@ -44,6 +49,9 @@ const shareAppLink = async () => {
 };
 
 const SocialLinks = () => {
+  const userDetails = useAtomValue(Atoms.UserAtom);
+  const whatsappGroupLink = getWhatsappGroupLinkForRole(userDetails?.role);
+
   const SOCIAL_ITEMS: SocialItem[] = [
     {
       id: "whatsapp",
@@ -53,7 +61,7 @@ const SocialLinks = () => {
       bg: "#F0FBF3",
       border: "#B2ECC0",
       iconBg: "#DCF8E6",
-      onPress: () => openExternalLink(SOCIAL_LINKS.whatsappGroup),
+      onPress: () => openExternalLink(whatsappGroupLink),
     },
     {
       id: "instagram",

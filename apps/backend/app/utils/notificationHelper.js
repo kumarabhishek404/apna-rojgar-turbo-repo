@@ -22,7 +22,7 @@ const replacePlaceholdersWithServiceTranslation = (
 
   for (const [placeholder, value] of Object.entries(params)) {
     // Find if the value exists as a key in the translation dictionary
-    const translated = langMap[value] ?? value;
+    const translated = langMap?.[value] ?? value;
 
     // Replace placeholder in the message string
     message = message.replace(`{{${placeholder}}}`, translated);
@@ -36,45 +36,35 @@ const replacePlaceholdersWithServiceTranslation = (
 };
 
 export const getNotificationMessage = (key, language, params = {}) => {
-  // Get messages for the specified language or fallback to English
-
   console.log("key---", key, "lang---", language);
-  
+
   if (typeof key !== "string") {
     throw new Error(
       `Invalid notification key type: ${typeof key}. Expected string.`,
     );
   }
 
-  if (!TRANSLATION?.messages[language]?.[key]) {
+  const lang = language || "hi";
+  const title =
+    TRANSLATION?.titles[lang]?.[key] ??
+    TRANSLATION?.titles.hi?.[key] ??
+    TRANSLATION?.titles.en?.[key];
+  const message =
+    TRANSLATION?.messages[lang]?.[key] ??
+    TRANSLATION?.messages.hi?.[key] ??
+    TRANSLATION?.messages.en?.[key];
+
+  if (!title || !message) {
     throw new Error(
       `Notification key '${key}' not found for language '${language}'`,
     );
   }
 
-  const localizedMessages =
-    TRANSLATION?.messages[language] || TRANSLATION?.messages["hi"];
-
-  // Fetch the message template
-  const title =
-    TRANSLATION?.titles[language]?.[key] ?? TRANSLATION?.titles.en[key];
-  const message = localizedMessages?.[key] ?? localizedMessages.en[key];
-
   return replacePlaceholdersWithServiceTranslation(
     title,
     message,
     params,
-    language,
+    lang,
     SERVICETRANSLATION,
   );
-  // // Replace placeholders with actual values
-  // for (const [placeholder, value] of Object.entries(params)) {
-  //   title = title;
-  //   message = message.replace(`{{${placeholder}}}`, value);
-  // }
-
-  // return {
-  //   title: title,
-  //   message: message,
-  // };
 };

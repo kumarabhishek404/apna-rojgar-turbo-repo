@@ -1,6 +1,32 @@
-export const NEW_USER_WHATSAPP_GROUP =
-  "https://chat.whatsapp.com/E5IuGZ8EXJR5ZO490tlfoD";
+export const WHATSAPP_GROUP_BY_ROLE = {
+  WORKER: "https://chat.whatsapp.com/FFvAv3Ygor4Aqbi6tSSI5j?mode=gi_t",
+  MEDIATOR: "https://chat.whatsapp.com/CdJcn9AcfVK6xekk329d0Q?mode=gi_t",
+  EMPLOYER: "https://chat.whatsapp.com/Dv2khyXxDrrCaWna8OxUCY?mode=gi_t",
+} as const;
+
+export type WhatsappGroupRole = keyof typeof WHATSAPP_GROUP_BY_ROLE;
+
+/** @deprecated Prefer getWhatsappGroupLinkForRole(role) */
+export const NEW_USER_WHATSAPP_GROUP = WHATSAPP_GROUP_BY_ROLE.WORKER;
 export const NEW_USER_INSTAGRAM = "https://www.instagram.com/apnarojgarindia/";
+
+export function getWhatsappGroupLinkForRole(role?: string) {
+  const key = String(role || "")
+    .trim()
+    .toUpperCase() as WhatsappGroupRole;
+  return WHATSAPP_GROUP_BY_ROLE[key] || WHATSAPP_GROUP_BY_ROLE.WORKER;
+}
+
+export const WHATSAPP_GROUP_LABEL_BY_ROLE = {
+  WORKER: "Workers (मज़दूर)",
+  MEDIATOR: "Contractors (ठेकेदार)",
+  EMPLOYER: "Employers (काम देने वाले)",
+} as const;
+
+export function getWhatsappGroupLabelForRole(role?: string) {
+  const key = welcomeRole(role);
+  return WHATSAPP_GROUP_LABEL_BY_ROLE[key];
+}
 
 function welcomeName(name?: string) {
   const first = String(name || "")
@@ -69,13 +95,16 @@ function roleMessage(role: ReturnType<typeof welcomeRole>) {
 export function buildNewUserWhatsappWelcome(name?: string, role?: string) {
   const who = welcomeName(name);
   const greeting = who.toLowerCase() === "sir" ? "*sir*" : `*${who} sir*`;
+  const roleKey = welcomeRole(role);
+  const groupLabel = getWhatsappGroupLabelForRole(roleKey);
+  const groupLink = getWhatsappGroupLinkForRole(roleKey);
   return [
     `नमस्ते ${greeting}! 🙏`,
     ``,
-    ...roleMessage(welcomeRole(role)),
+    ...roleMessage(roleKey),
     ``,
-    `👥 *WhatsApp ग्रुप जॉइन करें* (नई जॉब्स + अपडेट्स):`,
-    NEW_USER_WHATSAPP_GROUP,
+    `👥 *WhatsApp ग्रुप जॉइन करें* — अपना रोजगार - ${groupLabel}:`,
+    groupLink,
     ``,
     `📸 *Instagram पर फॉलो करें:*`,
     NEW_USER_INSTAGRAM,

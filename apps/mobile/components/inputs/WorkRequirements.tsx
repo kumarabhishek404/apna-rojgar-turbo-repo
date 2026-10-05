@@ -7,8 +7,10 @@ import { t } from "@/utils/translationHelper";
 import TextInputComponent from "./TextInputWithIcon";
 import { getDynamicWorkerType } from "@/utils/i18n";
 import {
+  MAX_PAY_PER_DAY,
   MIN_PAY_PER_DAY,
   getPayPerDayFieldError,
+  isValidPayPerDay,
   parsePayPerDay,
 } from "@/utils/serviceRequirements";
 import TOAST from "@/app/hooks/toast";
@@ -32,8 +34,7 @@ export default function WorkerRequirementSelector({
   const [price, setPrice] = useState("");
   const payFieldErrorKey = getPayPerDayFieldError(price);
   const parsedPay = parsePayPerDay(price);
-  const canSavePay =
-    parsedPay != null && parsedPay >= MIN_PAY_PER_DAY;
+  const canSavePay = isValidPayPerDay(parsedPay);
 
   const workerTypes = filterWorkerTypes(type, subType) || [];
 
@@ -54,8 +55,16 @@ export default function WorkerRequirementSelector({
       TOAST.error(t("payPerDayIsRequired"));
       return;
     }
+    if (!Number.isInteger(payPerDay) || !Number.isSafeInteger(payPerDay)) {
+      TOAST.error(t("payPerDayInvalid"));
+      return;
+    }
     if (payPerDay < MIN_PAY_PER_DAY) {
       TOAST.error(t("payPerDayMustBeAtLeast500"));
+      return;
+    }
+    if (payPerDay > MAX_PAY_PER_DAY) {
+      TOAST.error(t("payPerDayTooHigh"));
       return;
     }
     if (!Number.isFinite(count) || count < 1) {
@@ -127,8 +136,9 @@ export default function WorkerRequirementSelector({
               name="payPerDay"
               label="pricePerDay"
               value={price}
-              placeholder={t("enterPayPerDayMin500")}
+              placeholder={t("enterPayPerDayRange")}
               type="number"
+              maxLength={5}
               onChangeText={setPrice}
               isRequired
               errors={
@@ -139,7 +149,10 @@ export default function WorkerRequirementSelector({
               style={{ marginTop: 12 }}
             />
             <Text style={styles.minPayHint}>
-              {t("payPerDayMinHint", { amount: MIN_PAY_PER_DAY })}
+              {t("payPerDayRangeHint", {
+                min: MIN_PAY_PER_DAY,
+                max: MAX_PAY_PER_DAY,
+              })}
             </Text>
             {payFieldErrorKey ? (
               <Text style={styles.minPayError}>{t(payFieldErrorKey)}</Text>

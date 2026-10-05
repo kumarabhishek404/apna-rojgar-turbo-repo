@@ -107,6 +107,21 @@ export const getNotificationPolicy = (type) => {
     };
   }
 
+  if (normalizedType === "WELCOME_WHATSAPP_GROUP") {
+    return {
+      category: NOTIFICATION_CATEGORIES.SYSTEM,
+      priority: NOTIFICATION_PRIORITIES.HIGH,
+      // One welcome per user; long cooldown covers role-save + later device-register races.
+      cooldownHours: numberFromEnv(
+        "NOTIFICATION_WELCOME_COOLDOWN_HOURS",
+        365 * 24,
+      ),
+      dailyCap: 0,
+      respectQuietHours: false,
+      digestWindowMinutes: 0,
+    };
+  }
+
   if (
     normalizedType === "SYSTEM_ERROR_ALERT" ||
     normalizedType === "ADMIN_NEW_USER_ALERT" ||

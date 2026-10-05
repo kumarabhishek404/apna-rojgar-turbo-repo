@@ -27,6 +27,8 @@ import {
 } from "@/lib/userVerification";
 import {
   buildNewUserWhatsappWelcome,
+  getWhatsappGroupLabelForRole,
+  getWhatsappGroupLinkForRole,
   openWhatsappUserChat,
   whatsappChatUrl,
 } from "@/lib/newUserWhatsappWelcome";
@@ -190,6 +192,8 @@ function WelcomeWhatsappCard({
     () => buildNewUserWhatsappWelcome(name, role),
     [name, role],
   );
+  const groupLabel = useMemo(() => getWhatsappGroupLabelForRole(role), [role]);
+  const groupLink = useMemo(() => getWhatsappGroupLinkForRole(role), [role]);
   const chat = useMemo(
     () => whatsappChatUrl(countryCode, mobile, message),
     [countryCode, mobile, message],
@@ -214,9 +218,20 @@ function WelcomeWhatsappCard({
     <Section title="Welcome WhatsApp" icon={MessageCircle}>
       <div className="overflow-hidden rounded-xl border border-[#25D366]/25 bg-gradient-to-br from-[#f3fff7] to-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#25D366]/15 bg-[#25D366]/8 px-3.5 py-2.5">
-          <p className="text-xs font-semibold text-[#0b5c32]">
-            इस यूज़र की भूमिका के हिसाब से तैयार संदेश — कॉपी करके WhatsApp पर भेजें
-          </p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-[#0b5c32]">
+              इस यूज़र की भूमिका के हिसाब से तैयार संदेश — कॉपी करके WhatsApp पर भेजें
+            </p>
+            <a
+              href={groupLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#128C7E] underline-offset-2 hover:underline"
+            >
+              ग्रुप: अपना रोजगार - {groupLabel}
+              <ExternalLink className="h-3 w-3 shrink-0" />
+            </a>
+          </div>
           <div className="flex items-center gap-2">
             {chat ? (
               <button

@@ -13,6 +13,7 @@ import {
   getNotificationPolicy,
   getQuietHoursState,
 } from "../utils/notificationPolicy.js";
+import { sendWelcomeWhatsappGroupNotification } from "../utils/sendWelcomeWhatsappGroupNotification.js";
 
 let expo = new Expo();
 const Device = db.device;
@@ -279,11 +280,24 @@ export const handleRegisterDeviceController = async (req, res) => {
     await Promise.allSettled(operations);
 
     // 6. Return success response
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       userId,
       message: "Device registered or updated successfully",
     });
+
+    // Retry welcome WhatsApp push once a device token exists (deduped per user).
+    if (userId) {
+      void sendWelcomeWhatsappGroupNotification(userId, {
+        req,
+        source: "DEVICE_REGISTER",
+      }).catch((notifyError) => {
+        console.error(
+          "[Welcome WhatsApp] Failed after device register:",
+          notifyError?.message || notifyError,
+        );
+      });
+    }
   } catch (error) {
     console.error("Device registration error:", error);
     return res.status(500).json({

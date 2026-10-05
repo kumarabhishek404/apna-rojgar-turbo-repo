@@ -1,4 +1,4 @@
-import { MIN_PAY_PER_DAY } from "@/utils/serviceRequirements";
+import { MAX_PAY_PER_DAY, MIN_PAY_PER_DAY } from "@/utils/serviceRequirements";
 import { fetchTeamMembers } from "../tools/saathiData";
 import {
   applyToJobFromSaathi,
@@ -166,7 +166,7 @@ function nextPostAsk(
   if (slots.quantity == null) return "quantity";
   if (slots.durationDays == null) return "duration";
   if (!slots.dateHint) return "date";
-  if (slots.payPerDay == null || slots.payPerDay < MIN_PAY_PER_DAY) return "pay";
+  if (slots.payPerDay == null || slots.payPerDay < MIN_PAY_PER_DAY || slots.payPerDay > MAX_PAY_PER_DAY) return "pay";
   if (!resolvedAddress(slots, snapshot)) return "address";
   return "confirm";
 }
@@ -375,10 +375,13 @@ export async function continuePostWork(params: {
       };
     }
     const low = slots.payPerDay != null && slots.payPerDay < MIN_PAY_PER_DAY;
+    const high = slots.payPerDay != null && slots.payPerDay > MAX_PAY_PER_DAY;
     return {
-      text: low
-        ? tx("saathiAskPayMin", { min: MIN_PAY_PER_DAY })
-        : tx("saathiAskPayPerDay", { min: MIN_PAY_PER_DAY }),
+      text: high
+        ? tx("saathiAskPayMax", { max: MAX_PAY_PER_DAY })
+        : low
+          ? tx("saathiAskPayMin", { min: MIN_PAY_PER_DAY })
+          : tx("saathiAskPayPerDay", { min: MIN_PAY_PER_DAY }),
       slots,
       intent: "POST_WORK",
       choices: [
@@ -446,6 +449,13 @@ export async function executePostWork(params: {
     if (result.message === "pay_low") {
       return {
         text: tx("saathiAskPayMin", { min: MIN_PAY_PER_DAY }),
+        slots: { ...slots, askField: "pay", pendingConfirm: null },
+        intent: "POST_WORK",
+      };
+    }
+    if (result.message === "pay_high") {
+      return {
+        text: tx("saathiAskPayMax", { max: MAX_PAY_PER_DAY }),
         slots: { ...slots, askField: "pay", pendingConfirm: null },
         intent: "POST_WORK",
       };

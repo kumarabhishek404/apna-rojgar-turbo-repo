@@ -47,12 +47,24 @@ export function getApiErrorMessage(
   if (code === "PAY_PER_DAY_TOO_LOW") {
     return t("payPerDayMustBeAtLeast500");
   }
+  if (code === "PAY_PER_DAY_TOO_HIGH") {
+    return t("payPerDayTooHigh");
+  }
+  if (code === "PAY_PER_DAY_INVALID") {
+    return t("payPerDayInvalid");
+  }
   if (code === "PAY_PER_DAY_REQUIRED") {
     return t("payPerDayIsRequired");
   }
   const message = axiosErr?.response?.data?.message;
   if (typeof message === "string" && /pay per day must be at least/i.test(message)) {
     return t("payPerDayMustBeAtLeast500");
+  }
+  if (typeof message === "string" && /pay per day cannot exceed/i.test(message)) {
+    return t("payPerDayTooHigh");
+  }
+  if (typeof message === "string" && /pay per day must be a whole rupee/i.test(message)) {
+    return t("payPerDayInvalid");
   }
   if (typeof message === "string" && message.trim()) return message.trim();
   if (axiosErr?.message?.trim()) return axiosErr.message.trim();
