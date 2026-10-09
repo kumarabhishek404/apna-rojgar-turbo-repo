@@ -93,7 +93,6 @@
         "NSSpeechRecognitionUsageDescription": "Apna Rojgar converts your speech to text so Rojgar Saathi can help you."
       },
       "associatedDomains": [
-        "applinks:apnarojgarindia.com",
         "applinks:www.apnarojgarindia.com"
       ]
     },
@@ -129,28 +128,13 @@
           "data": [
             {
               "scheme": "https",
-              "host": "apnarojgarindia.com",
-              "pathPrefix": "/job"
-            },
-            {
-              "scheme": "https",
               "host": "www.apnarojgarindia.com",
               "pathPrefix": "/job"
             },
             {
               "scheme": "https",
-              "host": "apnarojgarindia.com",
-              "pathPrefix": "/screens/service"
-            },
-            {
-              "scheme": "https",
               "host": "www.apnarojgarindia.com",
               "pathPrefix": "/screens/service"
-            },
-            {
-              "scheme": "https",
-              "host": "apnarojgarindia.com",
-              "pathPrefix": "/app"
             },
             {
               "scheme": "https",

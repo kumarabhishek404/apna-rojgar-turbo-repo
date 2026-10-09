@@ -7,7 +7,7 @@ export const APPLINK =
 
 /** Branded short URL on the website — share this instead of the raw Play Store link. */
 export const APP_PAGE_PATH = "/app";
-export const APP_PAGE_URL = "https://apnarojgarindia.com/app";
+export const APP_PAGE_URL = "https://www.apnarojgarindia.com/app";
 
 /** Public tips / articles (no "blog" in the URL). */
 export const ROJGAR_TIPS_PATH = "/rojgar-tips";

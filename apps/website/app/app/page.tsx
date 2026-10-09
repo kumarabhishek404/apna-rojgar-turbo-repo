@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Download the Apna Rojgar Android app from Google Play. Find work or hire workers near you across India.",
   alternates: {
-    canonical: "https://apnarojgarindia.com/app",
+    canonical: "https://www.apnarojgarindia.com/app",
   },
   openGraph: {
     title: "Download Apna Rojgar App",
     description:
       "Get the Apna Rojgar app on Google Play — find work or hire workers near you.",
-    url: "https://apnarojgarindia.com/app",
+    url: "https://www.apnarojgarindia.com/app",
     siteName: "Apna Rojgar",
     type: "website",
   },

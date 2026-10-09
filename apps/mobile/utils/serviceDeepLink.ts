@@ -5,12 +5,15 @@ import * as Linking from "expo-linking";
  */
 export const APP_LINK_SCHEME = "apnarojgar" as const;
 
-/** Canonical host used when generating HTTPS App Links / Universal Links. */
-export const UNIVERSAL_LINK_HOST = "apnarojgarindia.com" as const;
-/** Allowed app-link hosts to parse (both non-www and www variants). */
+/**
+ * Canonical host for HTTPS App Links.
+ * Must be www: the apex domain 301s to www, and Play rejects assetlinks.json redirects.
+ */
+export const UNIVERSAL_LINK_HOST = "www.apnarojgarindia.com" as const;
+/** Allowed app-link hosts to parse (apex still arrives from older shared links). */
 const ALLOWED_UNIVERSAL_LINK_HOSTS = new Set([
+  "apnarojgarindia.com",
   UNIVERSAL_LINK_HOST,
-  `www.${UNIVERSAL_LINK_HOST}`,
 ]);
 
 /** Android package — must match `app.json` → `android.package`. */
