@@ -122,7 +122,7 @@ const notificationSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["EVENT", "CRON", "DEFERRED", "ADMIN"],
+      enum: ["EVENT", "CRON", "DEFERRED", "ADMIN", "REGISTRATION", "DEVICE_REGISTER"],
       default: "EVENT",
     },
     read: {

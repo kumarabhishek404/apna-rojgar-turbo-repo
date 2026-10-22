@@ -35,7 +35,7 @@ export const handleCompleteBooking = async (req, res) => {
     handleAppliedUserStatusUpdate(service);
     handleSelectedUserStatusUpdate(service);
 
-    await service.save();
+    await service.save({ validateModifiedOnly: true });
 
     const { workerIds, individualWorkerIds, mediatorWorkerIds, mediatorIds } =
       categorizeWorkers(service);
@@ -129,16 +129,21 @@ const categorizeWorkers = (service) => {
   if (service.bookingType === "direct" && service.bookedWorker) {
     workerIds.add(service.bookedWorker._id.toString());
   } else {
-    for (const selected of service.selectedUsers) {
-      if (selected.workers.length > 0) {
-        mediatorIds.add(selected.user._id.toString());
-        selected.workers.forEach((worker) => {
-          workerIds.add(worker._id.toString());
-          mediatorWorkerIds.add(worker._id.toString());
+    for (const selected of service.selectedUsers || []) {
+      const workers = selected.workers || [];
+      const selectedUserId = selected.user?._id || selected.user;
+      if (!selectedUserId) continue;
+      if (workers.length > 0) {
+        mediatorIds.add(String(selectedUserId));
+        workers.forEach((worker) => {
+          const workerId = worker?._id || worker;
+          if (!workerId) return;
+          workerIds.add(String(workerId));
+          mediatorWorkerIds.add(String(workerId));
         });
       } else {
-        workerIds.add(selected.user._id.toString());
-        individualWorkerIds.add(selected.user._id.toString());
+        workerIds.add(String(selectedUserId));
+        individualWorkerIds.add(String(selectedUserId));
       }
     }
   }
@@ -153,23 +158,16 @@ const updateUsersStats = async (
   mediatorIds,
   service
 ) => {
-  try {
-    const updatePromises = [
-      User.findByIdAndUpdate(_id, {
-        $addToSet: { serviceHistory: service._id },
-      }),
-      ...Array.from(workerIds).map((workerId) =>
-        User.findByIdAndUpdate(workerId, {
-          $addToSet: { workHistory: service._id },
-        })
-      ),
-    ];
-
-    handleAppliedUserStatsUpdate(service, updatePromises);
-    await Promise.all(updatePromises);
-  } catch (error) {
-    logError(new Error("Update requirement count failed"), req);
-  }
+  const updatePromises = [
+    User.findByIdAndUpdate(_id, {
+      $addToSet: { serviceHistory: service._id },
+    }),
+    ...Array.from(workerIds).map((workerId) =>
+      User.findByIdAndUpdate(workerId, {
+        $addToSet: { workHistory: service._id },
+      })
+    ),
+  ];
 
   if (service.bookingType === "direct") {
     updatePromises.push(
@@ -205,7 +203,6 @@ const updateUsersStats = async (
     );
   }
 
-  // Call handleAppliedUserStatsUpdate before executing all promises
   handleAppliedUserStatsUpdate(service, updatePromises);
 
   await Promise.all(updatePromises);
@@ -280,18 +277,22 @@ const sendCompletionNotifications = async (
 };
 
 const handleAppliedUserStatsUpdate = (service, updatePromises) => {
-  for (const applied of service.appliedUsers) {
+  for (const applied of service.appliedUsers || []) {
     const appliedUser = applied.user;
-    const appliedWorkers = applied.workers;
+    const appliedUserId = appliedUser?._id || appliedUser;
+    const appliedWorkers = applied.workers || [];
+    if (!appliedUserId) continue;
 
     if (appliedWorkers.length > 0) {
       updatePromises.push(
-        updateUserStats(appliedUser._id, "CANCEL_APPLY_BY_EMPLOYER_AS_MEDIATOR")
+        updateUserStats(appliedUserId, "CANCEL_APPLY_BY_EMPLOYER_AS_MEDIATOR")
       );
       appliedWorkers.forEach((worker) => {
+        const workerId = worker?._id || worker;
+        if (!workerId) return;
         updatePromises.push(
           updateUserStats(
-            worker._id,
+            workerId,
             "CANCEL_APPLY_BY_EMPLOYER_WHEN_APPLIED_BY_MEDIATOR"
           )
         );
@@ -299,7 +300,7 @@ const handleAppliedUserStatsUpdate = (service, updatePromises) => {
     } else {
       updatePromises.push(
         updateUserStats(
-          appliedUser._id,
+          appliedUserId,
           "CANCEL_APPLY_BY_EMPLOYER_WHEN_APPLIED_INDIVIDUALLY"
         )
       );
@@ -308,11 +309,11 @@ const handleAppliedUserStatsUpdate = (service, updatePromises) => {
 };
 
 const handleAppliedUserStatusUpdate = (service) => {
-  for (const applied of service.appliedUsers) {
+  for (const applied of service.appliedUsers || []) {
     if (applied.status === "PENDING") {
       applied.status = "SERVICE_COMPLETED";
     }
-    applied.workers.forEach((worker) => {
+    (applied.workers || []).forEach((worker) => {
       if (worker.status === "PENDING") {
         worker.status = "SERVICE_COMPLETED";
       }
@@ -321,11 +322,11 @@ const handleAppliedUserStatusUpdate = (service) => {
 };
 
 const handleSelectedUserStatusUpdate = (service) => {
-  for (const selected of service.selectedUsers) {
+  for (const selected of service.selectedUsers || []) {
     if (selected.status === "SELECTED") {
       selected.status = "SERVICE_COMPLETED";
     }
-    selected.workers.forEach((worker) => {
+    (selected.workers || []).forEach((worker) => {
       if (worker.status === "SELECTED") {
         worker.status = "SERVICE_COMPLETED";
       }

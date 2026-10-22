@@ -137,7 +137,10 @@ app.use("/api/v1/saathi", saathiRoutes);
 app.use((err, req, res, next) => {
   console.error("⚠️ Global Error:", err);
 
-  if (err) {
+  const isMalformedBody =
+    err?.type === "entity.parse.failed" ||
+    (err instanceof SyntaxError && Number(err.status) === 400);
+  if (err && !isMalformedBody) {
     logError(err, req, err.status || 500, req.originalUrl || "global-handler", {
       source: "backend",
     });

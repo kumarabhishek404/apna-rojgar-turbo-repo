@@ -13,30 +13,26 @@ const userStatus = (req, res, next) => {
       });
     }
 
+    // These are expected account states, not defects. Keep the messages
+    // stable — the app matches them — but do not write an error log.
     if (status === "DISABLED") {
-      const error = new Error("User account is disabled"); // If change this message than update in the frontend also
-      logError(error, req, 400, "middleware - userStatus");
       return res.status(400).json({
         success: false,
-        message: error.message,
+        message: "User account is disabled",
       });
     }
 
     if (status === "PENDING") {
-      const error = new Error("User is not activated yet"); // If change this message than update in the frontend also
-      logError(error, req, 400, "middleware - userStatus");
       return res.status(400).json({
         success: false,
-        message: error.message,
+        message: "User is not activated yet",
       });
     }
 
     if (status === "SUSPENDED") {
-      const error = new Error("User is suspended"); // If change this message than update in the frontend also
-      logError(error, req, 400, "middleware - userStatus");
       return res.status(400).json({
         success: false,
-        message: error.message,
+        message: "User is suspended",
       });
     }
 

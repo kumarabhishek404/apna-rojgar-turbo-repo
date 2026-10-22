@@ -317,16 +317,54 @@ function resolveAuthErrorResponse(error) {
   };
 }
 
+const TRANSIENT_PROVIDER_STATUS = new Set([
+  502, 503, 504, 520, 521, 522, 523, 524, 525, 526,
+]);
+
+function isTransientNetworkCode(code) {
+  return [
+    "ECONNABORTED",
+    "ETIMEDOUT",
+    "ECONNRESET",
+    "EAI_AGAIN",
+    "ENOTFOUND",
+    "ECONNREFUSED",
+  ].includes(code);
+}
+
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 2factor sits behind Cloudflare. HTTP 525 and similar codes are often brief. */
+async function getTwoFactor(url) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await axios.get(url, {
+        timeout: 15000,
+        validateStatus: () => true,
+      });
+      const status = response?.status || 0;
+      if (TRANSIENT_PROVIDER_STATUS.has(status) && attempt < 2) {
+        await wait(500 * (attempt + 1));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (!isTransientNetworkCode(error?.code) || attempt === 2) throw error;
+      await wait(500 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
 async function requestTwoFactorAutogen(apiKey, phoneKey, template) {
   const pathSuffix = template
     ? `SMS/${phoneKey}/AUTOGEN/${encodeURIComponent(template)}`
     : `SMS/${phoneKey}/AUTOGEN`;
   const url = `https://2factor.in/API/V1/${apiKey}/${pathSuffix}`;
 
-  const response = await axios.get(url, {
-    timeout: 15000,
-    validateStatus: () => true,
-  });
+  const response = await getTwoFactor(url);
   const data = response?.data;
   console.log("[auth] 2factor send response:", {
     httpStatus: response?.status,
@@ -531,10 +569,7 @@ const verifyOTP = async (payload) => {
     if (sessionId) {
       /** Official 2factor flow after AUTOGEN (session id from send response Details) */
       const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY/${encodeURIComponent(sessionId)}/${encodeURIComponent(otp)}`;
-      const response = await axios.get(url, {
-        timeout: 15000,
-        validateStatus: () => true,
-      });
+      const response = await getTwoFactor(url);
       httpStatus = response?.status || 0;
       data = response?.data;
       console.log("[auth] 2factor VERIFY (session) response:", {
@@ -547,10 +582,7 @@ const verifyOTP = async (payload) => {
        * Uses same normalized key as AUTOGEN send when possible.
        */
       const url = `https://2factor.in/API/V1/${apiKey}/SMS/VERIFY3/${encodeURIComponent(phoneKey)}/${encodeURIComponent(otp)}`;
-      const response = await axios.get(url, {
-        timeout: 15000,
-        validateStatus: () => true,
-      });
+      const response = await getTwoFactor(url);
       httpStatus = response?.status || 0;
       data = response?.data;
       console.warn("[auth] 2factor VERIFY3 (legacy, no session) response:", {
@@ -875,10 +907,12 @@ export const handleLogin = async (req, res) => {
       providerDetail: error?.providerDetail,
     });
 
-    // OTP send/verify noise — keep ErrorLog for debugging, skip admin notify spam.
-    logError(logErr, req, statusCode, "auth.controller - handleLogin", {
-      skipAdminNotify: statusCode < 500 || isOtpErrorCode(error?.code),
-    });
+    // A short or rejected number is a client mistake, not a server failure.
+    if (statusCode >= 500) {
+      logError(logErr, req, statusCode, "auth.controller - handleLogin", {
+        skipAdminNotify: isOtpErrorCode(error?.code),
+      });
+    }
 
     return res.status(statusCode).json({
       success: false,

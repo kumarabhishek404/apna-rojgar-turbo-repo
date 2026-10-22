@@ -55,7 +55,26 @@ const register = async (payload: any) => {
   }
 };
 
+function assertIndianMobile(mobile: unknown) {
+  const digits = String(mobile || "").replace(/\D/g, "");
+  if (digits.length === 10) return digits;
+  const error: any = new Error("Please enter a valid 10-digit mobile number.");
+  error.response = {
+    status: 400,
+    data: {
+      message: error.message,
+      errorCode: "OTP_INVALID_MOBILE",
+    },
+  };
+  return error;
+}
+
 const signIn = async (payload: any) => {
+  const invalid = assertIndianMobile(payload?.mobile);
+  if (invalid instanceof Error) {
+    TOAST?.error(invalid.message);
+    throw invalid;
+  }
   try {
     const source: "ios" | "android" | "web" | null =
       Platform.OS === "ios"
@@ -98,6 +117,11 @@ const signIn = async (payload: any) => {
 /** Registration OTP — backend only (dev SMS bypass, no client → 2factor). */
 const sendOTP = async (mobile: string) => {
   console.log("mobile--", mobile);
+  const invalid = assertIndianMobile(mobile);
+  if (invalid instanceof Error) {
+    TOAST?.error(invalid.message);
+    throw invalid;
+  }
   try {
     const res = await API_CLIENT.makePostRequest("/auth/sms-otp", { mobile });
     return res.data;

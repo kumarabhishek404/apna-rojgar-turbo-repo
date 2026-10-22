@@ -1469,7 +1469,9 @@ export const updateAdminServiceStatus = async (req, res) => {
     }
 
     service.status = nextStatus;
-    await service.save();
+    // Older works can have pay below the current minimum. A status change
+    // must not re-validate those untouched fields.
+    await service.save({ validateModifiedOnly: true });
 
     try {
       await updateUserStats(

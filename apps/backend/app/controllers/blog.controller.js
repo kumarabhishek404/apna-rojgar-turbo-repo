@@ -49,11 +49,17 @@ async function assertNoDuplicate({ title, content, googleSourceId, excludeId }) 
   throw err;
 }
 
+function searchPattern(value) {
+  const text = String(value || "").trim().slice(0, 80);
+  if (text.length < 2) return null;
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export const listPublishedBlogs = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 12));
-    const search = String(req.query.search || "").trim();
+    const search = searchPattern(req.query.search);
 
     const filter = { status: "PUBLISHED" };
     if (search) {
@@ -168,7 +174,7 @@ export const listAdminBlogs = async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
-    const search = String(req.query.search || "").trim();
+    const search = searchPattern(req.query.search);
     const status = String(req.query.status || "ALL").toUpperCase();
 
     const filter = {};
