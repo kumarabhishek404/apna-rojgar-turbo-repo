@@ -8,9 +8,8 @@ import CityFilterSelect from "@/components/filters/CityFilterSelect";
 import SkillFilterSelect from "@/components/filters/SkillFilterSelect";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useAdminUserCities, useAdminUserSkills } from "@/hooks/useAdminUserFilters";
-import AdminUserDetailsView, {
-  type AdminUserRecord,
-} from "@/components/webapp/admin/AdminUserDetailsView";
+import AdminUserDetailsModal from "@/components/webapp/admin/AdminUserDetailsModal";
+import { type AdminUserRecord } from "@/components/webapp/admin/AdminUserDetailsView";
 import VerifiedBadge from "@/components/commons/VerifiedBadge";
 import {
   VERIFICATION_STATUS,
@@ -123,20 +122,6 @@ export default function AdminUsersPage() {
     if (loading || loadingMore || !canLoadMore) return;
     setPage((prev) => prev + 1);
   }, [canLoadMore, loading, loadingMore]);
-
-  useEffect(() => {
-    if (!selectedUser) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedUser(null);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [selectedUser]);
 
   useEffect(() => {
     setActionMessage("");
@@ -405,49 +390,22 @@ export default function AdminUsersPage() {
       ) : null}
 
       {selectedUser ? (
-        <div
-          className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/60 p-3 backdrop-blur-sm"
-          onClick={() => setSelectedUser(null)}
-          role="presentation"
-        >
-          <div
-            className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-white/20 bg-white shadow-[0_20px_80px_rgba(15,23,42,0.35)]"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-label="User details"
-          >
-            <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-[#f7f9ff] to-[#eef3ff] px-4 py-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#22409a]/80">
-                  User details
-                </p>
-                <h3 className="text-base font-bold text-[#16264f]">
-                  {selectedUser.name || "Unnamed user"}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedUser(null)}
-                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Close
-              </button>
-            </div>
-            <div className="max-h-[calc(92vh-4.25rem)] overflow-y-auto p-4 md:p-5">
-              {actionMessage ? (
-                <p className="mb-3 rounded-xl border border-[#22409a]/15 bg-[#f7f9ff] px-3 py-2 text-sm font-medium text-[#22409a]">
-                  {actionMessage}
-                </p>
-              ) : null}
-              <AdminUserDetailsView
-                user={selectedUser}
-                onVerificationChange={handleVerificationChange}
-                verificationSaving={verificationSaving}
-              />
-            </div>
-          </div>
-        </div>
+        <AdminUserDetailsModal
+          key={selectedUser._id}
+          user={selectedUser}
+          onClose={() => setSelectedUser(null)}
+          onVerificationChange={handleVerificationChange}
+          verificationSaving={verificationSaving}
+          message={actionMessage}
+          onDismissMessage={() => setActionMessage("")}
+          onStatusUpdated={(nextStatus) => {
+            const nextUser = { ...selectedUser, status: nextStatus };
+            setSelectedUser(nextUser);
+            setRows((prev) =>
+              prev.map((row) => (row._id === nextUser._id ? nextUser : row)),
+            );
+          }}
+        />
       ) : null}
     </section>
   );

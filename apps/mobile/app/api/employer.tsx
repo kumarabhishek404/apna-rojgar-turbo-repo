@@ -3,6 +3,11 @@ import API_CLIENT from ".";
 import TOAST from "@/app/hooks/toast";
 import { normalizePaginatedPage } from "@/utils/paginatedApi";
 import { retryAsync } from "@/utils/retryAsync";
+import {
+  getApiErrorMessage,
+  isTransientApiError,
+  logApiCatch,
+} from "@/utils/apiError";
 
 // Helper function for consistent error handling (toast shown by caller)
 const handleServiceError = (error: any, operation: string) => {
@@ -92,14 +97,12 @@ const fetchMyServices = async ({ pageParam, status }: any) => {
     );
     return normalizePaginatedPage(response?.data);
   } catch (error: any) {
-    console.error(
-      `[employer] An error occurred while fetching my works : `,
-      error?.response?.data?.message || error,
-    );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while fetching my works",
-    );
+    logApiCatch("[employer] fetch my works failed", error);
+    if (!isTransientApiError(error)) {
+      TOAST?.error(
+        getApiErrorMessage(error, "An error occurred while fetching my works"),
+      );
+    }
     throw error;
   }
 };

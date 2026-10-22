@@ -44,6 +44,11 @@ function getUpdateFields(actionType) {
       "serviceDetails.byService.cancelled": 1,
       "serviceDetails.byService.pending": -1,
     },
+    // Admin re-activated a cancelled service: reverse of SERVICE_CANCELLED.
+    SERVICE_REACTIVATED: {
+      "serviceDetails.byService.cancelled": -1,
+      "serviceDetails.byService.pending": 1,
+    },
     COMPLETE_SERVICE_FOR_EMPLOYER: {
       "serviceDetails.byService.completed": 1,
       "serviceDetails.byService.pending": -1,

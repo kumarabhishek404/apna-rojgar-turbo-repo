@@ -935,8 +935,12 @@ export const getUserSkills = async (req, res) => {
 export const getUsersOnRole = async (req, res) => {
   try {
     const { role, page = 1, limit = 10 } = req.query;
+    const body =
+      req.body && typeof req.body === "object" && !Array.isArray(req.body)
+        ? req.body
+        : {};
     const { skills, name, city, distance, completedServices, rating, sortBy } =
-      req.body;
+      body;
     const loggedInUserId = req.user?._id;
 
     // Base match filter
@@ -1066,8 +1070,14 @@ export const getUsersOnRole = async (req, res) => {
     const pipeline = [];
     const shouldSortNearest = sortBy === "nearest";
     const nearPoint = normalizeNearPoint(loggedInUser?.geoLocation);
+    const nearIsUnset =
+      !nearPoint ||
+      (nearPoint.coordinates[0] === 0 && nearPoint.coordinates[1] === 0);
     // Trusted tab must include users without geo — do not use $geoNear for trusted_profiles.
-    const shouldUseGeoNear = nearPoint && (distance || shouldSortNearest);
+    // [0, 0] is the stored placeholder, not a real location, and $geoNear fails
+    // the whole listing if any profile has a broken geo point.
+    const shouldUseGeoNear =
+      !nearIsUnset && nearPoint && (distance || shouldSortNearest);
 
     if (shouldUseGeoNear) {
       const maxDistanceKm =
@@ -1112,7 +1122,11 @@ export const getUsersOnRole = async (req, res) => {
         teamDetails: {
           memberCount: {
             $size: {
-              $ifNull: [{ $arrayElemAt: ["$teamDocs.workers", 0] }, []],
+              $cond: [
+                { $isArray: { $arrayElemAt: ["$teamDocs.workers", 0] } },
+                { $arrayElemAt: ["$teamDocs.workers", 0] },
+                [],
+              ],
             },
           },
           status: {
@@ -1139,7 +1153,26 @@ export const getUsersOnRole = async (req, res) => {
     pipeline.push({ $skip: (parsedPage - 1) * parsedLimit });
     pipeline.push({ $limit: parsedLimit });
 
-    const users = await User.aggregate(pipeline);
+    let users;
+    try {
+      users = await User.aggregate(pipeline);
+    } catch (aggregateError) {
+      const usedGeoNear = pipeline.some((stage) => stage.$geoNear);
+      if (!usedGeoNear) throw aggregateError;
+      console.error(
+        "[getUsersOnRole] $geoNear failed, listing without distance:",
+        aggregateError?.message || aggregateError,
+      );
+      const fallback = pipeline.filter((stage) => !stage.$geoNear);
+      fallback.unshift(
+        { $match: listMatch },
+        { $match: { mobile: { $nin: [process.env.ADMIN_MOBILE] } } },
+      );
+      if (!fallback.some((stage) => stage.$sort)) {
+        fallback.splice(2, 0, { $sort: { createdAt: -1 } });
+      }
+      users = await User.aggregate(fallback);
+    }
 
     const totalUsers = await User.countDocuments(listMatch);
 

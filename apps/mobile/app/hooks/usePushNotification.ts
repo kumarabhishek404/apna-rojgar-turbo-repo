@@ -68,12 +68,20 @@ const registerForPushNotificationsAsync = async (
 
       console.log("[PushNotification] Push token received:", pushTokenString);
 
+      const deviceTypeName =
+        Device?.DeviceType?.[Device?.deviceType ?? 0] || "UNKNOWN";
+      const deviceType = ["UNKNOWN", "PHONE", "TABLET", "DESKTOP", "TV"].includes(
+        deviceTypeName,
+      )
+        ? deviceTypeName
+        : "UNKNOWN";
+
       try {
         console.log("[PushNotification] Registering device with backend...");
         await NOTIFICATION?.registerDevice({
           pushToken: pushTokenString,
           notificationConsent: notificationConsent,
-          deviceType: Device?.DeviceType[Device?.deviceType ?? 0],
+          deviceType,
           userId: userId,
         });
         console.log("[PushNotification] Device registered successfully.");

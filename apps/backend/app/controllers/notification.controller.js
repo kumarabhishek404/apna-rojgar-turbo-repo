@@ -230,10 +230,23 @@ export const handleRegisterDeviceController = async (req, res) => {
   try {
     // 1. Validate push token
     if (!Expo.isExpoPushToken(pushToken)) {
-      return res
-        .status(400)
-        .json({ success: false, error: "Invalid push token" });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid push token",
+        error: "Invalid push token",
+      });
     }
+
+    const DEVICE_TYPES = new Set([
+      "UNKNOWN",
+      "PHONE",
+      "TABLET",
+      "DESKTOP",
+      "TV",
+    ]);
+    const normalizedDeviceType = DEVICE_TYPES.has(String(deviceType || "").toUpperCase())
+      ? String(deviceType).toUpperCase()
+      : "UNKNOWN";
 
     const operations = [];
 
@@ -254,7 +267,7 @@ export const handleRegisterDeviceController = async (req, res) => {
         {
           $set: {
             userId: userId || null,
-            deviceType,
+            deviceType: normalizedDeviceType,
             isActive: true,
           },
         },

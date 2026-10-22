@@ -13,6 +13,7 @@ import { handleSendNotificationController } from "./notification.controller.js";
 import { exportWeeklyRegistrations } from "../cron/weeklyRegistrationsExport.js";
 import { exportWeeklyServices } from "../cron/weeklyServicesExport.js";
 import logError from "../utils/addErrorLog.js";
+import { updateUserStats } from "../utils/updateState.js";
 import { getEnglishTitles } from "../utils/translations.js";
 import {
   isListingFeatureActive,
@@ -1245,7 +1246,7 @@ export const getAdminAllServices = async (req, res) => {
         .limit(limit)
         .populate(
           "employer",
-          "name mobile role address profilePicture status registrationSource email verification",
+          "name mobile countryCode role address profilePicture status registrationSource email verification",
         )
         .populate(
           "bookedWorker",
@@ -1397,6 +1398,102 @@ export const updateServiceListingFeature = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to update listing feature",
+    });
+  }
+};
+
+const ADMIN_SERVICE_STATUS_TRANSITIONS = {
+  CANCELLED: ["HIRING", "PENDING"],
+  HIRING: ["CANCELLED"],
+};
+
+/**
+ * PATCH /admin/services/:id/status
+ * Admin cancels an open service or re-activates a cancelled one.
+ * Body: { status: "CANCELLED" | "HIRING" }
+ */
+export const updateAdminServiceStatus = async (req, res) => {
+  const { id } = req.params;
+  const nextStatus = String(req.body?.status || "").trim().toUpperCase();
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid service id",
+    });
+  }
+
+  if (!Object.hasOwn(ADMIN_SERVICE_STATUS_TRANSITIONS, nextStatus)) {
+    return res.status(400).json({
+      success: false,
+      message: "status must be CANCELLED or HIRING",
+    });
+  }
+
+  try {
+    const service = await Service.findById(id);
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found",
+      });
+    }
+
+    const currentStatus = String(service.status || "").toUpperCase();
+    if (currentStatus === nextStatus) {
+      return res.status(409).json({
+        success: false,
+        message:
+          nextStatus === "CANCELLED"
+            ? "Service is already cancelled"
+            : "Service is already active",
+      });
+    }
+
+    if (!ADMIN_SERVICE_STATUS_TRANSITIONS[nextStatus].includes(currentStatus)) {
+      return res.status(409).json({
+        success: false,
+        message:
+          nextStatus === "CANCELLED"
+            ? `A ${currentStatus.toLowerCase()} service cannot be cancelled`
+            : "Only cancelled services can be re-activated",
+      });
+    }
+
+    if (nextStatus === "HIRING" && service.bookingType === "direct") {
+      return res.status(409).json({
+        success: false,
+        message:
+          "Direct bookings cannot be re-activated. Ask the employer to create a new booking.",
+      });
+    }
+
+    service.status = nextStatus;
+    await service.save();
+
+    try {
+      await updateUserStats(
+        service.employer,
+        nextStatus === "CANCELLED" ? "SERVICE_CANCELLED" : "SERVICE_REACTIVATED",
+      );
+    } catch (statsError) {
+      // The status change already succeeded; stats can be reconciled later.
+      logError(statsError, req, 500);
+    }
+
+    res.status(200).json({
+      success: true,
+      message:
+        nextStatus === "CANCELLED"
+          ? "Service cancelled"
+          : "Service re-activated",
+      data: { _id: service._id, status: service.status },
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to update service status",
     });
   }
 };

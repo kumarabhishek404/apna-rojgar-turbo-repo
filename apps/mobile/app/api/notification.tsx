@@ -20,14 +20,22 @@ const registerDevice = async (payload: any) => {
       `[Sign In] [userService] user device registered successfully with the response `
     );
   } catch (error: any) {
-    console.log(
-      `[Sign In] [userService] An error occurred while registering user device `,
-      error?.response?.data
+    logApiCatch("[userService] register device failed", error);
+    const status = error?.response?.status;
+    const serverText = String(
+      error?.response?.data?.message || error?.response?.data?.error || "",
     );
-    TOAST?.error(
-      error?.response?.data?.message ||
-        "An error occurred while registering user device"
-    );
+    // Push registration is background. Invalid tokens and offline failures
+    // must not look like the workers or contractors list failed.
+    if (
+      !isTransientApiError(error) &&
+      status &&
+      status >= 500 &&
+      serverText &&
+      !/invalid push token/i.test(serverText)
+    ) {
+      TOAST?.error(serverText);
+    }
     throw error;
   }
 };

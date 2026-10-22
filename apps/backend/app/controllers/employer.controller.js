@@ -140,12 +140,15 @@ export const getMyUploadedServices = async (req, res) => {
     // Process services to update requirement counts
     const updatedServices = await Promise.all(
       services.map(async (service) => {
-        let updatedRequirements = [...service.requirements];
+        let updatedRequirements = Array.isArray(service.requirements)
+          ? [...service.requirements]
+          : [];
         const selectedWorkersCount = {};
 
         // Create a skill map for fast lookup in requirements
         const skillMap = updatedRequirements.reduce((acc, req) => {
-          acc[req.name.toLowerCase()] = req;
+          const skillName = String(req?.name || "").trim().toLowerCase();
+          if (skillName) acc[skillName] = req;
           return acc;
         }, {});
 
@@ -167,8 +170,10 @@ export const getMyUploadedServices = async (req, res) => {
 
                   if (userDetails?.skills?.length > 0) {
                     userDetails.skills.forEach((skillObj) => {
-                      const skillName = skillObj.skill.toLowerCase();
-                      if (skillMap[skillName]) {
+                      const skillName = String(skillObj?.skill || "")
+                        .trim()
+                        .toLowerCase();
+                      if (skillName && skillMap[skillName]) {
                         selectedWorkersCount[skillName] =
                           (selectedWorkersCount[skillName] || 0) + 1;
                       }
@@ -194,8 +199,10 @@ export const getMyUploadedServices = async (req, res) => {
                     workers.forEach((worker) => {
                       if (worker?.skills?.length > 0) {
                         worker.skills.forEach((skillObj) => {
-                          const skillName = skillObj.skill.toLowerCase();
-                          if (skillMap[skillName]) {
+                          const skillName = String(skillObj?.skill || "")
+                            .trim()
+                            .toLowerCase();
+                          if (skillName && skillMap[skillName]) {
                             selectedWorkersCount[skillName] =
                               (selectedWorkersCount[skillName] || 0) + 1;
                           }
@@ -213,11 +220,11 @@ export const getMyUploadedServices = async (req, res) => {
 
         // Update requirements based on counted selected workers
         updatedRequirements = updatedRequirements.map((req) => {
-          const skillName = req.name.toLowerCase();
-          if (selectedWorkersCount[skillName]) {
+          const skillName = String(req?.name || "").trim().toLowerCase();
+          if (skillName && selectedWorkersCount[skillName]) {
             return {
               ...req,
-              count: Math.max(0, req.count - selectedWorkersCount[skillName]), // Deduct count
+              count: Math.max(0, req.count - selectedWorkersCount[skillName]),
             };
           }
           return req;
