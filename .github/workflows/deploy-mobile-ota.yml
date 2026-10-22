@@ -45,15 +45,15 @@ jobs:
       - name: Install monorepo dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup Expo & EAS
-        uses: expo/expo-github-action@v8
-        with:
-          token: ${{ secrets.EXPO_TOKEN }}
-          eas-version: latest
+      - name: Install EAS CLI
+        # expo-github-action installs eas-cli with yarn. After corepack enable,
+        # yarn is a shim and this repo is pnpm, so that install exits 1.
+        run: npm install -g eas-cli
 
       - name: Publish OTA update (Android)
         working-directory: apps/mobile
         env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           # Baked into the OTA JS bundle (same as website production API)
           EXPO_PUBLIC_BASE_URL: https://api.apnarojgarindia.com/api/v1
         run: |
