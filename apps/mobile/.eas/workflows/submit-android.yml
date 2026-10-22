@@ -20,9 +20,9 @@ jobs:
   publish_ota:
     name: Publish OTA update
     needs: [submit_android]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: expo/expo-github-action@v8
         with:
           expo-token: ${{ secrets.EXPO_TOKEN }}
