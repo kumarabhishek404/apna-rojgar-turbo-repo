@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+.turbo/
+dist/
+web-build/
+.env
+.env.*
+!.env.example
+expo-env.d.ts
+*.tsbuildinfo
+ios/
+android/

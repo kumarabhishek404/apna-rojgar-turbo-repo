@@ -51,6 +51,7 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 │       │   ├── cron/
 │       │   └── ...
 │       └── package.json
+│   ├── admin-mobile/           # Expo admin app (npm name: admin-apna-rojgar). `pnpm dev:admin` on port 8082. Not started by `pnpm dev`.
 │   └── website/                # Next.js (npm name: apna-rojgar-website)
 │       ├── app/                # App Router pages & layouts
 │       ├── components/
@@ -67,7 +68,8 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 
 | Directory | `package.json` name | Role |
 |-----------|----------------------|------|
-| `apps/mobile` | `labour-app` | Expo / React Native client |
+| `apps/mobile` | `labour-app` | Expo / React Native customer app |
+| `apps/admin-mobile` | `admin-apna-rojgar` | Expo admin app (separate from the customer app) |
 | `apps/backend` | `apna-rojgar-backend` | Express API |
 | `apps/website` | `apna-rojgar-website` | Next.js marketing / web app |
 | `packages/common` | `@repo/common` | Shared types, constants, small pure helpers |
@@ -75,7 +77,7 @@ apna-rojgar/                    # repo root (package name: apna-rojgar)
 **Rules:**
 
 - Work on **one workspace at a time** unless the task is explicitly cross-cutting (e.g. shared types in `@repo/common`).
-- Mobile UI and routes live under **`apps/mobile/`** only; API under **`apps/backend/`** only; web/marketing UI under **`apps/website/`** only.
+- Customer mobile UI and routes live under **`apps/mobile/`** only. The admin app lives under **`apps/admin-mobile/`** and must not change the customer app. API under **`apps/backend/`** only; web/marketing UI under **`apps/website/`** only.
 - Put **cross-app** shared code (types, enums, constants) in **`packages/common`** and import with `@repo/common`. After changing `packages/common`, run `pnpm --filter @repo/common build` (or rely on root `prepare` after `pnpm install`).
 
 ---
@@ -93,6 +95,7 @@ Use **pnpm** from the **repo root** (Corepack can activate `pnpm@9.15.0` per roo
 | Dev website only | `pnpm dev:website` or `pnpm --filter apna-rojgar-website dev` |
 | Dev API only | `pnpm dev:backend` or `pnpm --filter apna-rojgar-backend dev` |
 | Dev Expo only | `pnpm dev:mobile` or `pnpm --filter labour-app dev` |
+| Dev admin app only | `pnpm dev:admin` or `pnpm --filter admin-apna-rojgar start` |
 | Build website only (Turbo) | `pnpm exec turbo run build --filter=apna-rojgar-website` |
 | Build shared package | `pnpm --filter @repo/common build` |
 | Mobile typecheck (strict TS) | `pnpm --filter labour-app typecheck` |

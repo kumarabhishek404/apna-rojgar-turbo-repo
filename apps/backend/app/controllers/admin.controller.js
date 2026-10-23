@@ -14,6 +14,7 @@ import { exportWeeklyRegistrations } from "../cron/weeklyRegistrationsExport.js"
 import { exportWeeklyServices } from "../cron/weeklyServicesExport.js";
 import logError from "../utils/addErrorLog.js";
 import { updateUserStats } from "../utils/updateState.js";
+import { generateJobID } from "../constants/functions.js";
 import { getEnglishTitles } from "../utils/translations.js";
 import {
   isListingFeatureActive,
@@ -1594,6 +1595,250 @@ export const handleExportRegistrations = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error?.message || "Failed to export registrations to Google Sheets",
+    });
+  }
+};
+
+const ADMIN_CREATABLE_ROLES = ["WORKER", "MEDIATOR", "EMPLOYER", "ADMIN"];
+const MIN_PAY_PER_DAY = 500;
+const MAX_PAY_PER_DAY = 50000;
+
+/**
+ * POST /admin/users
+ * Creates a user without going through the customer OTP registration flow.
+ * Name and address may be empty so incomplete profiles stay visible in the users list.
+ */
+export const createAdminUser = async (req, res) => {
+  const name = String(req.body?.name || "").trim();
+  const mobile = String(req.body?.mobile || "").replace(/\D/g, "");
+  const role = String(req.body?.role || "WORKER").trim().toUpperCase();
+  const address = String(req.body?.address || "").trim();
+  const gender = String(req.body?.gender || "").trim().toLowerCase();
+  const countryCode =
+    String(req.body?.countryCode || "91").replace(/\D/g, "") || "91";
+
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    return res.status(400).json({
+      success: false,
+      message: "Mobile number must be 10 digits",
+    });
+  }
+  if (!ADMIN_CREATABLE_ROLES.includes(role)) {
+    return res.status(400).json({
+      success: false,
+      message: "Role must be WORKER, MEDIATOR, EMPLOYER, or ADMIN",
+    });
+  }
+  if (gender && !["male", "female", "other"].includes(gender)) {
+    return res.status(400).json({
+      success: false,
+      message: "Gender must be male, female, or other",
+    });
+  }
+
+  try {
+    const existing = await User.findOne({ mobile, countryCode });
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        message: "A user with this mobile number already exists",
+      });
+    }
+
+    const user = await User.create({
+      name,
+      mobile,
+      countryCode,
+      role,
+      address,
+      gender,
+      status: "ACTIVE",
+      registrationSource: null,
+      locale: { language: "hi" },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "User created",
+      data: user,
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to create user",
+    });
+  }
+};
+
+/**
+ * POST /admin/services
+ * Publishes a service on behalf of an existing employer (by id or mobile).
+ */
+export const createAdminService = async (req, res) => {
+  const employerId = String(req.body?.employerId || "").trim();
+  const employerMobile = String(req.body?.employerMobile || "").replace(/\D/g, "");
+  const type = String(req.body?.type || "").trim();
+  const subType = String(req.body?.subType || "").trim();
+  const address = String(req.body?.address || "").trim();
+  const description = String(req.body?.description || "").trim();
+  const duration = Number(req.body?.duration);
+  const bookingType = String(req.body?.bookingType || "byService").trim();
+  const workerMobile = String(req.body?.workerMobile || "").replace(/\D/g, "");
+  const startDate = new Date(req.body?.startDate);
+  const rawRequirements = Array.isArray(req.body?.requirements)
+    ? req.body.requirements
+    : [];
+
+  if (!type || !subType || !address || !req.body?.startDate) {
+    return res.status(400).json({
+      success: false,
+      message: "Type, sub type, address, and start date are required",
+    });
+  }
+  if (Number.isNaN(startDate.getTime())) {
+    return res.status(400).json({
+      success: false,
+      message: "Start date is invalid",
+    });
+  }
+  if (!Number.isFinite(duration) || duration < 1) {
+    return res.status(400).json({
+      success: false,
+      message: "Duration must be at least 1 day",
+    });
+  }
+  if (!["byService", "direct"].includes(bookingType)) {
+    return res.status(400).json({
+      success: false,
+      message: "Booking type must be byService or direct",
+    });
+  }
+  if (!rawRequirements.length) {
+    return res.status(400).json({
+      success: false,
+      message: "At least one worker requirement is required",
+    });
+  }
+
+  const requirements = [];
+  for (let index = 0; index < rawRequirements.length; index += 1) {
+    const item = rawRequirements[index] || {};
+    const requirementName = String(item.name || "").trim();
+    const count = Number(item.count);
+    const payPerDay = Number(item.payPerDay);
+    if (!requirementName) {
+      return res.status(400).json({
+        success: false,
+        message: `Requirement #${index + 1}: worker type is required`,
+      });
+    }
+    if (!Number.isFinite(count) || count < 1) {
+      return res.status(400).json({
+        success: false,
+        message: `Requirement #${index + 1}: worker count must be at least 1`,
+      });
+    }
+    if (
+      !Number.isInteger(payPerDay) ||
+      payPerDay < MIN_PAY_PER_DAY ||
+      payPerDay > MAX_PAY_PER_DAY
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Requirement #${index + 1}: pay per day must be a whole amount between ₹${MIN_PAY_PER_DAY} and ₹${MAX_PAY_PER_DAY}`,
+      });
+    }
+    requirements.push({
+      name: requirementName,
+      count,
+      payPerDay,
+      food: Boolean(item.food),
+      living: Boolean(item.living),
+      pf: Boolean(item.pf),
+      insurance: Boolean(item.insurance),
+    });
+  }
+
+  try {
+    let employer = null;
+    if (employerId && mongoose.Types.ObjectId.isValid(employerId)) {
+      employer = await User.findById(employerId);
+    } else if (/^[0-9]{10}$/.test(employerMobile)) {
+      employer = await User.findOne({ mobile: employerMobile });
+    }
+    if (!employer) {
+      return res.status(404).json({
+        success: false,
+        message: "Employer not found. Use an existing employer mobile number.",
+      });
+    }
+
+    let bookedWorker = null;
+    if (bookingType === "direct") {
+      if (!/^[0-9]{10}$/.test(workerMobile)) {
+        return res.status(400).json({
+          success: false,
+          message: "Direct bookings need the booked worker's 10-digit mobile",
+        });
+      }
+      bookedWorker = await User.findOne({ mobile: workerMobile });
+      if (!bookedWorker) {
+        return res.status(404).json({
+          success: false,
+          message: "Booked worker not found",
+        });
+      }
+    }
+
+    const coordinates = Array.isArray(employer.geoLocation?.coordinates)
+      ? employer.geoLocation.coordinates
+      : [0, 0];
+    const jobID = await generateJobID();
+    const service = await Service.create({
+      jobID,
+      bookingType,
+      status: "HIRING",
+      employer: employer._id,
+      bookedWorker: bookedWorker?._id,
+      type,
+      subType,
+      description,
+      address,
+      startDate,
+      duration,
+      requirements,
+      images: [],
+      uploadStatus: "COMPLETED",
+      uploadProgress: 100,
+      geoLocation: {
+        type: "Point",
+        coordinates: coordinates.length === 2 ? coordinates : [0, 0],
+      },
+      facilities: {
+        food: Boolean(req.body?.facilities?.food),
+        living: Boolean(req.body?.facilities?.living),
+        travelling: Boolean(req.body?.facilities?.travelling),
+        esi_pf: Boolean(req.body?.facilities?.esi_pf),
+      },
+    });
+
+    try {
+      await updateUserStats(employer._id, "SERVICE_CREATED");
+    } catch (statsError) {
+      logError(statsError, req, 500);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Service created",
+      data: service,
+    });
+  } catch (error) {
+    logError(error, req, 500);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || "Failed to create service",
     });
   }
 };

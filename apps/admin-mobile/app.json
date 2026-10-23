@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Admin - Apna Rojgar",
+    "slug": "admin-apna-rojgar",
+    "version": "1.0.0",
+    "orientation": "default",
+    "scheme": "apnarojgaradmin",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#162b6b"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kumarabhishek404.apnarojgar.admin"
+    },
+    "android": {
+      "package": "com.kumarabhishek404.apnarojgar.admin",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/icon.png"
+    },
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "34d56ad6-d944-405b-b58c-bdfb3e0dc238"
+      }
+    },
+    "owner": "kaarya.app"
+  }
+}

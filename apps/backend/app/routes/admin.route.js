@@ -18,6 +18,8 @@ import {
   handleExportServices,
   updateServiceListingFeature,
   updateAdminServiceStatus,
+  createAdminUser,
+  createAdminService,
 } from "../controllers/admin.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 import checkAdmin from "../middlewares/checkRole.middleware.js";
@@ -112,5 +114,8 @@ router.patch(
   checkAdmin,
   updateAdminServiceStatus
 );
+
+router.post("/users", verifyToken, userStatus, checkAdmin, createAdminUser);
+router.post("/services", verifyToken, userStatus, checkAdmin, createAdminService);
 
 export default router;
